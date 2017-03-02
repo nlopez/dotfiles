@@ -32,7 +32,7 @@ antigen apply
 cdpath=(.. ~ ~/src)
 alias e='subl -add'
 export EDITOR='subl --add --wait'
-export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # direnv
 if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
