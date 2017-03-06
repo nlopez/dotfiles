@@ -14,7 +14,6 @@ antigen bundle virtualenv
 antigen bundle colored-man-pages
 antigen bundle mosh
 antigen bundle kubectl
-antigen bundle carloscuesta/materialshell
 
 # Syntax highlighting bundle.
 antigen bundle zsh-users/zsh-syntax-highlighting
@@ -23,7 +22,7 @@ antigen bundle zsh-users/zsh-syntax-highlighting
 antigen bundle zsh-users/zsh-completions
 
 # Load the theme.
-antigen theme carloscuesta/materialshell zsh/materialshell-dark
+antigen theme pure
 
 # Tell antigen that you're done.
 antigen apply
