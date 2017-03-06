@@ -14,6 +14,7 @@ antigen bundle virtualenv
 antigen bundle colored-man-pages
 antigen bundle mosh
 antigen bundle kubectl
+antigen bundle carloscuesta/materialshell
 
 # Syntax highlighting bundle.
 antigen bundle zsh-users/zsh-syntax-highlighting
@@ -22,14 +23,14 @@ antigen bundle zsh-users/zsh-syntax-highlighting
 antigen bundle zsh-users/zsh-completions
 
 # Load the theme.
-antigen theme pure
+antigen theme carloscuesta/materialshell zsh/materialshell-dark
 
 # Tell antigen that you're done.
 antigen apply
 
 cdpath=(.. ~ ~/src)
-alias e='code --reuse-window'
-export EDITOR='code --reuse-window'
+alias e='subl --add'
+export EDITOR='subl --add --wait'
 export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # direnv
@@ -37,3 +38,8 @@ if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
 
 # pipenv
 if which pipenv >/dev/null 2>&1; then eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"; fi
+
+# use gnu coreutils with regular names
+if which greadlink >/dev/null 2>&1; then
+  export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+fi
