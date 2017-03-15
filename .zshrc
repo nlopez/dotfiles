@@ -1,7 +1,6 @@
 source ~/.antigen/antigen.zsh
 antigen use oh-my-zsh
 antigen bundles <<EOBUNDLES
-  terraform
   aws
   colored-man-pages
   gitfast
@@ -16,6 +15,7 @@ antigen bundles <<EOBUNDLES
   zsh-users/zsh-completions
   zsh-users/zsh-syntax-highlighting
   zsh_reload
+  vault
 EOBUNDLES
 antigen apply
 
@@ -30,3 +30,26 @@ if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
 
 # pipenv
 if which pipenv >/dev/null 2>&1; then eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"; fi
+
+# use gnu utils with regular names
+if which greadlink >/dev/null 2>&1; then
+  export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+  export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
+fi
+
+if which gsed >/dev/null 2>&1; then
+  export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
+  export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH"
+fi
+
+if which gfind >/dev/null 2>&1; then
+  export PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH"
+  export MANPATH="/usr/local/opt/findutils/libexec/gnuman:$MANPATH"
+fi
+
+if which gtar >/dev/null 2>&1; then
+  export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
+  export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
+fi
+
+
