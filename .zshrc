@@ -1,20 +1,20 @@
 source ~/.antigen/antigen.zsh
 antigen use oh-my-zsh
 antigen bundles <<EOBUNDLES
-  aws
-  colored-man-pages
-  gitfast
-  kubectl
   mafredri/zsh-async
-  mosh
-  nmap
-  pip
   sindresorhus/pure
-  terraform
-  virtualenv
   zsh-users/zsh-completions
   zsh-users/zsh-syntax-highlighting
   zsh_reload
+  gitfast
+  colored-man-pages
+  aws
+  kubectl
+  mosh
+  nmap
+  pip
+  terraform
+  virtualenv
   vault
 EOBUNDLES
 antigen apply
