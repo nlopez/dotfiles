@@ -1,3 +1,6 @@
+export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+export PURE_GIT_PULL=0
+
 source ~/.antigen/antigen.zsh
 antigen use oh-my-zsh
 antigen bundles <<EOBUNDLES
@@ -19,11 +22,10 @@ antigen bundles <<EOBUNDLES
 EOBUNDLES
 antigen apply
 
-alias e='subl --add'
-export EDITOR='subl --add --wait'
+alias e='reattach-to-user-namespace subl --add'
+export EDITOR='reattach-to-user-namespace subl --add --wait'
 
 cdpath=(.. ~ ~/src)
-export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # direnv
 if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
@@ -34,6 +36,7 @@ if which pipenv >/dev/null 2>&1; then eval "$(env _PIPENV_COMPLETE=source-zsh pi
 if [[ -f /usr/local/share/chtf/chtf.sh ]]; then
   source "/usr/local/share/chtf/chtf.sh"
 fi
+chtf 0.9.0
 
 # use gnu utils with regular names
 if which greadlink >/dev/null 2>&1; then
