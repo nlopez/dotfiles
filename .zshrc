@@ -31,6 +31,10 @@ if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
 # pipenv
 if which pipenv >/dev/null 2>&1; then eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"; fi
 
+if [[ -f /usr/local/share/chtf/chtf.sh ]]; then
+  source "/usr/local/share/chtf/chtf.sh"
+fi
+
 # use gnu utils with regular names
 if which greadlink >/dev/null 2>&1; then
   export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
@@ -51,5 +55,3 @@ if which gtar >/dev/null 2>&1; then
   export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 fi
-
-
