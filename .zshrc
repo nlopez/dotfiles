@@ -58,3 +58,5 @@ if which gtar >/dev/null 2>&1; then
   export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 fi
+
+alias ls="ls --color=always"
