@@ -13,7 +13,15 @@ prompt pure
 autoload -Uz compinit
 compinit
 # Show completion status
-zstyle ":completion:*" show-completer true
+# # http://stackoverflow.com/a/844299
+expand-or-complete-with-dots() {
+  echo -n "\e[31m...\e[0m"
+  zle expand-or-complete
+  zle redisplay
+}
+zle -N expand-or-complete-with-dots
+bindkey "^I" expand-or-complete-with-dots
+
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 # if [ -f /usr/local/bin/aws_zsh_completer.sh ]; then
 
@@ -28,6 +36,7 @@ alias gup="git pull --rebase"
 alias gst="git status"
 alias gc="git commit"
 alias grhh="git rest --hard HEAD"
+alias gp="git push"
 
 # Sublime
 export EDITOR="reattach-to-user-namespace subl --add --wait"
