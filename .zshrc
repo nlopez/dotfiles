@@ -21,13 +21,13 @@ expand-or-complete-with-dots() {
 }
 zle -N expand-or-complete-with-dots
 bindkey "^I" expand-or-complete-with-dots
-
+# Case-insensitive matching
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-# if [ -f /usr/local/bin/aws_zsh_completer.sh ]; then
+# Use completion menu
+zstyle ':completion:*' menu select
 
-# fi
 
-# correction
+# Correction
 setopt correctall
 
 # git
