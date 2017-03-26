@@ -28,7 +28,7 @@ zstyle ':completion:*' menu select
 
 
 # Correction
-setopt correctall
+setopt correct
 
 # git
 alias g=git
@@ -82,4 +82,10 @@ fi
 
 alias ls="ls --color=always"
 
-source "/usr/local/bin/aws_zsh_completer.sh"
+if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
+  source "/usr/local/bin/aws_zsh_completer.sh"
+fi
+
+# https://github.com/zsh-users/zsh-syntax-highlighting
+# Keep this last!
+source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
