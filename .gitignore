@@ -5,4 +5,6 @@
 !.Brewfile
 !.gitconfig
 !.zshrc
-!.oh-my-zsh/
+!.zfunctions/
+!.zfunctions/*
+
