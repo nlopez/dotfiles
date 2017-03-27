@@ -8,7 +8,7 @@ fpath=(
 autoload -Uz promptinit
 promptinit
 prompt pure
-PROMPT='%(?.%F{green}.%F{red}❯%F{green})❯%f '
+PROMPT='%(?.%F{green}.%F{red})❯%f '
 
 # Completion
 autoload -Uz compinit
