@@ -36,7 +36,7 @@ alias g=git
 alias gup="git pull --rebase"
 alias gst="git status"
 alias gc="git commit"
-alias grhh="git rest --hard HEAD"
+alias grhh="git reset --hard HEAD"
 alias gp="git push"
 
 # Sublime
