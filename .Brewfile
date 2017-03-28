@@ -7,6 +7,7 @@ tap 'homebrew/dupes'
 tap 'homebrew/services'
 tap 'homebrew/versions'
 cask 'xquartz'
+brew 'ant'
 brew 'autoconf'
 brew 'automake'
 brew 'awscli'
@@ -133,6 +134,7 @@ brew 'ripgrep'
 brew 'rmtrash'
 brew 'ruby-build'
 brew 'shellcheck'
+brew 'siege'
 brew 'ssh-copy-id'
 brew 'sshuttle'
 brew 'sysdig'
@@ -142,6 +144,7 @@ brew 'utf8proc'
 brew 'vault'
 brew 'watch'
 brew 'wget'
+brew 'wrk'
 brew 'xmlstarlet'
 brew 'zsh-completions'
 brew 'zsh-syntax-highlighting'
@@ -188,6 +191,7 @@ cask 'xca'
 mas 'Amphetamine', id: 937984704
 mas 'Apple Configurator 2', id: 1037126344
 mas 'Bear', id: 1091189122
+mas 'Install macOS Sierra', id: 1127487414
 mas 'Keynote', id: 409183694
 mas 'Numbers', id: 409203825
 mas 'Pages', id: 409201541
