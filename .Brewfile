@@ -190,7 +190,6 @@ cask 'wireshark'
 cask 'xca'
 mas 'Amphetamine', id: 937984704
 mas 'Apple Configurator 2', id: 1037126344
-mas 'Bear', id: 1091189122
 mas 'Keynote', id: 409183694
 mas 'Numbers', id: 409203825
 mas 'Pages', id: 409201541
