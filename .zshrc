@@ -13,6 +13,7 @@ PROMPT='%(?.%F{green}.%F{red})❯%f '
 # Completion
 autoload -Uz compinit
 compinit
+
 # Show completion status
 # # http://stackoverflow.com/a/844299
 expand-or-complete-with-dots() {
@@ -62,6 +63,8 @@ setopt hist_no_store
 if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
 # pipenv
 if which pipenv >/dev/null 2>&1; then eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"; fi
+# kubectl
+if which kubectl >/dev/null 2>&1; then eval "$(kubectl completion zsh)"; fi
 
 # use gnu utils with regular names
 if which greadlink >/dev/null 2>&1; then
