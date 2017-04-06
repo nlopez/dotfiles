@@ -95,3 +95,4 @@ fi
 source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
 
 export PATH="$PATH:$HOME/bin"
+export LESSCHARSET=utf-8
