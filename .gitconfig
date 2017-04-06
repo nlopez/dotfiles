@@ -20,5 +20,7 @@
   current-branch = symbolic-ref --short HEAD
   # Hard reset branch to the upstream version.
   hard-reset = !git reset --hard $(git upstream)/$(git current-branch)
+  # Delete local branches that have been deleted remotely
+  prune = !git fetch --prune
 [core]
 	excludesfile = ~/.gitignore_global
