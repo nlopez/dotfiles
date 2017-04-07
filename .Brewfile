@@ -54,6 +54,7 @@ brew 'gawk'
 brew 'gdbm'
 brew 'git-crypt'
 brew 'git-standup'
+brew 'gmp@4'
 brew 'gnu-sed'
 brew 'gnu-tar'
 brew 'libtasn1'
@@ -178,4 +179,3 @@ mas 'Numbers', id: 409203825
 mas 'Pages', id: 409201541
 mas 'QREncoder', id: 452695239
 mas 'Simplenote', id: 692867256
-mas 'Xcode', id: 497799835
