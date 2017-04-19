@@ -98,3 +98,6 @@ source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>
 
 export PATH="$PATH:$HOME/bin"
 export LESSCHARSET=utf-8
+
+export GOPATH=$HOME/go
+export PATH="$PATH:$(go env GOPATH)/bin"
