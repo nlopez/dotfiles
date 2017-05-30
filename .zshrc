@@ -92,12 +92,16 @@ if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
   source "/usr/local/bin/aws_zsh_completer.sh"
 fi
 
-# https://github.com/zsh-users/zsh-syntax-highlighting
-# Keep this last!
-source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
 
 export PATH="$PATH:$HOME/bin"
 export LESSCHARSET=utf-8
 
 export GOPATH=$HOME/go
 export PATH="$PATH:$(go env GOPATH)/bin"
+
+# https://github.com/kennethreitz/pipenv/issues/184
+export PIPENV_SHELL_COMPAT=1
+
+# https://github.com/zsh-users/zsh-syntax-highlighting
+# Keep this last!
+source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
