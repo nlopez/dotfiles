@@ -52,7 +52,7 @@ setopt autocd
 setopt extendedglob
 
 # History
-export HISTSIZE=2000
+export HISTSIZE=500000
 export HISTFILE="$HOME/.history"
 export SAVEHIST=$HISTSIZE
 setopt hist_ignore_all_dups
@@ -86,7 +86,7 @@ if which gtar >/dev/null 2>&1; then
   export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 fi
 
-alias ls="ls --color=always"
+alias ls="ls -lFAh --group-directories-first --color=always"
 
 if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
   source "/usr/local/bin/aws_zsh_completer.sh"
