@@ -7,4 +7,5 @@
 !.zshrc
 !.zfunctions/
 !.zfunctions/*
-
+!.curlrc
+!.wgetrc
