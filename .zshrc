@@ -43,8 +43,8 @@ alias grhh="git reset --hard HEAD"
 alias gp="git push"
 
 # Sublime
-export EDITOR="subl --add --wait"
-alias e="subl --add"
+export EDITOR="reattach-to-user-namespace subl --add --wait"
+alias e="reattach-to-user-namespace subl --add"
 
 # Misc
 cdpath=( "$HOME/src" )
