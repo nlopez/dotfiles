@@ -102,7 +102,11 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 # https://github.com/kennethreitz/pipenv/issues/184
 export PIPENV_SHELL_COMPAT=1
 
+# Homebrew python
 export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+# pipsi
+export PATH=/Users/nicklopez/.local/bin:$PATH
+
 
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last!
