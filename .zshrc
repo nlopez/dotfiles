@@ -102,6 +102,8 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 # https://github.com/kennethreitz/pipenv/issues/184
 export PIPENV_SHELL_COMPAT=1
 
+export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last!
 source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
