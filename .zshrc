@@ -1,5 +1,11 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+# Enable Ctrl-x-e to edit command line
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^xe' edit-command-line
+bindkey '^x^e' edit-command-line
+
 fpath=(
   "$HOME/.zfunctions"
   /usr/local/share/zsh/site-functions
@@ -97,6 +103,8 @@ export PATH="$PATH:$HOME/bin"
 export LESSCHARSET=utf-8
 
 export GOPATH=$HOME/go
+# GOROOT-based install location
+export PATH=$PATH:/usr/local/opt/go/libexec/bin
 export PATH="$PATH:$(go env GOPATH)/bin"
 
 # https://github.com/kennethreitz/pipenv/issues/184
