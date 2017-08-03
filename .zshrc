@@ -102,7 +102,6 @@ fi
 export PATH="$PATH:$HOME/bin"
 export LESSCHARSET=utf-8
 
-export GOPATH=$HOME/go
 # GOROOT-based install location
 export PATH=$PATH:/usr/local/opt/go/libexec/bin
 export PATH="$PATH:$(go env GOPATH)/bin"
