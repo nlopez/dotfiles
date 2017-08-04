@@ -73,6 +73,12 @@ if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
 if which pipenv >/dev/null 2>&1; then eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"; fi
 # kubectl
 if which kubectl >/dev/null 2>&1; then eval "$(kubectl completion zsh)"; fi
+# rbenv
+if which rbenv >/dev/null 2>&1; then
+  export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
+  export PATH="$HOME/.rbenv/bin:$PATH"
+  eval "$(rbenv init -)"
+fi
 
 # use gnu utils with regular names
 if which greadlink >/dev/null 2>&1; then
@@ -98,7 +104,6 @@ if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
   source "/usr/local/bin/aws_zsh_completer.sh"
 fi
 
-
 export PATH="$PATH:$HOME/bin"
 export LESSCHARSET=utf-8
 
@@ -113,7 +118,6 @@ export PIPENV_SHELL_COMPAT=1
 export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 # pipsi
 export PATH=/Users/nicklopez/.local/bin:$PATH
-
 
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last!
