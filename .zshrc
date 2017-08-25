@@ -118,6 +118,8 @@ export PIPENV_SHELL_COMPAT=1
 export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 # pipsi
 export PATH=/Users/nicklopez/.local/bin:$PATH
+# Rust
+if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last!
