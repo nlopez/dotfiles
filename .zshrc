@@ -108,8 +108,10 @@ export PATH="$PATH:$HOME/bin"
 export LESSCHARSET=utf-8
 
 # GOROOT-based install location
-export PATH=$PATH:/usr/local/opt/go/libexec/bin
-export PATH="$PATH:$(go env GOPATH)/bin"
+if which go >/dev/null 2>&1; then
+  export PATH=$PATH:/usr/local/opt/go/libexec/bin
+  export PATH="$PATH:$(go env GOPATH)/bin"
+fi
 
 # https://github.com/kennethreitz/pipenv/issues/184
 export PIPENV_SHELL_COMPAT=1
