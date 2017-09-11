@@ -119,7 +119,8 @@ export PIPENV_SHELL_COMPAT=1
 # Homebrew python
 export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 # pipsi
-export PATH=/Users/nicklopez/.local/bin:$PATH
+export PATH="$HOME/.local/bin:$PATH"
+
 # Rust
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
