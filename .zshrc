@@ -53,7 +53,7 @@ export EDITOR="reattach-to-user-namespace subl --add --wait"
 alias e="reattach-to-user-namespace subl --add"
 
 # Misc
-cdpath=( "$HOME/src" )
+cdpath=( ".:$HOME/src/*/*" )
 setopt autocd
 setopt extendedglob
 
