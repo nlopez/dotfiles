@@ -21,7 +21,6 @@ fpath=(
 autoload -Uz promptinit
 promptinit
 prompt pure
-PROMPT='%(?.%F{green}.%F{red})❯%f '
 
 # Completion
 autoload -Uz compinit
@@ -118,9 +117,6 @@ if which go >/dev/null 2>&1; then
   export PATH=$PATH:/usr/local/opt/go/libexec/bin
   export PATH="$PATH:$(go env GOPATH)/bin"
 fi
-
-# https://github.com/kennethreitz/pipenv/issues/184
-export PIPENV_SHELL_COMPAT=1
 
 # Rust
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
