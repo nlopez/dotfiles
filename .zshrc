@@ -53,7 +53,6 @@ export EDITOR="reattach-to-user-namespace subl --add --wait"
 alias e="reattach-to-user-namespace subl --add"
 
 # Misc
-cdpath=( "." "$HOME/src/*/*" )
 setopt autocd
 setopt extendedglob
 
@@ -97,6 +96,8 @@ if which gtar >/dev/null 2>&1; then
   export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 fi
+
+export CDPATH=".:$(find ~/src -mindepth 2 -maxdepth 2 -type d -printf "%p:" | sed 's/:$//g')"
 
 alias ls="ls -lFAh --group-directories-first --color=always"
 
