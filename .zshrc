@@ -1,5 +1,10 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+# Homebrew python
+export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+# pipsi
+export PATH="$HOME/.local/bin:$PATH"
+
 # Enable Ctrl-x-e to edit command line
 autoload -U edit-command-line
 zle -N edit-command-line
@@ -116,11 +121,6 @@ fi
 
 # https://github.com/kennethreitz/pipenv/issues/184
 export PIPENV_SHELL_COMPAT=1
-
-# Homebrew python
-export PATH="/usr/local/opt/python/libexec/bin:$PATH"
-# pipsi
-export PATH="$HOME/.local/bin:$PATH"
 
 # Rust
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
