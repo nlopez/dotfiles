@@ -126,7 +126,9 @@ export PATH="$HOME/.local/bin:$PATH"
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
 # https://github.com/zsh-users/zsh-autosuggestions
+export ZSH_AUTOSUGGEST_USE_ASYNC=true
 source "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
+bindkey '^ ' autosuggest-accept
 
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last!
