@@ -124,6 +124,9 @@ export PATH="$HOME/.local/bin:$PATH"
 # Rust
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
+# https://github.com/zsh-users/zsh-autosuggestions
+source "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
+
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last!
 source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
