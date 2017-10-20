@@ -56,6 +56,14 @@ alias gp="git push"
 export EDITOR="reattach-to-user-namespace subl --add --wait"
 alias e="reattach-to-user-namespace subl --add"
 
+export DIRSTACKSIZE=20
+setopt pushdsilent
+alias cd=pushd
+alias dh='dirs -v'
+setopt cdablevars
+export DO=~/src/github.internal.digitalocean.com/digitalocean
+export PLAT=~/src/github.internal.digitalocean.com/platform
+
 # Misc
 setopt autocd
 setopt extendedglob
