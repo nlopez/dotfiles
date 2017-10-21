@@ -56,11 +56,13 @@ alias gp="git push"
 export EDITOR="reattach-to-user-namespace subl --add --wait"
 alias e="reattach-to-user-namespace subl --add"
 
-# cd conveniences
-setopt cdablevars
+# Misc aliases
+alias brewup="brew update && brew upgrade --cleanup"
+alias reload="exec $SHELL"
 
 # Misc
 setopt autocd
+setopt cdablevars
 setopt extendedglob
 
 # History
