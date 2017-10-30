@@ -57,7 +57,7 @@ export EDITOR="reattach-to-user-namespace subl --add --wait"
 alias e="reattach-to-user-namespace subl --add"
 
 # Misc aliases
-alias brewup="brew update && brew upgrade --cleanup"
+alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec $SHELL"
 
 # Misc
