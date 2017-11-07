@@ -9,3 +9,4 @@
 !.zfunctions/*
 !.curlrc
 !.wgetrc
+!.git_template/**
