@@ -44,6 +44,9 @@ zstyle ':completion:*' menu select
 # Correction
 setopt correct
 
+# Allow comments in interactive commands: echo hi # like this
+setopt interactivecomments
+
 # git
 alias g=git
 alias gup="git pull --rebase"
