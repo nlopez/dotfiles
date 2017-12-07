@@ -62,6 +62,7 @@ alias e="reattach-to-user-namespace subl --add"
 # Misc aliases
 alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec $SHELL"
+alias -g chomp="tr -d '\n'"
 
 # Misc
 setopt autocd
