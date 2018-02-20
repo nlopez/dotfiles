@@ -131,6 +131,10 @@ fi
 # Rust
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
+if which keychain >/dev/null 2>&1; then
+  eval "$(keychain --eval --inherit local-once --quick --quiet ~/.ssh/id_rsa)"
+fi
+
 # https://github.com/zsh-users/zsh-autosuggestions
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
 source "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
