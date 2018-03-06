@@ -1,7 +1,7 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# Homebrew python
-export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+if which pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi
+
 # pipsi
 export PATH="$HOME/.local/bin:$PATH"
 
