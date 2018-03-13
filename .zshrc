@@ -21,6 +21,7 @@ fpath=(
 autoload -Uz promptinit
 promptinit
 prompt pure
+PROMPT='%(?.%F{magenta}.%F{red}❯%F{magenta})❯%f '
 
 # Completion
 autoload -Uz compinit
