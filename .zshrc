@@ -1,7 +1,7 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-if which pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi
-
+# Homebrew python
+export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 # pipsi
 export PATH="$HOME/.local/bin:$PATH"
 
@@ -21,11 +21,11 @@ fpath=(
 autoload -Uz promptinit
 promptinit
 prompt pure
-PROMPT='%(?.%F{magenta}.%F{red}❯%F{magenta})❯%f '
 
 # Completion
 autoload -Uz compinit
 compinit
+bashcompinit
 
 # Show completion status
 # # http://stackoverflow.com/a/844299
@@ -45,9 +45,6 @@ zstyle ':completion:*' menu select
 # Correction
 setopt correct
 
-# Allow comments in interactive commands: echo hi # like this
-setopt interactivecomments
-
 # git
 alias g=git
 alias gup="git pull --rebase"
@@ -57,13 +54,12 @@ alias grhh="git reset --hard HEAD"
 alias gp="git push"
 
 # Sublime
-export EDITOR="reattach-to-user-namespace subl --add --wait"
-alias e="reattach-to-user-namespace subl --add"
+export EDITOR="subl --add --wait"
+alias e="subl --add"
 
 # Misc aliases
 alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec $SHELL"
-alias -g chomp="tr -d '\n'"
 
 # Misc
 setopt autocd
@@ -77,7 +73,6 @@ export SAVEHIST=$HISTSIZE
 setopt hist_ignore_all_dups
 setopt hist_ignore_space
 setopt share_history
-setopt inc_append_history
 setopt hist_verify
 setopt hist_no_store
 
@@ -86,7 +81,7 @@ if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
 # pipenv
 if which pipenv >/dev/null 2>&1; then eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"; fi
 # kubectl
-if which kubectl >/dev/null 2>&1; then eval "$(kubectl completion zsh)"; fi
+#if which kubectl >/dev/null 2>&1; then eval "$(kubectl completion zsh)"; fi
 # rbenv
 if which rbenv >/dev/null 2>&1; then
   export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
@@ -131,10 +126,6 @@ fi
 
 # Rust
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
-
-if which keychain >/dev/null 2>&1; then
-  eval "$(keychain --eval --inherit local-once --quick --quiet ~/.ssh/id_rsa)"
-fi
 
 # https://github.com/zsh-users/zsh-autosuggestions
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
