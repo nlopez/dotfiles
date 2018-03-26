@@ -1,5 +1,6 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+
 # Homebrew python
 export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 # pipsi
@@ -25,7 +26,7 @@ prompt pure
 # Completion
 autoload -Uz compinit
 compinit
-bashcompinit
+#bashcompinit
 
 # Show completion status
 # # http://stackoverflow.com/a/844299
@@ -126,6 +127,8 @@ fi
 
 # Rust
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
+
+if which pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi 
 
 # https://github.com/zsh-users/zsh-autosuggestions
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
