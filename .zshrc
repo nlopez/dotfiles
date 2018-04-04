@@ -128,7 +128,10 @@ fi
 # Rust
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
-if which pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi 
+if which pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi
+
+# Keychain
+if which keychain >/dev/null 2>&1; then eval "$(keychain --eval --quiet --inherit any ~/.ssh/id_*)"; fi
 
 # https://github.com/zsh-users/zsh-autosuggestions
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
