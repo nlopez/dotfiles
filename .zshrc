@@ -77,6 +77,11 @@ setopt share_history
 setopt hist_verify
 setopt hist_no_store
 
+# pushd
+setopt autopushd pushdminus pushdsilent pushdtohome pushdignoredups
+alias dh='dirs -v'
+DIRSTACKSIZE=10
+
 # direnv
 if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
 # pipenv
