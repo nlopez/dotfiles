@@ -1,11 +1,5 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-
-# Homebrew python
-export PATH="/usr/local/opt/python/libexec/bin:$PATH"
-# pipsi
-export PATH="$HOME/.local/bin:$PATH"
-
 # Enable Ctrl-x-e to edit command line
 autoload -U edit-command-line
 zle -N edit-command-line
@@ -132,8 +126,6 @@ fi
 
 # Rust
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
-
-if which pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi
 
 # Keychain
 if which keychain >/dev/null 2>&1; then eval "$(keychain --eval --quiet --inherit any ~/.ssh/id_*)"; fi
