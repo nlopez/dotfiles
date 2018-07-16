@@ -1,5 +1,24 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+# use gnu utils with regular names
+if which greadlink >/dev/null 2>&1; then
+  export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+  export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
+fi
+if which gsed >/dev/null 2>&1; then
+  export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
+  export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH"
+fi
+if which gfind >/dev/null 2>&1; then
+  export PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH"
+  export MANPATH="/usr/local/opt/findutils/libexec/gnuman:$MANPATH"
+fi
+if which gtar >/dev/null 2>&1; then
+  export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
+  export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
+fi
+
+
 # Enable Ctrl-x-e to edit command line
 autoload -U edit-command-line
 zle -N edit-command-line
@@ -78,10 +97,10 @@ DIRSTACKSIZE=10
 
 # direnv
 if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
+
 # pipenv
 if which pipenv >/dev/null 2>&1; then eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"; fi
-# kubectl
-#if which kubectl >/dev/null 2>&1; then eval "$(kubectl completion zsh)"; fi
+
 # rbenv
 if which rbenv >/dev/null 2>&1; then
   export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
@@ -89,22 +108,12 @@ if which rbenv >/dev/null 2>&1; then
   eval "$(rbenv init -)"
 fi
 
-# use gnu utils with regular names
-if which greadlink >/dev/null 2>&1; then
-  export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
-  export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
-fi
-if which gsed >/dev/null 2>&1; then
-  export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
-  export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH"
-fi
-if which gfind >/dev/null 2>&1; then
-  export PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH"
-  export MANPATH="/usr/local/opt/findutils/libexec/gnuman:$MANPATH"
-fi
-if which gtar >/dev/null 2>&1; then
-  export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
-  export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
+# kubectl
+if which kubectl >/dev/null 2>&1; then
+  eval "$(kubectl completion zsh)"
+  autoload -U colors; colors
+  source "$HOME/.zfunctions/kubectl.zsh"
+  RPROMPT='%{$fg[blue]%}($ZSH_KUBECTL_PROMPT)%{$reset_color%}'
 fi
 
 export CDPATH=".:$(find ~/src -mindepth 2 -maxdepth 2 -type d -printf "%p:" | sed 's/:$//g')"
@@ -133,7 +142,7 @@ if which keychain >/dev/null 2>&1; then eval "$(keychain --eval --quiet --inheri
 # https://github.com/zsh-users/zsh-autosuggestions
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
 source "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
-bindkey '^ ' autosuggest-accept
+bindkey '^ ' autosuggest-acceptx
 
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last!
