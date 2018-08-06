@@ -81,7 +81,6 @@ alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec $SHELL"
 
 # Misc
-setopt autocd
 setopt cdablevars
 setopt extendedglob
 
