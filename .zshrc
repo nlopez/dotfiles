@@ -103,7 +103,24 @@ DIRSTACKSIZE=10
 if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
 
 # pipenv
-if which pipenv >/dev/null 2>&1; then eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"; fi
+if which pipenv >/dev/null 2>&1; then
+  eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"
+
+  function auto_pipenv_shell {
+      if [ ! -n "${PIPENV_ACTIVE+1}" ]; then
+          if [ -f "Pipfile" ] ; then
+              pipenv shell
+          fi
+      fi
+  }
+
+  function cd {
+      builtin cd "$@"
+      auto_pipenv_shell
+  }
+
+  auto_pipenv_shell
+fi
 
 # rbenv
 if which rbenv >/dev/null 2>&1; then
