@@ -104,6 +104,7 @@ if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
 
 # pipenv
 if which pipenv >/dev/null 2>&1; then
+  export PIPENV_VENV_IN_PROJECT=1
   eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"
 
   function auto_pipenv_shell {
