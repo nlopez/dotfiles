@@ -38,3 +38,6 @@ Thumbs.db
 
 # direnv
 .envrc
+
+# pipenv
+.venv
