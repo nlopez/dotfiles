@@ -135,7 +135,6 @@ if which kubectl >/dev/null 2>&1; then
   eval "$(kubectl completion zsh)"
   autoload -U colors; colors
   source "$HOME/.zfunctions/kubectl.zsh"
-  RPROMPT='%{$fg[blue]%}($ZSH_KUBECTL_PROMPT)%{$reset_color%}'
 fi
 
 export CDPATH=".:$(find ~/src -mindepth 2 -maxdepth 2 -type d -printf "%p:" | sed 's/:$//g')"
