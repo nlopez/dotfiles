@@ -44,3 +44,11 @@ Thumbs.db
 
 # Sublime Text user-specific
 *.sublime-workspace
+
+# Ansible
+*.retry
+
+# Probably secrets
+*.pem
+*.crt
+*.key
