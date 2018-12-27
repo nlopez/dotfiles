@@ -41,3 +41,6 @@ Thumbs.db
 
 # pipenv
 .venv
+
+# Sublime Text user-specific
+*.sublime-workspace
