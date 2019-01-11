@@ -22,6 +22,10 @@ if which gtar >/dev/null 2>&1; then
   export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 fi
+if [ -f /usr/local/opt/gnu-getopt/bin/getopt ]; then
+  export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
+fi
+
 
 
 # Enable Ctrl-x-e to edit command line
