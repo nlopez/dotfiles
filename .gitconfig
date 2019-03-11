@@ -30,3 +30,5 @@
 	excludesfile = ~/.gitignore_global
 [init]
 	templateDir = ~/.git_template
+[diff]
+	renameLimit = 10000
