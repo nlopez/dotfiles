@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Runs all .json or .js files through pythons json lint tool before commiting,
 # to make sure that you don't commit broken json objects.
+IFS=$'\n\t'
 
 git_dir=$(git rev-parse --show-toplevel)
 files="$(git diff-index --name-only --diff-filter=ACM --cached HEAD -- \
