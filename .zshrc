@@ -2,6 +2,8 @@
 export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 
+export PATH="$HOME/Library/Python/3.7/bin:$PATH"
+
 # http://matthew-brett.github.io/pydagogue/installing_on_debian.html
 # pip install --user path
 export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')
