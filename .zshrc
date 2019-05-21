@@ -75,7 +75,7 @@ setopt correct
 # git
 alias g=git
 alias gup="git pull --rebase"
-alias gst="git status"
+alias gst="git status --ignored"
 alias gc="git commit"
 alias grhh="git reset --hard HEAD"
 alias gp="git push"
