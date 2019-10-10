@@ -1,7 +1,6 @@
 [user]
 	name = Nick Lopez
 	useConfigOnly = true
-	email = gitea@fake.local
 [push]
 	default = current
 [alias]
