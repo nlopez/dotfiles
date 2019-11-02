@@ -9,11 +9,6 @@ export PATH="$HOME/Library/Python/3.7/bin:$PATH"
 export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')
 export PATH=$PY_USER_BIN:$PATH
 
-# pyenv
-if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-fi
-
 # use gnu utils with regular names
 if which greadlink >/dev/null 2>&1; then
   export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
