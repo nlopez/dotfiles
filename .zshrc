@@ -2,7 +2,7 @@
 export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 
-export PATH="$HOME/Library/Python/3.7/bin:$PATH"
+eval "$(pyenv init -)"
 
 # http://matthew-brett.github.io/pydagogue/installing_on_debian.html
 # pip install --user path
