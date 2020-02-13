@@ -10,19 +10,19 @@ export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')
 export PATH=$PY_USER_BIN:$PATH
 
 # use gnu utils with regular names
-if which greadlink >/dev/null 2>&1; then
+if command -v greadlink >/dev/null 2>&1; then
   export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
 fi
-if which gsed >/dev/null 2>&1; then
+if command -v gsed >/dev/null 2>&1; then
   export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH"
 fi
-if which gfind >/dev/null 2>&1; then
+if command -v gfind >/dev/null 2>&1; then
   export PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/findutils/libexec/gnuman:$MANPATH"
 fi
-if which gtar >/dev/null 2>&1; then
+if command -v gtar >/dev/null 2>&1; then
   export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 fi
@@ -108,10 +108,10 @@ alias dh='dirs -v'
 DIRSTACKSIZE=10
 
 # direnv
-if which direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
+if command -v direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
 
 # pipenv
-if which pipenv >/dev/null 2>&1; then
+if command -v pipenv >/dev/null 2>&1; then
   export PIPENV_VENV_IN_PROJECT=1
   eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"
 
@@ -132,14 +132,14 @@ if which pipenv >/dev/null 2>&1; then
 fi
 
 # rbenv
-if which rbenv >/dev/null 2>&1; then
+if command -v rbenv >/dev/null 2>&1; then
   export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
   export PATH="$HOME/.rbenv/bin:$PATH"
   eval "$(rbenv init -)"
 fi
 
 # kubectl
-if which kubectl >/dev/null 2>&1; then
+if command -v kubectl >/dev/null 2>&1; then
   eval "$(kubectl completion zsh)"
   autoload -U colors; colors
   source "$HOME/.zfunctions/kubectl.zsh"
@@ -157,7 +157,7 @@ export PATH="$PATH:$HOME/bin"
 export LESSCHARSET=utf-8
 
 # GOROOT-based install location
-if which go >/dev/null 2>&1; then
+if command -v go >/dev/null 2>&1; then
   export PATH=$PATH:/usr/local/opt/go/libexec/bin
   export PATH="$PATH:$(go env GOPATH)/bin"
 fi
@@ -166,7 +166,7 @@ fi
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
 # Keychain
-if which keychain >/dev/null 2>&1; then eval "$(keychain --eval --quiet --inherit any ~/.ssh/id_*)"; fi
+if command -v keychain >/dev/null 2>&1; then eval "$(keychain --eval --quiet --inherit any ~/.ssh/id_*)"; fi
 
 # https://github.com/zsh-users/zsh-autosuggestions
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
