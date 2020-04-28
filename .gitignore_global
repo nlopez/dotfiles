@@ -52,3 +52,6 @@ Thumbs.db
 *.pem
 *.crt
 *.key
+
+# Compiled stuff
+*.pyc
