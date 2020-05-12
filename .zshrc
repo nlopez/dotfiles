@@ -168,6 +168,10 @@ if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 # Keychain
 if command -v keychain >/dev/null 2>&1; then eval "$(keychain --eval --quiet --inherit any ~/.ssh/id_*)"; fi
 
+# https://unix.stackexchange.com/a/377765
+# known hosts completion
+zstyle -e ':completion:*:(ssh|scp|sftp|rsh|rsync):hosts' hosts 'reply=(${=${${(f)"$(cat {/etc/ssh_,~/.ssh/known_}hosts(|2)(N) /dev/null)"}%%[# ]*}//,/ })'
+
 # https://github.com/zsh-users/zsh-autosuggestions
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
 source "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
