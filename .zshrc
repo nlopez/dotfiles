@@ -54,15 +54,21 @@ autoload -Uz compinit
 compinit
 #bashcompinit
 
-# Show completion status
-# # http://stackoverflow.com/a/844299
+# Cribbed from https://github.com/ohmyzsh/ohmyzsh/blob/fd786291bab7468c7cdd5066ac436218a1fba9e2/lib/completion.zsh#L61-L73
+# terminfo, echoti are zsh builtins
+# %F{red}red text%f is also provided by zsh https://scriptingosx.com/2019/07/moving-to-zsh-06-customizing-the-zsh-prompt/
 expand-or-complete-with-dots() {
-  echo -n "\e[31m...\e[0m"
+  # toggle line-wrapping off and back on again
+  [[ -n "$terminfo[rmam]" && -n "$terminfo[smam]" ]] && echoti rmam
+  print -Pn "%{%F{red}...%f%}"
+  [[ -n "$terminfo[rmam]" && -n "$terminfo[smam]" ]] && echoti smam
+
   zle expand-or-complete
   zle redisplay
 }
 zle -N expand-or-complete-with-dots
 bindkey "^I" expand-or-complete-with-dots
+
 # Case-insensitive matching
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 # Use completion menu
