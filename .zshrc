@@ -2,7 +2,11 @@
 export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 
-eval "$(pyenv init -)"
+if command -v pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi
+
+if command -v pipx >/dev/null 2>&1; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
 
 # http://matthew-brett.github.io/pydagogue/installing_on_debian.html
 # pip install --user path
