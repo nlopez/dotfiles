@@ -1,12 +1,10 @@
 # local bin paths
 export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
 
 if command -v pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi
-
-if command -v pipx >/dev/null 2>&1; then
-  export PATH="$HOME/.local/bin:$PATH"
-fi
 
 # http://matthew-brett.github.io/pydagogue/installing_on_debian.html
 # pip install --user path
@@ -147,6 +145,8 @@ if command -v rbenv >/dev/null 2>&1; then
   export PATH="$HOME/.rbenv/bin:$PATH"
   eval "$(rbenv init -)"
 fi
+
+export GEM_HOME="$HOME/.local"
 
 # kubectl
 if command -v kubectl >/dev/null 2>&1; then
