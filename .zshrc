@@ -157,6 +157,9 @@ fi
 
 export CDPATH=".:$(find ~/src -mindepth 2 -maxdepth 2 -type d -printf "%p:" | sed 's/:$//g')"
 
+if command -v dircolors >/dev/null 2>&1; then
+  eval "$(dircolors $HOME/.dir_colors)"
+fi
 alias ls="ls -lFAh --group-directories-first --color=always"
 
 if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
