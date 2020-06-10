@@ -3,6 +3,8 @@ export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
+alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
+
 
 if command -v pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi
 
