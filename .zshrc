@@ -5,12 +5,12 @@ export PATH="$HOME/.local/bin:$PATH"
 
 alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
 
-
 if command -v pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi
 
 # http://matthew-brett.github.io/pydagogue/installing_on_debian.html
 # pip install --user path
-export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')
+PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')
+export PY_USER_BIN
 export PATH=$PY_USER_BIN:$PATH
 
 # use gnu utils with regular names
@@ -34,14 +34,14 @@ if [ -f /usr/local/opt/gnu-getopt/bin/getopt ]; then
   export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
 fi
 
-
-
 # Enable Ctrl-x-e to edit command line
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '^xe' edit-command-line
 bindkey '^x^e' edit-command-line
 
+# fpath can't be quoted
+# shellcheck disable=SC2206
 fpath=(
   "$HOME/.zfunctions"
   /usr/local/share/zsh/site-functions
@@ -63,9 +63,10 @@ compinit
 # %F{red}red text%f is also provided by zsh https://scriptingosx.com/2019/07/moving-to-zsh-06-customizing-the-zsh-prompt/
 expand-or-complete-with-dots() {
   # toggle line-wrapping off and back on again
-  [[ -n "$terminfo[rmam]" && -n "$terminfo[smam]" ]] && echoti rmam
+  # shellcheck disable=SC2154
+  [[ -n "${terminfo[rmam]}" && -n "${terminfo[smam]}" ]] && echoti rmam
   print -Pn "%{%F{red}...%f%}"
-  [[ -n "$terminfo[rmam]" && -n "$terminfo[smam]" ]] && echoti smam
+  [[ -n "${terminfo[rmam]}" && -n "${terminfo[smam]}" ]] && echoti smam
 
   zle expand-or-complete
   zle redisplay
@@ -78,7 +79,6 @@ zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 
 # Use completion menu
 zstyle ':completion:*' menu select
 
-
 # Correction
 setopt correct
 
@@ -90,13 +90,13 @@ alias gc="git commit"
 alias grhh="git reset --hard HEAD"
 alias gp="git push"
 
-# Sublime
-export EDITOR="subl --add --wait"
-alias e="subl --add"
+# Editor
+export EDITOR="code --add --wait"
+alias e="code --add"
 
 # Misc aliases
 alias brewup="brew update && brew upgrade && brew cleanup"
-alias reload="exec $SHELL"
+alias reload="exec \$SHELL"
 
 # Misc
 setopt cdablevars
@@ -115,31 +115,10 @@ setopt hist_no_store
 # pushd
 setopt autopushd pushdminus pushdsilent pushdtohome pushdignoredups
 alias dh='dirs -v'
-DIRSTACKSIZE=10
+export DIRSTACKSIZE=10
 
 # direnv
 if command -v direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
-
-# pipenv
-if command -v pipenv >/dev/null 2>&1; then
-  export PIPENV_VENV_IN_PROJECT=1
-  eval "$(env _PIPENV_COMPLETE=source-zsh pipenv)"
-
-  function auto_pipenv_shell {
-      if [ ! -n "${PIPENV_ACTIVE+1}" ]; then
-          if [ -f "Pipfile" ] ; then
-              pipenv shell
-          fi
-      fi
-  }
-
-  function cd {
-      builtin cd "$@"
-      auto_pipenv_shell
-  }
-
-  auto_pipenv_shell
-fi
 
 # rbenv
 if command -v rbenv >/dev/null 2>&1; then
@@ -153,14 +132,17 @@ export GEM_HOME="$HOME/.local"
 # kubectl
 if command -v kubectl >/dev/null 2>&1; then
   eval "$(kubectl completion zsh)"
-  autoload -U colors; colors
+  autoload -U colors
+  colors
+  # shellcheck source=./.zfunctions/kubectl.zsh
   source "$HOME/.zfunctions/kubectl.zsh"
 fi
 
-export CDPATH=".:$(find ~/src -mindepth 2 -maxdepth 2 -type d -printf "%p:" | sed 's/:$//g')"
+CDPATH=".:$(find ~/src -mindepth 2 -maxdepth 2 -type d -printf "%p:" | sed 's/:$//g')"
+export CDPATH
 
 if command -v dircolors >/dev/null 2>&1; then
-  eval "$(dircolors $HOME/.dir_colors)"
+  eval "$(dircolors "$HOME/.dir_colors")"
 fi
 alias ls="ls -lFAh --group-directories-first --color=always"
 
@@ -174,10 +156,12 @@ export LESSCHARSET=utf-8
 # GOROOT-based install location
 if command -v go >/dev/null 2>&1; then
   export PATH=$PATH:/usr/local/opt/go/libexec/bin
-  export PATH="$PATH:$(go env GOPATH)/bin"
+  PATH="$PATH:$(go env GOPATH)/bin"
+  export PATH
 fi
 
 # Rust
+# shellcheck source=./.cargo/env
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
 # Keychain
@@ -192,6 +176,9 @@ export ZSH_AUTOSUGGEST_USE_ASYNC=true
 source "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
 bindkey '^ ' autosuggest-acceptx
 
+# shellcheck source=./.zshrc_work
+if [ -f "$HOME/.zshrc_work" ]; then source "$HOME/.zshrc_work"; fi
+
 # https://github.com/zsh-users/zsh-syntax-highlighting
-# Keep this last!
+# Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
 source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
