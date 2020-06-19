@@ -2,9 +2,6 @@
 # See sample alacritty.yml with all possible values at https://github.com/alacritty/alacritty/releases
 live_config_reload: true
 
-shell:
-  program: tmx # https://github.com/nlopez/bin/blob/master/tmx
-
 window:
   decorations: buttonless
 
