@@ -51,6 +51,8 @@ fpath=(
 # Prompt
 autoload -Uz promptinit
 promptinit
+zstyle ':prompt:pure:prompt:success' color default
+zstyle ':prompt:pure:prompt:failure' color red
 prompt pure
 
 # Completion
