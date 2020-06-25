@@ -2,9 +2,6 @@
 # See sample alacritty.yml with all possible values at https://github.com/alacritty/alacritty/releases
 live_config_reload: true
 
-window:
-  decorations: buttonless
-
 font:
   size: 18.0
   normal:
