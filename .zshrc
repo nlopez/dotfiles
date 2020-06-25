@@ -107,6 +107,8 @@ setopt extendedglob
 # History
 export HISTSIZE=500000
 export HISTFILE="$HOME/.history"
+# export HISTFILE=/dev/null
+# export HISTSIZE=0
 export SAVEHIST=$HISTSIZE
 setopt hist_ignore_all_dups
 setopt hist_ignore_space
