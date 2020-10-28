@@ -3,6 +3,9 @@ export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
+# Know what I hate? Fun.
+export ANSIBLE_NOCOWS=1
+
 alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
 
 if command -v pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi
@@ -185,6 +188,11 @@ bindkey '^ ' autosuggest-acceptx
 
 # shellcheck source=./.zshrc_work
 if [ -f "$HOME/.zshrc_work" ]; then source "$HOME/.zshrc_work"; fi
+
+# serverless
+# tabtab source for packages
+# uninstall by removing these lines
+[[ -f ~/.config/tabtab/__tabtab.zsh ]] && . ~/.config/tabtab/__tabtab.zsh || true
 
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
