@@ -96,8 +96,8 @@ alias grhh="git reset --hard HEAD"
 alias gp="git push"
 
 # Editor
-export EDITOR="code-insiders --add --wait"
-alias e="code-insiders --add"
+export EDITOR="code --add --wait"
+alias e="code --add"
 
 # Misc aliases
 alias brewup="brew update && brew upgrade && brew cleanup"
