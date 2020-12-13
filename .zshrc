@@ -58,6 +58,12 @@ zstyle ':prompt:pure:prompt:success' color default
 zstyle ':prompt:pure:prompt:failure' color red
 prompt pure
 
+kube_ps1_sh="/usr/local/opt/kube-ps1/share/kube-ps1.sh"
+if [ -f "$kube_ps1_sh" ] >/dev/null 2>&1; then
+  source "$kube_ps1_sh"
+  PS1='$(kube_ps1)'$PS1
+fi
+
 # Completion
 autoload -Uz compinit
 compinit
