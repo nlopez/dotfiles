@@ -178,7 +178,7 @@ fi
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
 # Keychain
-if command -v keychain >/dev/null 2>&1; then eval "$(keychain --eval --quiet --inherit any ~/.ssh/id_*)"; fi
+if command -v keychain >/dev/null 2>&1; then eval "$(keychain --eval --quiet --inherit any)"; fi
 
 # Homebrew curl
 if [ -f /usr/local/opt/curl/bin/curl ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
@@ -191,6 +191,16 @@ zstyle -e ':completion:*:(ssh|scp|sftp|rsh|rsync):hosts' hosts 'reply=(${=${${(f
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
 source "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
 bindkey '^ ' autosuggest-acceptx
+
+# What do I look like, a guy who's not lazy?
+if command -v kubectl >/dev/null; then
+  alias k=kubectl
+  alias kd='kubectl describe'
+  alias kg='kubectl get'
+fi
+
+if command -v kubectx >/dev/null; then alias kctx=kubectx; fi
+if command -v kubens >/dev/null; then alias kns=kubens; fi
 
 # shellcheck source=./.zshrc_work
 if [ -f "$HOME/.zshrc_work" ]; then source "$HOME/.zshrc_work"; fi
