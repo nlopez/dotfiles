@@ -144,11 +144,7 @@ export GEM_HOME="$HOME/.local"
 
 # kubectl
 if command -v kubectl >/dev/null 2>&1; then
-  eval "$(kubectl completion zsh)"
-  autoload -U colors
-  colors
-  # shellcheck source=./.zfunctions/kubectl.zsh
-  source "$HOME/.zfunctions/kubectl.zsh"
+  source <(kubectl completion zsh)
 fi
 
 CDPATH=".:$(find ~/src -mindepth 2 -maxdepth 2 -type d -printf "%p:" | sed 's/:$//g')"
@@ -196,7 +192,10 @@ bindkey '^ ' autosuggest-acceptx
 if command -v kubectl >/dev/null; then
   alias k=kubectl
   alias kd='kubectl describe'
+  alias kdp='kubectl describe pod'
   alias kg='kubectl get'
+  alias kgp='kubectl get pod'
+  alias ke='kubectl exec -it'
 fi
 
 if command -v kubectx >/dev/null; then alias kctx=kubectx; fi
