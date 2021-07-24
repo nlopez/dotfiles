@@ -34,5 +34,6 @@
 	quotepath = false
 [init]
 	templateDir = ~/.git_template
+	defaultBranch = main
 [diff]
 	renameLimit = 10000
