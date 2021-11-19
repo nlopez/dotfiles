@@ -8,7 +8,12 @@ export ANSIBLE_NOCOWS=1
 
 alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
 
-if command -v pyenv >/dev/null 2>&1; then eval "$(pyenv init -)"; fi
+if command -v pyenv >/dev/null 2>&1; then
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+  eval "$(pyenv init -)"
+fi
 
 # http://matthew-brett.github.io/pydagogue/installing_on_debian.html
 # pip install --user path
@@ -65,9 +70,9 @@ if [ -f "$kube_ps1_sh" ] >/dev/null 2>&1; then
 fi
 
 # Completion
-autoload -Uz compinit
+autoload -Uz compinit bashcompinit
 compinit
-#bashcompinit
+bashcompinit
 
 # Cribbed from https://github.com/ohmyzsh/ohmyzsh/blob/fd786291bab7468c7cdd5066ac436218a1fba9e2/lib/completion.zsh#L61-L73
 # terminfo, echoti are zsh builtins
@@ -209,6 +214,18 @@ if [ -f "$HOME/.zshrc_work" ]; then source "$HOME/.zshrc_work"; fi
 # uninstall by removing these lines
 [[ -f ~/.config/tabtab/__tabtab.zsh ]] && . ~/.config/tabtab/__tabtab.zsh || true
 
+source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc || true
+source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc || true
+
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
 source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
+
+
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
+
+if command -v saml2aws 1>/dev/null 2>&1; then
+  eval "$(saml2aws --completion-script-zsh)"
+fi
