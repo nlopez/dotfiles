@@ -217,10 +217,6 @@ if [ -f "$HOME/.zshrc_work" ]; then source "$HOME/.zshrc_work"; fi
 source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc || true
 source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc || true
 
-# https://github.com/zsh-users/zsh-syntax-highlighting
-# Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
-source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
-
 
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
@@ -229,3 +225,13 @@ fi
 if command -v saml2aws 1>/dev/null 2>&1; then
   eval "$(saml2aws --completion-script-zsh)"
 fi
+
+export KUBECONFIG="$(mktemp -u $TMPDIR/.kube.XXXXXXXXX)"
+cp $HOME/.kube/config $KUBECONFIG
+alias kl="kubectl config use-context"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# https://github.com/zsh-users/zsh-syntax-highlighting
+# Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
+source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
