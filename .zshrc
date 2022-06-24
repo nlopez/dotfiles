@@ -95,13 +95,19 @@ zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 
 # Use completion menu
 zstyle ':completion:*' menu select
 
+_complete_alias() {
+    [[ -n $PREFIX ]] && compadd -- ${(M)${(k)galiases}:#$PREFIX*}
+    return 1
+}
+zstyle ':completion:*' completer _complete_alias _complete _ignored
+
 # Correction
 setopt correct
 
 # git
 alias g=git
 alias gup="git pull --rebase"
-alias gst="git status --ignored"
+alias gst="git status"
 alias gc="git commit"
 alias grhh="git reset --hard HEAD"
 alias gp="git push"
@@ -217,7 +223,6 @@ if [ -f "$HOME/.zshrc_work" ]; then source "$HOME/.zshrc_work"; fi
 source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc || true
 source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc || true
 
-
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
 fi
@@ -230,8 +235,32 @@ export KUBECONFIG="$(mktemp -u $TMPDIR/.kube.XXXXXXXXX)"
 cp $HOME/.kube/config $KUBECONFIG
 alias kl="kubectl config use-context"
 
+# Kube and context management
+_kubectx_with_tmp_config() {
+    KUBECONFIG="$TMPDIR/.kube.$1";
+    KUBECONFIG=$(mktemp $KUBECONFIG.XXXXXXX)
+    cp $HOME/.kube/config $KUBECONFIG
+    echo "Using tmp context: $KUBECONFIG";
+    kubectx -u
+    kubectx $@
+}
+
+# Explicit set of KUBECONFIG to avoid using default/current configuration in a new shell
+export KUBECONFIG="$(mktemp -u /$TMPDIR/.kube.XXXXXXXXX)"
+alias kl-unset='export KUBECONFIG="$(mktemp -u /$TMPDIR/.kube.XXXXXXXXX)"'
+
+# alias the default kubectx to hook context management
+alias kubectx="_kubectx_with_tmp_config"
+
+# Sample usage:
+# kubectx gizmo.us1.staging.dog
+
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+source "/usr/local/opt/asdf/libexec/asdf.sh" 2>/dev/null || true
 
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
 source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
+export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"

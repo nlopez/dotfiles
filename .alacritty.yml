@@ -2,6 +2,9 @@
 # See sample alacritty.yml with all possible values at https://github.com/alacritty/alacritty/releases
 live_config_reload: true
 
+window:
+  decorations: buttonless
+
 font:
   size: 18.0
   normal:
@@ -20,6 +23,8 @@ colors:
     background: "#000000"
     foreground: "#ffffff"
   cursor:
+    style:
+      shape: Block
     text: "#000000"
     cursor: "#ffffff"
   normal:
