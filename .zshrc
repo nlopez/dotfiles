@@ -233,27 +233,6 @@ if command -v saml2aws 1>/dev/null 2>&1; then
   eval "$(saml2aws --completion-script-zsh)"
 fi
 
-export KUBECONFIG="$(mktemp -u $TMPDIR/.kube.XXXXXXXXX)"
-cp $HOME/.kube/config $KUBECONFIG
-alias kl="kubectl config use-context"
-
-# Kube and context management
-_kubectx_with_tmp_config() {
-    KUBECONFIG="$TMPDIR/.kube.$1";
-    KUBECONFIG=$(mktemp $KUBECONFIG.XXXXXXX)
-    cp $HOME/.kube/config $KUBECONFIG
-    echo "Using tmp context: $KUBECONFIG";
-    kubectx -u
-    kubectx $@
-}
-
-# Explicit set of KUBECONFIG to avoid using default/current configuration in a new shell
-export KUBECONFIG="$(mktemp -u /$TMPDIR/.kube.XXXXXXXXX)"
-alias kl-unset='export KUBECONFIG="$(mktemp -u /$TMPDIR/.kube.XXXXXXXXX)"'
-
-# alias the default kubectx to hook context management
-alias kubectx="_kubectx_with_tmp_config"
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 source "/usr/local/opt/asdf/libexec/asdf.sh" 2>/dev/null || true
