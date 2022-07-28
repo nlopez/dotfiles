@@ -19,9 +19,11 @@ fi
 
 # http://matthew-brett.github.io/pydagogue/installing_on_debian.html
 # pip install --user path
-PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')
-export PY_USER_BIN
-export PATH=$PY_USER_BIN:$PATH
+if _command python; then
+  PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')
+  export PY_USER_BIN
+  export PATH=$PY_USER_BIN:$PATH
+fi
 
 # use gnu utils with regular names
 if _command greadlink; then
