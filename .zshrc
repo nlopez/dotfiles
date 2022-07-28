@@ -117,11 +117,13 @@ alias grhh="git reset --hard HEAD"
 alias gp="git push"
 
 # Editor
-export EDITOR="code --add --wait"
-alias e="code --add"
+if _command code; then
+  export EDITOR="code --add --wait"
+  alias e="code --add"
+fi
 
 # Misc aliases
-alias brewup="brew update && brew upgrade && brew cleanup"
+_command brew && alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec \$SHELL"
 
 # Misc
@@ -157,19 +159,12 @@ fi
 
 export GEM_HOME="$HOME/.local"
 
-# kubectl
-if _command kubectl; then
-  source <(kubectl completion zsh)
-fi
-
 if [ -d "$HOME/src" ]; then
   CDPATH=".:$(find ~/src -mindepth 2 -maxdepth 2 -type d -printf "%p:" | sed 's/:$//g')"
   export CDPATH
 fi
 
-if _command dircolors; then
-  eval "$(dircolors "$HOME/.dir_colors")"
-fi
+_command dircolors && eval "$(dircolors "$HOME/.dir_colors")"
 alias ls="ls -lFAh --group-directories-first --color=always"
 
 if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
@@ -206,7 +201,8 @@ source "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/nul
 bindkey '^ ' autosuggest-acceptx
 
 # What do I look like, a guy who's not lazy?
-if command -v kubectl >/dev/null; then
+if _command kubectl; then
+  source <(kubectl completion zsh)
   alias k=kubectl
   alias kd='kubectl describe'
   alias kdp='kubectl describe pod'
@@ -215,8 +211,8 @@ if command -v kubectl >/dev/null; then
   alias ke='kubectl exec -it'
 fi
 
-if command -v kubectx >/dev/null; then alias kctx=kubectx; fi
-if command -v kubens >/dev/null; then alias kns=kubens; fi
+_command kubectx && alias kctx=kubectx
+_command kubens && alias kns=kubens
 
 # shellcheck source=./.zshrc_work
 if [ -f "$HOME/.zshrc_work" ]; then source "$HOME/.zshrc_work"; fi
@@ -231,15 +227,13 @@ if [ -d  "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk" ]; then
   source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
 fi
 
-if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-fi
-
-if command -v saml2aws 1>/dev/null 2>&1; then
-  eval "$(saml2aws --completion-script-zsh)"
-fi
+_command pyenv && eval "$(pyenv init -)"
+_command saml2aws && eval "$(saml2aws --completion-script-zsh)"
+_command rclone && eval "$(rclone completion zsh)"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+
 
 source "/usr/local/opt/asdf/libexec/asdf.sh" 2>/dev/null || true
 
