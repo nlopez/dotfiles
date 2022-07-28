@@ -1,3 +1,5 @@
+alias _command="command -v $1 >/dev/null 2>&1"
+
 # local bin paths
 export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
@@ -8,7 +10,7 @@ export ANSIBLE_NOCOWS=1
 
 alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
 
-if command -v pyenv >/dev/null 2>&1; then
+if _command pyenv; then
   export PYENV_ROOT="$HOME/.pyenv"
   export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init --path)"
@@ -22,19 +24,19 @@ export PY_USER_BIN
 export PATH=$PY_USER_BIN:$PATH
 
 # use gnu utils with regular names
-if command -v greadlink >/dev/null 2>&1; then
+if _command greadlink; then
   export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
 fi
-if command -v gsed >/dev/null 2>&1; then
+if _command gsed; then
   export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH"
 fi
-if command -v gfind >/dev/null 2>&1; then
+if _command gfind; then
   export PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/findutils/libexec/gnuman:$MANPATH"
 fi
-if command -v gtar >/dev/null 2>&1; then
+if _command gtar; then
   export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
   export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 fi
@@ -142,10 +144,10 @@ alias dh='dirs -v'
 export DIRSTACKSIZE=10
 
 # direnv
-if command -v direnv >/dev/null 2>&1; then eval "$(direnv hook zsh)"; fi
+if _command direnv; then eval "$(direnv hook zsh)"; fi
 
 # rbenv
-if command -v rbenv >/dev/null 2>&1; then
+if _command rbenv; then
   export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
   export PATH="$HOME/.rbenv/bin:$PATH"
   eval "$(rbenv init -)"
@@ -154,14 +156,16 @@ fi
 export GEM_HOME="$HOME/.local"
 
 # kubectl
-if command -v kubectl >/dev/null 2>&1; then
+if _command kubectl; then
   source <(kubectl completion zsh)
 fi
 
-CDPATH=".:$(find ~/src -mindepth 2 -maxdepth 2 -type d -printf "%p:" | sed 's/:$//g')"
-export CDPATH
+if [ -d "$HOME/src" ]; then
+  CDPATH=".:$(find ~/src -mindepth 2 -maxdepth 2 -type d -printf "%p:" | sed 's/:$//g')"
+  export CDPATH
+fi
 
-if command -v dircolors >/dev/null 2>&1; then
+if _command dircolors; then
   eval "$(dircolors "$HOME/.dir_colors")"
 fi
 alias ls="ls -lFAh --group-directories-first --color=always"
@@ -174,7 +178,7 @@ export PATH="$PATH:$HOME/bin"
 export LESSCHARSET=utf-8
 
 # GOROOT-based install location
-if command -v go >/dev/null 2>&1; then
+if _command go; then
   export PATH=$PATH:/usr/local/opt/go/libexec/bin
   PATH="$PATH:$(go env GOPATH)/bin"
   export PATH
@@ -185,7 +189,7 @@ fi
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
 # Keychain
-if command -v keychain >/dev/null 2>&1; then eval "$(keychain --eval --quiet --inherit any)"; fi
+if _command keychain; then eval "$(keychain --eval --quiet --inherit any)"; fi
 
 # Homebrew curl
 if [ -f /usr/local/opt/curl/bin/curl ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
