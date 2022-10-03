@@ -8,14 +8,9 @@ export PATH="$HOME/.local/bin:$PATH"
 # Know what I hate? Fun.
 export ANSIBLE_NOCOWS=1
 
-alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
+BREW_PREFIX="$(brew --prefix)"
 
-if _command pyenv; then
-  export PYENV_ROOT="$HOME/.pyenv"
-  export PATH="$PYENV_ROOT/bin:$PATH"
-  eval "$(pyenv init --path)"
-  eval "$(pyenv init -)"
-fi
+alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
 
 # http://matthew-brett.github.io/pydagogue/installing_on_debian.html
 # pip install --user path
@@ -27,23 +22,23 @@ fi
 
 # use gnu utils with regular names
 if _command greadlink; then
-  export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
-  export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
+  export PATH="$BREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"
+  export MANPATH="$BREW_PREFIX/opt/coreutils/libexec/gnuman:$MANPATH"
 fi
 if _command gsed; then
-  export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
-  export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH"
+  export PATH="$BREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
+  export MANPATH="$BREW_PREFIX/opt/gnu-sed/libexec/gnuman:$MANPATH"
 fi
 if _command gfind; then
-  export PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH"
-  export MANPATH="/usr/local/opt/findutils/libexec/gnuman:$MANPATH"
+  export PATH="$BREW_PREFIX/opt/findutils/libexec/gnubin:$PATH"
+  export MANPATH="$BREW_PREFIX/opt/findutils/libexec/gnuman:$MANPATH"
 fi
 if _command gtar; then
-  export PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH"
-  export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
+  export PATH="$BREW_PREFIX/opt/gnu-tar/libexec/gnubin:$PATH"
+  export MANPATH="$BREW_PREFIX/opt/gnu-tar/libexec/gnuman:$MANPATH"
 fi
-if [ -f /usr/local/opt/gnu-getopt/bin/getopt ]; then
-  export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
+if [ -f $BREW_PREFIX/opt/gnu-getopt/bin/getopt ]; then
+  export PATH="$BREW_PREFIX/opt/gnu-getopt/bin:$PATH"
 fi
 
 # Enable Ctrl-x-e to edit command line
@@ -56,7 +51,7 @@ bindkey '^x^e' edit-command-line
 # shellcheck disable=SC2206
 fpath=(
   "$HOME/.zfunctions"
-  /usr/local/share/zsh/site-functions
+  $BREW_PREFIX/share/zsh/site-functions
   $fpath
 )
 
@@ -67,13 +62,16 @@ zstyle ':prompt:pure:prompt:success' color default
 zstyle ':prompt:pure:prompt:failure' color red
 prompt pure
 
-kube_ps1_sh="/usr/local/opt/kube-ps1/share/kube-ps1.sh"
+kube_ps1_sh="$BREW_PREFIX/opt/kube-ps1/share/kube-ps1.sh"
 if [ -f "$kube_ps1_sh" ] >/dev/null 2>&1; then
   source "$kube_ps1_sh"
   PS1='$(kube_ps1)'$PS1
 fi
 
 # Completion
+if type brew &>/dev/null; then
+  FPATH=$BREW_PREFIX/share/zsh-completions:$FPATH
+fi
 autoload -Uz compinit bashcompinit
 compinit
 bashcompinit
@@ -186,7 +184,7 @@ fi
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
 # Keychain
-if _command keychain; then eval "$(keychain --eval --quiet --inherit any)"; fi
+# if _command keychain; then eval "$(keychain --eval --quiet --inherit any)"; fi
 
 # Homebrew curl
 if [ -f /usr/local/opt/curl/bin/curl ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
@@ -197,7 +195,7 @@ zstyle -e ':completion:*:(ssh|scp|sftp|rsh|rsync):hosts' hosts 'reply=(${=${${(f
 
 # https://github.com/zsh-users/zsh-autosuggestions
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
-source "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
+source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
 bindkey '^ ' autosuggest-acceptx
 
 # What do I look like, a guy who's not lazy?
@@ -227,17 +225,15 @@ if [ -d  "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk" ]; then
   source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
 fi
 
-_command pyenv && eval "$(pyenv init -)"
 _command saml2aws && eval "$(saml2aws --completion-script-zsh)"
 _command rclone && eval "$(rclone completion zsh)"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 
 
-source "/usr/local/opt/asdf/libexec/asdf.sh" 2>/dev/null || true
+source "$BREW_PREFIX/opt/asdf/libexec/asdf.sh" 2>/dev/null || true
 
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
-source "/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
-export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
+source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
