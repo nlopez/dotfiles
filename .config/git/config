@@ -44,4 +44,4 @@
 [credential "https://dev.azure.com"]
 	useHttpPath = true
 [includeIf "hasconfig:remote.*.url:https://github.com/nlopez/**"]
-	path = ~/.gitconfig_personal
+	path = ~/.config/git/config_personal
