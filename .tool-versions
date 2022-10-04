@@ -5,3 +5,4 @@ argocd 2.4.13
 ripgrep 13.0.0
 jq 1.6
 git 2.38.0
+pre-commit 2.20.0

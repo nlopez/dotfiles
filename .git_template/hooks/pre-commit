@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-here="$(dirname "$(readlink -f "$0")")"
-find "$here/pre-commit.d" -type f -executable -exec {} \;

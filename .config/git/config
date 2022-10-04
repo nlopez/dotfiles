@@ -32,7 +32,7 @@
 [core]
 	quotepath = false
 [init]
-	templateDir = ~/.git_template
+	templateDir = ~/.config/git/template
 	defaultBranch = main
 [diff]
 	renameLimit = 10000
