@@ -1,8 +1,8 @@
 [user]
-	name = Nick Lopez
 	useConfigOnly = true
 [push]
 	default = current
+	autoSetupRemote = true
 [pull]
 	rebase = true
 [alias]
@@ -30,7 +30,6 @@
 	root = rev-parse --show-toplevel
 	st = !git status --ignored
 [core]
-	excludesfile = ~/.gitignore_global
 	quotepath = false
 [init]
 	templateDir = ~/.git_template
@@ -44,3 +43,5 @@
 	helper = /usr/local/share/gcm-core/git-credential-manager-core
 [credential "https://dev.azure.com"]
 	useHttpPath = true
+[includeIf "hasconfig:remote.*.url:https://github.com/nlopez/**"]
+	path = ~/.gitconfig_personal
