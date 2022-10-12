@@ -1,5 +1,5 @@
 ---
-# See sample alacritty.yml with all possible values at https://github.com/alacritty/alacritty/releases
+# See sample alacritty.yml with all possible values at https://github.com/alacritty/alacritty/blob/master/alacritty.yml
 live_config_reload: true
 
 window:
