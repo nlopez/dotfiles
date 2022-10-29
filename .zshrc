@@ -8,7 +8,30 @@ export PATH="$HOME/.local/bin:$PATH"
 # Know what I hate? Fun.
 export ANSIBLE_NOCOWS=1
 
-BREW_PREFIX="$(brew --prefix)"
+if _command brew; then
+  BREW_PREFIX="$(brew --prefix)"
+
+  # use gnu utils with regular names
+  if _command greadlink; then
+    export PATH="$BREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"
+    export MANPATH="$BREW_PREFIX/opt/coreutils/libexec/gnuman:$MANPATH"
+  fi
+  if _command gsed; then
+    export PATH="$BREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
+    export MANPATH="$BREW_PREFIX/opt/gnu-sed/libexec/gnuman:$MANPATH"
+  fi
+  if _command gfind; then
+    export PATH="$BREW_PREFIX/opt/findutils/libexec/gnubin:$PATH"
+    export MANPATH="$BREW_PREFIX/opt/findutils/libexec/gnuman:$MANPATH"
+  fi
+  if _command gtar; then
+    export PATH="$BREW_PREFIX/opt/gnu-tar/libexec/gnubin:$PATH"
+    export MANPATH="$BREW_PREFIX/opt/gnu-tar/libexec/gnuman:$MANPATH"
+  fi
+  if [ -f $BREW_PREFIX/opt/gnu-getopt/bin/getopt ]; then
+    export PATH="$BREW_PREFIX/opt/gnu-getopt/bin:$PATH"
+  fi
+fi
 
 alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
 
@@ -20,40 +43,13 @@ if _command python; then
   export PATH=$PY_USER_BIN:$PATH
 fi
 
-# use gnu utils with regular names
-if _command greadlink; then
-  export PATH="$BREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"
-  export MANPATH="$BREW_PREFIX/opt/coreutils/libexec/gnuman:$MANPATH"
-fi
-if _command gsed; then
-  export PATH="$BREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
-  export MANPATH="$BREW_PREFIX/opt/gnu-sed/libexec/gnuman:$MANPATH"
-fi
-if _command gfind; then
-  export PATH="$BREW_PREFIX/opt/findutils/libexec/gnubin:$PATH"
-  export MANPATH="$BREW_PREFIX/opt/findutils/libexec/gnuman:$MANPATH"
-fi
-if _command gtar; then
-  export PATH="$BREW_PREFIX/opt/gnu-tar/libexec/gnubin:$PATH"
-  export MANPATH="$BREW_PREFIX/opt/gnu-tar/libexec/gnuman:$MANPATH"
-fi
-if [ -f $BREW_PREFIX/opt/gnu-getopt/bin/getopt ]; then
-  export PATH="$BREW_PREFIX/opt/gnu-getopt/bin:$PATH"
-fi
+FPATH="$HOME/.zfunctions:$FPATH"
 
 # Enable Ctrl-x-e to edit command line
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '^xe' edit-command-line
 bindkey '^x^e' edit-command-line
-
-# fpath can't be quoted
-# shellcheck disable=SC2206
-fpath=(
-  "$HOME/.zfunctions"
-  $BREW_PREFIX/share/zsh/site-functions
-  $fpath
-)
 
 # Prompt
 autoload -Uz promptinit
@@ -62,14 +58,17 @@ zstyle ':prompt:pure:prompt:success' color default
 zstyle ':prompt:pure:prompt:failure' color red
 prompt pure
 
-kube_ps1_sh="$BREW_PREFIX/opt/kube-ps1/share/kube-ps1.sh"
+if [ -n "$BREW_PREFIX" ]; then
+  kube_ps1_sh="$BREW_PREFIX/opt/kube-ps1/share/kube-ps1.sh"
+fi
 if [ -f "$kube_ps1_sh" ] >/dev/null 2>&1; then
   source "$kube_ps1_sh"
   PS1='$(kube_ps1)'$PS1
 fi
 
 # Completion
-if type brew &>/dev/null; then
+
+if [ -n "$BREW_PREFIX" ]; then
   FPATH=$BREW_PREFIX/share/zsh-completions:$FPATH
 fi
 autoload -Uz compinit bashcompinit
@@ -238,7 +237,8 @@ source "$BREW_PREFIX/opt/asdf/libexec/asdf.sh" 2>/dev/null || true
 # Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
 source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
 
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
+if _command pyenv; then
+  export PYENV_ROOT="$HOME/.pyenv"
+  command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init -)"
+fi
