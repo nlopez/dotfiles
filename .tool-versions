@@ -6,3 +6,4 @@ ripgrep 13.0.0
 jq 1.6
 git 2.38.1
 pre-commit 2.20.0
+golang 1.19.3

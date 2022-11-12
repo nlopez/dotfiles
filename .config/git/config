@@ -1,49 +1,51 @@
 [user]
-	useConfigOnly = true
+useConfigOnly = true
 [push]
-	default = current
-	autoSetupRemote = true
+default = current
+autoSetupRemote = true
 [pull]
-	rebase = true
+rebase = true
 [alias]
-	squash = "!f(){ git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; };f"
-	pushf = push --force-with-lease
-	# subtree add
-	sba = "!f() { git subtree add --prefix $2 $1 master --squash; }; f"
-	# subtree update
-	sbu = "!f() { git subtree pull --prefix $2 $1 master --squash; }; f"
-	# list subtrees
-	ls-subtrees = !"git log | grep git-subtree-dir | awk '{ print $2 }' | sort -u"
-	# switch to branch, creating if it doesn't exist
-	cob = "!f() { git checkout $(git show-ref --verify --quiet refs/heads/\"$1\" || echo '-b') \"$1\"; }; f"
-	# Print the name of the current upstream tracking branch.
-	upstream = !git config --get branch.$(git current-branch).remote || echo origin
-	# Print the name of the current branch.
-	current-branch = symbolic-ref --short HEAD
-	# Hard reset branch to the upstream version.
-	hard-reset = !git reset --hard $(git upstream)/$(git current-branch)
-	# Delete local branches that have been deleted remotely
-	pprune = !git fetch --prune
-	oldest-ancestor = !zsh -c 'diff --old-line-format= --new-line-format= <(git rev-list --first-parent \"${1:-master}\") <(git rev-list --first-parent \"${2:-HEAD}\") | head -1' -
-	branchdiff = !sh -c \"git diff `git oldest-ancestor`..\"
-	branchlog = !sh -c \"git log `git oldest-ancestor`..\"
-	root = rev-parse --show-toplevel
-	st = !git status --ignored
+name = !git symbolic-ref -q HEAD | cut -b 12-
+mbase = !git merge-base $(git name) origin/$1 && :
+squash = !git fetch origin && git rebase $(git mbase $1) --autostash -i && : # squash relative to any origin branch
+pushf = push --force-with-lease
+# subtree add
+sba = "!f() { git subtree add --prefix $2 $1 master --squash; }; f"
+# subtree update
+sbu = "!f() { git subtree pull --prefix $2 $1 master --squash; }; f"
+# list subtrees
+ls-subtrees = !"git log | grep git-subtree-dir | awk '{ print $2 }' | sort -u"
+# switch to branch, creating if it doesn't exist
+cob = "!f() { git checkout $(git show-ref --verify --quiet refs/heads/\"$1\" || echo '-b') \"$1\"; }; f"
+# Print the name of the current upstream tracking branch.
+upstream = !git config --get branch.$(git current-branch).remote || echo origin
+# Print the name of the current branch.
+current-branch = symbolic-ref --short HEAD
+# Hard reset branch to the upstream version.
+hard-reset = !git reset --hard $(git upstream)/$(git current-branch)
+# Delete local branches that have been deleted remotely
+pprune = !git fetch --prune
+oldest-ancestor = !zsh -c 'diff --old-line-format= --new-line-format= <(git rev-list --first-parent \"${1:-master}\") <(git rev-list --first-parent \"${2:-HEAD}\") | head -1' -
+branchdiff = !sh -c \"git diff $(git oldest-ancestor)..\"
+branchlog = !sh -c \"git log $(git oldest-ancestor)..\"
+root = rev-parse --show-toplevel
+st = !git status --ignored
 [core]
-	quotepath = false
+quotepath = false
 [init]
-	templateDir = ~/.config/git/template
-	defaultBranch = main
+templateDir = ~/.config/git/template
+defaultBranch = main
 [diff]
-	renameLimit = 10000
+renameLimit = 10000
 [credential "github.com"]
-	useHttpPath = true
+useHttpPath = true
 [credential]
-	helper =
-	helper = /usr/local/share/gcm-core/git-credential-manager-core
+helper =
+helper = /usr/local/share/gcm-core/git-credential-manager-core
 [credential "https://dev.azure.com"]
-	useHttpPath = true
+useHttpPath = true
 [includeIf "gitdir/i:~/src/github.com/nlopez/"]
-	path = ./config_personal
+path = ./config_personal
 [includeIf "gitdir/i:~/src/github.com/DataDog/"]
-	path = ./config_datadog
+path = ./config_datadog
