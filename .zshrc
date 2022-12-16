@@ -1,11 +1,10 @@
 alias _command="command -v $1 >/dev/null 2>&1"
 
 # local bin paths
-export PATH="/usr/local/bin:$PATH"
-export PATH="/usr/local/sbin:$PATH"
+export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+export PATH="/usr/local/sbin:/opt/homebrew/sbin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
-export XDG_CONFIG_HOME=$HOME/.config
 
 # Know what I hate? Fun.
 export ANSIBLE_NOCOWS=1
@@ -80,18 +79,18 @@ bashcompinit
 # Cribbed from https://github.com/ohmyzsh/ohmyzsh/blob/fd786291bab7468c7cdd5066ac436218a1fba9e2/lib/completion.zsh#L61-L73
 # terminfo, echoti are zsh builtins
 # %F{red}red text%f is also provided by zsh https://scriptingosx.com/2019/07/moving-to-zsh-06-customizing-the-zsh-prompt/
-# expand-or-complete-with-dots() {
-#   # toggle line-wrapping off and back on again
-#   # shellcheck disable=SC2154
-#   [[ -n "${terminfo[rmam]}" && -n "${terminfo[smam]}" ]] && echoti rmam
-#   print -Pn "%{%F{red}...%f%}"
-#   [[ -n "${terminfo[rmam]}" && -n "${terminfo[smam]}" ]] && echoti smam
+expand-or-complete-with-dots() {
+  # toggle line-wrapping off and back on again
+  # shellcheck disable=SC2154
+  [[ -n "${terminfo[rmam]}" && -n "${terminfo[smam]}" ]] && echoti rmam
+  print -Pn "%{%F{red}...%f%}"
+  [[ -n "${terminfo[rmam]}" && -n "${terminfo[smam]}" ]] && echoti smam
 
-#   zle expand-or-complete
-#   zle redisplay
-# }
-# zle -N expand-or-complete-with-dots
-# bindkey "^I" expand-or-complete-with-dots
+  zle expand-or-complete
+  zle redisplay
+}
+zle -N expand-or-complete-with-dots
+bindkey "^I" expand-or-complete-with-dots
 
 # Case-insensitive matching
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
@@ -114,6 +113,7 @@ alias gst="git status"
 alias gc="git commit"
 alias grhh="git reset --hard HEAD"
 alias gp="git push"
+alias groot="git root"
 
 # Editor
 if _command code; then
@@ -186,10 +186,10 @@ fi
 if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 
 # Keychain
-# if _command keychain; then eval "$(keychain --eval --quiet --inherit any)"; fi
+if _command keychain; then eval "$(keychain --eval --quiet --inherit any)"; fi
 
 # Homebrew curl
-if [ -f /usr/local/opt/curl/bin/curl ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
+if [ -f "${BREW_PREFIX}/opt/curl/bin/curl" ]; then export PATH="${BREW_PREFIX}/opt/curl/bin/curl:$PATH"; fi
 
 # https://unix.stackexchange.com/a/377765
 # known hosts completion
@@ -232,7 +232,7 @@ _command rclone && eval "$(rclone completion zsh)"
 
 # [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-
+WORDCHARS=${WORDCHARS/\/}
 
 source "$BREW_PREFIX/opt/asdf/libexec/asdf.sh" 2>/dev/null || true
 

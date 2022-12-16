@@ -5,6 +5,8 @@ live_config_reload: true
 window:
   decorations: buttonless
 
+dynamic_title: true
+
 font:
   size: 18.0
   normal:
