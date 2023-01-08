@@ -8,7 +8,8 @@ rebase = true
 [alias]
 name = !git symbolic-ref -q HEAD | cut -b 12-
 mbase = !git merge-base $(git name) origin/$1 && :
-squash = !git fetch origin && git rebase $(git mbase $1) --autostash -i && : # squash relative to any origin branch
+# squash relative to any origin branch
+squash = !git fetch origin && git rebase $(git mbase $1) --autostash -i && :
 pushf = push --force-with-lease
 # subtree add
 sba = "!f() { git subtree add --prefix $2 $1 master --squash; }; f"

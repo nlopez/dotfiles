@@ -5,6 +5,8 @@ export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
+export XDG_CONFIG_HOME=$HOME/.config
+
 # Know what I hate? Fun.
 export ANSIBLE_NOCOWS=1
 
@@ -122,6 +124,7 @@ fi
 # Misc aliases
 _command brew && alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec \$SHELL"
+alias k9s="k9s --logoless"
 
 # Misc
 setopt cdablevars
