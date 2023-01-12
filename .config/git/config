@@ -41,13 +41,9 @@ defaultBranch = main
 renameLimit = 10000
 [credential "github.com"]
 useHttpPath = true
-[credential]
-helper =
-	helper = 
-	helper = /usr/local/share/gcm-core/git-credential-manager
-[credential "https://dev.azure.com"]
-useHttpPath = true
 [includeIf "gitdir/i:~/src/github.com/nlopez/"]
 path = ./config_personal
 [includeIf "gitdir/i:~/src/github.com/DataDog/"]
 path = ./config_datadog
+[credential]
+helper = manager
