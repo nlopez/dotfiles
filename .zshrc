@@ -1,16 +1,13 @@
 alias _command="command -v $1 >/dev/null 2>&1"
 
-# local bin paths
-export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
-export PATH="/usr/local/sbin:/opt/homebrew/sbin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
+# path construction
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+export PATH="${HOME}/.local/bin:${PATH}"
 
+BREW_PREFIX="/opt/homebrew"
 
-# Know what I hate? Fun.
-export ANSIBLE_NOCOWS=1
-
-if _command brew; then
-  BREW_PREFIX="$(brew --prefix)"
+if [ -d "$BREW_PREFIX" ]; then
+  eval "$($BREW_PREFIX/bin/brew shellenv)"
 
   # use gnu utils with regular names
   if _command greadlink; then
@@ -33,6 +30,7 @@ if _command brew; then
     export PATH="$BREW_PREFIX/opt/gnu-getopt/bin:$PATH"
   fi
 fi
+
 
 alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
 
@@ -108,12 +106,12 @@ setopt correct
 
 # git
 alias g=git
-alias gup="git pull --rebase"
+alias gup="git pull --prune --rebase"
 alias gst="git status"
 alias gc="git commit"
 alias grhh="git reset --hard HEAD"
 alias gp="git push"
-alias groot="git root"
+alias groot="cd $(git rev-parse --show-toplevel)"
 
 # Editor
 if _command code; then
@@ -195,11 +193,6 @@ if [ -f "${BREW_PREFIX}/opt/curl/bin/curl" ]; then export PATH="${BREW_PREFIX}/o
 # known hosts completion
 zstyle -e ':completion:*:(ssh|scp|sftp|rsh|rsync):hosts' hosts 'reply=(${=${${(f)"$(cat {/etc/ssh_,~/.ssh/known_}hosts(|2)(N) /dev/null)"}%%[# ]*}//,/ })'
 
-# https://github.com/zsh-users/zsh-autosuggestions
-export ZSH_AUTOSUGGEST_USE_ASYNC=true
-source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
-bindkey '^ ' autosuggest-acceptx
-
 # What do I look like, a guy who's not lazy?
 if _command kubectl; then
   source <(kubectl completion zsh)
@@ -229,19 +222,30 @@ fi
 
 _command saml2aws && eval "$(saml2aws --completion-script-zsh)"
 _command rclone && eval "$(rclone completion zsh)"
+_command pipx && eval "$(register-python-argcomplete pipx)"
 
-# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 WORDCHARS=${WORDCHARS/\/}
 
 source "$BREW_PREFIX/opt/asdf/libexec/asdf.sh" 2>/dev/null || true
-
-# https://github.com/zsh-users/zsh-syntax-highlighting
-# Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
-source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
 
 if _command pyenv; then
   export PYENV_ROOT="$HOME/.pyenv"
   command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init -)"
 fi
+
+# krew
+if [ -d "$HOME/.krew/bin" ] || [ -n "$KREW_ROOT" ]; then
+  export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+fi
+
+# https://github.com/zsh-users/zsh-autosuggestions
+export ZSH_AUTOSUGGEST_USE_ASYNC=true
+source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null || true
+bindkey '^ ' autosuggest-acceptx
+
+# https://github.com/zsh-users/zsh-syntax-highlighting
+# Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
+source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
