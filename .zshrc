@@ -1,8 +1,8 @@
 alias _command="command -v $1 >/dev/null 2>&1"
 
 # path construction
-export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-export PATH="${HOME}/.local/bin:${PATH}"
+# export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+# export PATH="${HOME}/.local/bin:${PATH}"
 
 BREW_PREFIX="/opt/homebrew"
 
@@ -111,7 +111,7 @@ alias gst="git status"
 alias gc="git commit"
 alias grhh="git reset --hard HEAD"
 alias gp="git push"
-alias groot="cd $(git rev-parse --show-toplevel)"
+alias -g groot="$(git rev-parse --show-toplevel)"
 
 # Editor
 if _command code; then
@@ -123,6 +123,7 @@ fi
 _command brew && alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec \$SHELL"
 alias k9s="k9s --logoless"
+alias dec2hex='printf "%x\n"'
 
 # Misc
 setopt cdablevars
