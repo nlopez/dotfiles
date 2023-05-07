@@ -4,7 +4,12 @@ alias _command="command -v $1 >/dev/null 2>&1"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 export PATH="${HOME}/.local/bin:${PATH}"
 
-BREW_PREFIX="/opt/homebrew"
+
+if [[ "$(/usr/bin/uname -m)" == "arm64" ]]; then
+  BREW_PREFIX="/opt/homebrew"
+else
+  BREW_PREFIX="/usr/local"
+fi
 
 if [ -d "$BREW_PREFIX" ]; then
   eval "$($BREW_PREFIX/bin/brew shellenv)"
@@ -31,6 +36,8 @@ if [ -d "$BREW_PREFIX" ]; then
   fi
 fi
 
+export PATH="${BREW_PREFIX}/opt/curl/bin:$PATH"
+export PATH="${BREW_PREFIX}/opt/openjdk/bin:$PATH"
 
 alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
 
@@ -256,4 +263,3 @@ bindkey '^ ' autosuggest-acceptx
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
 source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
-export PATH="/opt/homebrew/opt/curl/bin:$PATH"
