@@ -68,7 +68,7 @@ fi
 # Completion
 
 if [ -n "$BREW_PREFIX" ]; then
-  FPATH=$BREW_PREFIX/share/zsh-completions:$FPATH
+  FPATH=$BREW_PREFIX/share/zsh-completions:$BREW_PREFIX/share/zsh/site-functions:$FPATH
 fi
 autoload -Uz compinit bashcompinit
 compinit
@@ -122,7 +122,7 @@ fi
 # Misc aliases
 _command brew && alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec \$SHELL"
-alias k9s="k9s --logoless"
+# alias k9s="k9s --logoless"
 alias dec2hex='printf "%x\n"'
 
 # Misc
@@ -250,3 +250,4 @@ bindkey '^ ' autosuggest-acceptx
 # https://github.com/zsh-users/zsh-syntax-highlighting
 # Keep this last! https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlightingzsh-be-sourced-at-the-end-of-the-zshrc-file
 source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null || true
+export PATH="/opt/homebrew/opt/curl/bin:$PATH"
