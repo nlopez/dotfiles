@@ -111,6 +111,9 @@ alias gst="git status"
 alias gc="git commit"
 alias grhh="git reset --hard HEAD"
 alias gp="git push"
+function gcd() {
+  git checkout "$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"
+}
 alias -g groot="$(git rev-parse --show-toplevel)"
 
 # Editor
@@ -120,7 +123,7 @@ if _command code; then
 fi
 
 # Misc aliases
-_command brew && alias brewup="brew update && brew upgrade && brew cleanup"
+_command brew && alias brewup="brew update && brew upgrade --greedy && brew cleanup"
 alias reload="exec \$SHELL"
 # alias k9s="k9s --logoless"
 alias dec2hex='printf "%x\n"'

@@ -19,31 +19,35 @@ scrolling:
 url:
   launcher: None
 colors:
-  name: Erebus
-  author: ""
+  # Default colors
   primary:
-    background: "#000000"
-    foreground: "#ffffff"
+    background: '#fdf6e3' # base3
+    foreground: '#657b83' # base00
+
+  # Cursor colors
   cursor:
-    style:
-      shape: Block
-    text: "#000000"
-    cursor: "#ffffff"
+    text: '#fdf6e3' # base3
+    cursor: '#657b83' # base00
+
+  # Normal colors
   normal:
-    black: "#757575"
-    red: "#ff5f5f"
-    green: "#de8a36"
-    yellow: "#d78787"
-    blue: "#af5fd7"
-    magenta: "#ff87d7"
-    cyan: "#dea3e5"
-    white: "#b8b8b8"
+    black: '#073642' # base02
+    red: '#dc322f' # red
+    green: '#859900' # green
+    yellow: '#b58900' # yellow
+    blue: '#268bd2' # blue
+    magenta: '#d33682' # magenta
+    cyan: '#2aa198' # cyan
+    white: '#eee8d5' # base2
+
+  # Bright colors
   bright:
-    black: "#b8b8b8"
-    red: "#d78787"
-    green: "#ff9f6f"
-    yellow: "#ff5f5f"
-    blue: "#dea3e5"
-    magenta: "#d7afaf"
-    cyan: "#af5fd7"
-    white: "#757575"
+    black: '#002b36' # base03
+    red: '#cb4b16' # orange
+    green: '#586e75' # base01
+    yellow: '#657b83' # base00
+    blue: '#839496' # base0
+    magenta: '#6c71c4' # violet
+    cyan: '#93a1a1' # base1
+    white: '#fdf6e3' # base3
+theme: Solarized-Light
