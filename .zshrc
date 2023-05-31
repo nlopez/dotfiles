@@ -1,8 +1,8 @@
 alias _command="command -v $1 >/dev/null 2>&1"
 
 # path construction
-# export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-# export PATH="${HOME}/.local/bin:${PATH}"
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+export PATH="${HOME}/.local/bin:${PATH}"
 
 BREW_PREFIX="/opt/homebrew"
 
@@ -127,6 +127,7 @@ _command brew && alias brewup="brew update && brew upgrade --greedy && brew clea
 alias reload="exec \$SHELL"
 # alias k9s="k9s --logoless"
 alias dec2hex='printf "%x\n"'
+alias jcurl="curl --output /dev/null --silent --show-error --write-out '%{json}'"
 
 # Misc
 setopt cdablevars
