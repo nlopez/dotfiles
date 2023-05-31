@@ -1,5 +1,7 @@
 [user]
 useConfigOnly = true
+	name = Nick Lopez
+	email = 20211302+nlopez@users.noreply.github.com
 [push]
 default = current
 autoSetupRemote = true
@@ -35,6 +37,8 @@ st = !git status --ignored
 fcommit = commit --no-verify
 [core]
 quotepath = false
+	editor = code --new-window --wait --disable-extensions
+	hooksPath = /usr/local/dd/global_hooks
 [init]
 templateDir = ~/.config/git/template
 defaultBranch = main
@@ -42,17 +46,22 @@ defaultBranch = main
 renameLimit = 10000
 [credential "github.com"]
 useHttpPath = true
-[credential]
-helper = /usr/local/share/gcm-core/git-credential-manager
 [includeIf "gitdir/i:~/src/github.com/nlopez/"]
 path = ./config_personal
 [includeIf "gitdir/i:~/src/github.com/DataDog/"]
 path = ./config_datadog
 [credential]
 helper = manager
-[gpg]
-format = ssh
+	helper = 
+	helper = /usr/local/share/gcm-core/git-credential-manager
 [worktree]
 guessRemote = true
 [url "https://"]
 insteadOf = git://
+[credential "https://dev.azure.com"]
+	useHttpPath = true
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
