@@ -128,6 +128,8 @@ alias reload="exec \$SHELL"
 # alias k9s="k9s --logoless"
 alias dec2hex='printf "%x\n"'
 alias jcurl="curl --output /dev/null --silent --show-error --write-out '%{json}'"
+alias jq="jq -C"
+alias less="less -R"
 
 # Misc
 setopt cdablevars
