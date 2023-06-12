@@ -1,7 +1,7 @@
 alias _command="command -v $1 >/dev/null 2>&1"
 
-# path construction
-export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+# path construction - https://zsh.sourceforge.io/Guide/zshguide02.html#l24
+typeset -aU path
 export PATH="${HOME}/.local/bin:${PATH}"
 
 
