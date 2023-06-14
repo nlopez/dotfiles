@@ -60,3 +60,4 @@ Thumbs.db
 *.code-workspace
 
 .terraform.lock.hcl
+dotfiles/
