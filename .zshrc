@@ -133,7 +133,7 @@ if _command code; then
 fi
 
 # Misc aliases
-_command brew && alias brewup="brew update && brew upgrade --greedy && brew cleanup"
+_command brew && alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec \$SHELL"
 # alias k9s="k9s --logoless"
 alias dec2hex='printf "%x\n"'

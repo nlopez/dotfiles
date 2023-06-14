@@ -56,6 +56,7 @@ helper = /usr/local/share/gcm-core/git-credential-manager
 guessRemote = true
 [url "https://"]
 insteadOf = git://
+insteadOf = ssh://
 [credential "https://dev.azure.com"]
 useHttpPath = true
 [filter "lfs"]
