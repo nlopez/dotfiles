@@ -3,6 +3,7 @@ alias _command="command -v $1 >/dev/null 2>&1"
 # path construction - https://zsh.sourceforge.io/Guide/zshguide02.html#l24
 typeset -aU path
 export PATH="${HOME}/.local/bin:${PATH}"
+path=(/Applications/Docker.app/Contents/Resources/bin/ $path)
 
 
 if [[ "$(/usr/bin/uname -m)" == "arm64" ]]; then
