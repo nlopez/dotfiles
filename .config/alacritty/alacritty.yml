@@ -20,3 +20,6 @@ import:
 
 url:
   launcher: None
+
+env:
+  TERM: xterm-256color
