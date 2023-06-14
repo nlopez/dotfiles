@@ -1,0 +1,22 @@
+# See sample alacritty.yml with all possible values at https://github.com/alacritty/alacritty/blob/master/alacritty.yml
+live_config_reload: true
+
+window:
+  decorations: buttonless
+
+dynamic_title: true
+
+font:
+  size: 18.0
+  normal:
+    family: Essential PragmataPro
+    style: Regular
+
+scrolling:
+  history: 0
+
+import:
+  - ~/.config/alacritty/themes/themes/solarized_light.yaml
+
+url:
+  launcher: None

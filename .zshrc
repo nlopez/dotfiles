@@ -5,6 +5,8 @@ typeset -aU path
 export PATH="${HOME}/.local/bin:${PATH}"
 path=(/Applications/Docker.app/Contents/Resources/bin/ $path)
 
+export XDG_CONFIG_HOME="${HOME}/.config"
+
 
 if [[ "$(/usr/bin/uname -m)" == "arm64" ]]; then
   BREW_PREFIX="/opt/homebrew"
