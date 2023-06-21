@@ -5,6 +5,7 @@ function prepend_path() {
   path=("$1" $path)
 }
 typeset -aU path
+prepend_path ~/bin
 prepend_path "${HOME}/.local/bin"
 prepend_path "/Applications/Docker.app/Contents/Resources/bin"
 
