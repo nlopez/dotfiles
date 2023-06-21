@@ -1,9 +1,12 @@
 alias _command="command -v $1 >/dev/null 2>&1"
 
 # path construction - https://zsh.sourceforge.io/Guide/zshguide02.html#l24
+function prepend_path() {
+  path=("$1" $path)
+}
 typeset -aU path
-export PATH="${HOME}/.local/bin:${PATH}"
-path=(/Applications/Docker.app/Contents/Resources/bin/ $path)
+prepend_path "${HOME}/.local/bin"
+prepend_path "/Applications/Docker.app/Contents/Resources/bin"
 
 export XDG_CONFIG_HOME="${HOME}/.config"
 
@@ -19,28 +22,28 @@ if [ -d "$BREW_PREFIX" ]; then
 
   # use gnu utils with regular names
   if _command greadlink; then
-    export PATH="$BREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"
+    prepend_path "$BREW_PREFIX/opt/coreutils/libexec/gnubin"
     export MANPATH="$BREW_PREFIX/opt/coreutils/libexec/gnuman:$MANPATH"
   fi
   if _command gsed; then
-    export PATH="$BREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
+    prepend_path "$BREW_PREFIX/opt/gnu-sed/libexec/gnubin"
     export MANPATH="$BREW_PREFIX/opt/gnu-sed/libexec/gnuman:$MANPATH"
   fi
   if _command gfind; then
-    export PATH="$BREW_PREFIX/opt/findutils/libexec/gnubin:$PATH"
+    prepend_path "$BREW_PREFIX/opt/findutils/libexec/gnubin"
     export MANPATH="$BREW_PREFIX/opt/findutils/libexec/gnuman:$MANPATH"
   fi
   if _command gtar; then
-    export PATH="$BREW_PREFIX/opt/gnu-tar/libexec/gnubin:$PATH"
+    prepend_path "$BREW_PREFIX/opt/gnu-tar/libexec/gnubin"
     export MANPATH="$BREW_PREFIX/opt/gnu-tar/libexec/gnuman:$MANPATH"
   fi
   if [ -f $BREW_PREFIX/opt/gnu-getopt/bin/getopt ]; then
-    export PATH="$BREW_PREFIX/opt/gnu-getopt/bin:$PATH"
+    prepend_path "$BREW_PREFIX/opt/gnu-getopt/bin"
   fi
 fi
 
-export PATH="${BREW_PREFIX}/opt/curl/bin:$PATH"
-export PATH="${BREW_PREFIX}/opt/openjdk/bin:$PATH"
+prepend_path "${BREW_PREFIX}/opt/curl/bin"
+prepend_path "${BREW_PREFIX}/opt/openjdk/bin"
 
 alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
 
@@ -49,7 +52,7 @@ alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
 if _command python; then
   PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')
   export PY_USER_BIN
-  export PATH=$PY_USER_BIN:$PATH
+  prepend_path $PY_USER_BIN
 fi
 
 FPATH="$HOME/.zfunctions:$FPATH"
@@ -167,8 +170,8 @@ if _command direnv; then eval "$(direnv hook zsh)"; fi
 
 # rbenv
 if _command rbenv; then
-  export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
-  export PATH="$HOME/.rbenv/bin:$PATH"
+  prepend_path "$HOME/.rbenv/plugins/ruby-build/bin"
+  prepend_path "$HOME/.rbenv/bin"
   eval "$(rbenv init -)"
 fi
 
@@ -186,13 +189,12 @@ if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
   source "/usr/local/bin/aws_zsh_completer.sh"
 fi
 
-export PATH="$PATH:$HOME/bin"
 export LESSCHARSET=utf-8
 
 # GOROOT-based install location
 if _command go; then
-  export PATH=$PATH:/usr/local/opt/go/libexec/bin
-  PATH="$PATH:$(go env GOPATH)/bin"
+  prepend_path /usr/local/opt/go/libexec/bin
+  prepend_path "$(go env GOPATH)/bin"
   export PATH
 fi
 
@@ -204,7 +206,7 @@ if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 if _command keychain; then eval "$(keychain --eval --quiet --inherit any)"; fi
 
 # Homebrew curl
-if [ -f "${BREW_PREFIX}/opt/curl/bin/curl" ]; then export PATH="${BREW_PREFIX}/opt/curl/bin/curl:$PATH"; fi
+if [ -f "${BREW_PREFIX}/opt/curl/bin/curl" ]; then prepend_path "${BREW_PREFIX}/opt/curl/bin/curl"; fi
 
 # https://unix.stackexchange.com/a/377765
 # known hosts completion
@@ -249,13 +251,13 @@ source "$BREW_PREFIX/opt/asdf/libexec/asdf.sh" 2>/dev/null || true
 
 if _command pyenv; then
   export PYENV_ROOT="$HOME/.pyenv"
-  command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+  command -v pyenv >/dev/null || prepend_path "$PYENV_ROOT/bin"
   eval "$(pyenv init -)"
 fi
 
 # krew
 if [ -d "$HOME/.krew/bin" ] || [ -n "$KREW_ROOT" ]; then
-  export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+  prepend_path "${KREW_ROOT:-$HOME/.krew}/bin"
 fi
 
 # https://github.com/zsh-users/zsh-autosuggestions
