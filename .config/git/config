@@ -49,16 +49,11 @@ useHttpPath = true
 path = ./config_personal
 [includeIf "gitdir/i:~/src/github.com/DataDog/"]
 path = ./config_datadog
-[credential]
-helper =
-helper = /usr/local/share/gcm-core/git-credential-manager
 [worktree]
 guessRemote = true
 [url "https://"]
 insteadOf = git://
 insteadOf = ssh://
-[credential "https://dev.azure.com"]
-useHttpPath = true
 [filter "lfs"]
 clean = git-lfs clean -- %f
 smudge = git-lfs smudge -- %f
@@ -72,3 +67,8 @@ format = ssh
 program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 [commit]
 gpgsign = true
+[credential]
+	helper = 
+	helper = /usr/local/share/gcm-core/git-credential-manager
+[credential "https://dev.azure.com"]
+	useHttpPath = true
