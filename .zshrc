@@ -128,7 +128,6 @@ alias gp="git push"
 function gcd() {
   git checkout "$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"
 }
-alias -g groot="$(git rev-parse --show-toplevel)"
 
 # Editor
 if _command code; then
