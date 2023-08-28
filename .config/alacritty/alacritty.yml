@@ -1,6 +1,11 @@
 # See sample alacritty.yml with all possible values at https://github.com/alacritty/alacritty/blob/master/alacritty.yml
 live_config_reload: true
 
+env:
+  LC_ALL: en_US.UTF-8
+  LANG: en_US.UTF-8
+  TERM: xterm-256color
+
 window:
   decorations: buttonless
 
@@ -21,5 +26,9 @@ import:
 url:
   launcher: None
 
-env:
-  TERM: xterm-256color
+shell:
+  program: /bin/zsh
+  args:
+    - -i
+    - -c
+    - '[ ! "$TMUX" ] && exec tmux -u new-session -s 0 -A'
