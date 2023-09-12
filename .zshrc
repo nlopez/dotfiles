@@ -250,6 +250,7 @@ _command rclone && eval "$(rclone completion zsh -)"
 _command pipx && eval "$(register-python-argcomplete pipx)"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+export FZF_TMUX=1
 
 WORDCHARS=${WORDCHARS/\/}
 
