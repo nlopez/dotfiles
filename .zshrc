@@ -142,6 +142,7 @@ alias reload="exec \$SHELL"
 alias dec2hex='printf "%x\n"'
 alias jcurl="curl --output /dev/null --silent --show-error --write-out '%{json}'"
 alias less="less -R"
+alias history="history -D -E -t '%Y-%m-%d %H:%M:%S %Z'"
 
 # Misc
 setopt cdablevars
