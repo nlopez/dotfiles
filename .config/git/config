@@ -37,7 +37,8 @@ st = !git status --ignored
 fcommit = commit --no-verify
 [core]
 quotepath = false
-editor = code --new-window --wait --disable-extensions
+editor = vim
+	hooksPath = /usr/local/dd/global_hooks
 [init]
 templateDir = ~/.config/git/template
 defaultBranch = main
