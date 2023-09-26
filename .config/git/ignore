@@ -50,4 +50,5 @@ Thumbs.db
 
 .vscode/
 *.code-workspace
-.terraform.lock.hcl
+**/.terraform.lock.hcl
+*.tfstate
