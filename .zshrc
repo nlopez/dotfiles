@@ -252,7 +252,7 @@ _command pipx && eval "$(register-python-argcomplete pipx)"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 export FZF_TMUX=1
 
-WORDCHARS=${WORDCHARS/\/}
+export WORDCHARS=""
 
 source "$BREW_PREFIX/opt/asdf/libexec/asdf.sh" 2>/dev/null || true
 
