@@ -269,6 +269,8 @@ fi
 
 export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
 export LESS="--mouse"
+export MANPAGER="less -R --use-color -Dd+r -Du+b"
+export MANROFFOPT="-P -c"
 
 # https://github.com/zsh-users/zsh-autosuggestions
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
