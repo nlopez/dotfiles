@@ -246,7 +246,7 @@ if [ -d  "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk" ]; then
 fi
 
 _command saml2aws && eval "$(saml2aws --completion-script-zsh)"
-_command rclone && eval "$(rclone completion zsh -)"
+_command rclone && eval "$(rclone completion zsh)"
 _command pipx && eval "$(register-python-argcomplete pipx)"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
