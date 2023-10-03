@@ -67,17 +67,29 @@ bindkey '^x^e' edit-command-line
 # Prompt
 autoload -Uz promptinit
 promptinit
-zstyle ':prompt:pure:prompt:success' color default
-zstyle ':prompt:pure:prompt:failure' color red
-prompt pure
+# zstyle ':prompt:pure:prompt:success' color default
+# zstyle ':prompt:pure:prompt:failure' color red
 
+# kube-ps1
 if [ -n "$BREW_PREFIX" ]; then
   kube_ps1_sh="$BREW_PREFIX/opt/kube-ps1/share/kube-ps1.sh"
 fi
 if [ -f "$kube_ps1_sh" ] >/dev/null 2>&1; then
   source "$kube_ps1_sh"
-  PS1='$(kube_ps1)'$PS1
 fi
+
+if ! _command kube_ps1; then kube_ps1() {}; fi
+
+prompt pure
+PROMPT='%(?.%F{magenta}.%F{red}❯%F{magenta})❯%f '
+PROMPT='%F{default}%* '$PROMPT
+precmd_pipestatus() {
+	RPROMPT="${(j.|.)pipestatus} $(kube_ps1)"
+       if [[ ${(j.|.)pipestatus} = 0 ]]; then
+              RPROMPT="$(kube_ps1)"
+       fi
+}
+add-zsh-hook precmd precmd_pipestatus
 
 # Completion
 
