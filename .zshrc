@@ -280,7 +280,7 @@ if [ -d "$HOME/.krew/bin" ] || [ -n "$KREW_ROOT" ]; then
 fi
 
 export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
-export LESS="--mouse"
+export LESS="--mouse -R"
 export MANPAGER="less -R --use-color -Dd+r -Du+b"
 export MANROFFOPT="-P -c"
 
