@@ -52,3 +52,4 @@ Thumbs.db
 *.code-workspace
 **/.terraform.lock.hcl
 *.tfstate
+tfplan
