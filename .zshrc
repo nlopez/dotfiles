@@ -84,6 +84,9 @@ prompt pure
 PROMPT='%(?.%F{magenta}.%F{red}❯%F{magenta})❯%f '
 PROMPT='%F{default}%* '$PROMPT
 precmd_pipestatus() {
+  if [ "$TMUX" != "" ]; then
+    tmux rename-window "$(basename $PWD)"
+  fi
 	RPROMPT="${(j.|.)pipestatus} $(kube_ps1)"
        if [[ ${(j.|.)pipestatus} = 0 ]]; then
               RPROMPT="$(kube_ps1)"
@@ -258,7 +261,6 @@ if [ -d  "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk" ]; then
 fi
 
 _command saml2aws && eval "$(saml2aws --completion-script-zsh)"
-_command rclone && eval "$(rclone completion zsh)"
 _command pipx && eval "$(register-python-argcomplete pipx)"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
