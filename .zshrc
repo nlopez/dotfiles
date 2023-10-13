@@ -243,6 +243,8 @@ fi
 
 _command kubectx && alias kctx=kubectx
 _command kubens && alias kns=kubens
+_command aws_vault && eval "$(aws-vault --completion-script-zsh)"
+
 
 # shellcheck source=./.zshrc_work
 if [ -f "$HOME/.zshrc_work" ]; then source "$HOME/.zshrc_work"; fi
