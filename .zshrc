@@ -156,7 +156,6 @@ alias reload="exec \$SHELL"
 # alias k9s="k9s --logoless"
 alias dec2hex='printf "%x\n"'
 alias jcurl="curl --output /dev/null --silent --show-error --write-out '%{json}'"
-alias less="less -R"
 alias history="history -D -E -t '%Y-%m-%d %H:%M:%S %Z'"
 
 # Misc
@@ -209,8 +208,6 @@ alias ls="ls -lFAh --group-directories-first --color=always"
 if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
   source "/usr/local/bin/aws_zsh_completer.sh"
 fi
-
-export LESSCHARSET=utf-8
 
 # GOROOT-based install location
 if _command go; then
@@ -282,9 +279,11 @@ if [ -d "$HOME/.krew/bin" ] || [ -n "$KREW_ROOT" ]; then
 fi
 
 export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
-export LESS="-r"
-export MANPAGER="less -R --use-color -Dd+r -Du+b"
+export LESS="--raw-control-chars --quit-if-one-screen --mouse"
+export LESSCHARSET="utf-8"
+export MANPAGER="less --use-color -Dd+r -Du+b"
 export MANROFFOPT="-P -c"
+export PAGER="less"
 
 # https://github.com/zsh-users/zsh-autosuggestions
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
