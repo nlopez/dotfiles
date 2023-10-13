@@ -137,6 +137,7 @@ setopt correct
 alias g=git
 alias gup="git pull --prune --rebase"
 alias gst="git status"
+alias gs="git status"
 alias gc="git commit"
 alias grhh="git reset --hard HEAD"
 alias gp="git push"
