@@ -205,6 +205,7 @@ fi
 
 _command dircolors && eval "$(dircolors "$HOME/.dir_colors")"
 alias ls="ls -lFAh --group-directories-first --color=always"
+alias -g groot="$(git rev-parse --show-toplevel)"
 
 if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
   source "/usr/local/bin/aws_zsh_completer.sh"
