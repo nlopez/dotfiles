@@ -141,16 +141,16 @@ abbrevs=(
   'tfinit' 'terraform init'
   'tfplan' 'terraform plan'
   'tfshow' 'terraform show tfplan'
-  'tfapply' 'terraform apply'
   'g' 'git'
-  'gup' 'git pull --prune --rebase'
+  'gup' 'git pull --rebase'
   'gst' 'git status'
   'gs' 'git status'
   'gc' 'git commit'
   'grhh' 'git reset --hard HEAD'
   'gp' 'git push'
   'gcd' 'git checkout "$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"'
-  # 'gcp' 'git checkout -'
+  'ga' 'git add'
+  'gdc' 'git diff --cached'
 )
 
 # shellcheck source=./.zshrc_work
@@ -206,11 +206,11 @@ alias reload="exec \$SHELL"
 alias dec2hex='printf "%x\n"'
 alias jcurl="curl --output /dev/null --silent --show-error --write-out '%{json}'"
 alias history="history -D -E -t '%Y-%m-%d %H:%M:%S %Z'"
+alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 
 # Misc
 setopt cdablevars
 setopt extendedglob
-setopt interactivecomments
 
 # History
 export HISTFILE="$ZDOTDIR/.zsh_history"
@@ -254,7 +254,7 @@ fi
 
 _command dircolors && eval "$(dircolors "$HOME/.dir_colors")"
 alias ls="ls -lFAh --group-directories-first --color=always"
-alias -g groot='$(git rev-parse --show-toplevel)'
+alias -g groot="$(git rev-parse --show-toplevel)"
 
 if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
   source "/usr/local/bin/aws_zsh_completer.sh"
