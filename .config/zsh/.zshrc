@@ -9,7 +9,7 @@ prepend_path ~/bin
 prepend_path "${HOME}/.local/bin"
 prepend_path "/Applications/Docker.app/Contents/Resources/bin"
 
-export XDG_CONFIG_HOME="${HOME}/.config"
+umask 077
 
 
 if [[ "$(/usr/bin/uname -m)" == "arm64" ]]; then
@@ -130,6 +130,8 @@ _complete_alias() {
 }
 zstyle ':completion:*' completer _complete_alias _complete _ignored
 
+
+
 # Correction
 setopt correct
 
@@ -149,6 +151,10 @@ abbrevs=(
   'gcd' 'git checkout "$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"'
   'gcp' 'git checkout -'
 )
+
+# shellcheck source=./.zshrc_work
+if [ -f "$ZDOTDIR/.zshrc_work" ]; then source "$ZDOTDIR/.zshrc_work"; fi
+
 
 for abbr in ${(k)abbrevs}; do
    alias $abbr="${abbrevs[$abbr]}"
@@ -290,8 +296,6 @@ _command kubens && alias kns=kubens
 _command aws_vault && eval "$(aws-vault --completion-script-zsh)"
 
 
-# shellcheck source=./.zshrc_work
-if [ -f "$HOME/.zshrc_work" ]; then source "$HOME/.zshrc_work"; fi
 
 # serverless
 # tabtab source for packages
