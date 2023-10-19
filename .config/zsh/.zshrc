@@ -155,7 +155,6 @@ abbrevs=(
 # shellcheck source=./.zshrc_work
 if [ -f "$ZDOTDIR/.zshrc_work" ]; then source "$ZDOTDIR/.zshrc_work"; fi
 
-
 for abbr in ${(k)abbrevs}; do
    alias $abbr="${abbrevs[$abbr]}"
 done
@@ -212,7 +211,7 @@ setopt cdablevars
 setopt extendedglob
 
 # History
-export HISTFILE="$HOME/.zsh_history"
+export HISTFILE="$ZDOTDIR/.zsh_history"
 export HISTSIZE=10000000
 export SAVEHIST=$HISTSIZE
 setopt BANG_HIST                 # Treat the '!' character specially during expansion.
