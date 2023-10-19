@@ -136,8 +136,18 @@ setopt correct
 # Abbreviations
 typeset -Ag abbrevs
 abbrevs=(
-  "..." "../.."
-  "...." "../../.."
+  'tfinit' 'terraform init'
+  'tfplan' 'terraform plan'
+  'tfshow' 'terraform show tfplan'
+  'g' 'git'
+  'gup' 'git pull --prune --rebase'
+  'gst' 'git status'
+  'gs' 'git status'
+  'gc' 'git commit'
+  'grhh' 'git reset --hard HEAD'
+  'gp' 'git push'
+  'gcd' 'git checkout "$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"'
+  'gcp' 'git checkout -'
 )
 
 for abbr in ${(k)abbrevs}; do
@@ -176,18 +186,6 @@ bindkey " " magic-abbrev-expand
 bindkey "^M" magic-abbrev-expand-and-execute
 bindkey "^x " no-magic-abbrev-expand
 bindkey -M isearch " " self-insert
-
-# git
-alias g=git
-alias gup="git pull --prune --rebase"
-alias gst="git status"
-alias gs="git status"
-alias gc="git commit"
-alias grhh="git reset --hard HEAD"
-alias gp="git push"
-function gcd() {
-  git checkout "$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"
-}
 
 # Editor
 if _command code; then
