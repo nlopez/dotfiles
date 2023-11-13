@@ -141,6 +141,7 @@ abbrevs=(
   'tfinit' 'terraform init'
   'tfplan' 'terraform plan'
   'tfshow' 'terraform show tfplan'
+  'tfapply' 'terraform apply'
   'g' 'git'
   'gup' 'git pull --prune --rebase'
   'gst' 'git status'
@@ -149,7 +150,7 @@ abbrevs=(
   'grhh' 'git reset --hard HEAD'
   'gp' 'git push'
   'gcd' 'git checkout "$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"'
-  'gcp' 'git checkout -'
+  # 'gcp' 'git checkout -'
 )
 
 # shellcheck source=./.zshrc_work
@@ -209,6 +210,7 @@ alias history="history -D -E -t '%Y-%m-%d %H:%M:%S %Z'"
 # Misc
 setopt cdablevars
 setopt extendedglob
+setopt interactivecomments
 
 # History
 export HISTFILE="$ZDOTDIR/.zsh_history"
@@ -252,7 +254,7 @@ fi
 
 _command dircolors && eval "$(dircolors "$HOME/.dir_colors")"
 alias ls="ls -lFAh --group-directories-first --color=always"
-alias -g groot="$(git rev-parse --show-toplevel)"
+alias -g groot='$(git rev-parse --show-toplevel)'
 
 if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
   source "/usr/local/bin/aws_zsh_completer.sh"
