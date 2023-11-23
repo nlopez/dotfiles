@@ -81,13 +81,6 @@ helper =
 helper = /usr/local/share/gcm-core/git-credential-manager
 useHttpPath = true
 
-[blame]
-ignoreRevsFile = .git-blame-ignore-revs
-# Mark any lines that have had a commit skipped using --ignore-rev with a `?`
-markIgnoredLines = true
-# Mark any lines that were added in a skipped commit and can not be attributed with a `*`
-markUnblamableLines = true
-
 [includeIf "gitdir/i:~/src/github.com/nlopez/"]
 path = ./config_personal
 
