@@ -1,0 +1,12 @@
+--cookies-from firefox
+--merge-output-format mkv
+--embed-subs
+--embed-thumbnail
+--embed-metadata
+--embed-chapters
+--embed-info-json
+--downloader aria2c
+--add-header "User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+
+# Save all videos under YouTube directory in your home directory
+-o ~/YouTube/%(title)s.%(ext)s
