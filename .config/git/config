@@ -35,6 +35,7 @@ pprune = !git fetch --prune
 oldest-ancestor = !zsh -c 'diff --old-line-format= --new-line-format= <(git rev-list --first-parent \"${1:-master}\") <(git rev-list --first-parent \"${2:-HEAD}\") | head -1' -
 branchdiff = !sh -c \"git diff $(git oldest-ancestor)..\"
 branchlog = !sh -c \"git log $(git oldest-ancestor)..\"
+branchdate = !git for-each-ref --sort=committerdate refs/heads/ --format='%(committerdate:short) %(refname:short)'
 root = rev-parse --show-toplevel
 st = !git status --ignored
 fcommit = commit --no-verify
@@ -77,12 +78,14 @@ program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 gpgsign = true
 
 [credential]
-helper =
-helper = /usr/local/share/gcm-core/git-credential-manager
 useHttpPath = true
+	helper =
+	helper = /usr/local/share/gcm-core/git-credential-manager
 
 [includeIf "gitdir/i:~/src/github.com/nlopez/"]
 path = ./config_personal
 
 [includeIf "gitdir/i:~/src/github.com/DataDog/"]
 path = ./config_datadog
+[credential "https://dev.azure.com"]
+	useHttpPath = true
