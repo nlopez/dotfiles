@@ -23,7 +23,7 @@ scrolling:
   history: 0
 
 import:
-  - ~/.config/alacritty/themes/themes/solarized_light.yaml
+- ~/.config/alacritty/themes/themes/solarized_light.yaml
 
 url:
   launcher: None
@@ -31,19 +31,20 @@ url:
 shell:
   program: /bin/zsh
   args:
-    - -i
-    - -c
-    - '[ ! "$TMUX" ] && exec tmux -u new-session -s 0 -A'
+  - -i
+  - -c
+  - '[ ! "$TMUX" ] && exec tmux -u new-session -s 0 -A'
 colors:
+  draw_bold_text_with_bright_colors: false
   # Default colors
   primary:
-    background: '#fdf6e3' # base3
-    foreground: '#657b83' # base00
+    background: '#002b36' # base03
+    foreground: '#839496' # base0
 
   # Cursor colors
   cursor:
-    text: '#fdf6e3' # base3
-    cursor: '#657b83' # base00
+    text: '#002b36' # base03
+    cursor: '#839496' # base0
 
   # Normal colors
   normal:
@@ -66,4 +67,4 @@ colors:
     magenta: '#6c71c4' # violet
     cyan: '#93a1a1' # base1
     white: '#fdf6e3' # base3
-theme: Solarized-Light
+theme: Solarized-Dark
