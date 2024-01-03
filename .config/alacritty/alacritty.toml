@@ -1,6 +1,7 @@
-dynamic_title = true
 import = ["/Users/user/.config/alacritty/themes/themes/solarized_light.toml"]
-live_config_reload = true
+
+[window]
+dynamic_title = true
 
 [env]
 LANG = "en_US.UTF-8"
@@ -20,6 +21,3 @@ history = 0
 [shell]
 args = ["-i", "-c", "[ ! \"$TMUX\" ] && exec tmux -u new-session -s 0 -A"]
 program = "/bin/zsh"
-
-[url]
-launcher = "None"
