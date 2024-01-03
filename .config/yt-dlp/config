@@ -1,13 +1,16 @@
 --cookies ~/YouTube/cookies.txt
 --merge-output-format mkv
---embed-subs
 --embed-thumbnail
 --embed-metadata
 --embed-chapters
 --embed-info-json
+--write-info-json
+--write-thumbnail
+--download-archive ~/YouTube/download-archive.txt
 --downloader aria2c
 --add-header "User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
---paths ~/YouTube
---paths "temp:tmp"
---output %(title)s.%(ext)s
---restrict-filenames
+--paths ~/YouTube/out
+--paths "temp:~/YouTube/tmp"
+--output "%(uploader)s [%(uploader_id)s]/%(title)s [%(id)s].%(ext)s"
+--windows-filenames
+--format-sort ,,vcodec:h264,res,acodec:aac
