@@ -12,10 +12,12 @@ prepend_path "/Applications/Docker.app/Contents/Resources/bin"
 umask 077
 
 
-if [[ "$(/usr/bin/uname -m)" == "arm64" ]]; then
-  BREW_PREFIX="/opt/homebrew"
-else
-  BREW_PREFIX="/usr/local"
+if [[ "$(/usr/bin/uname -s)" == "Darwin" ]]; then
+  if [[ "$(/usr/bin/uname -m)" == "arm64" ]]; then
+    BREW_PREFIX="/opt/homebrew"
+  else
+    BREW_PREFIX="/usr/local"
+  fi
 fi
 
 if [ -d "$BREW_PREFIX" ]; then
