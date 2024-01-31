@@ -11,8 +11,9 @@ prepend_path "/Applications/Docker.app/Contents/Resources/bin"
 
 umask 077
 
+readonly kernel_name="$(/usr/bin/uname -s)"
 
-if [[ "$(/usr/bin/uname -s)" == "Darwin" ]]; then
+if [[ "${kernel_name}" == "Darwin" ]]; then
   if [[ "$(/usr/bin/uname -m)" == "arm64" ]]; then
     BREW_PREFIX="/opt/homebrew"
   else
@@ -214,7 +215,9 @@ alias reload="exec \$SHELL"
 alias dec2hex='printf "%x\n"'
 alias jcurl="curl --output /dev/null --silent --show-error --write-out '%{json}'"
 alias history="history -D -E -t '%Y-%m-%d %H:%M:%S %Z'"
-alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+if [[ "${kernel_name}" == "Darwin" ]]; then
+  alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+fi
 
 # Misc
 setopt cdablevars
