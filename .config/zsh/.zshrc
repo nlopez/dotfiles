@@ -153,6 +153,12 @@ abbrevs=(
   'gcd' 'git checkout "$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"'
   'ga' 'git add'
   'gdc' 'git diff --cached'
+  'k' 'kubectl'
+  'kd' 'kubectl describe'
+  'kdp' 'kubectl describe pod'
+  'kg' 'kubectl get'
+  'kgp' 'kubectl get pod'
+  'ke' 'kubectl exec -it'
 )
 
 # shellcheck source=./.zshrc_work
@@ -256,7 +262,7 @@ fi
 
 _command dircolors && eval "$(dircolors "$HOME/.dir_colors")"
 alias ls="ls -lFAh --group-directories-first --color=always"
-alias -g groot="$(git rev-parse --show-toplevel)"
+# alias -g groot="$(git rev-parse --show-toplevel)"
 
 if [ -f "/usr/local/bin/aws_zsh_completer.sh" ]; then
   source "/usr/local/bin/aws_zsh_completer.sh"
@@ -283,15 +289,8 @@ if [ -f "${BREW_PREFIX}/opt/curl/bin/curl" ]; then prepend_path "${BREW_PREFIX}/
 # known hosts completion
 zstyle -e ':completion:*:(ssh|scp|sftp|rsh|rsync):hosts' hosts 'reply=(${=${${(f)"$(cat {/etc/ssh_,~/.ssh/known_}hosts(|2)(N) /dev/null)"}%%[# ]*}//,/ })'
 
-# What do I look like, a guy who's not lazy?
 if _command kubectl; then
   source <(kubectl completion zsh)
-  alias k=kubectl
-  alias kd='kubectl describe'
-  alias kdp='kubectl describe pod'
-  alias kg='kubectl get'
-  alias kgp='kubectl get pod'
-  alias ke='kubectl exec -it'
 fi
 
 _command kubectx && alias kctx=kubectx
