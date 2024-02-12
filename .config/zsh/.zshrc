@@ -105,8 +105,12 @@ if [ -n "$BREW_PREFIX" ]; then
   FPATH=$BREW_PREFIX/share/zsh-completions:$BREW_PREFIX/share/zsh/site-functions:$FPATH
 fi
 autoload -Uz compinit bashcompinit
-compinit
-bashcompinit
+for dump in ~/.zcompdump(N.mh+24); do
+  compinit
+  bashcompinit
+done
+compinit -C
+bashcompinit -C
 
 # Cribbed from https://github.com/ohmyzsh/ohmyzsh/blob/fd786291bab7468c7cdd5066ac436218a1fba9e2/lib/completion.zsh#L61-L73
 # terminfo, echoti are zsh builtins
