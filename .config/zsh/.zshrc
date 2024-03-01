@@ -167,6 +167,7 @@ abbrevs=(
   'tfinit' 'terraform init'
   'tfplan' 'terraform plan'
   'tfshow' 'terraform show tfplan'
+  'tfsl' 'terraform state list'
 )
 
 # shellcheck source=./.zshrc_work
