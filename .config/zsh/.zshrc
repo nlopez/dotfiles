@@ -147,25 +147,26 @@ setopt correct
 # Abbreviations
 typeset -Ag abbrevs
 abbrevs=(
-  'tfinit' 'terraform init'
-  'tfplan' 'terraform plan'
-  'tfshow' 'terraform show tfplan'
   'g' 'git'
-  'gup' 'git pull --rebase'
-  'gst' 'git status'
-  'gs' 'git status'
-  'gc' 'git commit'
-  'grhh' 'git reset --hard HEAD'
-  'gp' 'git push'
-  'gcd' 'git checkout "$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"'
   'ga' 'git add'
+  'gc' 'git commit'
+  'gcd' 'git checkout "$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)"'
   'gdc' 'git diff --cached'
+  'gp' 'git push'
+  'grhh' 'git reset --hard HEAD'
+  'gs' 'git status'
+  'gst' 'git status'
+  'gup' 'git pull --rebase'
   'k' 'kubectl'
   'kd' 'kubectl describe'
   'kdp' 'kubectl describe pod'
+  'ke' 'kubectl exec -it'
   'kg' 'kubectl get'
   'kgp' 'kubectl get pod'
-  'ke' 'kubectl exec -it'
+  'tfapply' 'terraform apply'
+  'tfinit' 'terraform init'
+  'tfplan' 'terraform plan'
+  'tfshow' 'terraform show tfplan'
 )
 
 # shellcheck source=./.zshrc_work
