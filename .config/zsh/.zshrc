@@ -16,6 +16,8 @@ umask 077
 readonly kernel_name="$(/usr/bin/uname -s)"
 
 if [[ "${kernel_name}" == "Darwin" ]]; then
+  # https://hynek.me/articles/apple-openssl-verification-surprises/
+  export OPENSSL_X509_TEA_DISABLE=1
   if [[ "$(/usr/bin/uname -m)" == "arm64" ]]; then
     BREW_PREFIX="/opt/homebrew"
   else
