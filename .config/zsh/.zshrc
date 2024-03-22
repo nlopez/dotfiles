@@ -101,11 +101,12 @@ precmd_pipestatus() {
 }
 add-zsh-hook precmd precmd_pipestatus
 
+###############################################################################
 # Completion
-
-if [ -n "$BREW_PREFIX" ]; then
-  FPATH=$BREW_PREFIX/share/zsh-completions:$BREW_PREFIX/share/zsh/site-functions:$FPATH
-fi
+###############################################################################
+# if [ -n "$BREW_PREFIX" ]; then
+#   FPATH=$BREW_PREFIX/share/zsh-completions:$BREW_PREFIX/share/zsh/site-functions:$FPATH
+# fi
 autoload -Uz compinit bashcompinit
 for dump in ~/.zcompdump(N.mh+24); do
   compinit
@@ -114,34 +115,45 @@ done
 compinit -C
 bashcompinit -C
 
-# Cribbed from https://github.com/ohmyzsh/ohmyzsh/blob/fd786291bab7468c7cdd5066ac436218a1fba9e2/lib/completion.zsh#L61-L73
-# terminfo, echoti are zsh builtins
-# %F{red}red text%f is also provided by zsh https://scriptingosx.com/2019/07/moving-to-zsh-06-customizing-the-zsh-prompt/
-expand-or-complete-with-dots() {
-  # toggle line-wrapping off and back on again
-  # shellcheck disable=SC2154
-  [[ -n "${terminfo[rmam]}" && -n "${terminfo[smam]}" ]] && echoti rmam
-  print -Pn "%{%F{red}...%f%}"
-  [[ -n "${terminfo[rmam]}" && -n "${terminfo[smam]}" ]] && echoti smam
+# Cribbed from https://github.com/ohmyzsh/ohmyzsh/blob/d157fc60c93fa59e757921b503e9594bd23b422c/lib/completion.zsh#L61-L75
+COMPLETION_WAITING_DOTS="true"
+if [[ ${COMPLETION_WAITING_DOTS:-false} != false ]]; then
+  expand-or-complete-with-dots() {
+    # use $COMPLETION_WAITING_DOTS either as toggle or as the sequence to show
+    [[ $COMPLETION_WAITING_DOTS = true ]] && COMPLETION_WAITING_DOTS="%F{red}…%f"
+    # turn off line wrapping and print prompt-expanded "dot" sequence
+    printf '\e[?7l%s\e[?7h' "${(%)COMPLETION_WAITING_DOTS}"
+    zle expand-or-complete
+    zle redisplay
+  }
+  zle -N expand-or-complete-with-dots
+  # Set the function as the default tab completion widget
+  bindkey -M emacs "^I" expand-or-complete-with-dots
+  bindkey -M viins "^I" expand-or-complete-with-dots
+  bindkey -M vicmd "^I" expand-or-complete-with-dots
+fi
 
-  zle expand-or-complete
-  zle redisplay
-}
-zle -N expand-or-complete-with-dots
-bindkey "^I" expand-or-complete-with-dots
+unsetopt menu_complete   # do not autoselect the first completion entry
+unsetopt flowcontrol
+setopt auto_menu         # show completion menu on successive tab press
+setopt complete_in_word
+setopt always_to_end
 
 # Case-insensitive matching
-zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' matcher-list 'r:|=*' 'l:|=* r:|=*'
 # Use completion menu
 zstyle ':completion:*' menu select
+# Complete . and .. special directories
+zstyle ':completion:*' special-dirs true
+# Use caching so that commands like apt and dpkg complete are useable
+zstyle ':completion:*' use-cache yes
+zstyle ':completion:*' cache-path $ZSH_CACHE_DIR
 
 _complete_alias() {
     [[ -n $PREFIX ]] && compadd -- ${(M)${(k)galiases}:#$PREFIX*}
     return 1
 }
 zstyle ':completion:*' completer _complete_alias _complete _ignored
-
-
 
 # Correction
 setopt correct
