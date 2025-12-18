@@ -101,7 +101,7 @@ if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
-alias dotfiles='git --git-dir=$HOME/dotfiles/ --work-tree=$HOME'
+alias dotfiles="git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 
 # http://matthew-brett.github.io/pydagogue/installing_on_debian.html
 # pip install --user path
