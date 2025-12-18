@@ -1,2 +1,2 @@
 # dotfiles
-Initialize with `curl -sSL https://tinyurl.com/ydyu9tug | sh`
+Initialize with `curl -sSL https://raw.githubusercontent.com/nlopez/dotfiles/refs/heads/main/dotfiles-init.sh | sh`
