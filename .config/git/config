@@ -1,0 +1,87 @@
+[include]
+  path = config_local
+
+[include]
+  path = config_personal
+
+[includeIf "gitdir/i:~wsluser/"]
+  path = config_wsl
+
+[includeIf "gitdir/i:~/src/github.com/SilentShout42/"]
+[includeIf "gitdir/i:~/src/github.com/KamoTimestamps/"]
+  path = config_ss42
+
+[push]
+  default = current
+  autoSetupRemote = true
+
+[pull]
+  rebase = true
+
+[core]
+  quotepath = false
+	autocrlf = input
+	symlinks = true
+	editor = vim
+
+[init]
+  templateDir = template
+  defaultBranch = main
+
+[diff]
+  renameLimit = 10000
+
+[worktree]
+  guessRemote = true
+
+[commit]
+  gpgsign = true
+
+[tag]
+  gpgsign = true
+
+[gpg "ssh"]
+  allowedSignersFile = ~/.config/git/allowed_signers
+
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+
+[alias]
+  name = !git symbolic-ref -q HEAD | cut -b 12-
+  mbase = !git merge-base $(git name) origin/$1 && :
+  # squash relative to any origin branch
+	squash = "!f(){ git reset --soft $(git merge-base $(git rev-parse --abbrev-ref origin/HEAD) $(git branch --show-current)) && git commit -am \"${1}\";};f"
+  pushf = push --force-with-lease
+  # subtree add
+  sba = "!f() { git subtree add --prefix $2 $1 master --squash; }; f"
+  # subtree update
+  sbu = "!f() { git subtree pull --prefix $2 $1 master --squash; }; f"
+  # list subtrees
+  ls-subtrees = !"git log | grep git-subtree-dir | awk '{ print $2 }' | sort -u"
+  # switch to branch, creating if it doesn't exist
+  cob = "!f() { git checkout $(git show-ref --verify --quiet refs/heads/\"$1\" || echo '-b') \"$1\"; }; f"
+  # Print the name of the current upstream tracking branch.
+  upstream = !git config --get branch.$(git current-branch).remote || echo origin
+  # Print the name of the current branch.
+  current-branch = symbolic-ref --short HEAD
+  # Hard reset branch to the upstream version.
+  hard-reset = !git reset --hard $(git upstream)/$(git current-branch)
+  # Delete local branches that have been deleted remotely
+  pprune = !git fetch --prune
+  oldest-ancestor = !zsh -c 'diff --old-line-format= --new-line-format= <(git rev-list --first-parent \"${1:-master}\") <(git rev-list --first-parent \"${2:-HEAD}\") | head -1' -
+  branchdiff = !sh -c \"git diff $(git oldest-ancestor)..\"
+  branchlog = !sh -c \"git log $(git oldest-ancestor)..\"
+  root = rev-parse --show-toplevel
+  st = !git status --ignored
+  fcommit = commit --no-verify
+  default-branch = !gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'
+  # branches = !git for-each-ref --sort='-committerdate:iso8601' --format=' %(committerdate:iso8601)%09%(refname)' refs/heads
+  # branchesr = !git for-each-ref --sort='-committerdate:iso8601' --format=' %(committerdate:iso8601)%09%(refname)' refs/remotes
+  branches = !git for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/heads
+  branchesr = !git for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/remotes
+  prettylog = !git log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short
+[url "git@github.com:"]
+	insteadOf = https://github.com/

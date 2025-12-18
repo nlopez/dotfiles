@@ -1,0 +1,10 @@
+initial-command = ~/bin/tmx
+font-size = 18
+font-family = Iosevka Term
+quit-after-last-window-closed = true
+confirm-close-surface = false
+theme = Builtin Solarized Light
+window-padding-x = 0
+window-padding-y = 0
+#window-padding-color = extend
+font-feature = -calt

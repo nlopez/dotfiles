@@ -1,0 +1,34 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Show directory and git branch on the line above the character
+format = """
+$directory\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$cmd_duration\
+$fill\
+$kubernetes\
+$line_break\
+$character
+"""
+
+[kubernetes]
+disabled = false
+format = '[$symbol$context( \($namespace\))]($style)'
+
+[[kubernetes.contexts]]
+# "bold red" style + default symbol when Kubernetes current context name equals "production" *and* the current user
+# equals "admin_user"
+context_pattern = ".*prod.*"
+style = "bold red"
+
+[[kubernetes.contexts]]
+context_pattern = ".*macaroni-pirate.ts.net.*"
+symbol = "🏡 "
+
+[fill]
+symbol = " "

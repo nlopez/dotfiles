@@ -1,0 +1,16 @@
+--cookies ~/YouTube/cookies.txt
+--embed-metadata
+--embed-chapters
+--merge-output-format mkv
+--write-info-json
+--clean-info-json
+--write-thumbnail
+--downloader aria2c
+--downloader-args aria2c:"--min-split-size=1M --max-connection-per-server=8 --max-concurrent-downloads=8 --split=8"
+--add-header "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+--paths ~/YouTube/out
+--paths "temp:~/YouTube/tmp"
+--output "%(uploader)s [%(uploader_id)s]/%(title)s[%(id)s].%(ext)s"
+--live-from-start
+--wait-for-video 300
+#--format "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4"
