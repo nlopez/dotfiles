@@ -9,6 +9,7 @@ tap "microsoft/git"
 tap "mongodb/brew"
 tap "oven-sh/bun"
 tap "possatti/possatti"
+tap "ryooooooga/tap"
 tap "sheeki03/tap"
 tap "tsuru/tsuru"
 tap "vectordotdev/brew"
@@ -360,6 +361,10 @@ brew "z"
 brew "zig"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
+# Fish-like fast/unobtrusive autosuggestions for zsh
+brew "zsh-autosuggestions"
+# Feature-rich syntax highlighting for Zsh
+brew "zsh-fast-syntax-highlighting"
 # devkube provisions and manages devkubes for isolated k8s development
 brew "datadog/tap/devkube"
 # docker-local-dev creates a local Docker container with the repository sources, using the CI image
@@ -398,6 +403,8 @@ brew "datadog/tap/vault"
 brew "johanhaleby/kubetail/kubetail"
 # High-performance, schema-free, document-oriented database
 brew "mongodb/brew/mongodb-community"
+# ZSH abbreviation expansion plugin
+brew "ryooooooga/tap/zabrze"
 # Terminal security - catches homograph attacks, pipe-to-shell, ANSI injection
 brew "sheeki03/tap/tirith"
 # A High-Performance Log, Metrics, and Events Router
@@ -421,8 +428,6 @@ cask "barrier"
 cask "bartender"
 # Bits is a CLI tool for interacting with stateful Datadog agents from the terminal
 cask "datadog/tap/bits"
-# Monitors common persistence locations
-cask "blockblock"
 # Prevents your sleeping computer from connecting to Bluetooth accessories
 cask "bluesnooze"
 # Markdown note editor for developers
