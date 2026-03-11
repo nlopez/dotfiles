@@ -1,0 +1,10 @@
+font-size = 18
+font-family = Iosevka Term
+quit-after-last-window-closed = true
+confirm-close-surface = false
+theme = iTerm2 Solarized Light
+window-padding-x = 0
+window-padding-y = 0
+font-feature = -calt
+shell-integration = zsh
+title = " "

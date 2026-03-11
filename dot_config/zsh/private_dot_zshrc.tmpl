@@ -1,0 +1,252 @@
+# Minimal packages for a happy life: starship atuin zoxide atuin fzf direnv
+
+if [[ -n "$ZSH_DO_PROFILING" ]]; then zmodload zsh/zprof; fi
+
+function _source() {
+  [[ -f $1 ]] && source "$@"
+}
+
+function _command() {
+  command -v $1 >/dev/null 2>&1
+}
+
+{{- if eq (get .chezmoi "os") "darwin" }}
+export HOMEBREW_CASK_OPTS="--appdir=${HOME}/Applications"
+export SSH_AUTH_SOCK="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+{{- /* Intel Mac */ -}}
+{{- if eq (get .chezmoi "arch") "amd64" }}
+BREW_PREFIX="/usr/local"
+{{- /* Apple silicon Mac */ -}}
+{{- else if eq (get .chezmoi "arch") "arm64" }}
+BREW_PREFIX="/opt/homebrew"
+{{- end }}
+{{- else if eq (get .chezmoi "os") "linux" }}
+BREW_PREFIX="/home/linuxbrew/.linuxbrew"
+{{- end }}
+[[ -x "$BREW_PREFIX/bin/brew" ]] && eval "$($BREW_PREFIX/bin/brew shellenv)"
+
+path+=("${HOME}/.local/bin" "${HOME}/bin")
+
+umask 077
+
+{{- if eq (get .chezmoi "os") "darwin" }}
+path+=("/Applications/Docker.app/Contents/Resources/bin")
+
+if [ -d "$BREW_PREFIX" ]; then
+  # GNU utils as default names: sed→gsed, find→gfind, etc.
+  local gnu_formulas=(coreutils gnu-sed findutils gnu-tar gnu-time)
+  for f in $gnu_formulas; do
+    if [[ -d "$BREW_PREFIX/opt/$f/libexec/gnubin" ]]; then
+      path+=("$BREW_PREFIX/opt/$f/libexec/gnubin")
+      export MANPATH="$BREW_PREFIX/opt/$f/libexec/gnuman:${MANPATH:-}"
+    fi
+  done
+  [[ -f "$BREW_PREFIX/opt/gnu-getopt/bin/getopt" ]] && path+=("$BREW_PREFIX/opt/gnu-getopt/bin")
+fi
+{{- end }}
+
+# Enable Ctrl-x-e to edit command line
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^xe' edit-command-line
+bindkey '^x^e' edit-command-line
+
+_command starship && eval "$(starship init zsh)"
+
+export TENV_AUTO_INSTALL=true
+
+###############################################################################
+# Completion (system and Homebrew completions via default fpath)
+###############################################################################
+# Prepend Homebrew completion dirs so compinit finds them with system dirs
+if [[ -n "$BREW_PREFIX" ]]; then
+  fpath+=(
+    "$BREW_PREFIX/share/zsh-completions"
+    "$BREW_PREFIX/share/zsh/site-functions"
+  )
+fi
+
+autoload -Uz compinit
+# Skip compaudit (-C) when using cached dump
+# Rebuild dump when it's older than 24h so new completions are picked up.
+if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
+  compinit -C -d "${ZDOTDIR:-$HOME}/.zcompdump"
+else
+  compinit -d "${ZDOTDIR:-$HOME}/.zcompdump"
+fi
+
+# Bash-style completions for tools that ship them (e.g. aws, docker)
+autoload -Uz bashcompinit
+bashcompinit
+
+# Basic completion options (close to default zsh behavior)
+setopt complete_in_word
+setopt always_to_end
+zstyle ':completion:*' menu select
+zstyle ':completion:*' special-dirs true
+
+# zoxide (smarter cd) – init right after compinit so tab completion for cd is registered
+_command zoxide && eval "$(zoxide init zsh --cmd cd)"
+
+# Correction
+setopt correct
+
+# shellcheck source=./.zshrc_local
+_source "$ZDOTDIR/.zshrc_local"
+
+# Abbreviations
+_command zabrze && eval "$(zabrze init --bind-keys)"
+
+# Editor
+if _command cursor; then
+  export EDITOR="cursor --add --wait"
+  alias e="cursor --add"
+elif _command code; then
+  export EDITOR="code --add --wait"
+  alias e="code --add"
+fi
+
+# Terminal window title: full command while running, dirname when idle
+set_terminal_title() {
+  printf '\e]0;%s\a' "$*"
+}
+precmd_terminal_title() {
+  local dir
+  dir=$(starship module directory 2>/dev/null) || dir=""
+  if [[ -n "$dir" ]]; then
+    # Strip ANSI escape sequences for window title
+    dir=$(printf '%s' "$dir" | sed $'s/\033\\[[0-9;]*[A-Za-z]//g')
+    dir=${dir##[[:space:]]#}
+    dir=${dir%%[[:space:]]#}
+    set_terminal_title "${dir:-~}"
+  else
+    if [[ "$PWD" == "$HOME" ]]; then
+      set_terminal_title "~"
+    else
+      set_terminal_title "${PWD:t}"
+    fi
+  fi
+}
+preexec_terminal_title() {
+  local cmd="${1//$'\n'/ }"
+  [[ ${#cmd} -gt 256 ]] && cmd="${cmd:0:253}..."
+  set_terminal_title "$cmd"
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd precmd_terminal_title
+add-zsh-hook preexec preexec_terminal_title
+
+# Misc aliases
+_command brew && alias brewup="brew update && brew upgrade && brew cleanup"
+alias reload="exec \$SHELL"
+
+# Misc
+setopt cdablevars
+setopt extendedglob
+# Make filename globbing case-insensitive (e.g., `*foo` matches `Foo`)
+setopt nocaseglob
+setopt kshoptionprint
+
+# History
+export HISTFILE="$ZDOTDIR/.zsh_history"
+export HISTSIZE=50000
+export SAVEHIST=$HISTSIZE
+setopt BANG_HIST                 # Treat the '!' character specially during expansion.
+setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
+setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
+setopt APPEND_HISTORY            # Always append to history, never overwrite
+setopt SHARE_HISTORY             # Share history between all sessions.
+setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
+setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
+setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
+setopt HIST_VERIFY               # Don't execute immediately upon history expansion.
+setopt HIST_BEEP                 # Beep when accessing nonexistent history.
+
+# pushd
+setopt autopushd pushdminus pushdsilent pushdtohome pushdignoredups
+alias dh='dirs -v'
+export DIRSTACKSIZE=100
+
+# direnv
+if _command direnv; then eval "$(direnv hook zsh)"; fi
+
+_command dircolors && _source <(dircolors "$HOME/.dir_colors")
+alias ls="ls -lFAh --color=auto"
+
+_command k9s && eval "$(k9s completion zsh)"
+
+# Go
+_command go && path+=("$(go env GOPATH)/bin")
+
+# Rust
+_source "$HOME/.cargo/env"
+
+_command kubectl && eval "$(kubectl completion zsh)"
+_command kubectx && alias kctx=kubectx
+_command kubens && alias kns=kubens
+_command aws_vault && eval "$(aws-vault --completion-script-zsh)"
+
+# gcloud CLI completion
+_source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+_source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
+
+_command saml2aws && eval "$(saml2aws --completion-script-zsh)"
+
+# fzf
+if _command fzf; then
+  eval "$(fzf --zsh)"
+  export FZF_TMUX=1 # enable tmux integration
+fi
+
+export WORDCHARS=""
+
+# Try pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && path+=("$PYENV_ROOT/bin")
+
+_command op && eval "$(op completion zsh)"
+
+_command docker && docker &>1 && eval "$(docker completion zsh)"
+
+# krew
+if [ -d "$HOME/.krew/bin" ] || [ -n "$KREW_ROOT" ]; then
+  path+=("${KREW_ROOT:-$HOME/.krew}/bin")
+fi
+
+export LESS="--raw-control-chars --quit-if-one-screen"
+export LESSCHARSET="utf-8"
+export MANPAGER="less --use-color -Dd+r -Du+b"
+# export MANROFFOPT="-P -c"
+export PAGER="less"
+
+# atuin: Ctrl+R = atuin history piped to fzf (cmd-only), insert selected
+atuin-fzf-history() {
+  local selected
+  selected=$(atuin history list --cmd-only 2>/dev/null | fzf --tac --no-sort +m -q "${LBUFFER}")
+  [[ -n "$selected" ]] && LBUFFER="$selected" && zle redisplay
+}
+zle -N atuin-fzf-history
+export ATUIN_NOBIND=1
+if [[ -f "$HOME/.atuin/bin/env" ]]; then
+  . "$HOME/.atuin/bin/env"
+fi
+if _command atuin; then
+  eval "$(atuin init zsh --disable-ctrl-r --disable-up-arrow)"
+  bindkey '^R' atuin-fzf-history
+fi
+
+_command tirith && eval "$(tirith init --shell zsh)"
+
+_command chezmoi && eval "$(chezmoi completion zsh)"
+
+_source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+_source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+
+typeset -U PATH path
+export PATH
+
+if [[ -n "$ZSH_DO_PROFILING" ]]; then zprof; fi
+
+_command tmux && if [[ "$TMUX" == "" ]]; then tmux -u new-session -s 0 -A; fi
