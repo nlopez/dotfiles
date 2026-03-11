@@ -1,0 +1,16 @@
+Host *
+  Compression yes
+  ServerAliveInterval 240
+  ServerAliveCountMax 2
+  HostKeyAlgorithms -ssh-rsa
+  ForwardAgent no
+  IdentityFile none
+  LogLevel ERROR
+  StrictHostKeyChecking accept-new
+  User nlopez
+  {{- if eq (get .chezmoi "os") "darwin" }}
+  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+  {{- end }}
+
+Host github.com
+  User git

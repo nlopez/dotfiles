@@ -1,0 +1,582 @@
+tap "bazelbuild/tap"
+tap "datadog/tap", "https://nlopez@github.com/datadog/homebrew-tap"
+tap "homebrew/autoupdate"
+tap "homebrew/bundle"
+tap "homebrew/services"
+tap "johanhaleby/kubetail"
+tap "little-angry-clouds/my-brews"
+tap "microsoft/git"
+tap "mongodb/brew"
+tap "oven-sh/bun"
+tap "possatti/possatti"
+tap "sheeki03/tap"
+tap "tsuru/tsuru"
+tap "vectordotdev/brew"
+tap "versent/taps"
+tap "yakitrak/yakitrak"
+# Codec library for encoding and decoding AV1 video streams
+brew "aom"
+# GitOps Continuous Delivery for Kubernetes
+brew "argocd"
+# C string library for manipulating Unicode strings
+brew "libunistring"
+# Cryptography and SSL/TLS Toolkit
+brew "openssl@3"
+# Download with resuming and segmented downloading
+brew "aria2"
+# Securely store and access AWS credentials in development environments
+brew "aws-vault", link: false
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.13"
+# Official Amazon AWS command-line interface
+brew "awscli"
+# Microsoft Azure CLI 2.0
+brew "azure-cli"
+# Bourne-Again SHell, a UNIX command interpreter
+brew "bash"
+# Clone of cat(1) with syntax highlighting and Git integration
+brew "bat"
+# JSON parser for C
+brew "json-c"
+# Implementation of the DNS protocols
+brew "bind"
+# GNU binary tools for native development
+brew "binutils"
+# Get/set bluetooth power and discoverable state
+brew "blueutil"
+# Format bazel BUILD files with a standard convention
+brew "buildifier"
+# Console-based live network and disk I/O bandwidth monitor
+brew "bwm-ng"
+# (Arguably) the best yacc variant
+brew "byacc"
+# Core application library for C
+brew "glib"
+# GNU multiple precision arithmetic library
+brew "gmp"
+# Validating, recursive, caching DNS resolver
+brew "unbound"
+# GNU Emacs text editor
+brew "emacs"
+# Emacs dependency management
+brew "cask"
+# Utility to examine and validate certificates in a variety of formats
+brew "certigo"
+# CloudFlare's PKI toolkit
+brew "cfssl"
+# OpenType text shaping engine
+brew "harfbuzz"
+# Library to render SVG files using Cairo
+brew "librsvg"
+# Versatile and fast Unicode/ASCII/ANSI graphics renderer
+brew "chafa"
+# Create and view interactive cheat sheets for *nix commands
+brew "cheat"
+# CLI to install, manage & troubleshoot Kubernetes clusters running Cilium
+brew "cilium-cli"
+# Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript
+brew "clang-format"
+# Get, unpack, build, and install modules from CPAN
+brew "cpanminus"
+# Tool for interacting with remote images and registries
+brew "crane"
+# High-level C binding for ZeroMQ
+brew "czmq"
+# Load/unload environment variables based on $PWD
+brew "direnv"
+# Tool for exploring each layer in a docker image
+brew "dive"
+# Synchronize your DNS to multiple providers from a simple DSL
+brew "dnscontrol"
+# Lightweight DNS forwarder and DHCP server
+brew "dnsmasq"
+# Platform keystore credential helper for Docker
+brew "docker-credential-helper"
+# Docker Credential Helper for Amazon ECR
+brew "docker-credential-helper-ecr"
+# Create Docker hosts locally and on cloud providers
+brew "docker-machine"
+# Activates NFS on docker-machine
+brew "docker-machine-nfs"
+# Convert text between DOS, UNIX, and Mac formats
+brew "dos2unix"
+# Run arbitrary commands when files change
+brew "entr"
+# Secure your credentials in environment variables
+brew "envchain"
+# Modern replacement for 'ls'
+brew "exa"
+# Simple, fast and user-friendly alternative to find
+brew "fd"
+# Collection of GNU find, xargs, and locate
+brew "findutils"
+# Scriptable ping program for checking if multiple hosts are up
+brew "fping"
+# Command-line fuzzy finder written in Go
+brew "fzf"
+# Replace zsh completion selection menu with fzf
+brew "fzf-tab"
+# GNU awk utility
+brew "gawk"
+# GNU compiler collection
+brew "gcc"
+# Generate C code to parse command-line arguments via getopt_long
+brew "gengetopt"
+# GitHub command-line tool
+brew "gh"
+# Shell script to install any Go version
+brew "gimme"
+# Distributed revision control system
+brew "git"
+# Git repository organizer & rebase workflow automation tool
+brew "git-machete"
+# Open source programming language to build simple/reliable/efficient software
+brew "go"
+# Simplified Go project management, dependency management, and vendoring
+brew "glide"
+# GNU implementation of the famous stream editor
+brew "gnu-sed"
+# GNU implementation of time utility
+brew "gnu-time"
+# GNU Privacy Guard (OpenPGP)
+brew "gnupg"
+# Go programming environment (1.17)
+brew "go@1.17"
+# Package compiler and linker metadata toolkit
+brew "pkgconf"
+# Generate introspection data for GObject libraries
+brew "gobject-introspection"
+# Command-line Golang template processor
+brew "gomplate"
+# GNU grep, egrep and fgrep
+brew "grep"
+# Next generation open source RPC library and framework
+brew "grpc"
+# Like cURL, but for gRPC
+brew "grpcurl"
+# Convert HCL2 to JSON
+brew "hcl2json"
+# Kubernetes package manager
+brew "helm"
+# Command-line oriented TCP/IP packet assembler/analyzer
+brew "hping"
+# Improved top (interactive process viewer)
+brew "htop"
+# User-friendly cURL replacement (command-line HTTP client)
+brew "httpie"
+# Command-line benchmarking tool
+brew "hyperfine"
+# Database of common MIME types
+brew "shared-mime-info"
+# ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
+brew "libheif"
+# Tools and libraries to manipulate images in select formats
+brew "imagemagick"
+# Calculate various network masks, etc. from a given IP address
+brew "ipcalc"
+# Official CLI for the IPinfo IP Address API
+brew "ipinfo-cli"
+# Utility for IPMI control with kernel driver or LAN interface
+brew "ipmitool"
+# Interactive computing in Python
+brew "ipython"
+# Lightweight and flexible command-line JSON processor
+brew "jq"
+# Kubernetes CLI To Manage Your Clusters In Style!
+brew "k9s"
+# Run local Kubernetes cluster in Docker
+brew "kind"
+# Kubernetes command-line interface
+brew "kubernetes-cli"
+# Kubernetes prompt info for bash and zsh
+brew "kube-ps1"
+# Tool that can switch between kubectl contexts easily and create aliases
+brew "kubectx"
+# Template-free customization of Kubernetes YAML manifests
+brew "kustomize"
+# DNS library written in C
+brew "ldns"
+# Pager program similar to more
+brew "less"
+# Subtitle renderer for the ASS/SSA subtitle format
+brew "libass"
+# Library for reading RAW files from digital photo cameras
+brew "libraw"
+# C XSLT library for GNOME
+brew "libxslt"
+# LLVM Project Linker
+brew "lld"
+# Powerful, lightweight programming language (v5.1.5)
+brew "lua@5.1"
+# Utility for directing compilation
+brew "make"
+# Mac App Store command-line interface
+brew "mas"
+# Like sed, awk, cut, join & sort for name-indexed data such as CSV
+brew "miller"
+# Run a Kubernetes cluster locally
+brew "minikube"
+# Protocol buffers (Google's data interchange format)
+brew "protobuf"
+# Intercept, modify, replay, save HTTP/S traffic
+brew "mitmproxy"
+# Open-source, cross-platform JavaScript runtime environment
+brew "node"
+# Remote terminal application
+brew "mosh"
+# 'traceroute' and 'ping' in a single tool
+brew "mtr"
+# NCurses Disk Usage
+brew "ncdu"
+# Ambitious Vim-fork focused on extensibility and agility
+brew "neovim"
+# Utility for managing network connections
+brew "netcat"
+# Image manipulation
+brew "netpbm"
+# Port scanning utility for large networks
+brew "nmap"
+# OpenBSD freely-licensed SSH connectivity tools
+brew "openssh"
+# Parallel gzip
+brew "pigz"
+# Pinentry for GPG on Mac
+brew "pinentry-mac"
+# Object-relational database system
+brew "postgresql@12"
+# Object-relational database system
+brew "postgresql@13"
+# Object-relational database system
+brew "postgresql@14"
+# Object-relational database system
+brew "postgresql@15"
+# Unix pager optimized for psql
+brew "pspg"
+# Monitor data's progress through a pipe
+brew "pv"
+# Python version management
+brew "pyenv"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.10"
+# Python interface to Tcl/Tk
+brew "python-tk@3.10"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.12"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.9"
+# Reattach process (e.g., tmux) to background
+brew "reattach-to-user-namespace"
+# Docker registry v2 command-line client
+brew "reg"
+# Docker and OCI Registry Client in Go and tooling using those libraries
+brew "regclient"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
+# Extremely fast non-cryptographic hash algorithm
+brew "xxhash"
+# Utility that provides fast incremental file transfer
+brew "rsync"
+# Powerful, clean, object-oriented scripting language
+brew "ruby"
+# Safe, concurrent, practical language
+brew "rust"
+# Login and retrieve AWS temporary credentials using a SAML IDP
+brew "saml2aws"
+# 7-Zip is a file archiver with a high compression ratio
+brew "sevenzip"
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
+# Advanced console-based IP subnet calculator
+brew "sipcalc"
+# Work with remote images registries
+brew "skopeo"
+# SOcket CAT: netcat on steroids
+brew "socat"
+# Test SSL/TLS enabled services to discover supported cipher suites
+brew "sslscan"
+# Cross-shell prompt for astronauts
+brew "starship"
+# Subdomain discovery tool
+brew "subfinder"
+# TCP connect to the given IP/port combo
+brew "tcping"
+# Replay saved tcpdump files at arbitrary speeds
+brew "tcpreplay"
+# Analyze tcpdump output
+brew "tcptrace"
+# Traceroute implementation using TCP packets
+brew "tcptraceroute"
+# Temporal CLI (tctl)
+brew "tctl"
+# User interface to the TELNET protocol
+brew "telnet"
+# Command-line interface for running and interacting with Temporal Server and UI
+brew "temporal"
+# OpenTofu / Terraform / Terragrunt / Terramate / Atmos version manager
+brew "tenv"
+# Tool to generate documentation from Terraform modules
+brew "terraform-docs"
+# Terraform Language Server
+brew "terraform-ls"
+# Language Server Protocol for Terraform
+brew "terraform-lsp"
+# Improve Terraform's plan output
+brew "terraform_landscape"
+# CLI tool to generate terraform files from existing infrastructure
+brew "terraformer"
+# Tool which checks for the support of TLS/SSL ciphers and flaws
+brew "testssl"
+# Linter for Terraform files
+brew "tflint"
+# Terminal multiplexer
+brew "tmux"
+# Command-line interface to the freedesktop.org trashcan
+brew "trash-cli"
+# Display directories as trees (with optional color/HTML output)
+brew "tree"
+# Extremely fast Python package installer and resolver, written in Rust
+brew "uv"
+# Video processing framework with simplicity in mind
+brew "vapoursynth"
+# Executes a program periodically, showing output fullscreen
+brew "watch"
+# Internet file retriever
+brew "wget"
+# Command-line XML and HTML beautifier and content extractor
+brew "xq"
+# Extensible command-line tool to format YAML files
+brew "yamlfmt"
+# Linter for YAML files
+brew "yamllint"
+# Blazing fast terminal file manager written in Rust, based on async I/O
+brew "yazi"
+# Tool for managing your YubiKey configuration
+brew "ykman"
+# Process YAML, JSON, XML, CSV and properties documents from the CLI
+brew "yq"
+# Tracks most-used directories to make cd smarter
+brew "z"
+# Programming language designed for robustness, optimality, and clarity
+brew "zig"
+# Shell extension to navigate your filesystem faster
+brew "zoxide"
+# devkube provisions and manages devkubes for isolated k8s development
+brew "datadog/tap/devkube"
+# docker-local-dev creates a local Docker container with the repository sources, using the CI image
+brew "datadog/tap/docker-local-dev"
+# Administrator CLI for service-discovery
+brew "datadog/tap/fabric-cli"
+# kubectl-analyse extracts info from running Kubernetes Objects
+brew "datadog/tap/kubectl-analyse"
+# kubectl-iscale allows to safely scale Kubernetes workloads
+brew "datadog/tap/kubectl-iscale"
+# kubectl-multiexec allows run parallel commands on Kubernetes workloads
+brew "datadog/tap/kubectl-multiexec"
+# kubectl-template render helm charts.
+brew "datadog/tap/kubectl-template"
+# latest-artifact is a tool for finding the latest version of an image with a given tag in a given environment.
+brew "datadog/tap/latest-artifact"
+# latest-chart is a tool for finding the latest version of a deployment's chart with a given tag in a given environment.
+brew "datadog/tap/latest-chart"
+# latest-datacenter-config is a tool to look up the most recently pushed datacenter-config version in storage.
+brew "datadog/tap/latest-datacenter-config"
+# latest-image is a tool for finding the latest version of an image with a given tag in a given environment.
+brew "datadog/tap/latest-image"
+# s22-checker is a command line tool for determining if secrets have been added to repos.
+brew "datadog/tap/s22-checker"
+# Safe Change Executor (SCE) enables review of any manual change to running production services
+brew "datadog/tap/sce"
+# to-prod deploys a particular branch or tag to production environments
+brew "datadog/tap/to-prod"
+# to-staging deploys a particular branch or tag to staging environments
+brew "datadog/tap/to-staging"
+# trigger-ci runs a CI pipeline based on the current branch
+brew "datadog/tap/trigger-ci"
+# Vault
+brew "datadog/tap/vault"
+# Tail logs from multiple Kubernetes pods at the same time
+brew "johanhaleby/kubetail/kubetail"
+# High-performance, schema-free, document-oriented database
+brew "mongodb/brew/mongodb-community"
+# Terminal security - catches homograph attacks, pipe-to-shell, ANSI injection
+brew "sheeki03/tap/tirith"
+# A High-Performance Log, Metrics, and Events Router
+brew "vectordotdev/brew/vector"
+brew "yakitrak/yakitrak/obsidian-cli"
+# Password manager that keeps all passwords secure behind one password
+cask "1password"
+# Command-line interface for 1Password
+cask "1password-cli"
+# Enable Windows-like alt-tab
+cask "alt-tab"
+# Software-defined perimeter for secure network access
+cask "appgate-sdp-client"
+# The Atlas CLI is a tool for interacting with the Atlas Platform
+cask "datadog/tap/atlas"
+# Securely stores and accesses AWS credentials in a development environment
+cask "aws-vault-binary"
+# Open-source KVM software
+cask "barrier"
+# Menu bar icon organiser
+cask "bartender"
+# Bits is a CLI tool for interacting with stateful Datadog agents from the terminal
+cask "datadog/tap/bits"
+# Monitors common persistence locations
+cask "blockblock"
+# Prevents your sleeping computer from connecting to Bluetooth accessories
+cask "bluesnooze"
+# Markdown note editor for developers
+cask "boost-note"
+# Bazel wrapper
+cask "datadog/tap/bzl"
+# Menu bar timezone tracker and compact calendar
+cask "clocker"
+# command line tool for querying the Cloud Perimeter API
+cask "datadog/tap/cloudperim"
+# computectl is a cli tool for use by the #compute engineering team
+cask "datadog/tap/computectl"
+# Databases and SQL IDE
+cask "datagrip"
+# This CLI relies on OAuth to provision credentials to interact with the Datadog API and outputs them in the standard DD_API_KEY and DD_APP_KEY environment variables (while the process runs).
+cask "datadog/tap/dd-auth"
+# Simplify and streamline git commit signing
+cask "datadog/tap/dd-gitsign"
+# Datadog patched gopls
+cask "datadog/tap/dd-gopls"
+# Create Datadog application releases with ease, supporting multiple branching schemes and builders (Rake, CNAB-CI)
+cask "datadog/tap/ddr"
+# ddsaml2aws is our fork of saml2aws with patches for functionality
+cask "datadog/tap/ddsaml2aws"
+# ddsign is a client for the Image Integrity Signer
+cask "datadog/tap/ddsign"
+# ddtool is a command line tool for interacting with internal infrastructure at Datadog.
+cask "datadog/tap/ddtool"
+# App to build and share containerised applications and microservices
+cask "docker-desktop"
+# Dogbrew is our in-house CLI distribution system, intended to be a more flexible replacement for Homebrew
+cask "datadog/tap/dogbrew"
+# Utility for customizing which browser to start
+cask "finicky"
+# Web browser
+cask "firefox"
+cask "font-hack-nerd-font"
+cask "font-iosevka"
+cask "font-iosevka-term-nerd-font"
+# Visualize filesystem changes in realtime
+cask "fsmonitor"
+# Visual desktop tool suite for working with the Fuse framework
+cask "fuse"
+# Set of tools to manage resources and applications hosted on Google Cloud
+cask "gcloud-cli"
+# Terminal emulator that uses platform-native UI and GPU acceleration
+cask "ghostty"
+# Git workflow helper for managing branch prefixes and tracking
+cask "datadog/tap/git-dd"
+# Desktop client for GitHub repositories
+cask "github"
+# Web browser
+cask "google-chrome"
+# Client for the Google Drive storage service
+cask "google-drive"
+# Graphically shows disk usage within a file system
+cask "grandperspective"
+# Tool to prevent the system from going into sleep mode
+cask "keepingyouawake"
+# End-to-end encryption software
+cask "keybase"
+# Host-based application firewall
+cask "little-snitch"
+# Knowledge base that works on top of a local folder of plain text Markdown files
+cask "obsidian"
+# Local development environment setup tool for Runtime DNA services
+cask "datadog/tap/rdna-devdesktop-procman"
+# Move and resize windows using keyboard shortcuts or snap areas
+cask "rectangle"
+# Open source virtual/remote desktop application
+cask "rustdesk"
+# Music streaming service
+cask "spotify"
+# Free, open-source, and completely encrypted notes app
+cask "standard-notes"
+# Mesh VPN based on WireGuard
+cask "tailscale-app"
+# Tctx makes it fast and easy to switch between Temporal clusters when running tctl commands
+cask "datadog/tap/tctx"
+# Open-source code editor
+cask "visual-studio-code"
+# Network protocol analyzer
+cask "wireshark-app"
+mas "1Password for Safari", id: 1569813296
+mas "Balance Lock", id: 1019371109
+mas "Push Security", id: 1596916655
+vscode "adamhartford.vscode-base64"
+vscode "adzero.vscode-sievehighlight"
+vscode "anysphere.cursorpyright"
+vscode "bazelbuild.vscode-bazel"
+vscode "boto3typed.boto3-ide"
+vscode "coolbear.systemd-unit-file"
+vscode "dandric.vscode-jq"
+vscode "datadog.datadog-vscode"
+vscode "dnicolson.binary-plist"
+vscode "donjayamanne.python-extension-pack"
+vscode "dotjoshjohnson.xml"
+vscode "eamodio.gitlens"
+vscode "esbenp.prettier-vscode"
+vscode "foxundermoon.shell-format"
+vscode "golang.go"
+vscode "grapecity.gc-excelviewer"
+vscode "hashicorp.hcl"
+vscode "hashicorp.terraform"
+vscode "iliazeus.vscode-ansi"
+vscode "janisdd.vscode-edit-csv"
+vscode "jasonnutter.vscode-codeowners"
+vscode "jnoortheen.nix-ide"
+vscode "jq-syntax-highlighting.jq-syntax-highlighting"
+vscode "kenhowardpdx.vscode-gist"
+vscode "kennylong.kubernetes-yaml-formatter"
+vscode "kevinrose.vsc-python-indent"
+vscode "lkrms.inifmt"
+vscode "malmaud.tmux"
+vscode "matangover.mypy"
+vscode "mechatroner.rainbow-csv"
+vscode "ms-azuretools.vscode-docker"
+vscode "ms-kubernetes-tools.vscode-kubernetes-tools"
+vscode "ms-python.black-formatter"
+vscode "ms-python.debugpy"
+vscode "ms-python.mypy-type-checker"
+vscode "ms-python.python"
+vscode "ms-toolsai.datawrangler"
+vscode "ms-vscode-remote.remote-containers"
+vscode "ms-vscode-remote.remote-ssh"
+vscode "ms-vscode-remote.remote-ssh-edit"
+vscode "ms-vscode-remote.remote-wsl"
+vscode "ms-vscode-remote.vscode-remote-extensionpack"
+vscode "ms-vscode.makefile-tools"
+vscode "ms-vscode.remote-explorer"
+vscode "ms-vscode.remote-server"
+vscode "njpwerner.autodocstring"
+vscode "pascalreitermann93.vscode-yaml-sort"
+vscode "philstainer.git-worktree"
+vscode "pkief.material-icon-theme"
+vscode "redhat.ansible"
+vscode "redhat.vscode-yaml"
+vscode "stackbuild.bazel-stack-vscode"
+vscode "tamasfe.even-better-toml"
+vscode "thomas-baumgaertner.vcl"
+vscode "timonwong.shellcheck"
+vscode "tobias-faller.vt100-syntax-highlighting"
+vscode "tyriar.sort-lines"
+vscode "visualstudioexptteam.intellicode-api-usage-examples"
+vscode "visualstudioexptteam.vscodeintellicode"
+vscode "wholroyd.jinja"
+vscode "yy0931.save-as-root"
+vscode "yzhang.markdown-all-in-one"
+go "github.com/DataDog/service-discovery-platform/cmd/tooling/chart-diff"
+go "github.com/DataDog/service-discovery-platform/cmd/ddcert-cli"
+go "github.com/DataDog/service-discovery-platform/cmd/tooling/gateways-cli"
+go "golang.org/x/tools/gopls"
+go "honnef.co/go/tools/cmd/staticcheck"
+cargo "oxipng"
+cargo "zr"
+uv "awsume", with: ["setuptools"]
+uv "pre-commit"

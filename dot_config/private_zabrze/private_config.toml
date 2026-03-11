@@ -1,0 +1,140 @@
+# ~/.config/zabrze/config.toml
+[[snippets]]
+name = "awk '{print $1}'"
+trigger = ".1"
+snippet = "awk '{print $1}'"
+
+[[snippets]]
+name = "git"
+trigger = "g"
+snippet = "git"
+
+[[snippets]]
+name = "ga"
+trigger = "ga"
+snippet = "git add"
+
+[[snippets]]
+name = "gc"
+trigger = "gc"
+snippet = "git commit"
+
+[[snippets]]
+name = "gcd"
+trigger = "gcd"
+snippet = 'git checkout "$(git remote show origin | sed -n "s/.*HEAD branch: \(.*\)/\1/p")"'
+
+[[snippets]]
+name = "gconf"
+trigger = "gconf"
+snippet = "git config --list --show-origin --show-scope --includes"
+
+[[snippets]]
+name = "gdc"
+trigger = "gdc"
+snippet = "git diff --cached"
+
+[[snippets]]
+name = "gd"
+trigger = "gd"
+snippet = "git diff"
+
+[[snippets]]
+name = "gp"
+trigger = "gp"
+snippet = "git push"
+
+[[snippets]]
+name = "grc"
+trigger = "grc"
+snippet = "git rebase --continue"
+
+[[snippets]]
+name = "grhh"
+trigger = "grhh"
+snippet = "git reset --hard HEAD"
+
+[[snippets]]
+name = "gst"
+trigger = "gst"
+snippet = "git status"
+
+[[snippets]]
+name = "gup"
+trigger = "gup"
+snippet = "git pull --rebase"
+
+[[snippets]]
+name = "k"
+trigger = "k"
+snippet = "kubectl"
+
+[[snippets]]
+name = "kd"
+trigger = "kd"
+snippet = "kubectl describe"
+
+[[snippets]]
+name = "kdp"
+trigger = "kdp"
+snippet = "kubectl describe pod"
+
+[[snippets]]
+name = "ke"
+trigger = "ke"
+snippet = "kubectl exec -it"
+
+[[snippets]]
+name = "kg"
+trigger = "kg"
+snippet = "kubectl get"
+
+[[snippets]]
+name = "kgp"
+trigger = "kgp"
+snippet = "kubectl get pod"
+
+[[snippets]]
+name = "tfapply"
+trigger = "tfapply"
+snippet = "terraform apply"
+
+[[snippets]]
+name = "tfinit"
+trigger = "tfinit"
+snippet = "terraform init"
+
+[[snippets]]
+name = "tfplan"
+trigger = "tfplan"
+snippet = "terraform plan -lock=false -out=tfplan.bin | tee >( sed \"s/\\x1B\\[[0-9;]\\{1,\\}[A-Za-z]//g\" >tfplan.txt)"
+
+[[snippets]]
+name = "tfshow"
+trigger = "tfshow"
+snippet = "terraform show tfplan"
+
+[[snippets]]
+name = "tfsl"
+trigger = "tfsl"
+snippet = "terraform state list"
+
+[[snippets]]
+name = "tfss"
+trigger = "tfss"
+snippet = "terraform state show"
+
+[[snippets]]
+name = "tfu"
+trigger = "tfu"
+snippet = "terraform force-unlock -force"
+
+[[snippets]]
+name = "kns"
+trigger = "kns"
+snippet = "kubens"
+
+[[snippets]]
+name = "kctx"
+trigger = "kctx"
+snippet = "kubectx"
