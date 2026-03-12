@@ -55,5 +55,4 @@ Thumbs.db
 # Terraform ephemera
 **/.terraform.lock.hcl
 *.tfstate
-tfplan.txt
-tfplan.bin
+tfplan*
