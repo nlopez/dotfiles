@@ -15,6 +15,7 @@ $kubernetes\
 $line_break\
 $character
 """
+command_timeout = 1000 # milliseconds (default: 500)
 
 [kubernetes]
 disabled = false
