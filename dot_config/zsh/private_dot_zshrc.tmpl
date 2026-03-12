@@ -1,5 +1,3 @@
-# Minimal packages for a happy life: starship atuin zoxide atuin fzf direnv
-
 if [[ -n "$ZSH_DO_PROFILING" ]]; then zmodload zsh/zprof; fi
 
 function _source() {
@@ -237,7 +235,7 @@ if _command atuin; then
   bindkey '^R' atuin-fzf-history
 fi
 
-_command tirith && eval "$(tirith init --shell zsh)"
+_command tirith && eval "$(tirith init --shell=zsh)"
 
 _command chezmoi && eval "$(chezmoi completion zsh)"
 

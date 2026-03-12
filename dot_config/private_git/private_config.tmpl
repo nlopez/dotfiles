@@ -16,8 +16,10 @@
   autocrlf = input
   symlinks = true
   editor = vim
-  {{- if hasSuffix "WSL2" (get .chezmoi.kernel "osrelease") }}
+  {{- if eq (get .chezmoi "os") "linux" }}
+  {{- if (get .chezmoi.kernel "osrelease" | lower | contains "microsoft") }}
   sshCommand = ssh.exe
+  {{- end }}
   {{- end }}
 
 [credential]
