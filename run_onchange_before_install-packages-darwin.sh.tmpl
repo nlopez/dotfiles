@@ -1,0 +1,16 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/usr/bin/env sh
+brew bundle --file=/dev/stdin <<EOF
+brew "atuin"
+brew "direnv"
+brew "font-iosevka-nerd-font"
+brew "git"
+brew "tirith"
+brew "tmux"
+brew "uv"
+brew "zabrze"
+brew "zoxide"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+EOF
+{{ end -}}
