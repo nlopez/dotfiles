@@ -15,7 +15,6 @@ packages:
     - tirith
     - tmux
     - uv
-    - zabrze
     - zoxide
     - zsh-autosuggestions
     - zsh-syntax-highlighting
