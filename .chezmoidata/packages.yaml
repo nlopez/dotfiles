@@ -1,0 +1,25 @@
+packages:
+  darwin:
+    brews:
+    - atuin
+    - direnv
+    - fd
+    - fzf
+    - git
+    - htop
+    - kubectl
+    - ripgrep
+    - ryooooooga/tap/zabrze
+    - sheeki03/tap/tirith
+    - starship
+    - tirith
+    - tmux
+    - uv
+    - zabrze
+    - zoxide
+    - zsh-autosuggestions
+    - zsh-syntax-highlighting
+    casks:
+    - font-iosevka-nerd-font
+    - font-iosevka-term-nerd-font
+    - ghostty
