@@ -26,7 +26,8 @@ set -eufo pipefail
 {{ $casks := list
 		"ghostty"
 		"font-iosevka-nerd-font"
-		"font-iosevka-term-nerd-font" -}}
+		"font-iosevka-term-nerd-font"
+		"tailscale-app" -}}
 
 {{ if .personal -}}
 {{   $brews = concat $brews (list
