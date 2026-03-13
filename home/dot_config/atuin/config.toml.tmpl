@@ -23,7 +23,11 @@
 # timezone = "local"
 
 ## enable or disable automatic sync
+{{- if .work }}
 auto_sync = false
+{{- else }}
+auto_sync = true
+{{- end }}
 
 ## enable or disable automatic update checks
 update_check = false
@@ -38,7 +42,7 @@ update_check = false
 
 ## which search mode to use
 ## possible values: prefix, fulltext, fuzzy, skim
-# search_mode = "fuzzy"
+search_mode = "fuzzy"
 
 ## which filter mode to use by default
 ## possible values: "global", "host", "session", "directory", "workspace"
@@ -56,7 +60,7 @@ filter_mode = "global"
 ## which filter mode to use when atuin is invoked from a shell up-key binding
 ## the accepted values are identical to those of "filter_mode"
 ## leave unspecified to use same mode set in "filter_mode"
-# filter_mode_shell_up_key_binding = "directory"
+filter_mode_shell_up_key_binding = "directory"
 
 ## which search mode to use when atuin is invoked from a shell up-key binding
 ## the accepted values are identical to those of "search_mode"
@@ -128,7 +132,7 @@ inline_height = 20
 show_help = false
 
 ## Configure whether or not to show tabs for search and inspect
-show_tabs = false
+show_tabs = true
 
 ## Configure whether or not the tabs row may be auto-hidden, which includes the current Atuin
 ## tab, such as Search or Inspector, and other tabs you may wish to see. This will
@@ -147,7 +151,7 @@ secrets_filter = true
 
 ## Defaults to true. If enabled, upon hitting enter Atuin will immediately execute the command. Press tab to return to the shell and edit.
 # This applies for new installs. Old installs will keep the old behaviour unless configured otherwise.
-enter_accept = true
+enter_accept = false
 
 ## Defaults to "emacs".  This specifies the keymap on the startup of `atuin
 ## search`.  If this is set to "auto", the startup keymap mode in the Atuin
@@ -170,7 +174,7 @@ enter_accept = true
 
 ## Set this to true and Atuin will minimize motion in the UI - timers will not update live, etc.
 ## Alternatively, set env NO_MOTION=true
-prefers_reduced_motion = true
+prefers_reduced_motion = false
 
 [stats]
 ## Set commands where we should consider the subcommand for statistics. Eg, kubectl get vs just kubectl
@@ -269,4 +273,7 @@ records = true
 ## The list of enabled filter modes, in order of priority.
 ## The "workspace" mode is skipped when not in a workspace or workspaces = false.
 ## Default filter mode can be overridden with the filter_mode setting.
-# filters = [ "global", "host", "session", "workspace", "directory" ]
+filters = [ "global", "host", "session", "workspace", "directory" ]
+
+[tmux]
+enabled = true
