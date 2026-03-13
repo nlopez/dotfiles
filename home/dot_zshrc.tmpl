@@ -1,5 +1,10 @@
 if [[ -n "$ZSH_DO_PROFILING" ]]; then zmodload zsh/zprof; fi
 
+export XDG_DATA_HOME=$HOME/.local/share
+export XDG_CONFIG_HOME=$HOME/.config
+export XDG_STATE_HOME=$HOME/.local/state
+export XDG_CACHE_HOME=$HOME/.cache
+
 function _source() {
   [[ -f $1 ]] && source "$@"
 }
@@ -8,17 +13,17 @@ function _command() {
   command -v $1 >/dev/null 2>&1
 }
 
-{{- if eq (get .chezmoi "os") "darwin" }}
+{{- if eq .chezmoi.os "darwin" }}
 export HOMEBREW_CASK_OPTS="--appdir=${HOME}/Applications"
 export SSH_AUTH_SOCK="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 {{- /* Intel Mac */ -}}
-{{- if eq (get .chezmoi "arch") "amd64" }}
+{{- if eq .chezmoi.arch "amd64" }}
 BREW_PREFIX="/usr/local"
 {{- /* Apple silicon Mac */ -}}
-{{- else if eq (get .chezmoi "arch") "arm64" }}
+{{- else if eq .chezmoi.arch "arm64" }}
 BREW_PREFIX="/opt/homebrew"
 {{- end }}
-{{- else if eq (get .chezmoi "os") "linux" }}
+{{- else if eq .chezmoi.os "linux" }}
 BREW_PREFIX="/home/linuxbrew/.linuxbrew"
 {{- end }}
 [[ -x "$BREW_PREFIX/bin/brew" ]] && eval "$($BREW_PREFIX/bin/brew shellenv)"
@@ -27,7 +32,7 @@ path+=("${HOME}/.local/bin" "${HOME}/bin")
 
 umask 077
 
-{{- if eq (get .chezmoi "os") "darwin" }}
+{{- if eq .chezmoi.os "darwin" }}
 path+=("/Applications/Docker.app/Contents/Resources/bin")
 
 if [ -d "$BREW_PREFIX" ]; then
