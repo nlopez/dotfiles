@@ -86,6 +86,3 @@
   branches = !git for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/heads
   branchesr = !git for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/remotes
   prettylog = !git log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short
-
-[url "ssh://git@"]
-  insteadOf = "https://"
