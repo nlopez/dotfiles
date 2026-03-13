@@ -16,12 +16,12 @@
   autocrlf = input
   symlinks = true
   editor = vim
-{{- if .wsl }}
+{{- if or .wsl (eq .chezmoi.os "windows") }}
   sshCommand = ssh.exe
 {{- end }}
 
 [credential]
-{{- if .wsl }}
+{{- if or .wsl (eq .chezmoi.os "windows") }}
   helper = manager.exe
 {{- else }}
   helper = manager
@@ -47,7 +47,7 @@
 
 [gpg "ssh"]
   allowedSignersFile = ~/.config/git/allowed_signers
-{{- if .wsl }}
+{{- if or .wsl (eq .chezmoi.os "windows") }}
   program = op-ssh-sign-wsl.exe
 {{- end }}
 

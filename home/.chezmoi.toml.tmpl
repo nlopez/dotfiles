@@ -36,3 +36,8 @@ hostname = {{ $hostname | quote }}
 personal = {{ $personal }}
 work = {{ $work }}
 wsl = {{ $wsl }}
+
+{{- if eq .chezmoi.os "windows" }}
+[cd]
+command = "powershell.exe"
+{{- end }}
