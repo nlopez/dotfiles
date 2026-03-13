@@ -18,15 +18,6 @@
     "trash-cli"
     "bat" -}}
 
-{{ $brews := list
-     "atuin"
-     "ryooooooga/tap/zabrze"
-     "sheeki03/tap/tirith"
-     "starship"
--}}
-
-{{ $casks := list }}
-
 {{ $sudo := "sudo " -}}
 {{ if eq .chezmoi.username "root" -}}
 {{   $sudo = "" -}}
