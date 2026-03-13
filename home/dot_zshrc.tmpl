@@ -13,28 +13,28 @@ function _command() {
   command -v $1 >/dev/null 2>&1
 }
 
-{{- if eq .chezmoi.os "darwin" }}
-export HOMEBREW_CASK_OPTS="--appdir=${HOME}/Applications"
-export SSH_AUTH_SOCK="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-{{- /* Intel Mac */ -}}
-{{- if eq .chezmoi.arch "amd64" }}
-BREW_PREFIX="/usr/local"
-{{- /* Apple silicon Mac */ -}}
-{{- else if eq .chezmoi.arch "arm64" }}
-BREW_PREFIX="/opt/homebrew"
-{{- end }}
-{{- else if eq .chezmoi.os "linux" }}
-BREW_PREFIX="/home/linuxbrew/.linuxbrew"
-{{- end }}
-[[ -x "$BREW_PREFIX/bin/brew" ]] && eval "$($BREW_PREFIX/bin/brew shellenv)"
+# Ensure path array does not contain duplicates with -U for unique
+typeset -gaU fpath path
 
-path+=("${HOME}/.local/bin" "${HOME}/bin")
+{{- $paths := list }}
+{{- $homeDir := .chezmoi.homeDir }}
+{{ range $_, $relPath := list "bin" "go/bin" ".cargo/bin" ".local/bin" }}
+{{  $path := joinPath $homeDir $relPath }}
+{{-   if stat $path }}
+{{-     $paths = mustAppend $paths $path }}
+{{-   end }}
+{{- end }}
+{{- if $paths }}
+path=({{ toStrings $paths | join ":" }} $path)
+{{- end }}
 
 umask 077
 
 {{- if eq .chezmoi.os "darwin" }}
-path+=("/Applications/Docker.app/Contents/Resources/bin")
+export HOMEBREW_CASK_OPTS="--appdir=${HOME}/Applications"
+export SSH_AUTH_SOCK="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 
+# TODO: Refactor for chezmoi
 if [ -d "$BREW_PREFIX" ]; then
   # GNU utils as default names: sed→gsed, find→gfind, etc.
   local gnu_formulas=(coreutils gnu-sed findutils gnu-tar gnu-time)
@@ -61,14 +61,6 @@ export TENV_AUTO_INSTALL=true
 ###############################################################################
 # Completion (system and Homebrew completions via default fpath)
 ###############################################################################
-# Prepend Homebrew completion dirs so compinit finds them with system dirs
-if [[ -n "$BREW_PREFIX" ]]; then
-  fpath+=(
-    "$BREW_PREFIX/share/zsh-completions"
-    "$BREW_PREFIX/share/zsh/site-functions"
-  )
-fi
-
 autoload -Uz compinit
 # Skip compaudit (-C) when using cached dump
 # Rebuild dump when it's older than 24h so new completions are picked up.
@@ -178,24 +170,12 @@ if _command direnv; then eval "$(direnv hook zsh)"; fi
 _command dircolors && _source <(dircolors "$HOME/.dir_colors")
 alias ls="ls -lFAh --color=auto"
 
-_command k9s && eval "$(k9s completion zsh)"
-
-# Go
-_command go && path+=("$(go env GOPATH)/bin")
-
-# Rust
-_source "$HOME/.cargo/env"
-
-_command kubectl && eval "$(kubectl completion zsh)"
 _command kubectx && alias kctx=kubectx
 _command kubens && alias kns=kubens
-_command aws_vault && eval "$(aws-vault --completion-script-zsh)"
 
 # gcloud CLI completion
 _source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
 _source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
-
-_command saml2aws && eval "$(saml2aws --completion-script-zsh)"
 
 # fzf
 if _command fzf; then
@@ -205,50 +185,16 @@ fi
 
 export WORDCHARS=""
 
-# Try pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && path+=("$PYENV_ROOT/bin")
-
-_command op && eval "$(op completion zsh)"
-
-_command docker && docker &>1 && eval "$(docker completion zsh)"
-
-# krew
-if [ -d "$HOME/.krew/bin" ] || [ -n "$KREW_ROOT" ]; then
-  path+=("${KREW_ROOT:-$HOME/.krew}/bin")
-fi
-
 export LESS="--raw-control-chars --quit-if-one-screen"
 export LESSCHARSET="utf-8"
 export MANPAGER="less --use-color -Dd+r -Du+b"
 # export MANROFFOPT="-P -c"
 export PAGER="less"
 
-# atuin: Ctrl+R = atuin history piped to fzf (cmd-only), insert selected
-atuin-fzf-history() {
-  local selected
-  selected=$(atuin history list --cmd-only 2>/dev/null | fzf --tac --no-sort +m -q "${LBUFFER}")
-  [[ -n "$selected" ]] && LBUFFER="$selected" && zle redisplay
-}
-zle -N atuin-fzf-history
-export ATUIN_NOBIND=1
-if [[ -f "$HOME/.atuin/bin/env" ]]; then
-  . "$HOME/.atuin/bin/env"
-fi
-if _command atuin; then
-  eval "$(atuin init zsh --disable-ctrl-r --disable-up-arrow)"
-  bindkey '^R' atuin-fzf-history
-fi
-
-_command tirith && eval "$(tirith init --shell=zsh)"
-
-_command chezmoi && eval "$(chezmoi completion zsh)"
+_command atuin &&  eval "$(atuin init zsh)"
 
 _source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 _source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
-
-typeset -U PATH path
-export PATH
 
 if [[ -n "$ZSH_DO_PROFILING" ]]; then zprof; fi
 

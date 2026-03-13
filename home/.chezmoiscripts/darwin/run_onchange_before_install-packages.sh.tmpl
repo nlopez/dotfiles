@@ -27,7 +27,9 @@ set -eufo pipefail
 		"ghostty"
 		"font-iosevka-nerd-font"
 		"font-iosevka-term-nerd-font"
-		"tailscale-app" -}}
+		"tailscale-app"
+		"1password"
+		"1password-cli" -}}
 
 {{ if .personal -}}
 {{   $brews = concat $brews (list
