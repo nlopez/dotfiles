@@ -1,8 +1,0 @@
-packages:
-  darwin:
-    brews:
-
-    casks:
-    - font-iosevka-nerd-font
-    - font-iosevka-term-nerd-font
-    - ghostty
