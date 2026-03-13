@@ -1,0 +1,8 @@
+{{- $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
+{{- range $brewPrefix := $brewPrefixes -}}
+{{ if stat (printf "%s/bin/brew" $brewPrefix) -}}
+fpath+=("{{ output (printf "%s/bin/brew" $brewPrefix) "--prefix" | trim }}/share/zsh/site-functions")
+
+eval "$({{ printf "%s/bin/brew" $brewPrefix }} shellenv)"
+{{ end -}}
+{{- end -}}
