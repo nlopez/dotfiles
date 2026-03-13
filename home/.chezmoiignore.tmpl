@@ -8,4 +8,14 @@
 
 {{ if ne .chezmoi.os "windows" }}
 .chezmoiscripts/windows/**
+Documents
+{{ else }}
+.zshrc
+.zshprofile
+.dir_colors
+.config/atuin
+.config/ghostty
+.config/tmux
+.config/zabrze
+starship.toml
 {{ end }}
