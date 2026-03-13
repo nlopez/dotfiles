@@ -30,6 +30,8 @@
      "tailscale"
      "vscode"
      "windows-terminal"
+     "go"
+     "tirith"
 -}}
 
 $buckets = @(
@@ -37,6 +39,8 @@ $buckets = @(
      "{{ . }}"
 {{- end }}
 )
+
+scoop bucket add tirith https://github.com/sheeki03/scoop-tirith
 
 $packages = @(
 {{- range ($packages | sortAlpha | uniq) }}
