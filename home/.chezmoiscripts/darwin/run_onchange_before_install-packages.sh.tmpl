@@ -1,0 +1,58 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+set -eufo pipefail
+
+{{ $brews := list
+    "atuin"
+    "direnv"
+    "fd"
+    "fzf"
+    "git"
+    "htop"
+    "kubectl"
+    "ripgrep"
+    "ryooooooga/tap/zabrze"
+    "sheeki03/tap/tirith"
+    "starship"
+    "tirith"
+    "tmux"
+    "uv"
+    "zoxide"
+    "zsh-autosuggestions"
+    "zsh-syntax-highlighting"
+		"go" -}}
+
+{{ $casks := list
+		"ghostty"
+		"font-iosevka-nerd-font"
+		"font-iosevka-term-nerd-font" -}}
+
+{{ if .personal -}}
+{{   $brews = concat $brews (list
+			"ffmpeg"
+			"yt-dlp"
+  ) -}}
+{{   $casks = concat $casks (list
+			"brave"
+			"visual-studio-code") -}}
+{{ end -}}
+
+{{  if .work -}}
+{{   $brews = concat $brews (list
+			"awscli"
+			"tenv") -}}
+{{   $casks = concat $casks (list
+			"docker"
+			"slack") -}}
+{{ end -}}
+
+brew bundle --file=/dev/stdin <<EOF
+{{ range ($brews | sortAlpha | uniq ) -}}
+brew {{ . | quote }}
+{{ end -}}
+{{ range ($casks | sortAlpha | uniq ) -}}
+cask {{ . | quote }}
+{{ end -}}
+EOF
+{{ end -}}

@@ -2,6 +2,7 @@
 {{- $personal := false -}}{{/* true if this machine is for fun */}}
 {{- $work := false -}}{{/* true if this machine is for pay */}}
 {{- $wsl := false -}}{{/* true if we're running inside wsl */}}
+{{- $headless := false -}}{{/* true if we're without a graphical display */}}
 
 {{/* work around unreliable hostname on darwin */}}
 {{- $hostname := .chezmoi.hostname -}}
@@ -17,6 +18,10 @@
 {{- $personalHosts := list "raphael" "intelol" "wassail" }}
 {{- if has $hostname $personalHosts -}}
 {{-   $personal = true -}}
+{{- end -}}
+
+{{- if eq $hostname "wassail" -}}
+{{-   $headless = true -}}
 {{- end -}}
 
 {{- if eq $hostname "workpc" -}}
