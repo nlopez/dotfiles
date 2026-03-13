@@ -16,18 +16,16 @@
   autocrlf = input
   symlinks = true
   editor = vim
-  {{- if eq (get .chezmoi "os") "linux" }}
-  {{- if (get .chezmoi.kernel "osrelease" | lower | contains "microsoft") }}
+{{- if .wsl }}
   sshCommand = ssh.exe
-  {{- end }}
-  {{- end }}
+{{- end }}
 
 [credential]
-  {{- if hasSuffix "WSL2" (get .chezmoi.kernel "osrelease") }}
+{{- if .wsl }}
   helper = manager.exe
-  {{- else }}
+{{- else }}
   helper = manager
-  {{- end }}
+{{- end }}
 
 [init]
   defaultBranch = main
@@ -49,9 +47,9 @@
 
 [gpg "ssh"]
   allowedSignersFile = ~/.config/git/allowed_signers
-  {{- if hasSuffix "WSL2" (get .chezmoi.kernel "osrelease") }}
+{{- if .wsl }}
   program = op-ssh-sign-wsl.exe
-  {{- end }}
+{{- end }}
 
 [alias]
   name = !git symbolic-ref -q HEAD | cut -b 12-
