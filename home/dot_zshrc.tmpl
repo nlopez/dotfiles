@@ -177,21 +177,15 @@ _command kubens && alias kns=kubens
 _source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
 _source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
 
-# fzf
-if _command fzf; then
-  eval "$(fzf --zsh)"
-  export FZF_TMUX=1 # enable tmux integration
-fi
-
 export WORDCHARS=""
 
-export LESS="--raw-control-chars --quit-if-one-screen"
+export LESS="--raw-control-chars --quit-if-one-screen --no-init"
 export LESSCHARSET="utf-8"
 export MANPAGER="less --use-color -Dd+r -Du+b"
 # export MANROFFOPT="-P -c"
 export PAGER="less"
 
-_command atuin &&  eval "$(atuin init zsh)"
+_command atuin && eval "$(atuin init zsh)"
 
 _source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 _source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh

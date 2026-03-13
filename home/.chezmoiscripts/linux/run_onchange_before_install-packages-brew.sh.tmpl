@@ -1,0 +1,21 @@
+#!/bin/bash
+
+{{ $brews := list
+     "atuin"
+     "ryooooooga/tap/zabrze"
+     "sheeki03/tap/tirith"
+     "starship"
+-}}
+
+{{ $casks := list }}
+
+set -eufo pipefail
+
+brew bundle --file=/dev/stdin <<EOF
+{{ range ($brews | sortAlpha | uniq ) -}}
+brew {{ . | quote }}
+{{ end -}}
+{{ range ($casks | sortAlpha | uniq ) -}}
+cask {{ . | quote }}
+{{ end -}}
+EOF

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+{{ $packages := list
+    "build-essential"
+    "curl"
+    "wget"
+    "git"
+    "fd-find"
+    "jq"
+    "yq"
+    "ripgrep"
+    "shellcheck"
+    "zsh"
+    "direnv"
+    "shellcheck"
+    "tmux"
+    "golang"
+    "trash-cli"
+    "bat" -}}
+
+{{ $brews := list
+     "atuin"
+     "ryooooooga/tap/zabrze"
+     "sheeki03/tap/tirith"
+     "starship"
+-}}
+
+{{ $casks := list }}
+
+{{ $sudo := "sudo " -}}
+{{ if eq .chezmoi.username "root" -}}
+{{   $sudo = "" -}}
+{{ end -}}
+
+set -eufo pipefail
+
+{{ $sudo }}apt-get update
+{{ $sudo }}apt-get install -y {{ $packages | sortAlpha | uniq | join " " }}
