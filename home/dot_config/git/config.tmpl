@@ -14,6 +14,7 @@
 [core]
   quotepath = false
   autocrlf = input
+  safecrlf = false
   symlinks = true
   editor = vim
 {{- if or .wsl (eq .chezmoi.os "windows") }}
@@ -55,7 +56,7 @@
   name = !git symbolic-ref -q HEAD | cut -b 12-
   mbase = !git merge-base $(git name) origin/$1 && :
   # squash relative to any origin branch
-	squash = "!f(){ git reset --soft $(git merge-base $(git rev-parse --abbrev-ref origin/HEAD) $(git branch --show-current)) && git commit -am \"${1}\";};f"
+  squash = "!f(){ git reset --soft $(git merge-base $(git rev-parse --abbrev-ref origin/HEAD) $(git branch --show-current)) && git commit -am \"${1}\";};f"
   pushf = push --force-with-lease
   # subtree add
   sba = "!f() { git subtree add --prefix $2 $1 master --squash; }; f"
@@ -85,3 +86,6 @@
   branches = !git for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/heads
   branchesr = !git for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/remotes
   prettylog = !git log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short
+
+[url "ssh://git@"]
+  insteadOf = "https://"
