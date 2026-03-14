@@ -1,3 +1,4 @@
+# Ignore scripts for different operating systems.
 {{ if ne .chezmoi.os "darwin" }}
 .chezmoiscripts/darwin/**
 {{ end }}
@@ -10,13 +11,11 @@
 .chezmoiscripts/windows/**
 Documents
 {{ else }}
-.zshrc
-.zshprofile
-.dir_colors
-.config/atuin
-.config/ghostty
-.config/tmux
-.config/zabrze
-.config/starship.toml
-.hushlogin
+# For Windows, explicitly include the dotfiles we want.
+*
+!.chezmoiscripts/windows/**
+!Documents/**
+!.config/git/**
+!.config/rclone/**
+!.ssh/**
 {{ end }}
