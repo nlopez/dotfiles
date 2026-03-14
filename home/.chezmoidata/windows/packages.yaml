@@ -27,6 +27,7 @@ packages:
         - git
         - git-credential-manager
         - go
+        - googlechrome
         - gsudo
         - hwinfo
         - icaros-np
@@ -35,6 +36,7 @@ packages:
         - losslesscut
         - mpv
         - nvcleanstall
+        - open-shell-np
         - oxipng
         - paint.net
         - powertoys
@@ -47,7 +49,7 @@ packages:
         - tailscale
         - vscode
         - windows-terminal
-        - winfsp
+        - winfsp-np
         - zen-browser
         personal: []
         work: []
