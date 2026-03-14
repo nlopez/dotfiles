@@ -9,5 +9,6 @@ function gc { git commit @args }
 function gp { git push @args }
 function gup { git pull --rebase @args }
 function gdc { git diff --cached @args }
+function grhh { git reset --hard HEAD @args }
 Set-Alias -Name e -Value code
 Import-Module gsudoModule
