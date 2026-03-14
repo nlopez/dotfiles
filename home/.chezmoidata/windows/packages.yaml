@@ -1,0 +1,48 @@
+packages:
+  windows:
+    scoop:
+      buckets:
+        base:
+        - name: main
+          url: https://github.com/ScoopInstaller/Main
+        - name: extras
+          url: https://github.com/ScoopInstaller/Extras
+        - name: versions
+          url: https://github.com/ScoopInstaller/Versions
+        - name: nonportable
+          url: https://github.com/ScoopInstaller/Nonportable
+        personal: []
+        work: []
+      packages:
+        base:
+        - 1password-cli
+        - 7zip
+        - brave
+        - cpu-z
+        - eartrumpet
+        - everything
+        - gimp
+        - git
+        - gsudo
+        - icaros-np
+        - irfanview
+        - losslesscut
+        - mpv
+        - nvcleanstall
+        - open-shell-np
+        - oxipng
+        - paint.net
+        - runcat
+        - sharex
+        - steam
+        - sumatrapdf
+        - tailscale
+        - vscode
+        - windows-terminal
+        - go
+        - hwinfo
+        - zen-browser
+        - espanso
+        - powertoys
+        personal: []
+        work: []

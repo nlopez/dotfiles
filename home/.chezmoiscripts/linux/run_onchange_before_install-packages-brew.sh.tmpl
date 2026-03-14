@@ -1,14 +1,23 @@
 #!/bin/bash
 
-{{ $brews := list
-     "atuin"
-     "ryooooooga/tap/zabrze"
-     "starship"
-     "rclone"
-     "go"
--}}
+{{ $brewConfig := .packages.linux.brew -}}
+{{ $brews := $brewConfig.brews.base -}}
+{{ $casks := $brewConfig.casks.base -}}
 
-{{ $casks := list }}
+{{ if .personal -}}
+{{   $brews = concat $brews $brewConfig.brews.personal -}}
+{{   $casks = concat $casks $brewConfig.casks.personal -}}
+{{ end -}}
+
+{{ if .work -}}
+{{   $brews = concat $brews $brewConfig.brews.work -}}
+{{   $casks = concat $casks $brewConfig.casks.work -}}
+{{ end -}}
+
+{{ if .wsl -}}
+{{   $brews = concat $brews $brewConfig.brews.wsl -}}
+{{   $casks = concat $casks $brewConfig.casks.wsl -}}
+{{ end -}}
 
 set -eufo pipefail
 
