@@ -1,0 +1,61 @@
+{{ $scoopConfig := .packages.windows.scoop -}}
+{{ $buckets := $scoopConfig.buckets.base -}}
+{{ $packages := $scoopConfig.packages.base -}}
+
+{{ if .personal -}}
+{{   $buckets = concat $buckets $scoopConfig.buckets.personal -}}
+{{   $packages = concat $packages $scoopConfig.packages.personal -}}
+{{ end -}}
+
+{{ if .work -}}
+{{   $buckets = concat $buckets $scoopConfig.buckets.work -}}
+{{   $packages = concat $packages $scoopConfig.packages.work -}}
+{{ end -}}
+
+$bucketSources = @(
+{{- range $bucket := $buckets }}
+     [pscustomobject]@{
+          Name = "{{ $bucket.name }}"
+          Url = "{{ $bucket.url }}"
+     }
+{{- end }}
+)
+
+$packages = @(
+{{- range ($packages | sortAlpha | uniq) }}
+     "{{ . }}"
+{{- end }}
+)
+
+$scoopState = scoop export | Out-String | ConvertFrom-Json
+
+$installedBuckets = @{}
+foreach ($bucket in $scoopState.buckets) {
+     if ($bucket.Name) {
+          $installedBuckets[$bucket.Name] = $true
+     }
+}
+
+$installedPackages = @{}
+foreach ($app in $scoopState.apps) {
+     if ($app.Name) {
+          $installedPackages[$app.Name] = $true
+     }
+}
+
+foreach ($entry in $bucketSources) {
+     if (-not $installedBuckets.ContainsKey($entry.Name)) {
+          if ($entry.Url) {
+               scoop bucket add $entry.Name $entry.Url
+          }
+          else {
+               scoop bucket add $entry.Name
+          }
+     }
+}
+
+foreach ($package in $packages) {
+     if (-not $installedPackages.ContainsKey($package)) {
+          scoop install $package
+     }
+}

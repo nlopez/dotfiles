@@ -1,0 +1,39 @@
+packages:
+  linux:
+    apt:
+      packages:
+        base:
+        - build-essential
+        - curl
+        - wget
+        - git
+        - fd-find
+        - jq
+        - yq
+        - ripgrep
+        - shellcheck
+        - zsh
+        - direnv
+        - tmux
+        - trash-cli
+        - bat
+        personal: []
+        work: []
+        wsl: []
+
+    brew:
+      brews:
+        base:
+        - atuin
+        - ryooooooga/tap/zabrze
+        - starship
+        - rclone
+        - go
+        personal: []
+        work: []
+        wsl: []
+      casks:
+        base: []
+        personal: []
+        work: []
+        wsl: []

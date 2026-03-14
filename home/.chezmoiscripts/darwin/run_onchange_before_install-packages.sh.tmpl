@@ -2,58 +2,18 @@
 
 set -eufo pipefail
 
-{{ $brews := list
-    "atuin"
-    "direnv"
-    "fd"
-    "fzf"
-    "git"
-    "htop"
-    "kubectl"
-    "ripgrep"
-    "ryooooooga/tap/zabrze"
-    "starship"
-    "tmux"
-		"yq"
-		"jq"
-		"shellcheck"
-    "uv"
-    "zoxide"
-    "zsh-autosuggestions"
-    "zsh-syntax-highlighting"
-		"k9s"
-		"go"
-		"tac"
-		"bat"
-		"rclone" -}}
-
-{{ $casks := list
-		"ghostty"
-		"font-iosevka-nerd-font"
-		"font-iosevka-term-nerd-font"
-		"tailscale-app"
-		"1password"
-		"1password-cli" -}}
+{{ $brewConfig := .packages.darwin.brew -}}
+{{ $brews := $brewConfig.brews.base -}}
+{{ $casks := $brewConfig.casks.base -}}
 
 {{ if .personal -}}
-{{   $brews = concat $brews (list
-			 "ffmpeg"
-			 "yt-dlp"
-       "oxipng") -}}
-{{   $casks = concat $casks (list
-			 "brave-browser"
-			 "visual-studio-code") -}}
+{{   $brews = concat $brews $brewConfig.brews.personal -}}
+{{   $casks = concat $casks $brewConfig.casks.personal -}}
 {{ end -}}
 
 {{ if .work -}}
-{{   $brews = concat $brews (list
-		   "awscli"
-			 "tenv"
-		 )
--}}
-{{   $casks = concat $casks (list
-			 "docker"
-			 "slack") -}}
+{{   $brews = concat $brews $brewConfig.brews.work -}}
+{{   $casks = concat $casks $brewConfig.casks.work -}}
 {{ end -}}
 
 brew bundle --file=/dev/stdin <<EOF

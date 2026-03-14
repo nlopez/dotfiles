@@ -1,21 +1,19 @@
 #!/bin/bash
 
-{{ $packages := list
-    "build-essential"
-    "curl"
-    "wget"
-    "git"
-    "fd-find"
-    "jq"
-    "yq"
-    "ripgrep"
-    "shellcheck"
-    "zsh"
-    "direnv"
-    "shellcheck"
-    "tmux"
-    "trash-cli"
-    "bat" -}}
+{{ $aptConfig := .packages.linux.apt -}}
+{{ $packages := $aptConfig.packages.base -}}
+
+{{ if .personal -}}
+{{   $packages = concat $packages $aptConfig.packages.personal -}}
+{{ end -}}
+
+{{ if .work -}}
+{{   $packages = concat $packages $aptConfig.packages.work -}}
+{{ end -}}
+
+{{ if .wsl -}}
+{{   $packages = concat $packages $aptConfig.packages.wsl -}}
+{{ end -}}
 
 {{ $sudo := "sudo " -}}
 {{ if eq .chezmoi.username "root" -}}

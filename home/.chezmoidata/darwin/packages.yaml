@@ -1,0 +1,49 @@
+packages:
+  darwin:
+    brew:
+      brews:
+        base:
+        - atuin
+        - direnv
+        - fd
+        - fzf
+        - git
+        - htop
+        - kubectl
+        - ripgrep
+        - ryooooooga/tap/zabrze
+        - starship
+        - tmux
+        - yq
+        - jq
+        - shellcheck
+        - uv
+        - zoxide
+        - zsh-autosuggestions
+        - zsh-syntax-highlighting
+        - k9s
+        - go
+        - tac
+        - bat
+        - rclone
+        personal:
+        - ffmpeg
+        - yt-dlp
+        - oxipng
+        work:
+        - awscli
+        - tenv
+      casks:
+        base:
+        - ghostty
+        - font-iosevka-nerd-font
+        - font-iosevka-term-nerd-font
+        - tailscale-app
+        - 1password
+        - 1password-cli
+        personal:
+        - brave-browser
+        - visual-studio-code
+        work:
+        - docker
+        - slack
