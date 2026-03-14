@@ -12,50 +12,57 @@
 {{   $packages = concat $packages $scoopConfig.packages.work -}}
 {{ end -}}
 
-$bucketSources = @(
+$desiredBuckets = @(
 {{- range $bucket := $buckets }}
-     [pscustomobject]@{
+     [ordered]@{
           Name = "{{ $bucket.name }}"
-          Url = "{{ $bucket.url }}"
+{{- if $bucket.url }}
+          Source = "{{ $bucket.url }}"
+{{- end }}
      }
 {{- end }}
 )
 
-$packages = @(
+$desiredPackages = @(
 {{- range ($packages | sortAlpha | uniq) }}
      "{{ . }}"
 {{- end }}
 )
 
-$scoopState = scoop export | Out-String | ConvertFrom-Json
-
-$installedBuckets = @{}
-foreach ($bucket in $scoopState.buckets) {
-     if ($bucket.Name) {
-          $installedBuckets[$bucket.Name] = $true
-     }
-}
-
-$installedPackages = @{}
-foreach ($app in $scoopState.apps) {
-     if ($app.Name) {
-          $installedPackages[$app.Name] = $true
-     }
-}
-
-foreach ($entry in $bucketSources) {
-     if (-not $installedBuckets.ContainsKey($entry.Name)) {
-          if ($entry.Url) {
-               scoop bucket add $entry.Name $entry.Url
+$desiredState = [ordered]@{
+     buckets = @($desiredBuckets | Sort-Object Name -Unique)
+     apps = @(
+          $desiredPackages | ForEach-Object {
+               # Scoop import expects Source; setting it to the app token installs by app name.
+               [ordered]@{ Name = $_; Source = $_ }
           }
-          else {
-               scoop bucket add $entry.Name
-          }
-     }
+     )
 }
 
-foreach ($package in $packages) {
-     if (-not $installedPackages.ContainsKey($package)) {
-          scoop install $package
+$scoopfileState = [ordered]@{
+     buckets = $desiredState.buckets
+     apps = $desiredState.apps
+}
+
+$scoopfilePath = Join-Path $env:TEMP ("chezmoi-scoopfile-{0}.json" -f [guid]::NewGuid())
+
+try {
+     $scoopfileState | ConvertTo-Json -Depth 8 | Set-Content -Path $scoopfilePath -Encoding utf8
+     # Scoop can emit messages on warning/information streams; merge all streams for filtering.
+     $importOutput = & scoop import $scoopfilePath *>&1
+     $suppressPattern = '(?i)already exists|already installed'
+
+     foreach ($line in $importOutput) {
+          $text = $line.ToString()
+          if ($text -notmatch $suppressPattern) {
+               Write-Host $text
+          }
      }
+
+     if ($LASTEXITCODE -ne 0) {
+          throw "scoop import failed with exit code $LASTEXITCODE"
+     }
+}
+finally {
+     Remove-Item -Path $scoopfilePath -ErrorAction SilentlyContinue
 }
