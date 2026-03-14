@@ -18,12 +18,16 @@ packages:
         - 1password-cli
         - 7zip
         - brave
+        - context-menu-manager
         - cpu-z
         - eartrumpet
+        - espanso
         - everything
         - gimp
         - git
+        - go
         - gsudo
+        - hwinfo
         - icaros-np
         - irfanview
         - losslesscut
@@ -32,6 +36,7 @@ packages:
         - open-shell-np
         - oxipng
         - paint.net
+        - powertoys
         - runcat
         - sharex
         - steam
@@ -39,10 +44,6 @@ packages:
         - tailscale
         - vscode
         - windows-terminal
-        - go
-        - hwinfo
         - zen-browser
-        - espanso
-        - powertoys
         personal: []
         work: []
