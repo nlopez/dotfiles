@@ -17,12 +17,11 @@ packages:
         base:
         - 1password-cli
         - 7zip
-        - brave
         - context-menu-manager
         - cpu-z
         - eartrumpet
         - espanso
-        - everything
+        - everything-alpha
         - gimp
         - git
         - go
@@ -33,7 +32,6 @@ packages:
         - losslesscut
         - mpv
         - nvcleanstall
-        - open-shell-np
         - oxipng
         - paint.net
         - powertoys
@@ -45,5 +43,6 @@ packages:
         - vscode
         - windows-terminal
         - zen-browser
+        - firefox
         personal: []
         work: []
