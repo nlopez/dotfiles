@@ -19,22 +19,27 @@ packages:
         - 7zip
         - context-menu-manager
         - cpu-z
+        - cryptomator
         - eartrumpet
         - espanso
         - everything-alpha
         - gimp
         - git
+        - git-credential-manager
         - go
         - gsudo
         - hwinfo
         - icaros-np
         - irfanview
+        - islc
         - losslesscut
         - mpv
         - nvcleanstall
         - oxipng
         - paint.net
         - powertoys
+        - rclone
+        - regeditor
         - runcat
         - sharex
         - steam
@@ -42,7 +47,7 @@ packages:
         - tailscale
         - vscode
         - windows-terminal
+        - winfsp
         - zen-browser
-        - firefox
         personal: []
         work: []
