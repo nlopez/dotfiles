@@ -1,4 +1,5 @@
 $env:Path += ";$env:UserProfile\bin"
+$env:Path += ";$env:UserProfile\.local\bin"
 Set-Alias -Name g -Value git
 # Remove default aliases so gc/gp can be used as git functions.
 Remove-Item alias:gc -Force -ErrorAction SilentlyContinue
