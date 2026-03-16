@@ -3,11 +3,13 @@ packages:
     brew:
       brews:
         base:
+        - ncdu
         - atuin
         - direnv
         - fd
         - fzf
         - git
+        - yazi
         - htop
         - kubectl
         - ripgrep
@@ -23,7 +25,7 @@ packages:
         - zsh-syntax-highlighting
         - k9s
         - go
-        - tac
+        - coreutils
         - bat
         - rclone
         personal:
@@ -41,9 +43,11 @@ packages:
         - tailscale-app
         - 1password
         - 1password-cli
+        - docker-desktop
+        - claude
+        - claude-code
         personal:
         - brave-browser
         - visual-studio-code
         work:
-        - docker
         - slack
