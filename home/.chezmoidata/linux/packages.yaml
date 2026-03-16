@@ -30,8 +30,7 @@ packages:
         - starship
         - rclone
         - go
-        - node
-        - http-server
+        - uv
         personal: []
         work: []
         wsl: []

@@ -1,0 +1,28 @@
+#!/usr/bin/env -S uv run --script
+# Like the cloned sheep, because it runs git clone.
+from shlex import quote
+from subprocess import call
+from urllib.parse import urlparse
+import argparse
+import os
+
+# clones a git repo into a dir hierarchy based
+# on its url. for example, https://github.com/nlopez/dotfiles
+# will be cloned into ~/src/github.com/nlopez/dotfiles
+
+parser = argparse.ArgumentParser()
+parser.add_argument("url", help="git clone <url>")
+parser.add_argument("git_args", nargs="*", help="additional arguments to pass to git clone")
+args = parser.parse_args()
+
+home = os.path.expanduser("~")
+url = urlparse(args.url)
+_netloc = url.netloc.split('@')[-1]
+clone_destination = home + "/src/" + _netloc + url.path
+
+# Build the git clone command with additional arguments
+git_clone_cmd = ["git", "clone", url.geturl(), clone_destination]
+if args.git_args:
+    git_clone_cmd.extend(args.git_args)
+
+call(git_clone_cmd)
