@@ -3,20 +3,21 @@ packages:
     apt:
       packages:
         base:
+        - bat
         - build-essential
         - curl
-        - wget
-        - git
+        - direnv
         - fd-find
+        - git
         - jq
-        - yq
+        - mkcert
         - ripgrep
         - shellcheck
-        - zsh
-        - direnv
         - tmux
         - trash-cli
-        - bat
+        - wget
+        - yq
+        - zsh
         personal: []
         work: []
         wsl: []
