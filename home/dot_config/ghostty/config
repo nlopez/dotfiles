@@ -11,3 +11,5 @@ font-feature = -calt
 shell-integration = zsh
 title = " "
 macos-titlebar-style = hidden
+cursor-style = block
+cursor-style-blink = false

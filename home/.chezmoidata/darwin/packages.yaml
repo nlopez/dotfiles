@@ -28,6 +28,7 @@ packages:
         - coreutils
         - bat
         - rclone
+        - eza
         personal:
         - ffmpeg
         - yt-dlp
@@ -44,10 +45,8 @@ packages:
         - 1password
         - 1password-cli
         - docker-desktop
-        - claude
-        - claude-code
+        - visual-studio-code
         personal:
         - brave-browser
-        - visual-studio-code
         work:
         - slack
