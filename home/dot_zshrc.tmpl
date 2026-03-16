@@ -155,7 +155,7 @@ setopt nocaseglob
 setopt kshoptionprint
 
 # History
-export HISTFILE="$ZDOTDIR/.zsh_history"
+export HISTFILE="${XDG_STATE_HOME}/zsh_history"
 export HISTSIZE=50000
 export SAVEHIST=$HISTSIZE
 setopt BANG_HIST                 # Treat the '!' character specially during expansion.
