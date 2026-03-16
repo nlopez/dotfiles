@@ -20,3 +20,7 @@ Documents
 !.config/rclone/**
 !.ssh/**
 {{ end }}
+
+{{ if not .personal }}
+dot_ssh/config_hobby
+{{ end }}
