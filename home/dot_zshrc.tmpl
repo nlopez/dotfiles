@@ -181,6 +181,15 @@ if _command direnv; then eval "$(direnv hook zsh)"; fi
 
 _command dircolors && _source <(dircolors "$HOME/.dir_colors")
 alias ls="ls -lFAh --color=auto"
+{{- if lookPath "bat" }}
+alias cat="bat"
+{{- end }}
+{{- if lookPath "rg" }}
+alias grep="rg"
+{{- end }}
+{{- if lookPath "eza" }}
+alias ls="eza"
+{{- end }}
 
 _command kubectx && alias kctx=kubectx
 _command kubens && alias kns=kubens
