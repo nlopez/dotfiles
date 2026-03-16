@@ -1,4 +1,5 @@
 [user]
+  useConfigOnly = true
   name = {{ .name | quote }}
   email = {{ .email | quote }}
   signingkey = {{ .signingkey | quote }}
@@ -26,6 +27,9 @@
 {{- else }}
   helper = manager
 {{- end }}
+
+[credential "https://github.com"]
+  username = nlopez
 
 [init]
   defaultBranch = main
@@ -89,4 +93,13 @@
 {{- if eq .chezmoi.os "windows" }}
 [safe]
   directory = %(prefix)///wsl.localhost/Ubuntu/home/localuser/.local/share/chezmoi
+{{- end -}}
+
+{{/* Last values win -- keep identity related includes last so they override defaults set earlier */}}
+{{- if .personal }}
+[includeIf "gitdir/i:**/silentshout42/**"]
+  path = config_hobby
+
+[includeIf "gitdir/i:**/kamotimestamps/**"]
+  path = config_hobby
 {{- end }}
