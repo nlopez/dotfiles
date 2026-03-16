@@ -235,9 +235,6 @@ atuin-setup() {
 }
 atuin-setup
 
-_source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-_source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
-
 if [[ -n "$ZSH_DO_PROFILING" ]]; then zprof; fi
 
 _command tmux && if [[ "$TMUX" == "" ]]; then tmux -u new-session -s 0 -A; fi
