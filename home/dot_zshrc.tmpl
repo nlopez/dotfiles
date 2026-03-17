@@ -182,6 +182,9 @@ if _command direnv; then eval "$(direnv hook zsh)"; fi
 {{- if lookPath "bat" }}
 alias cat="bat"
 {{- end }}
+{{- if lookPath "batcat" }}
+alias cat="batcat"
+{{- end }}
 {{- if lookPath "rg" }}
 alias grep="rg"
 {{- end }}
