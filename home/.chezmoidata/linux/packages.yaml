@@ -37,6 +37,7 @@ packages:
         - go
         - uv
         - yazi
+        - pure
         personal: []
         work: []
         wsl: []
