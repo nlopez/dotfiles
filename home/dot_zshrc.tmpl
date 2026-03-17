@@ -211,16 +211,13 @@ export WORDCHARS=""
 export LESS="--raw-control-chars --quit-if-one-screen --no-init"
 export LESSCHARSET="utf-8"
 export MANPAGER="less --use-color -Dd+r -Du+b"
-# export MANROFFOPT="-P -c"
 export PAGER="less"
 
+{{- if lookPath "atuin" }}
 # https://news.ycombinator.com/item?id=35256206
 atuin-setup() {
-	if ! which atuin &> /dev/null; then return 1; fi
-	bindkey '^E' _atuin_search_widget
-
 	export ATUIN_NOBIND="true"
-	eval "$(atuin init --disable-ai --disable-ctrl-r --disable-up-arrow zsh)"
+	eval "$(atuin init zsh)"
 	fzf-atuin-history-widget() {
 			local selected num
 			setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2>/dev/null
@@ -253,6 +250,7 @@ atuin-setup() {
 	bindkey '^R' fzf-atuin-history-widget
 }
 atuin-setup
+{{- end }}
 
 if [[ -n "$ZSH_DO_PROFILING" ]]; then zprof; fi
 
