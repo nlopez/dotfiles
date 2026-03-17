@@ -252,6 +252,8 @@ atuin-setup() {
 atuin-setup
 {{- end }}
 
+eval "$(chezmoi completion zsh)"
+
 if [[ -n "$ZSH_DO_PROFILING" ]]; then zprof; fi
 
 _command tmux && if [[ "$TMUX" == "" ]]; then tmux -u new-session -s 0 -A; fi
