@@ -29,6 +29,7 @@ packages:
         - bat
         - rclone
         - eza
+        - pure
         personal:
         - ffmpeg
         - yt-dlp
