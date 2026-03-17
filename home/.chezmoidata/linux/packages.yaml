@@ -21,6 +21,7 @@ packages:
         - fdupes
         - ncdu
         - eza
+        - tree
         personal: []
         work: []
         wsl: []
@@ -34,6 +35,7 @@ packages:
         - rclone
         - go
         - uv
+        - yazi
         personal: []
         work: []
         wsl: []
