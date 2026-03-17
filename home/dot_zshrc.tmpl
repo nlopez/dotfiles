@@ -113,36 +113,6 @@ elif _command code; then
   alias e="code --add"
 fi
 
-# Terminal window title: full command while running, dirname when idle
-set_terminal_title() {
-  printf '\e]0;%s\a' "$*"
-}
-precmd_terminal_title() {
-  local dir
-  dir=$(starship module directory 2>/dev/null) || dir=""
-  if [[ -n "$dir" ]]; then
-    # Strip ANSI escape sequences for window title
-    dir=$(printf '%s' "$dir" | sed $'s/\033\\[[0-9;]*[A-Za-z]//g')
-    dir=${dir##[[:space:]]#}
-    dir=${dir%%[[:space:]]#}
-    set_terminal_title "${dir:-~}"
-  else
-    if [[ "$PWD" == "$HOME" ]]; then
-      set_terminal_title "~"
-    else
-      set_terminal_title "${PWD:t}"
-    fi
-  fi
-}
-preexec_terminal_title() {
-  local cmd="${1//$'\n'/ }"
-  [[ ${#cmd} -gt 256 ]] && cmd="${cmd:0:253}..."
-  set_terminal_title "$cmd"
-}
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd precmd_terminal_title
-add-zsh-hook preexec preexec_terminal_title
-
 # Misc aliases
 _command brew && alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec \$SHELL"
