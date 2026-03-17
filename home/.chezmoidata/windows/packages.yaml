@@ -52,5 +52,6 @@ packages:
           - winfsp-np
           - zen-browser
           - winaero-tweaker
+          - k9s
         personal: []
         work: []
