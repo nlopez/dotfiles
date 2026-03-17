@@ -18,6 +18,9 @@ packages:
         - wget
         - yq
         - zsh
+        - fdupes
+        - ncdu
+        - eza
         personal: []
         work: []
         wsl: []
