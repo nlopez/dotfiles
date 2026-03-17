@@ -179,8 +179,6 @@ export DIRSTACKSIZE=100
 # direnv
 if _command direnv; then eval "$(direnv hook zsh)"; fi
 
-_command dircolors && _source <(dircolors "$HOME/.dir_colors")
-alias ls="ls -lFAh --color=auto"
 {{- if lookPath "bat" }}
 alias cat="bat"
 {{- end }}
@@ -189,6 +187,12 @@ alias grep="rg"
 {{- end }}
 {{- if lookPath "eza" }}
 alias ls="eza"
+{{- end }}
+{{- if lookPath "fd" }}
+alias find="fd"
+{{- end }}
+{{- if lookPath "fdfind" }}
+alias find="fdfind"
 {{- end }}
 
 _command kubectx && alias kctx=kubectx
