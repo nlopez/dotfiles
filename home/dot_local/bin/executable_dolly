@@ -1,28 +1,138 @@
-#!/usr/bin/env -S uv run --script
+#!/usr/bin/env -S uv run --python 3.14.3 --script
 # Like the cloned sheep, because it runs git clone.
-from shlex import quote
-from subprocess import call
-from urllib.parse import urlparse
+# Sets up a repo for the "bare + worktrees" workflow:
+# https://www.tomups.com/posts/git-worktrees/ (Worktrees level 2)
+from __future__ import annotations
+
 import argparse
-import os
+import shutil
+import sys
+from pathlib import Path
+from shlex import quote
+from subprocess import CompletedProcess, run
+from urllib.parse import urlparse
 
-# clones a git repo into a dir hierarchy based
-# on its url. for example, https://github.com/nlopez/dotfiles
-# will be cloned into ~/src/github.com/nlopez/dotfiles
+# Clones into ~/src/<host>/<path> as:
+#   <dest>/.bare/          — bare repository
+#   <dest>/.git            — gitdir: ./.bare
+#   <dest>/<default>/      — primary worktree (repo HEAD / default branch, e.g. main or master)
 
-parser = argparse.ArgumentParser()
-parser.add_argument("url", help="git clone <url>")
-parser.add_argument("git_args", nargs="*", help="additional arguments to pass to git clone")
-args = parser.parse_args()
 
-home = os.path.expanduser("~")
-url = urlparse(args.url)
-_netloc = url.netloc.split('@')[-1]
-clone_destination = home + "/src/" + _netloc + url.path
+def get_default_branch(repo: Path) -> str:
+    gh = shutil.which("gh")
+    if gh:
+        proc = run(
+            [
+                gh,
+                "repo",
+                "view",
+                "--json",
+                "defaultBranchRef",
+                "-q",
+                ".defaultBranchRef.name",
+            ],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+        )
+        if proc.returncode == 0:
+            name = proc.stdout.strip()
+            if name:
+                return name
+    # Prefer origin/HEAD (set by clone)
+    proc = run(
+        ["git", "-C", str(repo), "symbolic-ref", "refs/remotes/origin/HEAD"],
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode == 0 and proc.stdout:
+        return proc.stdout.strip().removeprefix("refs/remotes/origin/")
+    proc = run(
+        ["git", "-C", str(repo), "remote", "show", "origin"],
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode == 0:
+        for line in proc.stdout.splitlines():
+            if "HEAD branch:" in line:
+                return line.split(":", 1)[1].strip()
+    for branch in ("main", "master"):
+        proc = run(
+            ["git", "-C", str(repo), "rev-parse", f"refs/remotes/origin/{branch}"],
+            capture_output=True,
+        )
+        if proc.returncode == 0:
+            return branch
+    print("error: could not detect default branch", file=sys.stderr)
+    raise SystemExit(1)
 
-# Build the git clone command with additional arguments
-git_clone_cmd = ["git", "clone", url.geturl(), clone_destination]
-if args.git_args:
-    git_clone_cmd.extend(args.git_args)
 
-call(git_clone_cmd)
+def _git(repo: Path, *git_args: str, check: bool = False) -> CompletedProcess[str]:
+    return run(["git", "-C", str(repo), *git_args], check=check, text=True)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Clone a Git repo as bare + primary worktree under ~/src/<host>/…",
+    )
+    parser.add_argument("url", help="git clone <url>")
+    parser.add_argument(
+        "git_args",
+        nargs="*",
+        help="additional arguments to pass to git clone --bare",
+    )
+    args = parser.parse_args()
+
+    url = urlparse(args.url)
+    netloc = url.netloc.split("@")[-1]
+    clone_destination = Path.home() / "src" / netloc / url.path.lstrip("/")
+    bare_dir = clone_destination / ".bare"
+
+    if clone_destination.exists() and any(clone_destination.iterdir()):
+        print(f"error: destination not empty: {clone_destination}", file=sys.stderr)
+        return 1
+
+    clone_destination.mkdir(parents=True, exist_ok=True)
+
+    clone = run(
+        ["git", "clone", "--bare", *args.git_args, url.geturl(), str(bare_dir)],
+    )
+    if clone.returncode != 0:
+        return clone.returncode
+
+    (clone_destination / ".git").write_text("gitdir: ./.bare\n", encoding="utf-8")
+
+    branch = get_default_branch(clone_destination)
+    fetch_spec = f"+refs/heads/{branch}:refs/remotes/origin/{branch}"
+    _git(
+        clone_destination,
+        "config",
+        "remote.origin.fetch",
+        fetch_spec,
+        check=True,
+    )
+    fetch = _git(clone_destination, "fetch", "origin")
+    if fetch.returncode != 0:
+        return fetch.returncode
+
+    wt = _git(clone_destination, "worktree", "add", branch, branch)
+    if wt.returncode != 0:
+        return wt.returncode
+
+    work_path = clone_destination / branch
+    up = _git(
+        work_path,
+        "branch",
+        "--set-upstream-to",
+        f"origin/{branch}",
+    )
+    if up.returncode != 0:
+        return up.returncode
+    print(f"Bare repo: {clone_destination}")
+    print(f"Work in:   {work_path}")
+    print(f"Add more:  git -C {quote(str(clone_destination))} worktree add <path> <branch>")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
