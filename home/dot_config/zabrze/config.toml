@@ -138,3 +138,8 @@ snippet = "kubens"
 name = "kctx"
 trigger = "kctx"
 snippet = "kubectx"
+
+[[snippets]]
+name = "I Am Git Root"
+trigger = "groot"
+snippet = "printf \"%s\" \"$(git rev-parse --show-toplevel)\""
