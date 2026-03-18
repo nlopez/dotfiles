@@ -1,5 +1,8 @@
 if [[ -n "$ZSH_DO_PROFILING" ]]; then zmodload zsh/zprof; fi
 
+###############################################################################
+# XDG & helpers
+###############################################################################
 export XDG_DATA_HOME=$HOME/.local/share
 export XDG_CONFIG_HOME=$HOME/.config
 export XDG_STATE_HOME=$HOME/.local/state
@@ -13,33 +16,62 @@ function _command() {
   command -v $1 >/dev/null 2>&1
 }
 
-autoload -U promptinit; promptinit
-prompt pure
+###############################################################################
+# History (after XDG so HISTFILE path is valid)
+###############################################################################
+export HISTFILE="${XDG_STATE_HOME}/zsh_history"
+export HISTSIZE=50000
+export SAVEHIST=$HISTSIZE
+setopt BANG_HIST                 # Treat the '!' character specially during expansion.
+setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
+setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
+setopt APPEND_HISTORY            # Always append to, never overwrite
+setopt SHARE_HISTORY             # Share history between all sessions.
+setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
+setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
+setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
+setopt HIST_VERIFY               # Don't execute immediately upon history expansion.
+setopt HIST_BEEP                 # Beep when accessing nonexistent history.
 
-# Ensure path array does not contain duplicates with -U for unique
+###############################################################################
+# PATH / umask / env (BREW_PREFIX often in .zshrc_local)
+###############################################################################
 typeset -gaU fpath path
 
-{{- $paths := list }}
-{{- /* home directory paths */}}
-{{- $homeDir := .chezmoi.homeDir }}
-{{ range $_, $relPath := list "bin" "go/bin" ".cargo/bin" ".local/bin" }}
-{{  $path := joinPath $homeDir $relPath }}
-{{-   if stat $path }}
-{{-     $paths = mustAppend $paths $path }}
-{{-   end }}
-{{- end }}
-{{- /* work paths */}}
-{{- if .work }}
-{{-   range $_, $workPath := list "/opt/dogbrew/bin" }}
-{{-     if stat $workPath }}
-{{-       $paths = mustAppend $paths $workPath }}
-{{-     end }}
-{{-   end }}
-{{- end }}
-{{- /* set paths */}}
-{{- if $paths }}
+# Non-login interactive shells (e.g. chezmoi cd) skip .zprofile; pure + brew
+# completions live under site-functions.
+
+{{ $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
+{{ range $brewPrefix := $brewPrefixes -}}
+{{ if stat (printf "%s/bin/brew" $brewPrefix) -}}
+fpath+=("{{ output (printf "%s/bin/brew" $brewPrefix) "--prefix" | trim }}/share/zsh/site-functions")
+
+eval "$({{ printf "%s/bin/brew" $brewPrefix }} shellenv)"
+{{ end -}}
+{{ end -}}
+{{ $paths := list -}}
+{{- /* home directory paths */ -}}
+{{- $homeDir := .chezmoi.homeDir -}}
+{{- range $_, $relPath := list "bin" "go/bin" ".cargo/bin" ".local/bin" -}}
+{{- $path := joinPath $homeDir $relPath -}}
+{{- if stat $path -}}
+{{- $paths = mustAppend $paths $path -}}
+{{- end -}}
+{{- end -}}
+{{- /* work paths */ -}}
+{{- if .work -}}
+{{- range $_, $workPath := list "/opt/dogbrew/bin" -}}
+{{- if stat $workPath -}}
+{{- $paths = mustAppend $paths $workPath -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- /* set paths */ -}}
+{{- if $paths -}}
 path=({{ toStrings $paths | join ":" }} $path)
-{{- end }}
+{{ end -}}
 
 umask 077
 
@@ -48,8 +80,14 @@ export HOMEBREW_CASK_OPTS="--appdir=${HOME}/Applications"
 export SSH_AUTH_SOCK="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 export HOMEBREW_NO_AUTO_UPDATE=1
 export HOMEBREW_NO_ENV_HINTS=1
+{{- end }}
 
-# TODO: Refactor for chezmoi
+export TENV_AUTO_INSTALL=true
+
+# shellcheck source=./.zshrc_local
+_source "$ZDOTDIR/.zshrc_local"
+
+{{- if eq .chezmoi.os "darwin" }}
 if [ -d "$BREW_PREFIX" ]; then
   # GNU utils as default names: sed→gsed, find→gfind, etc.
   local gnu_formulas=(coreutils gnu-sed findutils gnu-tar gnu-time)
@@ -63,51 +101,108 @@ if [ -d "$BREW_PREFIX" ]; then
 fi
 {{- end }}
 
-# Enable Ctrl-x-e to edit command line
+# gcloud CLI PATH (before completion)
+_source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
+
+###############################################################################
+# Shell options (before completion / key widgets)
+###############################################################################
+setopt cdablevars
+setopt extendedglob
+setopt nocaseglob
+setopt kshoptionprint
+setopt correct
+setopt complete_in_word
+setopt always_to_end
+
+setopt autopushd pushdminus pushdsilent pushdtohome pushdignoredups
+alias dh='dirs -v'
+export DIRSTACKSIZE=100
+
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '^xe' edit-command-line
 bindkey '^x^e' edit-command-line
 
-export TENV_AUTO_INSTALL=true
-
 ###############################################################################
-# Completion (system and Homebrew completions via default fpath)
+# Completion (after PATH/fpath settled)
 ###############################################################################
 autoload -Uz compinit
-# Skip compaudit (-C) when using cached dump
-# Rebuild dump when it's older than 24h so new completions are picked up.
 if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
   compinit -C -d "${ZDOTDIR:-$HOME}/.zcompdump"
 else
   compinit -d "${ZDOTDIR:-$HOME}/.zcompdump"
 fi
 
-# Bash-style completions for tools that ship them (e.g. aws, docker)
 autoload -Uz bashcompinit
 bashcompinit
 
-# Basic completion options (close to default zsh behavior)
-setopt complete_in_word
-setopt always_to_end
 zstyle ':completion:*' menu select
 zstyle ':completion:*' special-dirs true
 
+_source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+
+eval "$(chezmoi completion zsh)"
+
+###############################################################################
+# Prompt
+###############################################################################
+autoload -U promptinit
+promptinit
+prompt pure
+
+###############################################################################
+# Hooks & tools that use completion / zle
+###############################################################################
 {{- if lookPath "zoxide" }}
 eval "$(zoxide init zsh)"
 alias cd=z
 {{- end }}
 
-# Correction
-setopt correct
-
-# shellcheck source=./.zshrc_local
-_source "$ZDOTDIR/.zshrc_local"
-
-# Abbreviations
 _command zabrze && eval "$(zabrze init --bind-keys)"
 
-# Editor
+if _command direnv; then eval "$(direnv hook zsh)"; fi
+
+{{- if lookPath "atuin" }}
+# https://news.ycombinator.com/item?id=35256206
+atuin-setup() {
+  export ATUIN_NOBIND="true"
+  eval "$(atuin init zsh)"
+  fzf-atuin-history-widget() {
+    local selected num
+    setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2>/dev/null
+
+    local atuin_opts="--cmd-only"
+    local fzf_opts=(
+      --height=${FZF_TMUX_HEIGHT:-80%}
+      --tac
+      "-n2..,.."
+      --tiebreak=index
+      "--query=${LBUFFER}"
+      "+m"
+      "--bind=ctrl-d:reload(atuin search $atuin_opts -c $PWD),ctrl-r:reload(atuin search $atuin_opts)"
+    )
+
+    selected=$(
+      eval "atuin search ${atuin_opts}" |
+        fzf "${fzf_opts[@]}"
+    )
+    local ret=$?
+    if [ -n "$selected" ]; then
+      LBUFFER+="${selected}"
+    fi
+    zle reset-prompt
+    return $ret
+  }
+  zle -N fzf-atuin-history-widget
+  bindkey '^R' fzf-atuin-history-widget
+}
+atuin-setup
+{{- end }}
+
+###############################################################################
+# Editor & pager
+###############################################################################
 if _command cursor; then
   export EDITOR="cursor --add --wait"
   alias e="cursor --add"
@@ -116,41 +211,17 @@ elif _command code; then
   alias e="code --add"
 fi
 
-# Misc aliases
+export WORDCHARS=""
+export LESS="--raw-control-chars --quit-if-one-screen --no-init"
+export LESSCHARSET="utf-8"
+export MANPAGER="less --use-color -Dd+r -Du+b"
+export PAGER="less"
+
+###############################################################################
+# Aliases
+###############################################################################
 _command brew && alias brewup="brew update && brew upgrade && brew cleanup"
 alias reload="exec \$SHELL"
-
-# Misc
-setopt cdablevars
-setopt extendedglob
-# Make filename globbing case-insensitive (e.g., `*foo` matches `Foo`)
-setopt nocaseglob
-setopt kshoptionprint
-
-# History
-export HISTFILE="${XDG_STATE_HOME}/zsh_history"
-export HISTSIZE=50000
-export SAVEHIST=$HISTSIZE
-setopt BANG_HIST                 # Treat the '!' character specially during expansion.
-setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
-setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
-setopt APPEND_HISTORY            # Always append to history, never overwrite
-setopt SHARE_HISTORY             # Share history between all sessions.
-setopt HIST_IGNORE_DUPS          # Don't record an entry that was just recorded again.
-setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
-setopt HIST_IGNORE_SPACE         # Don't record an entry starting with a space.
-setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
-setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
-setopt HIST_VERIFY               # Don't execute immediately upon history expansion.
-setopt HIST_BEEP                 # Beep when accessing nonexistent history.
-
-# pushd
-setopt autopushd pushdminus pushdsilent pushdtohome pushdignoredups
-alias dh='dirs -v'
-export DIRSTACKSIZE=100
-
-# direnv
-if _command direnv; then eval "$(direnv hook zsh)"; fi
 
 {{- if lookPath "bat" }}
 alias cat="bat"
@@ -175,66 +246,15 @@ alias fd="fdfind"
 _command kubectx && alias kctx=kubectx
 _command kubens && alias kns=kubens
 
-# gcloud CLI completion
-_source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
-_source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
-
-export WORDCHARS=""
-
-export LESS="--raw-control-chars --quit-if-one-screen --no-init"
-export LESSCHARSET="utf-8"
-export MANPAGER="less --use-color -Dd+r -Du+b"
-export PAGER="less"
-
-{{- if lookPath "atuin" }}
-# https://news.ycombinator.com/item?id=35256206
-atuin-setup() {
-	export ATUIN_NOBIND="true"
-	eval "$(atuin init zsh)"
-	fzf-atuin-history-widget() {
-			local selected num
-			setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2>/dev/null
-
-			# local atuin_opts="--cmd-only --limit ${ATUIN_LIMIT:-5000}"
-			local atuin_opts="--cmd-only"
-			local fzf_opts=(
-					--height=${FZF_TMUX_HEIGHT:-80%}
-					--tac
-					"-n2..,.."
-					--tiebreak=index
-					"--query=${LBUFFER}"
-					"+m"
-					"--bind=ctrl-d:reload(atuin search $atuin_opts -c $PWD),ctrl-r:reload(atuin search $atuin_opts)"
-			)
-
-			selected=$(
-					eval "atuin search ${atuin_opts}" |
-							fzf "${fzf_opts[@]}"
-			)
-			local ret=$?
-			if [ -n "$selected" ]; then
-					# the += lets it insert at current pos instead of replacing
-					LBUFFER+="${selected}"
-			fi
-			zle reset-prompt
-			return $ret
-	}
-	zle -N fzf-atuin-history-widget
-	bindkey '^R' fzf-atuin-history-widget
-}
-atuin-setup
-{{- end }}
-
-eval "$(chezmoi completion zsh)"
-
+###############################################################################
+# Functions
+###############################################################################
 wt()      { git worktree add -b "$1" "$WT_DIR/$1" "${2:-main}"; }
 wtr()     { git fetch origin "$1" && git worktree add --detach "$WT_DIR/${2:-${1//\//-}}" "origin/$1"; }
 wtrm()    { git worktree remove "$WT_DIR/$1" && [ "${2:-}" != "-k" ] && git branch -d "$1" 2>/dev/null; }
 wtl()     { git worktree list; }
 wtcd()    { cd "$WT_DIR/$1"; }
 wtprune() { git worktree prune -v; }
-
-
 
 if [[ -n "$ZSH_DO_PROFILING" ]]; then zprof; fi
 
