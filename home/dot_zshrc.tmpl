@@ -13,6 +13,9 @@ function _command() {
   command -v $1 >/dev/null 2>&1
 }
 
+autoload -U promptinit; promptinit
+prompt pure
+
 # Ensure path array does not contain duplicates with -U for unique
 typeset -gaU fpath path
 
@@ -229,8 +232,6 @@ wtl()     { git worktree list; }
 wtcd()    { cd "$WT_DIR/$1"; }
 wtprune() { git worktree prune -v; }
 
-autoload -U promptinit; promptinit
-prompt pure
 
 
 if [[ -n "$ZSH_DO_PROFILING" ]]; then zprof; fi
