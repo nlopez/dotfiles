@@ -47,6 +47,7 @@ packages:
         - 1password-cli
         - docker-desktop
         - visual-studio-code
+        - jordanbaird-ice
         personal:
         - brave-browser
         work:
