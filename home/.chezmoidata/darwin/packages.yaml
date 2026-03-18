@@ -47,6 +47,8 @@ packages:
         - tenv
       casks:
         base:
+        - standard-notes
+        - git-credential-manager
         - ghostty
         - font-iosevka-nerd-font
         - font-iosevka-term-nerd-font
