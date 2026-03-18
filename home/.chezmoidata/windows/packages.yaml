@@ -51,5 +51,6 @@ packages:
         - windows-terminal
         - winfsp-np
         - zen-browser
+        - winaero-tweaker
         personal: []
         work: []

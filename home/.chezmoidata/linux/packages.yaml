@@ -38,6 +38,8 @@ packages:
         - uv
         - yazi
         - pure
+        - ffmpeg
+        - helm
         personal: []
         work: []
         wsl: []
