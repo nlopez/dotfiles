@@ -93,8 +93,10 @@ setopt always_to_end
 zstyle ':completion:*' menu select
 zstyle ':completion:*' special-dirs true
 
-# zoxide (smarter cd) – init right after compinit so tab completion for cd is registered
-_command zoxide && eval "$(zoxide init zsh --cmd cd)"
+{{- if lookPath "zoxide" }}
+eval "$(zoxide init zsh)"
+alias cd=z
+{{- end }}
 
 # Correction
 setopt correct
