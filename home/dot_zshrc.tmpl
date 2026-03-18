@@ -38,18 +38,17 @@ setopt HIST_BEEP                 # Beep when accessing nonexistent history.
 ###############################################################################
 # PATH / umask / env (BREW_PREFIX often in .zshrc_local)
 ###############################################################################
-typeset -gaU fpath path
+typeset -gaU fpath path manpath
 
 # Non-login interactive shells (e.g. chezmoi cd) skip .zprofile; pure + brew
 # completions live under site-functions.
 
-{{ $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
-{{ range $brewPrefix := $brewPrefixes -}}
-{{ if stat (printf "%s/bin/brew" $brewPrefix) -}}
-fpath+=("{{ output (printf "%s/bin/brew" $brewPrefix) "--prefix" | trim }}/share/zsh/site-functions")
+{{ $foundBrewPrefix := or (and (stat "/opt/homebrew/bin/brew") "/opt/homebrew") (and (stat "/home/linuxbrew/.linuxbrew/bin/brew") "/home/linuxbrew/.linuxbrew") (and (stat "/usr/local/bin/brew") "/usr/local") "" -}}
+{{ if $foundBrewPrefix -}}
+BREW_PREFIX="{{ $foundBrewPrefix }}"
+fpath+=("${BREW_PREFIX}/share/zsh/site-functions")
 
-eval "$({{ printf "%s/bin/brew" $brewPrefix }} shellenv)"
-{{ end -}}
+eval "$(${BREW_PREFIX}/bin/brew shellenv)"
 {{ end -}}
 {{ $paths := list -}}
 {{- /* home directory paths */ -}}
@@ -83,22 +82,23 @@ export HOMEBREW_NO_ENV_HINTS=1
 {{- end }}
 
 export TENV_AUTO_INSTALL=true
+export GOPATH="${XDG_DATA_HOME}/go"
 
 # shellcheck source=./.zshrc_local
 _source "$ZDOTDIR/.zshrc_local"
 
-{{- if eq .chezmoi.os "darwin" }}
-if [ -d "$BREW_PREFIX" ]; then
-  # GNU utils as default names: sed→gsed, find→gfind, etc.
-  local gnu_formulas=(coreutils gnu-sed findutils gnu-tar gnu-time)
-  for f in $gnu_formulas; do
-    if [[ -d "$BREW_PREFIX/opt/$f/libexec/gnubin" ]]; then
-      path+=("$BREW_PREFIX/opt/$f/libexec/gnubin")
-      export MANPATH="$BREW_PREFIX/opt/$f/libexec/gnuman:${MANPATH:-}"
-    fi
-  done
-  [[ -f "$BREW_PREFIX/opt/gnu-getopt/bin/getopt" ]] && path+=("$BREW_PREFIX/opt/gnu-getopt/bin")
-fi
+{{- if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
+{{-   $gPathAdds := list }}
+{{-   $gManpathAdds := list }}
+{{-   if lookPath "gls" }}
+{{-     $gFormulas := list "coreutils" "gnu-sed" "findutils" "gnu-tar" "gnu-time" "gnu-getopt" "gnu-indent" "gnu-which" "grep" }}
+{{-     range $formula := $gFormulas }}
+{{-       $gnubin := printf "%s/opt/%s/libexec/gnubin" $foundBrewPrefix $formula }}
+{{-       $gnuman := printf "%s/opt/%s/libexec/gnuman" $foundBrewPrefix $formula }}
+{{-     if stat $gnubin }}{{ $gPathAdds = mustPrepend $gPathAdds $gnubin }}{{ end }}
+{{-     if stat $gnuman }}{{ $gManpathAdds = mustPrepend $gManpathAdds $gnuman }}{{ end }}
+{{-     end }}
+{{-   end }}
 {{- end }}
 
 # gcloud CLI PATH (before completion)
@@ -127,14 +127,13 @@ bindkey '^x^e' edit-command-line
 ###############################################################################
 # Completion (after PATH/fpath settled)
 ###############################################################################
-autoload -Uz compinit
+autoload -Uz compinit bashcompinit
 if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
   compinit -C -d "${ZDOTDIR:-$HOME}/.zcompdump"
 else
   compinit -d "${ZDOTDIR:-$HOME}/.zcompdump"
 fi
 
-autoload -Uz bashcompinit
 bashcompinit
 
 zstyle ':completion:*' menu select
