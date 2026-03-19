@@ -8,8 +8,21 @@ defaults write -g KeyRepeat -int 2
 defaults write -g ApplePressAdndHoldEnabled -bool false
 # Use F1, F2, etc. keys as standard function keys
 defaults write -g com.apple.keyboard.fnState -bool true
+# Disable "natural" scrolling
+defaults write -g com.apple.swipescrolldirection -int 0
 # Enable full keyboard access for all controls (e.g. enable Tab in modal dialogs)
 defaults write -g AppleKeyboardUIMode -int 2
+# Disable auto everything
+defaults write -g NSAutomaticCapitalizationEnabled -int 0
+defaults write -g NSAutomaticDashSubstitutionEnabled -int 0
+defaults write -g NSAutomaticInlinePredictionEnabled -int 0
+defaults write -g NSAutomaticPeriodSubstitutionEnabled -int 0
+defaults write -g NSAutomaticQuoteSubstitutionEnabled -int 0
+defaults write -g NSAutomaticSpellingCorrectionEnabled -int 0
+defaults write -g NSAutomaticTextCorrectionEnabled -int 0
+defaults write -g NSAutomaticWindowAnimationsEnabled -int 0
+defaults write -g NSUserDictionaryReplacementItems '()'
+defaults write -g WebAutomaticSpellingCorrectionEnabled -int 0
 
 # Finder
 defaults write -g AppleShowAllExtensions -bool true
