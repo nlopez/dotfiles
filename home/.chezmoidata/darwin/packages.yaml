@@ -58,6 +58,7 @@ packages:
         - docker-desktop
         - visual-studio-code
         - jordanbaird-ice
+        - rectangle
         personal:
         - brave-browser
         work:
