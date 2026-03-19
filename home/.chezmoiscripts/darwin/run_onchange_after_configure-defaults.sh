@@ -5,7 +5,8 @@ set -eufo pipefail
 # Keyboard
 defaults write -g InitialKeyRepeat -int 15
 defaults write -g KeyRepeat -int 2
-defaults write -g ApplePressAdndHoldEnabled -bool false
+# Disable press-and-hold for keys in favor of key repeat
+defaults write -g ApplePressAndHoldEnabled -bool false
 # Use F1, F2, etc. keys as standard function keys
 defaults write -g com.apple.keyboard.fnState -bool true
 # Disable "natural" scrolling
@@ -23,6 +24,8 @@ defaults write -g NSAutomaticTextCorrectionEnabled -int 0
 defaults write -g NSAutomaticWindowAnimationsEnabled -int 0
 defaults write -g NSUserDictionaryReplacementItems '()'
 defaults write -g WebAutomaticSpellingCorrectionEnabled -int 0
+# Enable ctrl + cmd dragging of windows from anywhere in the window, not just the title bar
+defaults write -g NSWindowShouldDragOnGesture -bool true
 
 # Finder
 defaults write -g AppleShowAllExtensions -bool true
@@ -37,7 +40,6 @@ defaults write com.apple.finder FXDefaultSearchScope -string SCcf
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 # Save to disk (not iCloud) by default
 defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
-killall Finder
 
 # Dock
 defaults write com.apple.dock orientation -string bottom
@@ -53,3 +55,5 @@ defaults write com.apple.dock autohide-delay -float 0
 defaults write com.apple.dock autohide-time-modifier -float 0
 
 killall Dock
+killall Finder
+killall SystemUIServer
