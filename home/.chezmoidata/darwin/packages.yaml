@@ -63,7 +63,9 @@ packages:
         - visual-studio-code
         - jordanbaird-ice
         - rectangle
+        - little-snitch
         personal:
         - brave-browser
         work:
         - slack
+        - google-drive

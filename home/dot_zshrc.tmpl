@@ -261,8 +261,8 @@ wtl()     { git worktree list; }
 wtcd()    { cd "$WT_DIR/$1"; }
 wtprune() { git worktree prune -v; }
 
-{{- if .work }}
-AWS_VAULT_KEYCHAIN_NAME=login
+{{ if .work }}
+export AWS_VAULT_KEYCHAIN_NAME=login
 {{- end }}
 
 if [[ -n "$ZSH_DO_PROFILING" ]]; then zprof; fi
