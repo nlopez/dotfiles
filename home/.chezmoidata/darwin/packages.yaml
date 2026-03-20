@@ -51,6 +51,7 @@ packages:
         - tenv
       casks:
         base:
+        - scroll-reverser
         - standard-notes
         - git-credential-manager
         - ghostty

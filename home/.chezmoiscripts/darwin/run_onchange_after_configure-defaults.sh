@@ -9,7 +9,8 @@ defaults write -g KeyRepeat -int 2
 defaults write -g ApplePressAndHoldEnabled -bool false
 # Use F1, F2, etc. keys as standard function keys
 defaults write -g com.apple.keyboard.fnState -bool true
-# Disable "natural" scrolling
+# Enable natural scrolling so trackpad feels right
+# Use https://pilotmoon.com/scrollreverser to keep mouse settings right
 defaults write -g com.apple.swipescrolldirection -int 0
 # Enable full keyboard access for all controls (e.g. enable Tab in modal dialogs)
 defaults write -g AppleKeyboardUIMode -int 2
