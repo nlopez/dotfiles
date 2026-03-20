@@ -28,7 +28,6 @@ packages:
         - go
         - coreutils
         - bat
-        - rclone
         - eza
         - pure
         - gnu-tar
@@ -51,6 +50,7 @@ packages:
         - tenv
       casks:
         base:
+        - macfuse
         - scroll-reverser
         - standard-notes
         - git-credential-manager
