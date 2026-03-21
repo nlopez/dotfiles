@@ -10,4 +10,52 @@ type = webdav
 url = {{ onepasswordRead "op://rclone/media_webdav/url" }}
 user = {{ onepasswordRead "op://rclone/media_webdav/user" }}
 pass = {{ onepasswordRead "op://rclone/media_webdav/pass" }}
-vendor = owncloud
+vendor = rclone
+
+[dropbox_personal]
+type = dropbox
+token = {{ onepasswordRead "op://rclone/dropbox_personal/token" }}
+
+[dropbox_alt]
+type = dropbox
+token = {{ onepasswordRead "op://rclone/dropbox_alt/token" }}
+
+[gdrive_personal]
+type = combine
+upstreams = "My Drive=gdrive_personal_my_drive:" "Shared with me=gdrive_personal_shared_with_me:"
+
+[gdrive_personal_shared_with_me]
+type = drive
+client_id = {{ onepasswordRead "op://rclone/gdrive_personal/client_id" }}
+client_secret = {{ onepasswordRead "op://rclone/gdrive_personal/client_secret" }}
+token = {{ onepasswordRead "op://rclone/gdrive_personal/token" }}
+scope = drive
+shared_with_me = true
+
+[gdrive_personal_my_drive]
+type = drive
+client_id = {{ onepasswordRead "op://rclone/gdrive_personal/client_id" }}
+client_secret = {{ onepasswordRead "op://rclone/gdrive_personal/client_secret" }}
+token = {{ onepasswordRead "op://rclone/gdrive_personal/token" }}
+scope = drive
+shared_with_me = false
+
+[gdrive_alt]
+type = combine
+upstreams = "My Drive=gdrive_alt_my_drive:" "Shared with me=gdrive_alt_shared_with_me:"
+
+[gdrive_alt_shared_with_me]
+type = drive
+client_id = {{ onepasswordRead "op://rclone/gdrive_alt/client_id" }}
+client_secret = {{ onepasswordRead "op://rclone/gdrive_alt/client_secret" }}
+scope = drive
+shared_with_me = true
+token = {{ onepasswordRead "op://rclone/gdrive_alt/token" }}
+
+[gdrive_alt_my_drive]
+type = drive
+client_id = {{ onepasswordRead "op://rclone/gdrive_alt/client_id" }}
+client_secret = {{ onepasswordRead "op://rclone/gdrive_alt/client_secret" }}
+scope = drive
+shared_with_me = false
+token = {{ onepasswordRead "op://rclone/gdrive_alt/token" }}

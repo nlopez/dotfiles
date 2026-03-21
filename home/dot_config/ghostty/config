@@ -6,6 +6,7 @@ confirm-close-surface = false
 theme = iTerm2 Solarized Light
 window-padding-x = 0
 window-padding-y = 0
+window-padding-color = extend
 # Disable ligatures
 font-feature = -calt
 shell-integration = zsh
