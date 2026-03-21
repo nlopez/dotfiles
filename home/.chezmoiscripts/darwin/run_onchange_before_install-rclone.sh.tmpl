@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -eufo pipefail
+
+{{- if lookPath "rclone"}}
+exit 0
+{{- end }}
+
+sudo -v ; curl https://rclone.org/install.sh | sudo bash

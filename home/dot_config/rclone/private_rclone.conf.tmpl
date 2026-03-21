@@ -1,0 +1,13 @@
+[do]
+type = s3
+provider = DigitalOcean
+access_key_id = {{ onepasswordRead "op://rclone/do/access_key_id" }}
+secret_access_key = {{ onepasswordRead "op://rclone/do/secret_access_key" }}
+endpoint = {{ onepasswordRead "op://rclone/do/endpoint" }}
+
+[media]
+type = webdav
+url = {{ onepasswordRead "op://rclone/media_webdav/url" }}
+user = {{ onepasswordRead "op://rclone/media_webdav/user" }}
+pass = {{ onepasswordRead "op://rclone/media_webdav/pass" }}
+vendor = owncloud
