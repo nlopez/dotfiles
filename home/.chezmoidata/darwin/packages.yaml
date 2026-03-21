@@ -67,6 +67,7 @@ packages:
         - little-snitch
         personal:
         - brave-browser
+        - mpv
         work:
         - slack
         - google-drive

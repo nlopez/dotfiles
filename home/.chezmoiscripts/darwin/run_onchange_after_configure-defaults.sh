@@ -22,21 +22,41 @@ defaults write -g NSAutomaticTextCorrectionEnabled -int 0
 defaults write -g NSAutomaticWindowAnimationsEnabled -int 0
 defaults write -g NSUserDictionaryReplacementItems '()'
 defaults write -g WebAutomaticSpellingCorrectionEnabled -int 0
+
+# Trackpad
 defaults write -g com.apple.swipescrolldirection -bool false
+defaults write -g com.apple.trackpad.forceClick -int 0
 
 # Finder
 defaults write -g AppleShowAllExtensions -bool true
 defaults write -g AppleShowAllFiles -bool true
 defaults write com.apple.finder ShowPathbar -bool true
+
 # List view by default
 defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+
 defaults write com.apple.finder _FXSortFoldersFirst -bool true
+
 # Search the current folder by default when performing a search in Finder
 defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
+
 # Don't show the warning when changing a file extension
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
-# Save to disk (not iCloud) by default
+
+# Prefer local disk over iCloud
 defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
+
+# Avoid creating .DS_Store files on network or USB volumes
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
+
+# Expand the following File Info panes:
+# "General", "Open with", and "Sharing & Permissions"
+defaults write com.apple.finder FXInfoPanesExpanded -dict \
+	General -bool true \
+	OpenWith -bool true \
+  Preview -bool true \
+	Privileges -bool true
 
 # Dock
 defaults write com.apple.dock orientation -string "bottom"
