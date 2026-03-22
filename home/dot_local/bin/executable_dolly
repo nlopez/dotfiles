@@ -18,53 +18,10 @@ from urllib.parse import urlparse
 #   <dest>/<default>/      — primary worktree (repo HEAD / default branch, e.g. main or master)
 
 
-def get_default_branch(repo: Path) -> str:
-    gh = shutil.which("gh")
-    if gh:
-        proc = run(
-            [
-                gh,
-                "repo",
-                "view",
-                "--json",
-                "defaultBranchRef",
-                "-q",
-                ".defaultBranchRef.name",
-            ],
-            cwd=repo,
-            capture_output=True,
-            text=True,
-        )
-        if proc.returncode == 0:
-            name = proc.stdout.strip()
-            if name:
-                return name
-    # Prefer origin/HEAD (set by clone)
-    proc = run(
-        ["git", "-C", str(repo), "symbolic-ref", "refs/remotes/origin/HEAD"],
-        capture_output=True,
-        text=True,
-    )
-    if proc.returncode == 0 and proc.stdout:
-        return proc.stdout.strip().removeprefix("refs/remotes/origin/")
-    proc = run(
-        ["git", "-C", str(repo), "remote", "show", "origin"],
-        capture_output=True,
-        text=True,
-    )
-    if proc.returncode == 0:
-        for line in proc.stdout.splitlines():
-            if "HEAD branch:" in line:
-                return line.split(":", 1)[1].strip()
-    for branch in ("main", "master"):
-        proc = run(
-            ["git", "-C", str(repo), "rev-parse", f"refs/remotes/origin/{branch}"],
-            capture_output=True,
-        )
-        if proc.returncode == 0:
-            return branch
-    print("error: could not detect default branch", file=sys.stderr)
-    raise SystemExit(1)
+home = os.path.expanduser("~")
+url = urlparse(args.url)
+_netloc = url.netloc.split('@')[-1]
+clone_destination = home + "/src/" + _netloc + url.path + .bare
 
 
 def _git(repo: Path, *git_args: str, check: bool = False) -> CompletedProcess[str]:
