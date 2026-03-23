@@ -31,8 +31,8 @@ packages:
       brews:
         base:
         - atuin
+        - spaceship
         - ryooooooga/tap/zabrze
-        - starship
         - rclone
         - go
         - uv
