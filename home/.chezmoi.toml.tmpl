@@ -36,6 +36,10 @@ hostname = {{ $hostname | quote }}
 personal = {{ $personal }}
 work = {{ $work }}
 wsl = {{ $wsl }}
+zshPlugins = [
+  "zsh-syntax-highlighting",
+]
+
 
 {{- if eq .chezmoi.os "windows" }}
 [cd]

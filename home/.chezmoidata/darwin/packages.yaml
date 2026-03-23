@@ -3,6 +3,7 @@ packages:
     brew:
       brews:
         base:
+        - tree
         - ncdu
         - atuin
         - direnv
@@ -39,6 +40,7 @@ packages:
         - gh
         - neovim
         - spaceship
+        - testssl
         personal:
         - ffmpeg
         - yt-dlp
@@ -67,7 +69,7 @@ packages:
         - little-snitch
         personal:
         - brave-browser
-        - mpv
+        - stolendata-mpv
         work:
         - slack
         - google-drive

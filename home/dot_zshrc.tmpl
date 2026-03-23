@@ -146,13 +146,6 @@ zstyle ':completion:*' special-dirs true
 
 _source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
 
-{{- $paths := list "share/zsh-autosuggestions/zsh-autosuggestions.zsh" "opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" "share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" -}}
-{{- range $_, $path := $paths }}
-{{- $path := joinPath $foundBrewPrefix $path -}}
-{{- if stat $path }}
-{{ printf "source %s\n" $path }}
-{{- end }}
-{{- end }}
 
 eval "$(chezmoi completion zsh)"
 
