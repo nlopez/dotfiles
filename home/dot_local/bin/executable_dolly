@@ -18,14 +18,13 @@ from urllib.parse import urlparse
 #   <dest>/<default>/      — primary worktree (repo HEAD / default branch, e.g. main or master)
 
 
-home = os.path.expanduser("~")
-url = urlparse(args.url)
-_netloc = url.netloc.split('@')[-1]
-clone_destination = home + "/src/" + _netloc + url.path + .bare
-
-
 def _git(repo: Path, *git_args: str, check: bool = False) -> CompletedProcess[str]:
     return run(["git", "-C", str(repo), *git_args], check=check, text=True)
+
+
+def get_default_branch(repo: Path) -> str:
+    head = _git(repo, "symbolic-ref", "--short", "HEAD", check=True)
+    return head.stdout.strip()
 
 
 def main() -> int:
