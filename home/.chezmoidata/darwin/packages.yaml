@@ -14,7 +14,6 @@ packages:
         - kubectl
         - ripgrep
         - ryooooooga/tap/zabrze
-        - starship
         - tmux
         - yq
         - jq
@@ -22,7 +21,6 @@ packages:
         - uv
         - zoxide
         - zsh-autocomplete
-        - zsh-autosuggestions
         - zsh-fast-syntax-highlighting
         - k9s
         - go
@@ -40,6 +38,7 @@ packages:
         - grep
         - gh
         - neovim
+        - spaceship
         personal:
         - ffmpeg
         - yt-dlp
@@ -50,6 +49,7 @@ packages:
         - tenv
       casks:
         base:
+        - zed
         - macfuse
         - scroll-reverser
         - standard-notes
@@ -71,3 +71,4 @@ packages:
         work:
         - slack
         - google-drive
+        - finicky

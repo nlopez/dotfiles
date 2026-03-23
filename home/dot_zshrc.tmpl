@@ -159,9 +159,13 @@ eval "$(chezmoi completion zsh)"
 ###############################################################################
 # Prompt
 ###############################################################################
+{{- if and $foundBrewPrefix (stat (joinPath $foundBrewPrefix "opt/spaceship/spaceship.zsh")) }}
+source "${BREW_PREFIX}/opt/spaceship/spaceship.zsh"
+{{- else }}
 autoload -U promptinit
 promptinit
 prompt pure
+{{- end }}
 
 ###############################################################################
 # Hooks & tools that use completion / zle
