@@ -87,17 +87,24 @@ export GOPATH="${XDG_DATA_HOME}/go"
 # shellcheck source=./.zshrc_local
 _source "$ZDOTDIR/.zshrc_local"
 
-{{- if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
+{{ if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
   {{- $gPathAdds := list }}
   {{- $gManpathAdds := list }}
-    {{- $gFormulas := list "coreutils" "gnu-sed" "findutils" "gnu-tar" "gnu-time" "gnu-getopt" "gnu-indent" "gnu-which" "grep" }}
-    {{- range $formula := $gFormulas }}
-      {{- $gnubin := printf "%s/opt/%s/libexec/gnubin" $foundBrewPrefix $formula }}
-      {{- $gnuman := printf "%s/opt/%s/libexec/gnuman" $foundBrewPrefix $formula }}
-    {{- if stat $gnubin }}{{ $gPathAdds = mustPrepend $gPathAdds $gnubin }}{{ end }}
-    {{- if stat $gnuman }}{{ $gManpathAdds = mustPrepend $gManpathAdds $gnuman }}{{ end }}
+  {{- $gFormulas := list "coreutils" "gnu-sed" "findutils" "gnu-tar" "gnu-time" "gnu-getopt" "gnu-indent" "gnu-which" "grep" }}
+  {{- range $formula := $gFormulas }}
+    {{- $gnubin := printf "%s/opt/%s/libexec/gnubin" $foundBrewPrefix $formula }}
+    {{- $gnuman := printf "%s/opt/%s/libexec/gnuman" $foundBrewPrefix $formula }}
+    {{- if stat $gnubin }}{{ $gPathAdds = mustAppend $gPathAdds $gnubin }}{{ end }}
+    {{- if stat $gnuman }}{{ $gManpathAdds = mustAppend $gManpathAdds $gnuman }}{{ end }}
   {{- end }}
-{{- end }}
+  {{- /* Prepend GNU *gnubin / *gnuman so they beat macOS /usr/bin and man paths */}}
+  {{- if $gPathAdds }}
+path=({{ toStrings $gPathAdds | join ":" }} $path)
+  {{- end }}
+  {{- if $gManpathAdds }}
+manpath=({{ toStrings $gManpathAdds | join ":" }} $manpath)
+  {{- end }}
+{{ end }}
 
 # gcloud CLI PATH (before completion)
 _source "$BREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
