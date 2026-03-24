@@ -26,7 +26,6 @@ packages:
         - coreutils
         - bat
         - eza
-        - pure
         - gnu-tar
         - gnu-sed
         - gnu-time
@@ -37,8 +36,8 @@ packages:
         - grep
         - gh
         - neovim
-        - spaceship
         - testssl
+        - cilium-cli
         personal:
         - ffmpeg
         - yt-dlp
@@ -49,6 +48,7 @@ packages:
         - tenv
       casks:
         base:
+        - wireshark
         - zed
         - macfuse
         - scroll-reverser
