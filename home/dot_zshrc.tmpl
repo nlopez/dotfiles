@@ -160,7 +160,6 @@ path=({{ toStrings $paths | join ":" }} $path)
 {{ end -}}
 
 {{- if eq .chezmoi.os "darwin" }}
-export HOMEBREW_CASK_OPTS="--appdir=${HOME}/Applications"
 export SSH_AUTH_SOCK="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 export HOMEBREW_NO_AUTO_UPDATE=1
 export HOMEBREW_NO_ENV_HINTS=1
