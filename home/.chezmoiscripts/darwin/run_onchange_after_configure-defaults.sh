@@ -32,9 +32,10 @@ defaults write -g AppleShowAllExtensions -bool true
 defaults write -g AppleShowAllFiles -bool true
 defaults write com.apple.finder ShowPathbar -bool true
 
-# List view by default
+# Default to details list view in Finder
 defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
 
+# Sort folders first
 defaults write com.apple.finder _FXSortFoldersFirst -bool true
 
 # Search the current folder by default when performing a search in Finder
@@ -50,13 +51,17 @@ defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
-# Expand the following File Info panes:
+# Expand the following File Info panes by default:
 # "General", "Open with", and "Sharing & Permissions"
 defaults write com.apple.finder FXInfoPanesExpanded -dict \
 	General -bool true \
 	OpenWith -bool true \
   Preview -bool true \
 	Privileges -bool true
+
+# Reduce menu bar item spacing
+defaults write -g NSStatusItemSpacing -int 6
+defaults write -g NSStatusItemSelectionPadding -int 6
 
 # Dock
 defaults write com.apple.dock orientation -string "bottom"
