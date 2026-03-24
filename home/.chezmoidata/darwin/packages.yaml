@@ -21,8 +21,6 @@ packages:
         - shellcheck
         - uv
         - zoxide
-        - zsh-autocomplete
-        - zsh-fast-syntax-highlighting
         - k9s
         - go
         - coreutils
