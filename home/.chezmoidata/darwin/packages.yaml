@@ -51,7 +51,7 @@ packages:
         - wireshark
         - zed
         - macfuse
-        - scroll-reverser
+        - linearmouse
         - standard-notes
         - git-credential-manager
         - ghostty
