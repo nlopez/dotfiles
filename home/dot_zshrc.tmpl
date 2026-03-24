@@ -122,7 +122,6 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-
 function _source() {
   [[ -f $1 ]] && source "$@"
 }
@@ -173,7 +172,11 @@ export GOPATH="${XDG_DATA_HOME}/go"
 # shellcheck source=./.zshrc_local
 _source "$ZDOTDIR/.zshrc_local"
 
-{{ if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
+{{- if lookPath "zabrze" }}
+eval "$(zabrze init --bind-keys)"
+{{- end }}
+
+{{- if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
   {{- $gPathAdds := list }}
   {{- $gManpathAdds := list }}
   {{- $gFormulas := list "coreutils" "gnu-sed" "findutils" "gnu-tar" "gnu-time" "gnu-getopt" "gnu-indent" "gnu-which" "grep" }}
@@ -245,7 +248,7 @@ elif _command code; then
   alias e="code --add"
 fi
 
-{{ if .work }}
+{{- if .work }}
 export AWS_VAULT_KEYCHAIN_NAME=login
 {{- end }}
 
