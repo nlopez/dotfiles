@@ -48,7 +48,7 @@ packages:
         - tenv
       casks:
         base:
-        - wireshark
+        - wireshark-app
         - zed
         - macfuse
         - linearmouse
