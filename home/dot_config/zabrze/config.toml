@@ -150,3 +150,8 @@ snippet = "kubectx"
 name = "I Am Git Root"
 trigger = "groot"
 snippet = "printf \"%s\" \"$(git rev-parse --show-toplevel)\""
+
+[[snippets]]
+name = "brewup"
+trigger = "brewup"
+snippet = "brew update && brew upgrade && brew cleanup"
