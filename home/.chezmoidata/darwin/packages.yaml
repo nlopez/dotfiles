@@ -38,6 +38,7 @@ packages:
         - neovim
         - testssl
         - cilium-cli
+        - watchman
         personal:
         - ffmpeg
         - yt-dlp
@@ -48,6 +49,7 @@ packages:
         - tenv
       casks:
         base:
+        - fsmonitor
         - wireshark-app
         - zed
         - macfuse
