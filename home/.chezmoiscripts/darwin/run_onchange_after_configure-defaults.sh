@@ -62,6 +62,11 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
 # Hide widgets on the desktop
 defaults write com.apple.WindowManager HideDesktop -int 1
 
+# Disable trackpad window management gestures
+defaults write com.apple.dock showDesktopGestureEnabled -int 0
+defaults write com.apple.dock showLaunchpadGestureEnabled -int 0
+defaults write com.apple.dock showMissionControlGestureEnabled -int 0
+
 # Reduce menu bar item spacing
 defaults write -g NSStatusItemSpacing -int 6
 defaults write -g NSStatusItemSelectionPadding -int 6

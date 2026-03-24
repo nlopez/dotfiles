@@ -91,6 +91,9 @@ plugins=(
 {{- end }}
 )
 
+# Load completions before OMZ https://github.com/zsh-users/zsh-completions/tree/0.36.0?tab=readme-ov-file#using-zsh-frameworks
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+autoload -U compinit && compinit
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
