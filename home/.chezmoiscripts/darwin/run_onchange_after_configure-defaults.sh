@@ -59,6 +59,9 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
   Preview -bool true \
 	Privileges -bool true
 
+# Hide widgets on the desktop
+defaults write com.apple.WindowManager HideDesktop -int 1
+
 # Reduce menu bar item spacing
 defaults write -g NSStatusItemSpacing -int 6
 defaults write -g NSStatusItemSelectionPadding -int 6
