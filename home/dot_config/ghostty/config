@@ -1,6 +1,6 @@
 font-size = 16
 font-family = ""
-font-family = MesloLGS NF
+font-family = IosevkaTerm NFM
 quit-after-last-window-closed = true
 confirm-close-surface = false
 theme = iTerm2 Solarized Light
