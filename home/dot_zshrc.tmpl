@@ -177,8 +177,8 @@ export HOMEBREW_NO_ENV_HINTS=1
 export TENV_AUTO_INSTALL=true
 export GOPATH="${XDG_DATA_HOME}/go"
 
-# shellcheck source=./.zshrc_local
-_source "$ZDOTDIR/.zshrc_local"
+# shellcheck source=~/.zshrc_local
+_source ~/.zshrc_local
 
 {{- if lookPath "zabrze" }}
 eval "$(zabrze init --bind-keys)"
