@@ -1,6 +1,6 @@
 font-size = 16
 font-family = ""
-font-family = IosevkaTerm NFM
+font-family = MesloLGS NF
 quit-after-last-window-closed = true
 confirm-close-surface = false
 theme = iTerm2 Solarized Light
@@ -9,11 +9,9 @@ window-padding-y = 0
 window-padding-color = extend
 # Disable ligatures
 font-feature = -calt
-shell-integration = zsh
-title = " "
 macos-titlebar-style = hidden
 
 # https://github.com/ghostty-org/ghostty/discussions/3836#discussioncomment-11688264
-cursor-style = block
-cursor-style-blink = false
+# cursor-style = block
+# cursor-style-blink = true
 shell-integration-features = no-cursor

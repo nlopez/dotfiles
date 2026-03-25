@@ -1,3 +1,9 @@
+{{- if lookPath "tmux" }}
+case $- in *i*)
+  [[ "$TMUX" == "" ]] && tmux -u new-session -s 0 -A
+esac
+{{- end }}
+
 ###############################################################################
 # XDG & helpers
 ###############################################################################
@@ -201,43 +207,6 @@ autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '^xe' edit-command-line
 bindkey '^x^e' edit-command-line
-
-{{- if lookPath "atuin" }}
-# https://news.ycombinator.com/item?id=35256206
-atuin-setup() {
-  export ATUIN_NOBIND="true"
-  eval "$(atuin init zsh)"
-  fzf-atuin-history-widget() {
-    local selected num
-    setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2>/dev/null
-
-    local atuin_opts="--cmd-only"
-    local fzf_opts=(
-      --height=${FZF_TMUX_HEIGHT:-80%}
-      --tac
-      "-n2..,.."
-      --tiebreak=index
-      "--query=${LBUFFER}"
-      "+m"
-      "--bind=ctrl-d:reload(atuin search $atuin_opts -c $PWD),ctrl-r:reload(atuin search $atuin_opts)"
-    )
-
-    selected=$(
-      eval "atuin search ${atuin_opts}" |
-        fzf "${fzf_opts[@]}"
-    )
-    local ret=$?
-    if [ -n "$selected" ]; then
-      LBUFFER+="${selected}"
-    fi
-    zle reset-prompt
-    return $ret
-  }
-  zle -N fzf-atuin-history-widget
-  bindkey '^R' fzf-atuin-history-widget
-}
-atuin-setup
-{{- end }}
 
 ###############################################################################
 # Editor & pager
