@@ -8,5 +8,9 @@ auto_sync = true
 {{- end }}
 update_check = false
 
+history_filter = [
+  "^(echo|printf)([^|><]|$)*$",
+]
+
 [sync]
 records = true # enable sync v2

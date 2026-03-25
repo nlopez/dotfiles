@@ -13,7 +13,7 @@
     refreshPeriod = "168h"
 [".oh-my-zsh/custom/themes/powerlevel10k"]
     type = "archive"
-    url = "https://github.com/romkatv/powerlevel10k/archive/v1.15.0.tar.gz"
+    url = "https://github.com/romkatv/powerlevel10k/archive/v1.20.0.tar.gz"
     exact = true
     stripComponents = 1
 [".oh-my-zsh/custom/plugins/zsh-autosuggestions"]
@@ -26,4 +26,26 @@
     url = "https://github.com/zsh-users/zsh-completions/archive/0.36.0.tar.gz"
     exact = true
     stripComponents = 1
+[".oh-my-zsh/custom/plugins/atuin/atuin.plugin.zsh"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/atuinsh/atuin/refs/heads/main/atuin.plugin.zsh"
+    refreshPeriod = "168h"
+{{- end }}
+
+{{- $fontDir := "" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $fontDir = "Library/Fonts" }}
+{{- else if eq .chezmoi.os "linux" }}
+{{-   $fontDir = ".local/share/fonts" }}
+{{- end }}
+
+{{- range (list
+        "MesloLGS NF Regular.ttf"
+        "MesloLGS NF Bold.ttf"
+        "MesloLGS NF Italic.ttf"
+        "MesloLGS NF Bold Italic.ttf") }}
+["{{ $fontDir }}/{{ . }}"]
+    type = "file"
+    url = "https://github.com/romkatv/powerlevel10k-media/raw/master/{{ . }}"
+    refreshPeriod = "168h"
 {{- end }}

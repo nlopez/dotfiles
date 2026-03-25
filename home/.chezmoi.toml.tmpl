@@ -37,12 +37,13 @@ personal = {{ $personal }}
 work = {{ $work }}
 wsl = {{ $wsl }}
 zshPlugins = [
-  "zsh-syntax-highlighting",
   "zsh-autosuggestions",
   "zoxide",
   "fzf",
   "direnv",
   "eza",
+  "atuin",
+  "zsh-syntax-highlighting",
 ]
 
 {{- if eq .chezmoi.os "windows" }}

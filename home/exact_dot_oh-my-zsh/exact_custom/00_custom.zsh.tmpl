@@ -1,0 +1,10 @@
+{{- if lookPath "atuin" }}
+# Disable history file and zsh's own history management in favor of atuin
+unset HISTFILE
+function zshaddhistory() { return 1 }
+alias history="atuin history list"
+{{- end }}
+
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+
+alias reload='exec env -i PATH=$PATH TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX zsh --login'
