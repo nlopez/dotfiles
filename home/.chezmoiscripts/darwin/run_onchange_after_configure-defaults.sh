@@ -24,7 +24,8 @@ defaults write -g NSUserDictionaryReplacementItems '()'
 defaults write -g WebAutomaticSpellingCorrectionEnabled -int 0
 
 # Trackpad
-defaults write -g com.apple.swipescrolldirection -bool false
+# Unnatural scrolling
+defaults write -g com.apple.swipescrolldirection -bool true
 defaults write -g com.apple.trackpad.forceClick -int 0
 # Disable smooth scrolling
 defaults write -g NSScrollAnimationEnabled -bool false
