@@ -187,7 +187,7 @@ eval "$(zabrze init --bind-keys)"
 {{- if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
   {{- $gPathAdds := list }}
   {{- $gManpathAdds := list }}
-  {{- $gFormulas := list "coreutils" "gnu-sed" "findutils" "gnu-tar" "gnu-time" "gnu-getopt" "gnu-indent" "gnu-which" "grep" }}
+  {{- $gFormulas := list "coreutils" "gnu-sed" "findutils" "gawk" "gnu-tar" "gnu-time" "gnu-getopt" "gnu-indent" "gnu-which" "grep" }}
   {{- range $formula := $gFormulas }}
     {{- $gnubin := printf "%s/opt/%s/libexec/gnubin" $foundBrewPrefix $formula }}
     {{- $gnuman := printf "%s/opt/%s/libexec/gnuman" $foundBrewPrefix $formula }}
