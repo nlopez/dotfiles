@@ -97,7 +97,7 @@ snippet = "kubectl get pod"
 [[snippets]]
 name = "tfapply"
 trigger = "tfapply"
-snippet = "terraform apply"
+snippet = "terraform apply tfplan.bin"
 global = true
 
 [[snippets]]
