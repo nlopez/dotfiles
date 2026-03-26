@@ -97,43 +97,43 @@ snippet = "kubectl get pod"
 [[snippets]]
 name = "tfapply"
 trigger = "tfapply"
-snippet = "terragrunt apply"
+snippet = "terraform apply"
 global = true
 
 [[snippets]]
 name = "tfinit"
 trigger = "tfinit"
-snippet = "terragrunt init"
+snippet = "terraform init"
 global = true
 
 [[snippets]]
 name = "tfplan"
 trigger = "tfplan"
-snippet = "terragrunt plan -lock=false -out=tfplan.bin | tee >( sed \"s/\\x1B\\[[0-9;]\\{1,\\}[A-Za-z]//g\" >tfplan.txt)"
+snippet = "terraform plan -lock=false -out=tfplan.bin | tee >( sed \"s/\\x1B\\[[0-9;]\\{1,\\}[A-Za-z]//g\" >tfplan.txt)"
 global = true
 
 [[snippets]]
 name = "tfshow"
 trigger = "tfshow"
-snippet = "terragrunt show tfplan"
+snippet = "terraform show tfplan"
 global = true
 
 [[snippets]]
 name = "tfsl"
 trigger = "tfsl"
-snippet = "terragrunt state list"
+snippet = "terraform state list"
 global = true
 
 [[snippets]]
 name = "tfss"
 trigger = "tfss"
-snippet = "terragrunt state show"
+snippet = "terraform state show"
 global = true
 
 [[snippets]]
 name = "tfu"
 trigger = "tfu"
-snippet = "terragrunt force-unlock -force"
+snippet = "terraform force-unlock -force"
 global = true
 
 [[snippets]]
