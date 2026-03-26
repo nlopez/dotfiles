@@ -93,6 +93,9 @@ defaults write com.apple.dock mineffect -string "scale"
 defaults write -g NSWindowShouldDragOnGesture -bool true
 defaults write com.apple.universalaccess reduceMotion -int 1
 
+# Disable "Displays have separate Spaces"
+/usr/libexec/PlistBuddy -c "Delete ':spans-displays'" -c "Add ':spans-displays' bool 'true'" "$HOME/Library/Preferences/com.apple.spaces.plist"
+
 killall Dock
 killall Finder
 killall SystemUIServer
