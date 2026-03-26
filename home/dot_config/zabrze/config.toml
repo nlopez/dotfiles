@@ -147,9 +147,9 @@ trigger = "kctx"
 snippet = "kubectx"
 
 [[snippets]]
-name = "I Am Git Root"
+name = "I am git root"
 trigger = "groot"
-snippet = "printf \"%s\" \"$(git rev-parse --show-toplevel)\""
+snippet = "cd \"$(git rev-parse --show-toplevel)\""
 
 [[snippets]]
 name = "brewup"
