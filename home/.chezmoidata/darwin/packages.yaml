@@ -3,6 +3,7 @@ packages:
     brew:
       brews:
         base:
+        - 8ta4/plist/plist
         - tree
         - ncdu
         - atuin
