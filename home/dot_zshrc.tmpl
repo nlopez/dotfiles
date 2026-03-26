@@ -149,7 +149,7 @@ eval "$(${BREW_PREFIX}/bin/brew shellenv)"
 {{ $paths := list -}}
 {{- /* home directory paths */ -}}
 {{- $homeDir := .chezmoi.homeDir -}}
-{{- range $_, $relPath := list "bin" "go/bin" ".cargo/bin" ".local/bin" -}}
+{{- range $_, $relPath := list "go/bin" ".cargo/bin" -}}
   {{- $path := joinPath $homeDir $relPath -}}
   {{- if stat $path -}}
     {{- $paths = mustAppend $paths $path -}}
@@ -202,6 +202,9 @@ path=({{ toStrings $gPathAdds | join ":" }} $path)
 manpath=({{ toStrings $gManpathAdds | join ":" }} $manpath)
   {{- end }}
 {{ end }}
+
+# Keep ~/.local/bin first in the path.
+path=({{ joinPath $homeDir ".local/bin" }} $path)
 
 autoload -U edit-command-line
 zle -N edit-command-line
