@@ -50,6 +50,7 @@ packages:
         - tenv
       casks:
         base:
+        - nikitabobko/tap/aerospace
         - fsmonitor
         - wireshark-app
         - zed
