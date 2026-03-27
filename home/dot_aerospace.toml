@@ -103,7 +103,7 @@ on-mode-changed = []
     # See: https://nikitabobko.github.io/AeroSpace/goodies#open-a-new-window-with-applescript
     ctrl-g = '''exec-and-forget osascript -e '
     tell application "Ghostty"
-      activate
+      new window
     end tell'
     '''
 

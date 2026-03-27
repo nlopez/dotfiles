@@ -1,30 +1,30 @@
 #!/usr/bin/env -S uv run --python 3.14.3 --script
 # Like the cloned sheep, because it runs git clone.
-# Sets up a repo for the "bare + worktrees" workflow:
-# https://www.tomups.com/posts/git-worktrees/ (Worktrees level 2)
+# Bare repo + primary worktree: https://www.tomups.com/posts/git-worktrees/
 from __future__ import annotations
 
 import argparse
-import shutil
 import sys
 from pathlib import Path
 from shlex import quote
-from subprocess import CompletedProcess, run
+from subprocess import CalledProcessError, run
 from urllib.parse import urlparse
 
-# Clones into ~/src/<host>/<path> as:
-#   <dest>/.bare/          — bare repository
-#   <dest>/.git            — gitdir: ./.bare
-#   <dest>/<default>/      — primary worktree (repo HEAD / default branch, e.g. main or master)
+# ~/src/<host>/<path>/.bare, .git → ./.bare, <default-branch>/
 
 
-def _git(repo: Path, *git_args: str, check: bool = False) -> CompletedProcess[str]:
-    return run(["git", "-C", str(repo), *git_args], check=check, text=True)
+def git(repo: Path, *args: str) -> None:
+    run(["git", "-C", str(repo), *args], check=True, text=True)
 
 
-def get_default_branch(repo: Path) -> str:
-    head = _git(repo, "symbolic-ref", "--short", "HEAD", check=True)
-    return head.stdout.strip()
+def git_out(repo: Path, *args: str) -> str:
+    r = run(
+        ["git", "-C", str(repo), *args],
+        check=True,
+        text=True,
+        capture_output=True,
+    )
+    return r.stdout.strip()
 
 
 def main() -> int:
@@ -35,58 +35,42 @@ def main() -> int:
     parser.add_argument(
         "git_args",
         nargs="*",
-        help="additional arguments to pass to git clone --bare",
+        help="extra arguments for git clone --bare",
     )
     args = parser.parse_args()
 
     url = urlparse(args.url)
     netloc = url.netloc.split("@")[-1]
-    clone_destination = Path.home() / "src" / netloc / url.path.lstrip("/")
-    bare_dir = clone_destination / ".bare"
+    dest = Path.home() / "src" / netloc / url.path.lstrip("/")
+    bare = dest / ".bare"
 
-    if clone_destination.exists() and any(clone_destination.iterdir()):
-        print(f"error: destination not empty: {clone_destination}", file=sys.stderr)
+    if dest.exists() and any(dest.iterdir()):
+        print(f"error: destination not empty: {dest}", file=sys.stderr)
         return 1
 
-    clone_destination.mkdir(parents=True, exist_ok=True)
+    dest.mkdir(parents=True, exist_ok=True)
 
-    clone = run(
-        ["git", "clone", "--bare", *args.git_args, url.geturl(), str(bare_dir)],
-    )
-    if clone.returncode != 0:
-        return clone.returncode
+    try:
+        run(
+            ["git", "clone", "--bare", *args.git_args, url.geturl(), str(bare)],
+            check=True,
+        )
+        (dest / ".git").write_text("gitdir: ./.bare\n", encoding="utf-8")
 
-    (clone_destination / ".git").write_text("gitdir: ./.bare\n", encoding="utf-8")
+        branch = git_out(dest, "symbolic-ref", "--short", "HEAD")
+        spec = f"+refs/heads/{branch}:refs/remotes/origin/{branch}"
+        git(dest, "config", "remote.origin.fetch", spec)
+        git(dest, "fetch", "origin")
+        git(dest, "worktree", "add", branch, branch)
 
-    branch = get_default_branch(clone_destination)
-    fetch_spec = f"+refs/heads/{branch}:refs/remotes/origin/{branch}"
-    _git(
-        clone_destination,
-        "config",
-        "remote.origin.fetch",
-        fetch_spec,
-        check=True,
-    )
-    fetch = _git(clone_destination, "fetch", "origin")
-    if fetch.returncode != 0:
-        return fetch.returncode
+        work = dest / branch
+        git(work, "branch", "--set-upstream-to", f"origin/{branch}")
+    except CalledProcessError as e:
+        return e.returncode if e.returncode else 1
 
-    wt = _git(clone_destination, "worktree", "add", branch, branch)
-    if wt.returncode != 0:
-        return wt.returncode
-
-    work_path = clone_destination / branch
-    up = _git(
-        work_path,
-        "branch",
-        "--set-upstream-to",
-        f"origin/{branch}",
-    )
-    if up.returncode != 0:
-        return up.returncode
-    print(f"Bare repo: {clone_destination}")
-    print(f"Work in:   {work_path}")
-    print(f"Add more:  git -C {quote(str(clone_destination))} worktree add <path> <branch>")
+    print(f"Bare repo: {dest}")
+    print(f"Work in:   {work}")
+    print(f"Add more:  git -C {quote(str(dest))} worktree add <path> <branch>")
     return 0
 
 
