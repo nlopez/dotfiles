@@ -37,3 +37,8 @@ Documents
 {{ if not .personal }}
 .ssh/config_hobby
 {{ end }}
+
+{{ if .headless }}
+.config/zed
+.config/ghostty
+{{ end }}
