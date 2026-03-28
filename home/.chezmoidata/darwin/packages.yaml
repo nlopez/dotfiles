@@ -3,8 +3,12 @@ packages:
     brew:
       brews:
         base:
+<<<<<<< HEAD
         - 8ta4/plist/plist
         - tree
+=======
+        - hyperfine
+>>>>>>> fce7a3f (add linux packages)
         - ncdu
         - atuin
         - direnv

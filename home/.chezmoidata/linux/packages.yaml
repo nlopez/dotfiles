@@ -23,6 +23,10 @@ packages:
         - eza
         - tree
         - zoxide
+        - hyperfine
+        - postgresql-client-16
+        - 1password-cli
+        - dnsutils
         personal: []
         work: []
         wsl: []
@@ -30,6 +34,9 @@ packages:
     brew:
       brews:
         base:
+        - zsh-autosuggestions
+        - zsh-fast-syntax-highlighting
+        - argocd
         - atuin
         - spaceship
         - ryooooooga/tap/zabrze
