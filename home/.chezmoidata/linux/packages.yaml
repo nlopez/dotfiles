@@ -3,30 +3,30 @@ packages:
     apt:
       packages:
         base:
-        - bat
-        - build-essential
-        - curl
-        - direnv
-        - fd-find
-        - git
-        - jq
-        - mkcert
-        - ripgrep
-        - shellcheck
-        - tmux
-        - trash-cli
-        - wget
-        - yq
-        - zsh
-        - fdupes
-        - ncdu
-        - eza
-        - tree
-        - zoxide
-        - hyperfine
-        - postgresql-client-16
-        - 1password-cli
-        - dnsutils
+          - bat
+          - build-essential
+          - curl
+          - direnv
+          - fd-find
+          - git
+          - jq
+          - mkcert
+          - ripgrep
+          - shellcheck
+          - tmux
+          - trash-cli
+          - wget
+          - yq
+          - zsh
+          - fdupes
+          - ncdu
+          - eza
+          - tree
+          - zoxide
+          - hyperfine
+          - postgresql-client-16
+          - 1password-cli
+          - dnsutils
         personal: []
         work: []
         wsl: []
@@ -34,18 +34,18 @@ packages:
     brew:
       brews:
         base:
-        - zsh-autosuggestions
-        - zsh-fast-syntax-highlighting
-        - argocd
-        - atuin
-        - ryooooooga/tap/zabrze
-        - rclone
-        - go
-        - uv
-        - yazi
-        - pure
-        - ffmpeg
-        - helm
+          - zsh-autosuggestions
+          - zsh-fast-syntax-highlighting
+          - argocd
+          - atuin
+          - ryooooooga/tap/zabrze
+          - rclone
+          - go
+          - uv
+          - yazi
+          - pure
+          - ffmpeg
+          - helm
         personal: []
         work: []
         wsl: []
