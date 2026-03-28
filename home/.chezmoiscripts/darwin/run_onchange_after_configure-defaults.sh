@@ -25,7 +25,7 @@ defaults write -g WebAutomaticSpellingCorrectionEnabled -int 0
 
 # Trackpad
 # Unnatural scrolling
-defaults write -g com.apple.swipescrolldirection -bool true
+/usr/libexec/PlistBuddy -c "Delete ':com.apple.swipescrolldirection'" -c "Add ':com.apple.swipescrolldirection' bool 'false'" "$HOME/Library/Preferences/.GlobalPreferences.plist"
 defaults write -g com.apple.trackpad.forceClick -int 0
 # Disable smooth scrolling
 defaults write -g NSScrollAnimationEnabled -bool false
@@ -91,7 +91,7 @@ defaults write com.apple.dock mineffect -string "scale"
 # Misc
 # Enable ctrl + cmd dragging of windows from anywhere in the window, not just the title bar
 defaults write -g NSWindowShouldDragOnGesture -bool true
-defaults write com.apple.universalaccess reduceMotion -int 1
+/usr/libexec/PlistBuddy -c "Delete ':ReduceMotionEnabled'" -c "Add ':ReduceMotionEnabled' integer '1'" "$HOME/Library/Preferences/com.apple.Accessibility.plist"
 
 # Disable "Displays have separate Spaces"
 /usr/libexec/PlistBuddy -c "Delete ':spans-displays'" -c "Add ':spans-displays' bool 'true'" "$HOME/Library/Preferences/com.apple.spaces.plist"
