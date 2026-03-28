@@ -19,18 +19,18 @@
 
 {{ if ne .chezmoi.os "windows" }}
 .chezmoiscripts/windows/**
+AppData/**
 Documents
 {{ else }}
 # For Windows, explicitly include the dotfiles we want.
 *
 !.chezmoiscripts/windows/**
 !Documents/**
+!AppData/**
 !.chezmoidata/windows/**
 !.config/git/**
 !.config/rclone/**
 !.ssh/config
-!.local/
-!.local/bin/
 !.local/bin/**
 {{ end }}
 
