@@ -6,9 +6,13 @@ packages:
 <<<<<<< HEAD
         - 8ta4/plist/plist
         - tree
+<<<<<<< HEAD
 =======
         - hyperfine
 >>>>>>> fce7a3f (add linux packages)
+=======
+        - hyperfine
+>>>>>>> 64bb7b6 (update packages)
         - ncdu
         - atuin
         - direnv
@@ -28,7 +32,7 @@ packages:
         - zoxide
         - k9s
         - go
-        - coreutils
+        -  eutils
         - bat
         - eza
         - gnu-tar
