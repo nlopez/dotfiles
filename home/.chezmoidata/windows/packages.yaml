@@ -53,5 +53,6 @@ packages:
           - zen-browser
           - winaero-tweaker
           - k9s
+          - ripgrep
         personal: []
         work: []
