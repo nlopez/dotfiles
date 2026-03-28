@@ -9,6 +9,7 @@ window-padding-color = extend
 # Disable ligatures
 font-feature = -calt
 macos-titlebar-style = hidden
+confirm-close-surface = false
 
 # https://github.com/ghostty-org/ghostty/discussions/3836#discussioncomment-11688264
 # cursor-style = block
