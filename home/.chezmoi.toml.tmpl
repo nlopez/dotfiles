@@ -14,7 +14,7 @@
 {{/* work around unreliable hostname on darwin */}}
 {{- $hostname := .chezmoi.hostname -}}
 {{- if eq .chezmoi.os "darwin" -}}
-{{-   $hostname := output "scutil" "--get" "LocalHostName" | trim -}}
+{{-   $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
 {{- end -}}
 
 {{/* detect windows subsystem for linux */}}
