@@ -15,6 +15,7 @@ packages:
         work: []
       packages:
         base:
+<<<<<<< HEAD
           - 1password-cli
           - 7zip
           - context-menu-manager
@@ -53,5 +54,44 @@ packages:
           - zen-browser
           - winaero-tweaker
           - k9s
+=======
+        - 1password-cli
+        - 7zip
+        - context-menu-manager
+        - cpu-z
+        - cryptomator
+        - eartrumpet
+        - espanso
+        - everything-alpha
+        - gimp
+        - git
+        - git-credential-manager
+        - go
+        - googlechrome
+        - gsudo
+        - hwinfo
+        - icaros-np
+        - irfanview
+        - islc
+        - losslesscut
+        - mpv
+        - nvcleanstall
+        - open-shell-np
+        - oxipng
+        - paint.net
+        - rclone
+        - regeditor
+        - runcat
+        - sharex
+        - steam
+        - sumatrapdf
+        - tailscale
+        - vscode
+        - windows-terminal
+        - winfsp-np
+        - zen-browser
+        - k9s
+        - powertoys
+>>>>>>> e126ba6 (zed settings)
         personal: []
         work: []
