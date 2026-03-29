@@ -42,6 +42,7 @@ packages:
           - cilium-cli
           - watchman
           - FelixKratz/formulae/borders
+          - FelixKratz/formulae/sketchybar
         personal:
           - ffmpeg
           - yt-dlp

@@ -94,7 +94,9 @@ defaults write -g NSWindowShouldDragOnGesture -bool true
 /usr/libexec/PlistBuddy -c "Delete ':ReduceMotionEnabled'" -c "Add ':ReduceMotionEnabled' integer '1'" "$HOME/Library/Preferences/com.apple.Accessibility.plist"
 
 # Disable "Displays have separate Spaces"
-/usr/libexec/PlistBuddy -c "Delete ':spans-displays'" -c "Add ':spans-displays' bool 'true'" "$HOME/Library/Preferences/com.apple.spaces.plist"
+# /usr/libexec/PlistBuddy -c "Delete ':spans-displays'" -c "Add ':spans-displays' bool 'true'" "$HOME/Library/Preferences/com.apple.spaces.plist"
+/usr/libexec/PlistBuddy -c "Delete ':spans-displays'" -c "Add ':spans-displays' bool 'false'" "$HOME/Library/Preferences/com.apple.spaces.plist"
+
 
 killall Dock
 killall Finder
