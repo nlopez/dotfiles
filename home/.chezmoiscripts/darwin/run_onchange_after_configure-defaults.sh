@@ -93,10 +93,17 @@ defaults write com.apple.dock mineffect -string "scale"
 defaults write -g NSWindowShouldDragOnGesture -bool true
 /usr/libexec/PlistBuddy -c "Delete ':ReduceMotionEnabled'" -c "Add ':ReduceMotionEnabled' integer '1'" "$HOME/Library/Preferences/com.apple.Accessibility.plist"
 
-# Disable "Displays have separate Spaces"
-# /usr/libexec/PlistBuddy -c "Delete ':spans-displays'" -c "Add ':spans-displays' bool 'true'" "$HOME/Library/Preferences/com.apple.spaces.plist"
+# Spaces
+# Enable "Displays have separate Spaces"
 /usr/libexec/PlistBuddy -c "Delete ':spans-displays'" -c "Add ':spans-displays' bool 'false'" "$HOME/Library/Preferences/com.apple.spaces.plist"
-
+# Disable most recently used Spaces rearrangement
+/usr/libexec/PlistBuddy -c "Delete ':mru-spaces'" -c "Add ':mru-spaces' bool 'false'" "$HOME/Library/Preferences/com.apple.dock.plist"
+# Don't group windows by app
+/usr/libexec/PlistBuddy -c "Delete ':expose-group-apps'" -c "Add ':expose-group-apps' bool 'false'" "$HOME/Library/Preferences/com.apple.dock.plist"
+# Don't switch to Space on application activate
+/usr/libexec/PlistBuddy -c "Delete ':AppleSpacesSwitchOnActivate'" -c "Add ':AppleSpacesSwitchOnActivate' bool 'false'" "$HOME/Library/Preferences/.GlobalPreferences.plist"
+# Don't enter MC via dragging
+/usr/libexec/PlistBuddy -c "Delete ':enterMissionControlByTopWindowDrag'" -c "Add ':enterMissionControlByTopWindowDrag' bool 'false'" "$HOME/Library/Preferences/com.apple.dock.plist"
 
 killall Dock
 killall Finder
