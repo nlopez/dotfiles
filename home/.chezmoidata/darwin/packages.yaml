@@ -43,6 +43,7 @@ packages:
           - watchman
           - FelixKratz/formulae/borders
           - FelixKratz/formulae/sketchybar
+          - lazygit
         personal:
           - ffmpeg
           - yt-dlp
@@ -64,6 +65,7 @@ packages:
           - ghostty
           - font-iosevka-nerd-font
           - font-iosevka-term-nerd-font
+          - font-hack-nerd-font # sketchybar default
           - tailscale-app
           - 1password
           - 1password-cli
