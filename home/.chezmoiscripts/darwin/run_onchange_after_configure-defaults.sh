@@ -25,7 +25,7 @@ defaults write -g WebAutomaticSpellingCorrectionEnabled -int 0
 
 # Trackpad
 # Unnatural scrolling
-/usr/libexec/PlistBuddy -c "Delete ':com.apple.swipescrolldirection'" -c "Add ':com.apple.swipescrolldirection' bool 'false'" "$HOME/Library/Preferences/.GlobalPreferences.plist"
+defaults write -g com.apple.swipescrolldirection -bool false
 defaults write -g com.apple.trackpad.forceClick -int 0
 # Disable smooth scrolling
 defaults write -g NSScrollAnimationEnabled -bool false
@@ -87,23 +87,25 @@ defaults write com.apple.dock autohide -bool true
 defaults write com.apple.dock autohide-delay -float 0
 defaults write com.apple.dock autohide-time-modifier -float 0
 defaults write com.apple.dock mineffect -string "scale"
+# Window title bar double-click action: No Action
+defaults write -g AppleActionOnDoubleClick -string "None"
 
 # Misc
 # Enable ctrl + cmd dragging of windows from anywhere in the window, not just the title bar
 defaults write -g NSWindowShouldDragOnGesture -bool true
-/usr/libexec/PlistBuddy -c "Delete ':ReduceMotionEnabled'" -c "Add ':ReduceMotionEnabled' integer '1'" "$HOME/Library/Preferences/com.apple.Accessibility.plist"
+defaults write com.apple.Accessibility ReduceMotionEnabled -int 1
 
 # Spaces
 # Enable "Displays have separate Spaces"
-/usr/libexec/PlistBuddy -c "Delete ':spans-displays'" -c "Add ':spans-displays' bool 'false'" "$HOME/Library/Preferences/com.apple.spaces.plist"
+defaults write com.apple.spaces spans-displays -bool false
 # Disable most recently used Spaces rearrangement
-/usr/libexec/PlistBuddy -c "Delete ':mru-spaces'" -c "Add ':mru-spaces' bool 'false'" "$HOME/Library/Preferences/com.apple.dock.plist"
+defaults write com.apple.dock mru-spaces -bool false
 # Don't group windows by app
-/usr/libexec/PlistBuddy -c "Delete ':expose-group-apps'" -c "Add ':expose-group-apps' bool 'false'" "$HOME/Library/Preferences/com.apple.dock.plist"
+defaults write com.apple.dock expose-group-apps -bool false
 # Don't switch to Space on application activate
-/usr/libexec/PlistBuddy -c "Delete ':AppleSpacesSwitchOnActivate'" -c "Add ':AppleSpacesSwitchOnActivate' bool 'false'" "$HOME/Library/Preferences/.GlobalPreferences.plist"
+defaults write -g AppleSpacesSwitchOnActivate -bool false
 # Don't enter MC via dragging
-/usr/libexec/PlistBuddy -c "Delete ':enterMissionControlByTopWindowDrag'" -c "Add ':enterMissionControlByTopWindowDrag' bool 'false'" "$HOME/Library/Preferences/com.apple.dock.plist"
+defaults write com.apple.dock enterMissionControlByTopWindowDrag -bool false
 
 killall Dock
 killall Finder
