@@ -26,6 +26,7 @@ packages:
           - hyperfine
           - postgresql-client-16
           - dnsutils
+          - ffmpeg
         personal: []
         work: []
         wsl: []
@@ -42,7 +43,6 @@ packages:
           - go
           - uv
           - yazi
-          - ffmpeg
           - helm
         personal: []
         work: []
