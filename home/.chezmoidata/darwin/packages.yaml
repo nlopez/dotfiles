@@ -44,7 +44,6 @@ packages:
           # - FelixKratz/formulae/borders
           # - FelixKratz/formulae/sketchybar
           - lazygit
-          - claude-code
         personal:
           - ffmpeg
           - yt-dlp
@@ -55,6 +54,7 @@ packages:
           - tenv
       casks:
         base:
+          - claude-code
           # - nikitabobko/tap/aerospace
           - fsmonitor
           - wireshark-app
