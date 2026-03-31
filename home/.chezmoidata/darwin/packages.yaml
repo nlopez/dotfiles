@@ -44,6 +44,7 @@ packages:
           # - FelixKratz/formulae/borders
           # - FelixKratz/formulae/sketchybar
           - lazygit
+          - claude-code
         personal:
           - ffmpeg
           - yt-dlp
