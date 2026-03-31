@@ -3,6 +3,7 @@ packages:
     brew:
       brews:
         base:
+          - fx # json tui
           - 8ta4/plist/plist
           - tree
           - hyperfine
