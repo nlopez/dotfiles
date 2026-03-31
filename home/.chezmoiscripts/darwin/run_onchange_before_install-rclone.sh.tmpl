@@ -2,8 +2,6 @@
 
 set -eufo pipefail
 
-{{- if lookPath "rclone"}}
-exit 0
-{{- end }}
-
+{{- if not (lookPath "rclone") }}
 sudo -v ; curl https://rclone.org/install.sh | sudo bash
+{{- end }}
