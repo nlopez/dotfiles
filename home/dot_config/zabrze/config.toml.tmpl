@@ -187,5 +187,5 @@ snippet = "brew update && brew upgrade && brew cleanup"
 [[snippets]]
 name = "rebootrq"
 trigger = "rebootrq"
-snippet = "echo '_sb' > /proc/sysrq-trigger"
+snippet = "sudo sh -c 'echo \"_sb\" > /proc/sysrq-trigger'"
 {{- end }}
