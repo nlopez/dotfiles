@@ -56,3 +56,5 @@ Thumbs.db
 **/.terraform.lock.hcl
 *.tfstate
 tfplan*
+
+**/.claude/settings.local.json
