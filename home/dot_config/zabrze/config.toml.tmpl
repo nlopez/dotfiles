@@ -185,7 +185,7 @@ snippet = "brew update && brew upgrade && brew cleanup"
 {{ if eq .chezmoi.os "linux" }}
 # https://www.kernel.org/doc/html/latest/admin-guide/sysrq.html
 [[snippets]]
-name = "sysrq-reboot"
-trigger = "sysreq-reboot"
+name = "rebootrq"
+trigger = "rebootrq"
 snippet = "echo '_sb' > /proc/sysrq-trigger"
 {{- end }}
