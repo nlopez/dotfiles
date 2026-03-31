@@ -7,12 +7,20 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    }
+  },
+  "edit_predictions": {
+    "provider": "copilot"
+  },
   "autosave": "on_focus_change",
   "agent": {
+    "profiles": {},
     "default_model": {
-      "effort": "high",
-      "provider": "copilot_chat",
-      "model": "gpt-5-mini",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-6-latest",
       "enable_thinking": false
     },
     "favorite_models": [],
