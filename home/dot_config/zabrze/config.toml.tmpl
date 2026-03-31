@@ -65,6 +65,37 @@ trigger = "gup"
 snippet = "git pull --rebase"
 
 [[snippets]]
+name = "I am git root"
+trigger = "groot"
+snippet = "\"$(git rev-parse --show-toplevel)\""
+global = true
+
+[[snippets]]
+name = "gcane"
+trigger = "gcane"
+snippet = "git commit --amend --no-edit"
+
+[[snippets]]
+name = "gwa"
+trigger = "gwa"
+snippet = "git worktree add"
+
+[[snippets]]
+name = "gwr"
+trigger = "gwr"
+snippet = "git worktree remove"
+
+[[snippets]]
+name = "gwl"
+trigger = "gwl"
+snippet = "git worktree list"
+
+[[snippets]]
+name = "gwm"
+trigger = "gwm"
+snippet = "git worktree move"
+
+[[snippets]]
 name = "k"
 trigger = "k"
 snippet = "kubectl"
@@ -145,17 +176,6 @@ snippet = "kubens"
 name = "kctx"
 trigger = "kctx"
 snippet = "kubectx"
-
-[[snippets]]
-name = "I am git root"
-trigger = "groot"
-snippet = "\"$(git rev-parse --show-toplevel)\""
-global = true
-
-[[snippets]]
-name = "gcae"
-trigger "gcae"
-snippet "git commit --amend --no-edit"
 
 [[snippets]]
 name = "brewup"
