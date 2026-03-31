@@ -25,7 +25,6 @@ packages:
           - zoxide
           - hyperfine
           - postgresql-client-16
-          - 1password-cli
           - dnsutils
         personal: []
         work: []
@@ -43,7 +42,6 @@ packages:
           - go
           - uv
           - yazi
-          - pure
           - ffmpeg
           - helm
         personal: []
