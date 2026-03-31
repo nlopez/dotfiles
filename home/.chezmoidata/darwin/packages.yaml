@@ -3,6 +3,7 @@ packages:
     brew:
       brews:
         base:
+          - sql-formatter
           - fx # json tui
           - 8ta4/plist/plist
           - tree
