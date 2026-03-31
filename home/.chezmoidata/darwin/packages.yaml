@@ -54,6 +54,7 @@ packages:
           - tenv
       casks:
         base:
+          - grandperspective
           - claude-code
           # - nikitabobko/tap/aerospace
           - fsmonitor
