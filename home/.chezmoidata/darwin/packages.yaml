@@ -80,6 +80,7 @@ packages:
           - brave-browser
           - stolendata-mpv
           - losslesscut
+          - mediainfo
         work:
           - slack
           - google-drive
