@@ -149,7 +149,13 @@ snippet = "kubectx"
 [[snippets]]
 name = "I am git root"
 trigger = "groot"
-snippet = "cd \"$(git rev-parse --show-toplevel)\""
+snippet = "\"$(git rev-parse --show-toplevel)\""
+global = true
+
+[[snippets]]
+name = "gcae"
+trigger "gcae"
+snippet "git commit --amend --no-edit"
 
 [[snippets]]
 name = "brewup"
