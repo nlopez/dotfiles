@@ -35,6 +35,7 @@ packages:
     brew:
       brews:
         base:
+          - sql-formatter
           - fx # json tui
           - zsh-autosuggestions
           - zsh-fast-syntax-highlighting
