@@ -71,6 +71,14 @@
           "arguments": ["--language", "mysql"]
         }
       }
+    },
+    "YAML": {
+      "formatter": {
+        "external": {
+          "command": "yamlfmt",
+          "arguments": ["-"]
+        }
+      }
     }
   }
 }
