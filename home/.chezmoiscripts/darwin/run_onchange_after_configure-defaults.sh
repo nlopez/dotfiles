@@ -107,6 +107,15 @@ defaults write -g AppleSpacesSwitchOnActivate -bool false
 # Don't enter MC via dragging
 defaults write com.apple.dock enterMissionControlByTopWindowDrag -bool false
 
+# Stage Manager
+defaults write com.apple.WindowManager GloballyEnabled -bool false
+
+# Disable Hot Corners
+defaults write com.apple.dock wvous-tl-corner -int 1
+defaults write com.apple.dock wvous-bl-corner -int 1
+defaults write com.apple.dock wvous-tr-corner -int 1
+defaults write com.apple.dock wvous-br-corner -int 1
+
 killall Dock
 killall Finder
 killall SystemUIServer
