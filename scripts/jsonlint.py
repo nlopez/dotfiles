@@ -57,7 +57,7 @@ def render_and_lint(
         print(f"jsonlint: {label}")
 
     output, error = render_template(tmpl, override_data, user_data)
-    if error:
+    if error is not None or output is None:
         print(f"RENDER FAILED: {label}\n{error}", file=sys.stderr)
         return 1
 
