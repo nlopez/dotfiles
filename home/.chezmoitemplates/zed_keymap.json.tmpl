@@ -10,12 +10,15 @@
     "context": "Workspace",
     "bindings": {
       // "shift shift": "file_finder::Toggle"
-{{- if eq .chezmoi.os "windows" }}
-      "ctrl-alt-b": "agent::ToggleFocus"
-{{- else }}
-      "cmd-alt-b": "agent::ToggleFocus"
-{{- end }}
     },
+  },
+  {
+    "bindings": {
+      "cmd-alt-c": [
+        "agent::NewExternalAgentThread",
+        { "agent": { "custom": { "name": "claude-acp" } } }
+      ]
+    }
   },
   {
     "context": "Editor && vim_mode == insert",
