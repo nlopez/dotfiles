@@ -194,10 +194,10 @@ path=({{ joinPath $homeDir ".local/bin" }} $path)
 
 autoload -U edit-command-line
 zle -N edit-command-line
-function _edit_command_line_vim() { EDITOR=vim zle edit-command-line }
-zle -N _edit_command_line_vim
-bindkey '^xe' _edit_command_line_vim
-bindkey '^x^e' _edit_command_line_vim
+function _edit_command_line() { EDITOR="zed --new --wait" zle edit-command-line }
+zle -N _edit_command_line
+bindkey '^xe' _edit_command_line
+bindkey '^x^e' _edit_command_line
 
 ###############################################################################
 # Editor & pager
