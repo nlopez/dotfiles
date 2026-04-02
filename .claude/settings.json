@@ -1,5 +1,5 @@
 {
   "permissions": {
-    "allow": ["Bash(chezmoi*)"]
+    "allow": ["Bash(chezmoi*)", "Bash(uv run*)", "Bash(pre commit*)"]
   }
 }
