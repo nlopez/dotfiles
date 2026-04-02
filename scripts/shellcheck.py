@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 import argparse
-import json
 import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
-import yaml
+sys.path.insert(0, str(Path(__file__).parent))
 
-OSES = ["darwin", "linux", "windows"]
+from chezmoi_lib import OSES, build_data, chezmoi_root, print_verbose, render_template
 
 
 def main() -> None:
@@ -24,18 +23,15 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    chezmoi_root = Path(
-        subprocess.check_output(["chezmoi", "source-path"]).decode().strip()
-    )
-
+    root = chezmoi_root()
     errors = 0
 
     for os_name in OSES:
-        scripts_dir = chezmoi_root / ".chezmoiscripts" / os_name
+        scripts_dir = root / ".chezmoiscripts" / os_name
         if not scripts_dir.exists():
             continue
 
-        override_data, user_data = build_data(chezmoi_root, os_name)
+        override_data, user_data = build_data(root, os_name)
 
         for tmpl in sorted(scripts_dir.glob("*.sh.tmpl")):
             errors += render_and_check(
@@ -53,68 +49,18 @@ def main() -> None:
     print("\nAll checks passed.")
 
 
-def build_data(chezmoi_root: Path, os_name: str) -> tuple[dict, dict]:
-    override_data: dict = {
-        "chezmoi": {
-            "os": os_name,
-            "osRelease": {
-                "id": "ubuntu",
-                "ubuntuCodename": "noble",
-            },
-        },
-    }
-
-    user_data: dict = {
-        "personal": True,
-        "work": False,
-        "wsl": False,
-        "headless": False,
-        "ephemeral": False,
-    }
-
-    pkg_file = chezmoi_root / ".chezmoidata" / os_name / "packages.yaml"
-    if pkg_file.exists():
-        with open(pkg_file) as f:
-            user_data.update(yaml.safe_load(f))
-
-    return override_data, user_data
-
-
-def print_verbose(label: str, override_data: dict, user_data: dict) -> None:
-    chezmoi = override_data["chezmoi"]
-    vars_: dict = {"chezmoi.os": chezmoi["os"]}
-    vars_.update({k: v for k, v in user_data.items() if k != "packages"})
-    vars_str = "  ".join(f"{k}={json.dumps(v)}" for k, v in vars_.items())
-    print(f"  {label}  [{vars_str}]")
-
-
 def render_and_check(
     tmpl: Path, override_data: dict, user_data: dict, os_name: str, verbose: bool
 ) -> int:
     label = f"{os_name}/{tmpl.stem}"  # strip .tmpl
-    merged = {**user_data, **override_data}
-    try:
-        result = subprocess.run(
-            [
-                "chezmoi",
-                "execute-template",
-                "--override-data",
-                json.dumps(merged),
-            ],
-            stdin=tmpl.open(),
-            capture_output=True,
-            text=True,
-        )
-    except Exception as e:
-        print(f"RENDER ERROR: {label}: {e}", file=sys.stderr)
-        return 1
 
-    if result.returncode != 0:
-        print(f"RENDER FAILED: {label}\n{result.stderr}", file=sys.stderr)
+    output, error = render_template(tmpl, override_data, user_data)
+    if error:
+        print(f"RENDER FAILED: {label}\n{error}", file=sys.stderr)
         return 1
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".sh", delete=False) as f:
-        f.write(result.stdout)
+        f.write(output)
         tmp_path = f.name
 
     rc = run_shellcheck(tmp_path, label, override_data, user_data, verbose)
