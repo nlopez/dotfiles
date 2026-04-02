@@ -3,88 +3,89 @@ packages:
     brew:
       brews:
         base:
-          - yamlfmt
-          - sql-formatter
-          - fx # json tui
-          - 8ta4/plist/plist
-          - tree
-          - hyperfine
-          - ncdu
-          - atuin
-          - direnv
-          - fd
-          - fzf
-          - git
-          - yazi
-          - htop
-          - kubectl
-          - ripgrep
-          - ryooooooga/tap/zabrze
-          - tmux
-          - yq
-          - jq
-          - shellcheck
-          - uv
-          - zoxide
-          - k9s
-          - go
-          - coreutils
-          - bat
-          - eza
-          - gnu-tar
-          - gnu-sed
-          - gnu-time
-          - gnu-getopt
-          - findutils
-          - gnu-indent
-          - gnu-which
-          - grep
-          - gh
-          - neovim
-          - testssl
-          - cilium-cli
-          - watchman
-          # - FelixKratz/formulae/borders
-          # - FelixKratz/formulae/sketchybar
-          - lazygit
+        - mas
+        - yamlfmt
+        - sql-formatter
+        - fx # json tui
+        - 8ta4/plist/plist
+        - tree
+        - hyperfine
+        - ncdu
+        - atuin
+        - direnv
+        - fd
+        - fzf
+        - git
+        - yazi
+        - htop
+        - kubectl
+        - ripgrep
+        - ryooooooga/tap/zabrze
+        - tmux
+        - yq
+        - jq
+        - shellcheck
+        - uv
+        - zoxide
+        - k9s
+        - go
+        - coreutils
+        - bat
+        - eza
+        - gnu-tar
+        - gnu-sed
+        - gnu-time
+        - gnu-getopt
+        - findutils
+        - gnu-indent
+        - gnu-which
+        - grep
+        - gh
+        - neovim
+        - testssl
+        - cilium-cli
+        - watchman
+        # - FelixKratz/formulae/borders
+        # - FelixKratz/formulae/sketchybar
+        - lazygit
         personal:
-          - ffmpeg
-          - yt-dlp
-          - oxipng
-          - argocd
+        - ffmpeg
+        - yt-dlp
+        - oxipng
+        - argocd
         work:
-          - awscli
-          - tenv
+        - awscli
+        - tenv
       casks:
         base:
-          - grandperspective
-          - claude-code
-          # - nikitabobko/tap/aerospace
-          - fsmonitor
-          - wireshark-app
-          - zed
-          - macfuse
-          - linearmouse
-          - standard-notes
-          - git-credential-manager
-          - ghostty
-          - font-iosevka-nerd-font
-          - font-iosevka-term-nerd-font
-          # - font-hack-nerd-font # sketchybar default
-          - tailscale-app
-          - 1password
-          - 1password-cli
-          - docker-desktop
-          - visual-studio-code
-          - jordanbaird-ice
-          - rectangle
-          - little-snitch
+        - grandperspective
+        - claude-code
+        # - nikitabobko/tap/aerospace
+        - fsmonitor
+        - wireshark-app
+        - zed
+        - macfuse
+        - linearmouse
+        - standard-notes
+        - git-credential-manager
+        - ghostty
+        - font-iosevka-nerd-font
+        - font-iosevka-term-nerd-font
+        # - font-hack-nerd-font # sketchybar default
+        - tailscale-app
+        - 1password
+        - 1password-cli
+        - docker-desktop
+        - visual-studio-code
+        - jordanbaird-ice
+        - rectangle
+        - little-snitch
         personal:
-          - brave-browser
-          - stolendata-mpv
-          - losslesscut
-          - mediainfo
+        - brave-browser
+        - stolendata-mpv
+        - losslesscut
+        - mediainfo
         work:
-          - slack
-          - google-drive
-          - finicky
+        - slack
+        - google-drive
+        - finicky

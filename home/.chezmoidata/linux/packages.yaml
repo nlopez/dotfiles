@@ -3,31 +3,31 @@ packages:
     apt:
       packages:
         base:
-          - bat
-          - build-essential
-          - curl
-          - direnv
-          - fd-find
-          - git
-          - jq
-          - mkcert
-          - ripgrep
-          - shellcheck
-          - tmux
-          - trash-cli
-          - wget
-          - yq
-          - zsh
-          - fdupes
-          - ncdu
-          - eza
-          - tree
-          - zoxide
-          - hyperfine
-          - postgresql-client-16
-          - dnsutils
-          - ffmpeg
-          - fzf
+        - bat
+        - build-essential
+        - curl
+        - direnv
+        - fd-find
+        - git
+        - jq
+        - mkcert
+        - ripgrep
+        - shellcheck
+        - tmux
+        - trash-cli
+        - wget
+        - yq
+        - zsh
+        - fdupes
+        - ncdu
+        - eza
+        - tree
+        - zoxide
+        - hyperfine
+        - postgresql-client-16
+        - dnsutils
+        - ffmpeg
+        - fzf
         personal: []
         work: []
         wsl: []
@@ -35,19 +35,19 @@ packages:
     brew:
       brews:
         base:
-          - yamlfmt
-          - sql-formatter
-          - fx # json tui
-          - zsh-autosuggestions
-          - zsh-fast-syntax-highlighting
-          - argocd
-          - atuin
-          - ryooooooga/tap/zabrze
-          - rclone
-          - go
-          - uv
-          - yazi
-          - helm
+        - yamlfmt
+        - sql-formatter
+        - fx # json tui
+        - zsh-autosuggestions
+        - zsh-fast-syntax-highlighting
+        - argocd
+        - atuin
+        - ryooooooga/tap/zabrze
+        - rclone
+        - go
+        - uv
+        - yazi
+        - helm
         personal: []
         work: []
         wsl: []

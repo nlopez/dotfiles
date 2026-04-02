@@ -3,56 +3,56 @@ packages:
     scoop:
       buckets:
         base:
-          - name: main
-            url: https://github.com/ScoopInstaller/Main
-          - name: extras
-            url: https://github.com/ScoopInstaller/Extras
-          - name: versions
-            url: https://github.com/ScoopInstaller/Versions
-          - name: nonportable
-            url: https://github.com/ScoopInstaller/Nonportable
+        - name: main
+          url: https://github.com/ScoopInstaller/Main
+        - name: extras
+          url: https://github.com/ScoopInstaller/Extras
+        - name: versions
+          url: https://github.com/ScoopInstaller/Versions
+        - name: nonportable
+          url: https://github.com/ScoopInstaller/Nonportable
         personal: []
         work: []
       packages:
         base:
-          - 1password-cli
-          - 7zip
-          - context-menu-manager
-          - cpu-z
-          - cryptomator
-          - eartrumpet
-          - espanso
-          - everything-alpha
-          - gimp
-          - git
-          - git-credential-manager
-          - go
-          - googlechrome
-          - gsudo
-          - hwinfo
-          - icaros-np
-          - irfanview
-          - islc
-          - losslesscut
-          - mpv
-          - nvcleanstall
-          - open-shell-np
-          - oxipng
-          - paint.net
-          - powertoys
-          - rclone
-          - regeditor
-          - runcat
-          - sharex
-          - steam
-          - sumatrapdf
-          - tailscale
-          - vscode
-          - windows-terminal
-          - winfsp-np
-          - zen-browser
-          - winaero-tweaker
-          - k9s
-          - ripgrep
+        - 1password-cli
+        - 7zip
+        - context-menu-manager
+        - cpu-z
+        - cryptomator
+        - eartrumpet
+        - espanso
+        - everything-alpha
+        - gimp
+        - git
+        - git-credential-manager
+        - go
+        - googlechrome
+        - gsudo
+        - hwinfo
+        - icaros-np
+        - irfanview
+        - islc
+        - losslesscut
+        - mpv
+        - nvcleanstall
+        - open-shell-np
+        - oxipng
+        - paint.net
+        - powertoys
+        - rclone
+        - regeditor
+        - runcat
+        - sharex
+        - steam
+        - sumatrapdf
+        - tailscale
+        - vscode
+        - windows-terminal
+        - winfsp-np
+        - zen-browser
+        - winaero-tweaker
+        - k9s
+        - ripgrep
         personal: []
         work: []
