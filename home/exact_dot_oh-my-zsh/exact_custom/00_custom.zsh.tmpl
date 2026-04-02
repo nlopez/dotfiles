@@ -10,6 +10,9 @@ ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 alias reload='exec env -i PATH=$PATH TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX zsh --login'
 
 {{- if .work }}
+{{- if lookPath "awsv" }}
+eval "$(awsv init)"
+{{- end }}
 
 alias sudo="/Applications/Privileges.app/Contents/MacOS/PrivilegesCLI -a && /usr/bin/sudo"
 
