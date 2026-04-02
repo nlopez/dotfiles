@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Checksum to trigger brew bundle when packages.yaml changes
+# {{ .packages.darwin.brew | toJson | sha256sum }}
+
+set -eufo pipefail
+
+brew bundle --global

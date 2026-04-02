@@ -45,8 +45,6 @@ packages:
         - testssl
         - cilium-cli
         - watchman
-        # - FelixKratz/formulae/borders
-        # - FelixKratz/formulae/sketchybar
         - lazygit
         personal:
         - ffmpeg
@@ -60,7 +58,6 @@ packages:
         base:
         - grandperspective
         - claude-code
-        # - nikitabobko/tap/aerospace
         - fsmonitor
         - wireshark-app
         - zed
@@ -71,7 +68,6 @@ packages:
         - ghostty
         - font-iosevka-nerd-font
         - font-iosevka-term-nerd-font
-        # - font-hack-nerd-font # sketchybar default
         - tailscale-app
         - 1password
         - 1password-cli
