@@ -4,13 +4,13 @@ repos:
   - id: jsonlint
     name: jsonlint
     language: system
-    entry: uv run scripts/jsonlint.py
+    entry: .venv/bin/python scripts/jsonlint.py
     pass_filenames: false
     always_run: true
 
   - id: shellcheck
     name: shellcheck
     language: system
-    entry: uv run scripts/shellcheck.py
+    entry: .venv/bin/python scripts/shellcheck.py
     pass_filenames: false
     always_run: true

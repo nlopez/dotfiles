@@ -1,15 +1,11 @@
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.11"
-# dependencies = ["pyyaml"]
-# ///
-
+#!/usr/bin/env python
 import argparse
 import json
 import subprocess
 import sys
 from pathlib import Path
 
+import json5
 import yaml
 
 OSES = ["darwin", "linux", "windows"]
@@ -128,55 +124,14 @@ def render_and_lint(
 def lint_json(content: str, label: str, verbose: bool = False) -> int:
     if verbose:
         print(f"jsonlint: {label}")
-    else:
-        print(f"jsonlint: {label}")
-
-    # Strip JS-style line comments before parsing, since Zed config files use them
-    lines = []
-    for line in content.splitlines():
-        stripped = line.lstrip()
-        if stripped.startswith("//"):
-            continue
-        # Inline comment: remove everything after an unquoted //
-        out = _strip_inline_comment(line)
-        lines.append(out)
-
-    # Remove trailing commas before closing braces/brackets (common in Zed configs)
-    cleaned = _remove_trailing_commas("\n".join(lines))
 
     try:
-        json.loads(cleaned)
-    except json.JSONDecodeError as e:
-        print(f"  JSON ERROR: {e}", file=sys.stderr)
+        json5.loads(content)
+    except ValueError as e:
+        print(f"  JSON ERROR in {label}: {e}", file=sys.stderr)
         return 1
 
     return 0
-
-
-def _strip_inline_comment(line: str) -> str:
-    """Remove a // line comment that appears outside of a quoted string."""
-    in_string = False
-    escape_next = False
-    i = 0
-    while i < len(line):
-        ch = line[i]
-        if escape_next:
-            escape_next = False
-        elif ch == "\\" and in_string:
-            escape_next = True
-        elif ch == '"':
-            in_string = not in_string
-        elif not in_string and ch == "/" and i + 1 < len(line) and line[i + 1] == "/":
-            return line[:i].rstrip()
-        i += 1
-    return line
-
-
-def _remove_trailing_commas(text: str) -> str:
-    """Remove trailing commas before } or ] (JSONC quirk used in Zed configs)."""
-    import re
-
-    return re.sub(r",(\s*[}\]])", r"\1", text)
 
 
 if __name__ == "__main__":

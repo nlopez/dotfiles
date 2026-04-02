@@ -1,9 +1,4 @@
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.11"
-# dependencies = ["pyyaml"]
-# ///
-
+#!/usr/bin/env python
 import argparse
 import json
 import os
@@ -18,8 +13,15 @@ OSES = ["darwin", "linux", "windows"]
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Render chezmoi templates and shellcheck .sh files")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print filename and variable inputs for each check")
+    parser = argparse.ArgumentParser(
+        description="Render chezmoi templates and shellcheck .sh files"
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print filename and variable inputs for each check",
+    )
     args = parser.parse_args()
 
     chezmoi_root = Path(
@@ -36,10 +38,14 @@ def main() -> None:
         override_data, user_data = build_data(chezmoi_root, os_name)
 
         for tmpl in sorted(scripts_dir.glob("*.sh.tmpl")):
-            errors += render_and_check(tmpl, override_data, user_data, os_name, args.verbose)
+            errors += render_and_check(
+                tmpl, override_data, user_data, os_name, args.verbose
+            )
 
         for sh in sorted(scripts_dir.glob("*.sh")):
-            errors += run_shellcheck(sh, f"{os_name}/{sh.name}", override_data, user_data, args.verbose)
+            errors += run_shellcheck(
+                sh, f"{os_name}/{sh.name}", override_data, user_data, args.verbose
+            )
 
     if errors:
         print(f"\n{errors} error(s)", file=sys.stderr)
@@ -82,14 +88,18 @@ def print_verbose(label: str, override_data: dict, user_data: dict) -> None:
     print(f"  {label}  [{vars_str}]")
 
 
-def render_and_check(tmpl: Path, override_data: dict, user_data: dict, os_name: str, verbose: bool) -> int:
+def render_and_check(
+    tmpl: Path, override_data: dict, user_data: dict, os_name: str, verbose: bool
+) -> int:
     label = f"{os_name}/{tmpl.stem}"  # strip .tmpl
     merged = {**user_data, **override_data}
     try:
         result = subprocess.run(
             [
-                "chezmoi", "execute-template",
-                "--override-data", json.dumps(merged),
+                "chezmoi",
+                "execute-template",
+                "--override-data",
+                json.dumps(merged),
             ],
             stdin=tmpl.open(),
             capture_output=True,
@@ -113,7 +123,9 @@ def render_and_check(tmpl: Path, override_data: dict, user_data: dict, os_name: 
     return rc
 
 
-def run_shellcheck(path: str | Path, label: str, override_data: dict, user_data: dict, verbose: bool) -> int:
+def run_shellcheck(
+    path: str | Path, label: str, override_data: dict, user_data: dict, verbose: bool
+) -> int:
     if verbose:
         print_verbose(label, override_data, user_data)
     else:
