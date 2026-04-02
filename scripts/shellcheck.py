@@ -55,7 +55,7 @@ def render_and_check(
     label = f"{os_name}/{tmpl.stem}"  # strip .tmpl
 
     output, error = render_template(tmpl, override_data, user_data)
-    if error:
+    if error is not None or output is None:
         print(f"RENDER FAILED: {label}\n{error}", file=sys.stderr)
         return 1
 
