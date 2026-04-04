@@ -21,6 +21,7 @@ for pattern in "${DENY_PATTERNS[@]}"; do
 done
 
 ALLOW_PATTERNS=(
+    '^kubectl\s+(get|describe|logs|top|explain|version|cluster-info|api-resources|api-versions|diff)\b'
     '^git\s+(status|log|diff|show|branch|blame|tag)\b'
     '^(cat|head|tail|wc|file|stat|ls|tree)\s'
     '^(grep|rg)\s'
