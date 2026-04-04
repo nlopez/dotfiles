@@ -58,13 +58,10 @@ def main() -> int:
         (dest / ".git").write_text("gitdir: ./.bare\n", encoding="utf-8")
 
         branch = git_out(dest, "symbolic-ref", "--short", "HEAD")
-        spec = f"+refs/heads/{branch}:refs/remotes/origin/{branch}"
-        git(dest, "config", "remote.origin.fetch", spec)
         git(dest, "fetch", "origin")
         git(dest, "worktree", "add", branch, branch)
 
         work = dest / branch
-        git(work, "branch", "--set-upstream-to", f"origin/{branch}")
     except CalledProcessError as e:
         return e.returncode if e.returncode else 1
 

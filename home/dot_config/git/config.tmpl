@@ -8,28 +8,31 @@
   default = current
   autoSetupRemote = true
 
-[pull]
+  [core]
+    quotepath = false
+    autocrlf = input
+    safecrlf = false
+    symlinks = true
+    editor = vim
+  {{- if or .wsl (eq .chezmoi.os "windows") }}
+    sshCommand = ssh.exe
+  {{- end }}
+
+  [credential]
+  {{- if or .wsl (eq .chezmoi.os "windows") }}
+    helper = manager.exe
+  {{- else }}
+    helper = manager
+  {{- end }}
+
+  [pull]
   rebase = true
 
 [checkout]
   defeaultRemote = origin
 
-[core]
-  quotepath = false
-  autocrlf = input
-  safecrlf = false
-  symlinks = true
-  editor = vim
-{{- if or .wsl (eq .chezmoi.os "windows") }}
-  sshCommand = ssh.exe
-{{- end }}
-
-[credential]
-{{- if or .wsl (eq .chezmoi.os "windows") }}
-  helper = manager.exe
-{{- else }}
-  helper = manager
-{{- end }}
+[worktree]
+	guessRemote = true
 
 [credential "https://github.com"]
   username = nlopez
