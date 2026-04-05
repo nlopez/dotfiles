@@ -78,6 +78,7 @@ packages:
           - jordanbaird-ice
           - rectangle
           - little-snitch
+          - smittytone/homebrew-smittytone/utitool
         personal:
           - brave-browser
           - stolendata-mpv
