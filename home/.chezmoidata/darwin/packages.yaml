@@ -83,6 +83,8 @@ packages:
           - stolendata-mpv
           - losslesscut
           - mediainfo
+          - signal
+          - telegram-desktop
         work:
           - slack
           - google-drive
