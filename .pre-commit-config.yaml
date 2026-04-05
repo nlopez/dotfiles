@@ -7,7 +7,6 @@ repos:
     entry: .venv/bin/python scripts/jsonlint.py
     pass_filenames: false
     always_run: true
-
   - id: shellcheck
     name: shellcheck
     language: system
