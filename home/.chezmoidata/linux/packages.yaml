@@ -3,11 +3,11 @@ packages:
     apt:
       packages:
         base:
-          - bat
-          - build-essential
-          - curl
-          - direnv
-          - fd-find
+        - bat
+        - build-essential
+        - curl
+        - direnv
+        - fd-find
           - git
           - jq
           - mkcert
@@ -48,6 +48,20 @@ packages:
           - uv
           - yazi
           - helm
+        - yamlfmt
+        - sql-formatter
+        - fx # json tui
+        - zsh-autosuggestions
+        - zsh-fast-syntax-highlighting
+        - argocd
+        - atuin
+        - ryooooooga/tap/zabrze
+        - rclone
+        - go
+        - uv
+        - yazi
+        - helm
+        - oxipng
         personal: []
         work: []
         wsl: []
