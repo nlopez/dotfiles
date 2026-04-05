@@ -3,6 +3,6 @@
 set -eufo pipefail
 
 # Associate common text/code filetypes with Zed
-for ext in txt json yaml sh xml sql go py js zsh rb; do
-  duti -s dev.zed.Zed ."$ext" all
+for uti in text plain-text source-code shell-script script; do
+  duti -s dev.zed.Zed "public.${uti}" all
 done
