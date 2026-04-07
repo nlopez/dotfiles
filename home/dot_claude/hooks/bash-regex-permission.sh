@@ -29,7 +29,7 @@ ALLOW_PATTERNS=(
     '^(fd|fdfind)\s'
     '.*(--)?(help|version)$'
     '.*--dry-run\b'
-    '^go (vet|build|fmt|test|run|mod tidy|mod vendor|mod graph|mod why)\b'
+    '^go (list|vet|build|fmt|test|run|mod tidy|mod vendor|mod graph|mod why)\b'
 )
 
 for pattern in "${ALLOW_PATTERNS[@]}"; do
