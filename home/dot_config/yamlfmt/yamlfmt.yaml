@@ -22,7 +22,7 @@ formatter:
   include_document_start: false
   indent: 2
   indent_root_array: false
-  indentless_arrays: true
+  indentless_arrays: false
   line_ending: lf
   max_line_length: 0
   pad_line_comments: 1
