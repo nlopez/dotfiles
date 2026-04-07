@@ -27,9 +27,9 @@ ALLOW_PATTERNS=(
     '^(grep|rg)\s'
     '^find\s+.*-name\s'
     '^(fd|fdfind)\s'
-    '.*--help$'
-    '.*--version$'
+    '.*(--)?(help|version)$'
     '.*--dry-run\b'
+    '^go (vet|build|fmt|test|run|mod tidy|mod vendor|mod graph|mod why)\b'
 )
 
 for pattern in "${ALLOW_PATTERNS[@]}"; do
