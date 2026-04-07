@@ -30,6 +30,32 @@ ALLOW_PATTERNS=(
     '.*(--)?(help|version)$'
     '.*--dry-run\b'
     '^go (list|vet|build|fmt|test|run|mod tidy|mod vendor|mod graph|mod why)\b'
+    # system info
+    '^(pwd|date|uname|hostname|whoami|id|uptime)\b'
+    '^(which|whereis|type)\s'
+    '^(env|printenv)\b'
+    '^(ps|pgrep)\s'
+    '^(df|du)\s'
+    '^(lsof)\s'
+    # text processing
+    '^(diff|delta|colordiff)\s'
+    '^(sort|uniq|cut|tr|awk|sed)\s'
+    '^(jq|yq)\s'
+    '^(bat|less|more)\s'
+    # package managers (read-only subcommands)
+    '^brew\s+(list|info|search|outdated|leaves|deps|desc|uses)\b'
+    '^(npm|yarn|pnpm)\s+(list|info|outdated|ls|why|audit)\b'
+    '^pip[0-9]?\s+(list|show|freeze|check)\b'
+    '^cargo\s+(check|clippy|doc|metadata|pkgid|locate-project|tree|verify-project)\b'
+    # chezmoi read-only
+    '^chezmoi\s+(diff|status|data|cat|managed|unmanaged|doctor|dump|execute-template)\b'
+    # docker read-only
+    '^docker\s+(ps|images|inspect|logs|stats|top|info|version|network ls|volume ls|container ls)\b'
+    # misc
+    '^(curl|wget)\s.*(-I\b|--head\b)'
+    '^(openssl|ssh-keygen)\s.*(--help|-h)\b'
+    '^(sw_vers|system_profiler|diskutil list|networksetup -listallnetworkservices)\b'
+    '^(xcode-select|xcrun)\s'
 )
 
 for pattern in "${ALLOW_PATTERNS[@]}"; do
