@@ -1,0 +1,3 @@
+{{- if ne .chezmoi.os "windows" -}}
+plugin_cache_dir = "{{ .chezmoi.homeDir }}/.terraform.d/plugin-cache"
+{{- end -}}
