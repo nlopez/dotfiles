@@ -1,0 +1,3 @@
+{{- if eq .chezmoi.os "windows" -}}
+plugin_cache_dir = "{{ .chezmoi.homeDir }}\\AppData\\Roaming\\terraform.d\\plugin-cache"
+{{- end -}}
