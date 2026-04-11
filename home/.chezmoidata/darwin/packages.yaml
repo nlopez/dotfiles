@@ -79,6 +79,7 @@ packages:
         - rectangle
         - little-snitch
         - smittytone/homebrew-smittytone/utitool
+        - espanso
         personal:
         - brave-browser
         - stolendata-mpv
@@ -86,6 +87,7 @@ packages:
         - mediainfo
         - signal
         - telegram-desktop
+        - discord
         work:
         - slack
         - google-drive
