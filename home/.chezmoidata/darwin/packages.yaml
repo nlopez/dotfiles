@@ -48,6 +48,7 @@ packages:
         - cilium-cli
         - watchman
         - lazygit
+        - pv
         personal:
         - ffmpeg
         - yt-dlp
