@@ -54,7 +54,6 @@ packages:
         - winaero-tweaker
         - k9s
         - ripgrep
-        - battlenet
         - signal
         - discord
         - telegram
