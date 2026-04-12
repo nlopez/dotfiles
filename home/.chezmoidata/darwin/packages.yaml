@@ -81,6 +81,7 @@ packages:
         - little-snitch
         - smittytone/homebrew-smittytone/utitool
         - espanso
+        - little-snitch
         personal:
         - brave-browser
         - stolendata-mpv
