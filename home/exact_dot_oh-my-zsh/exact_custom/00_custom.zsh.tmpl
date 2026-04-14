@@ -7,6 +7,16 @@ alias history="atuin history list"
 
 ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 
+cd() {
+  # If given a file path, cd to its parent directory. ${1:h} is zsh's :h modifier
+  # (borrowed from vi), which strips the trailing filename component — like dirname.
+  if [[ $# -eq 1 && -f "$1" ]]; then
+    builtin cd "${1:h}"
+  else
+    builtin cd "$@"
+  fi
+}
+
 alias reload='exec env -i PATH=$PATH TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX zsh --login'
 
 {{- if .work }}
