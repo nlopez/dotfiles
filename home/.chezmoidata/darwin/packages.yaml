@@ -3,6 +3,7 @@ packages:
     brew:
       brews:
         base:
+        - flock
         - skopeo
         - duti
         - mas

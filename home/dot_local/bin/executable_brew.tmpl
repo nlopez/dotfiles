@@ -1,0 +1,28 @@
+#!/bin/bash
+# Wrapper: elevate via Privileges.app before privileged brew operations.
+# Mirrors the sudo alias pattern so both interactive and script use is covered.
+
+PRIVILEGES_CLI=/Applications/Privileges.app/Contents/MacOS/PrivilegesCLI
+REAL_BREW={{ if eq .chezmoi.os "darwin" }}$(command -v brew 2>/dev/null || echo /opt/homebrew/bin/brew){{ else }}/usr/local/bin/brew{{ end }}
+
+priv_commands=(bundle install update upgrade uninstall cleanup reinstall doctor config)
+
+needs_priv=false
+for cmd in "${priv_commands[@]}"; do
+  if [[ "$1" == "$cmd" ]]; then
+    needs_priv=true
+    break
+  fi
+done
+
+if [[ "$needs_priv" == true ]]; then
+  if ! /usr/bin/groups | grep -q -E "\b(admin|wheel)\b"; then
+    "$PRIVILEGES_CLI" -a || {
+      echo "PrivilegesCLI failed to elevate. Aborting brew command." >&2
+      exit 1
+    }
+    sleep 1
+  fi
+fi
+
+exec "$REAL_BREW" "$@"
