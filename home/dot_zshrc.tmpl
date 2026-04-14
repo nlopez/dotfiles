@@ -200,6 +200,20 @@ bindkey '^xe' _edit_command_line
 bindkey '^x^e' _edit_command_line
 
 ###############################################################################
+# Claude — clear tmux status emoji on exit
+###############################################################################
+function claude() {
+  command claude "$@"
+  if [[ -n "$TMUX" ]]; then
+    local current
+    current=$(tmux display-message -p '#W')
+    local base="${current#🤖 }"; base="${base#👍 }"; base="${base#❓ }"
+    tmux rename-window "$base"
+    tmux set-option -w automatic-rename on
+  fi
+}
+
+###############################################################################
 # Editor & pager
 ###############################################################################
 export EDITOR="zed"
