@@ -50,6 +50,7 @@ packages:
         - watchman
         - lazygit
         - pv
+        - terminal-notifier
         personal:
         - ffmpeg
         - yt-dlp

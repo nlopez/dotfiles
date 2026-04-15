@@ -16,6 +16,7 @@ BASE=$(strip_window_emoji "$CURRENT")
 
 if [[ "$LAST_CHAR" == "?" ]]; then
   tmux rename-window -t "$PANE" "🛎️ $BASE"
+  bash ~/.claude/hooks/notification.sh "Waiting for input" <<< '{}'
 else
   tmux rename-window -t "$PANE" "✳️ $BASE"
 fi
