@@ -5,6 +5,23 @@
 # Usage: source this file, then call find_claude_pane
 # Returns: pane ID (e.g. %3) via stdout, exit 1 if not found
 
+strip_window_emoji() {
+  local name="$1"
+  local prefixes=("🤖 " "✳️ " "🛎️ ")
+  local changed=1
+  while [[ $changed -eq 1 ]]; do
+    changed=0
+    for prefix in "${prefixes[@]}"; do
+      local stripped="${name#$prefix}"
+      if [[ "$stripped" != "$name" ]]; then
+        name="$stripped"
+        changed=1
+      fi
+    done
+  done
+  echo "$name"
+}
+
 find_claude_pane() {
   local pane_id pane_pid current
 
