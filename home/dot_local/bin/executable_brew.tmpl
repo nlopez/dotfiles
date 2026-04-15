@@ -3,7 +3,7 @@
 # Mirrors the sudo alias pattern so both interactive and script use is covered.
 
 PRIVILEGES_CLI=/Applications/Privileges.app/Contents/MacOS/PrivilegesCLI
-REAL_BREW={{ if eq .chezmoi.os "darwin" }}$(command -v brew 2>/dev/null || echo /opt/homebrew/bin/brew){{ else }}/usr/local/bin/brew{{ end }}
+REAL_BREW={{ if eq .chezmoi.os "darwin" }}{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin/brew{{ else }}/usr/local/bin/brew{{ end }}{{ else }}/home/linuxbrew/.linuxbrew/bin/brew{{ end }}
 
 priv_commands=(bundle install update upgrade uninstall cleanup reinstall doctor config)
 
