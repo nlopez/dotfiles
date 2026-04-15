@@ -8,7 +8,7 @@ source ~/.claude/hooks/lib/tmux-pane.sh
 PANE=$(find_claude_pane) || exit 0
 
 CURRENT=$(tmux display-message -p -t "$PANE" '#W')
-BASE="${CURRENT#🤖 }"; BASE="${BASE#👍 }"; BASE="${BASE#❓ }"
+BASE=$(strip_window_emoji "$CURRENT")
 
 tmux set-option -w -t "$PANE" automatic-rename off
 tmux rename-window -t "$PANE" "🤖 $BASE"
