@@ -48,6 +48,15 @@
             "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
           }
         ]
+      },
+      {
+        "matcher": "ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
+          }
+        ]
       }
     ],
     "Stop": [
