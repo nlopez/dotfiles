@@ -32,6 +32,15 @@
     ],
     "PostToolUse": [
       {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
+          }
+        ]
+      },
+      {
         "matcher": "AskFollowupQuestion",
         "hooks": [
           {
@@ -59,22 +68,22 @@
         ]
       }
     ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/stop.sh"
-          }
-        ]
-      }
-    ],
     "PermissionRequest": [
       {
         "hooks": [
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/post-tool-use.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/stop.sh"
           }
         ]
       }
