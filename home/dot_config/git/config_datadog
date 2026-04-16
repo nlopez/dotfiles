@@ -1,0 +1,2 @@
+[core]
+  hooksPath = /usr/local/dd/global_hooks

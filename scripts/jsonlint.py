@@ -26,8 +26,11 @@ def main() -> None:
 
     # Lint plain .json files (no templating needed)
     for json_file in sorted(root.rglob("*.json")):
+        content = json_file.read_text()
+        if "chezmoi:modify-template" in content:
+            continue
         errors += lint_json(
-            json_file.read_text(),
+            content,
             str(json_file.relative_to(root)),
             args.verbose,
         )
