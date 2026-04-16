@@ -101,15 +101,5 @@
         ]
       }
     ],
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/notification.sh"
-          }
-        ]
-      }
-    ]
   }
 }
