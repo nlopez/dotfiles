@@ -1,0 +1,7 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $existing := .chezmoi.stdin | fromJson -}}
+{{- $managed := include ".chezmoitemplates/claude_settings.json" | fromJson -}}
+{{- if hasKey $existing "model" -}}
+{{-   $_ := set $managed "model" (get $existing "model") -}}
+{{- end -}}
+{{- $managed | toPrettyJson -}}

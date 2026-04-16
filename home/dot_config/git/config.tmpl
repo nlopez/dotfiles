@@ -107,7 +107,13 @@
 {{- end -}}
 
 {{/* Last values win -- keep identity related includes last so they override defaults set earlier */}}
+{{- if .work }}
+
+[includeIf "gitdir:~/src/github.com/datadog/"]
+  path = config_datadog
+{{- end }}
 {{- if .personal }}
+
 [includeIf "gitdir/i:**/silentshout42/**"]
   path = config_hobby
 
