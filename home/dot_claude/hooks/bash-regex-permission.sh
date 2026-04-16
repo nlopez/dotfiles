@@ -7,22 +7,28 @@ CMD=$(cat | jq -r '.tool_input.command // empty' 2>/dev/null)
 DENY_PATTERNS=(
     'find.*-exec'
     '^(fd|fdfind)\s+.*--exec(-batch)?\b'
-    'git\s+push\s+--force'
+    'git\s+push\s+.*--force'
+    'git\s+push\s+.*--force-with-lease'
     'git\s+reset\s+--hard'
+    'git\s+clean\s+-[a-zA-Z]*f'
+    'git\s+branch\s+.*-D\b'
+    'gh\s+pr\s+close\b'
     'rm\s+-rf\s+[/~]'
     'chmod\s+777'
 )
 
 for pattern in "${DENY_PATTERNS[@]}"; do
     if echo "$CMD" | grep -qE "$pattern"; then
-        echo "BLOCKED: Command matches deny pattern: $pattern" >&2
-        exit 2
+        # Fall through to normal permission prompt instead of blocking
+        exit 0
     fi
 done
 
 ALLOW_PATTERNS=(
     '^kubectl\s+(get|describe|logs|top|explain|version|cluster-info|api-resources|api-versions|diff)\b'
-    '^git\s+(status|log|diff|show|branch|blame|tag)\b'
+    '^git\s+(status|log|diff|show|branch|blame|tag|stash|fetch|pull|push|checkout|switch|rebase|merge|cherry-pick|revert|commit|add|restore|rm|mv|remote|config|rev-parse|ls-files|ls-tree|shortlog|reflog|describe|name-rev|for-each-ref|worktree)\b'
+    '^gh\s+pr\s+(create|edit|merge|view|list|checkout|diff|checks|ready|review|comment)\b'
+    '^gh\s+(issue|repo|run|workflow|auth|status)\s'
     '^(cat|head|tail|wc|file|stat|ls|tree)\s'
     '^(grep|rg)\s'
     '^find\s+.*-name\s'
