@@ -1,5 +1,8 @@
 {
   "autoUpdatesChannel": "stable",
+  "permissions": {
+    "defaultMode": "acceptEdits"
+  },
   "hooks": {
     "PreToolUse": [
       {
