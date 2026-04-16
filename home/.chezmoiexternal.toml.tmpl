@@ -42,6 +42,52 @@
     refreshPeriod = "168h"
 {{- end }}
 
+# HashiCorp Terraform agent skills - https://github.com/hashicorp/agent-skills
+[".claude/skills/terraform-search-import/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/code-generation/skills/terraform-search-import/SKILL.md"
+    refreshPeriod = "168h"
+[".claude/skills/terraform-style-guide/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/code-generation/skills/terraform-style-guide/SKILL.md"
+    refreshPeriod = "168h"
+[".claude/skills/terraform-test/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/code-generation/skills/terraform-test/SKILL.md"
+    refreshPeriod = "168h"
+[".claude/skills/refactor-module/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/module-generation/skills/refactor-module/SKILL.md"
+    refreshPeriod = "168h"
+[".claude/skills/terraform-stacks/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/module-generation/skills/terraform-stacks/SKILL.md"
+    refreshPeriod = "168h"
+[".claude/skills/new-terraform-provider/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/new-terraform-provider/SKILL.md"
+    refreshPeriod = "168h"
+[".claude/skills/provider-actions/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/provider-actions/SKILL.md"
+    refreshPeriod = "168h"
+[".claude/skills/provider-docs/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/provider-docs/SKILL.md"
+    refreshPeriod = "168h"
+[".claude/skills/provider-resources/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/provider-resources/SKILL.md"
+    refreshPeriod = "168h"
+[".claude/skills/provider-test-patterns/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/provider-test-patterns/SKILL.md"
+    refreshPeriod = "168h"
+[".claude/skills/run-acceptance-tests/SKILL.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/run-acceptance-tests/SKILL.md"
+    refreshPeriod = "168h"
+
 {{- $fontDir := "" }}
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $fontDir = "Library/Fonts" }}
