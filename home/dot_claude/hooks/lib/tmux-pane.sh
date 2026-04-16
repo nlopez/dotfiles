@@ -31,14 +31,20 @@ find_claude_pane() {
     pane_map[$pane_pid]=$pane_id
   done < <(tmux list-panes -a -F '#{pane_id} #{pane_pid}')
 
-  # Walk up the process tree from this hook's parent (the Claude process)
+  # Build full process ancestry map in one ps call instead of one per level
+  declare -A parent_map
+  while IFS=' ' read -r pid ppid; do
+    parent_map[$pid]=$ppid
+  done < <(ps -Ao pid=,ppid= 2>/dev/null)
+
+  # Walk up the process tree using the pre-built map
   current=$PPID
   while [[ -n "$current" && "$current" -gt 1 ]]; do
     if [[ -n "${pane_map[$current]}" ]]; then
       echo "${pane_map[$current]}"
       return 0
     fi
-    current=$(ps -o ppid= -p "$current" 2>/dev/null | tr -d ' ')
+    current=${parent_map[$current]}
   done
 
   return 1

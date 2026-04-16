@@ -10,9 +10,8 @@ source ~/.claude/hooks/lib/tmux-pane.sh
 
 PANE=$(find_claude_pane) || exit 0
 
-SESSION=$(tmux display-message -p -t "$PANE" '#S')
-WINDOW_INDEX=$(tmux display-message -p -t "$PANE" '#I')
-WINDOW_NAME=$(tmux display-message -p -t "$PANE" '#W')
+# Fetch SESSION, WINDOW_INDEX, and WINDOW_NAME in a single tmux call
+read -r SESSION WINDOW_INDEX WINDOW_NAME < <(tmux display-message -p -t "$PANE" '#{session_name} #{window_index} #{window_name}')
 BASE_NAME=$(strip_window_emoji "$WINDOW_NAME")
 
 # Determine notification message
@@ -23,8 +22,14 @@ else
   MSG=$(printf '%s' "$INPUT" | jq -r '.message // "Needs your attention"' 2>/dev/null || echo "Needs your attention")
 fi
 
-# Detect running terminal app and return its bundle ID
+# Detect running terminal app and return its bundle ID.
+# Cached in /tmp for the lifetime of the session to avoid repeated pgrep calls.
 detect_terminal_bundle() {
+  local cache_file="/tmp/claude_terminal_bundle"
+  if [[ -f "$cache_file" ]]; then
+    cat "$cache_file"
+    return
+  fi
   declare -A bundles=(
     [iTerm2]="com.googlecode.iterm2"
     [ghostty]="com.mitchellh.ghostty"
@@ -32,13 +37,14 @@ detect_terminal_bundle() {
     [WezTerm]="com.github.wez.wezterm"
     [Terminal]="com.apple.Terminal"
   )
+  local bundle="com.apple.Terminal"
   for app in iTerm2 ghostty kitty WezTerm Terminal; do
     if pgrep -xi "$app" > /dev/null 2>&1; then
-      echo "${bundles[$app]}"
-      return
+      bundle="${bundles[$app]}"
+      break
     fi
   done
-  echo "com.apple.Terminal"
+  echo "$bundle" | tee "$cache_file"
 }
 
 BUNDLE=$(detect_terminal_bundle)
