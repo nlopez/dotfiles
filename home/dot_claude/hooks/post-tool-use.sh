@@ -11,3 +11,4 @@ CURRENT=$(tmux display-message -p -t "$PANE" '#W')
 BASE="${CURRENT#🤖 }"; BASE="${BASE#👍 }"; BASE="${BASE#🛎️ }"
 
 tmux rename-window -t "$PANE" "🛎️ $BASE"
+bash ~/.claude/hooks/notification.sh "Waiting for input" <<< '{}'

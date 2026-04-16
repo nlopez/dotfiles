@@ -19,4 +19,5 @@ if [[ "$LAST_CHAR" == "?" ]]; then
   bash ~/.claude/hooks/notification.sh "Waiting for input" <<< '{}'
 else
   tmux rename-window -t "$PANE" "✳️ $BASE"
+  bash ~/.claude/hooks/notification.sh "Complete" <<< '{}'
 fi
