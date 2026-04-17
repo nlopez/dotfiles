@@ -1,0 +1,17 @@
+[user]
+name = {{ .name | quote }}
+email = {{ .email | quote }}
+
+[signing]
+sign-all = true
+backend = "ssh"
+key = {{ .signingkey | quote }}
+
+[signing.backends.ssh]
+allowed-signers = "~/.config/git/allowed_signers"
+
+[[repos]]
+roots = ["~src/github.com/silentshout42", "~src/github.com/kamotimestamps"]
+user.name = "Silent Shout"
+user.email = "161982876+SilentShout42@users.noreply.github.com"
+signing.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGdsuL9gfvu+aqCFhs12VeEv+uUkbtUskZ1Ny8T7ZkxZ"
