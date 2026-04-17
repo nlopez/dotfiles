@@ -58,3 +58,6 @@ Thumbs.db
 tfplan*
 
 **/.claude/settings.local.json
+
+# graphify knowledge graph outputs
+graphify-out/

@@ -126,7 +126,6 @@ packages:
         personal:
         - brave-browser
         - mpv
-        - videolan
         - losslesscut
         - mediainfo
         - signal
