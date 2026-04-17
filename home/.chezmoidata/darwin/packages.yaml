@@ -51,17 +51,56 @@ packages:
         - lazygit
         - pv
         - terminal-notifier
+        - helm
+        - kubectx
+        - kubernetes-cli
         personal:
         - ffmpeg
         - yt-dlp
         - oxipng
         - argocd
+        - media-info
         work:
         - awscli
         - tenv
         - glab
+      uv:
+        base:
+        - graphifyy
+        - pre-commit
+        - unique-namer
+      mas:
+        base:
+        - name: "1Password for Safari"
+          id: 1569813296
+        personal:
+        - name: "1Blocker"
+          id: 1365531024
+        - name: "Kagi for Safari"
+          id: 1622835804
+        - name: "StopTheMadness Pro"
+          id: 6471380298
+      vscode:
+        base:
+        - anthropic.claude-code
+        - esbenp.prettier-vscode
+        - golang.go
+        - hashicorp.hcl
+        - hashicorp.terraform
+        - pkief.material-icon-theme
+        - redhat.vscode-yaml
+        - tamasfe.even-better-toml
+        - timonwong.shellcheck
+        - datadog.datadog-vscode
+        - github.copilot-chat
+        - tailscale.vscode-tailscale
+        personal:
+        - ms-vscode-remote.remote-wsl
+        - ms-vscode.powershell
+        work:
       casks:
         base:
+        - digikam
         - grandperspective
         - claude-code
         - fsmonitor
@@ -82,12 +121,12 @@ packages:
         - jordanbaird-ice
         - rectangle
         - little-snitch
-        - smittytone/homebrew-smittytone/utitool
         - espanso
-        - little-snitch
+        - smittytone/homebrew-smittytone/utitool
         personal:
         - brave-browser
-        - stolendata-mpv
+        - mpv
+        - videolan
         - losslesscut
         - mediainfo
         - signal

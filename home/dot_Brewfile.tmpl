@@ -1,15 +1,24 @@
 {{- $brewConfig := .packages.darwin.brew -}}
-{{- $brews := $brewConfig.brews.base -}}
-{{- $casks := $brewConfig.casks.base -}}
+{{- $brews    := $brewConfig.brews.base   | default list -}}
+{{- $casks    := $brewConfig.casks.base   | default list -}}
+{{- $uvTools  := $brewConfig.uv.base      | default list -}}
+{{- $masApps  := $brewConfig.mas.base     | default list -}}
+{{- $vscode   := $brewConfig.vscode.base  | default list -}}
 
 {{- if .personal -}}
-{{-   $brews = concat $brews $brewConfig.brews.personal -}}
-{{-   $casks = concat $casks $brewConfig.casks.personal -}}
+{{-   if index $brewConfig.brews   "personal" -}}{{- $brews   = concat $brews   (index $brewConfig.brews   "personal") -}}{{- end -}}
+{{-   if index $brewConfig.casks   "personal" -}}{{- $casks   = concat $casks   (index $brewConfig.casks   "personal") -}}{{- end -}}
+{{-   if index $brewConfig.uv      "personal" -}}{{- $uvTools = concat $uvTools (index $brewConfig.uv      "personal") -}}{{- end -}}
+{{-   if index $brewConfig.mas     "personal" -}}{{- $masApps = concat $masApps (index $brewConfig.mas     "personal") -}}{{- end -}}
+{{-   if index $brewConfig.vscode  "personal" -}}{{- $vscode  = concat $vscode  (index $brewConfig.vscode  "personal") -}}{{- end -}}
 {{- end -}}
 
 {{- if .work -}}
-{{-   $brews = concat $brews $brewConfig.brews.work -}}
-{{-   $casks = concat $casks $brewConfig.casks.work -}}
+{{-   if index $brewConfig.brews   "work" -}}{{- $brews   = concat $brews   (index $brewConfig.brews   "work") -}}{{- end -}}
+{{-   if index $brewConfig.casks   "work" -}}{{- $casks   = concat $casks   (index $brewConfig.casks   "work") -}}{{- end -}}
+{{-   if index $brewConfig.uv      "work" -}}{{- $uvTools = concat $uvTools (index $brewConfig.uv      "work") -}}{{- end -}}
+{{-   if index $brewConfig.mas     "work" -}}{{- $masApps = concat $masApps (index $brewConfig.mas     "work") -}}{{- end -}}
+{{-   if index $brewConfig.vscode  "work" -}}{{- $vscode  = concat $vscode  (index $brewConfig.vscode  "work") -}}{{- end -}}
 {{- end -}}
 
 {{ range ($brews | sortAlpha | uniq) -}}
@@ -17,4 +26,13 @@ brew {{ . | quote }}
 {{ end -}}
 {{ range ($casks | sortAlpha | uniq) -}}
 cask {{ . | quote }}
+{{ end -}}
+{{ range $masApps -}}
+mas {{ .name | quote }}, id: {{ .id }}
+{{ end -}}
+{{ range ($uvTools | sortAlpha | uniq) -}}
+uv {{ . | quote }}
+{{ end -}}
+{{ range ($vscode | sortAlpha | uniq) -}}
+vscode {{ . | quote }}
 {{ end -}}
