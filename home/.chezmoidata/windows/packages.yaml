@@ -16,7 +16,6 @@ packages:
       packages:
         base:
         - potplayer
-        - videolan
         - 1password-cli
         - 7zip
         - context-menu-manager
