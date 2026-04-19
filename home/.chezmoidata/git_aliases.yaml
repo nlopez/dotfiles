@@ -1,0 +1,10 @@
+# Git shell aliases for PowerShell (Windows).
+# On Linux/Darwin, zabrze abbreviations are used instead.
+git_aliases:
+- { name: gst, cmd: "status" }
+- { name: ga, cmd: "add" }
+- { name: gc, cmd: "commit" }
+- { name: gp, cmd: "push" }
+- { name: gup, cmd: "pull --rebase" }
+- { name: gdc, cmd: "diff --cached" }
+- { name: grhh, cmd: "reset --hard HEAD" }
