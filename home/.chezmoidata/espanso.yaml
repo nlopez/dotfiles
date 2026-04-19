@@ -8,26 +8,43 @@ espanso:
       search_shortcut: ALT+SPACE
 
   matches:
-    base:
-    - trigger: ":me"
-      replace: "Nick Lopez"
-    - trigger: ":gh"
-      replace: "https://github.com/nlopez"
-
+    base: []
     # Home/personal machine snippets.
     personal:
-    - trigger: ":kshiny"
-      replace: ":_KannaShiny:"
-
+    - { replace: ":_KannaShiny:", triggers: [ ":kshiny" ] }
+    - { replace: ":_KannaLove:", triggers: [ ":klove" ] }
+    - { replace: ":_KannaNoU:", triggers: [ ":knou" ] }
+    - { replace: ":_KannaLMAO:", triggers: [ ":klol", ":klmao" ] }
+    - { replace: ":_KannaHiHi::_KannaHiHi:", triggers: [ ":khihi" ] }
+    - { replace: ":_KannaQua:", triggers: [ ":kqua" ] }
+    - { replace: ":_KannaHeadpat:", triggers: [ ":khp", ":kpat" ] }
+    - { replace: ":_KannaBuffering:", triggers: [ ":kbuff", ":kload" ] }
+    - { replace: ":_KannaHumu:", triggers: [ ":khumu" ] }
+    - { replace: ":_KannaScared:", triggers: [ ":kscare" ] }
+    - { replace: ":_KannaKamoLove:", triggers: [ ":kklove" ] }
+    - { replace: ":_KannaNoted:", triggers: [ ":knote" ] }
+    - { replace: ":_KannaKamoShy:", triggers: [ ":kkshy", ":kkblush" ] }
+    - { replace: ":_KannaCheer:", triggers: [ ":kcheer" ] }
+    - { replace: ":_KannaKamoNope:", triggers: [ ":knope" ] }
+    - { replace: ":_KannaKamoHug:", triggers: [ ":kkhug" ] }
+    - { replace: ":_KannaCry:", triggers: [ ":kcry", ":ksob" ] }
+    - { replace: ":_KannaWater:", triggers: [ ":kwater" ] }
+    - { replace: ":_KannaBurn:", triggers: [ ":kburn", ":kfire" ] }
+    - { replace: ":_KannaBonk:", triggers: [ ":kbonk" ] }
+    - { replace: ":_KannaDed:", triggers: [ ":kdead", ":kded", ":krip" ] }
+    - { replace: ":_KannaRage:", triggers: [ ":krage" ] }
+    - { replace: ":_KannaKamo:", triggers: [ ":kamo" ] }
+    - { replace: ":_KannaGremlin:", triggers: [ ":kgrem" ] }
+    - { replace: ":_KannaMILK:", triggers: [ ":kmilk" ] }
+    - { replace: ":_KannaEyebrow:", triggers: [ ":keye", ":ksus" ] }
+    - { replace: ":_KannaTSKR:", triggers: [ ":ktskr" ] }
+    - { replace: ":_KannaDotDotDot:", triggers: [ ":kdot" ] }
+    - { replace: ":_KannaComfy:", triggers: [ ":kcomfy" ] }
+    - { replace: ":_KannaLimina:", triggers: [ ":klim" ] }
+    - { replace: ":_KannaHiyori:", triggers: [ ":khiyo" ] }
+    - { replace: ":_KannaAmaya:", triggers: [ ":kamaya" ] }
     # Work machine snippets.
-    work:
-    - trigger: ":sig"
-      replace: "Nick Lopez\\nname@company.com"
-
+    work: []
     # OS-specific snippets.
-    darwin:
-    - trigger: ":pb"
-      replace: "pbcopy"
-    windows:
-    - trigger: ":pb"
-      replace: "clip"
+    darwin: []
+    windows: []
