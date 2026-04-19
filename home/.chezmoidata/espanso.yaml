@@ -1,0 +1,33 @@
+espanso:
+  config:
+    show_notifications: false
+    toggle_key: OFF
+    darwin:
+      search_shortcut: ALT+SPACE
+    windows:
+      search_shortcut: ALT+SPACE
+
+  matches:
+    base:
+    - trigger: ":me"
+      replace: "Nick Lopez"
+    - trigger: ":gh"
+      replace: "https://github.com/nlopez"
+
+    # Home/personal machine snippets.
+    personal:
+    - trigger: ":kshiny"
+      replace: ":_KannaShiny:"
+
+    # Work machine snippets.
+    work:
+    - trigger: ":sig"
+      replace: "Nick Lopez\\nname@company.com"
+
+    # OS-specific snippets.
+    darwin:
+    - trigger: ":pb"
+      replace: "pbcopy"
+    windows:
+    - trigger: ":pb"
+      replace: "clip"
