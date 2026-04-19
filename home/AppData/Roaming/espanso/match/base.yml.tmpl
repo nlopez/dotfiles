@@ -1,0 +1,23 @@
+# Managed by chezmoi.
+# Espanso match basics: https://espanso.org/docs/configuration/basics/
+matches:
+{{- range $m := .espanso.matches.base }}
+  - trigger: {{ $m.trigger | quote }}
+    replace: {{ $m.replace | quote }}
+{{- end }}
+{{- range $m := .espanso.matches.windows }}
+  - trigger: {{ $m.trigger | quote }}
+    replace: {{ $m.replace | quote }}
+{{- end }}
+{{- if .personal }}
+{{- range $m := .espanso.matches.personal }}
+  - trigger: {{ $m.trigger | quote }}
+    replace: {{ $m.replace | quote }}
+{{- end }}
+{{- end }}
+{{- if .work }}
+{{- range $m := .espanso.matches.work }}
+  - trigger: {{ $m.trigger | quote }}
+    replace: {{ $m.replace | quote }}
+{{- end }}
+{{- end }}

@@ -11,6 +11,7 @@
 # Ignore scripts for different operating systems.
 {{ if ne .chezmoi.os "darwin" }}
 .chezmoiscripts/darwin/**
+Library/Application Support/espanso/**
 {{ end }}
 
 {{ if ne .chezmoi.os "linux" }}
