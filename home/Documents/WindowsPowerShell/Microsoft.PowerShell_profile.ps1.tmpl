@@ -13,21 +13,11 @@ Remove-Item alias:gp -Force -ErrorAction SilentlyContinue
 function {{ .name }} { {{ .cmd }} @args }
 {{ end -}}
 
-# Emacs/readline-style key bindings for PSReadLine.
-# PSReadLine's default Windows edit-mode doesn't map these, so bind them
-# explicitly so they work consistently whether in a plain terminal or VS Code.
-if (Get-Module -ListAvailable PSReadLine) {
-  Set-PSReadLineKeyHandler -Chord Ctrl+a -Function BeginningOfLine
-  Set-PSReadLineKeyHandler -Chord Ctrl+e -Function EndOfLine
-  Set-PSReadLineKeyHandler -Chord Ctrl+f -Function ForwardChar
-  Set-PSReadLineKeyHandler -Chord Ctrl+b -Function BackwardChar
-  Set-PSReadLineKeyHandler -Chord Ctrl+k -Function KillLine
-  Set-PSReadLineKeyHandler -Chord Ctrl+u -Function BackwardDeleteLine
-  Set-PSReadLineKeyHandler -Chord Ctrl+w -Function BackwardKillWord
-  Set-PSReadLineKeyHandler -Chord Ctrl+y -Function Yank
-  Set-PSReadLineKeyHandler -Chord Ctrl+d -Function DeleteCharOrExit
-  Set-PSReadLineKeyHandler -Chord Ctrl+p -Function PreviousHistory
-  Set-PSReadLineKeyHandler -Chord Ctrl+n -Function NextHistory
-  Set-PSReadLineKeyHandler -Chord Ctrl+r -Function ReverseSearchHistory
-  Set-PSReadLineKeyHandler -Chord Ctrl+l -Function ClearScreen
+if (Get-Module PSReadLine) {
+  Set-PSReadLineOption -EditMode Emacs
+  Set-PSReadLineOption -BellStyle None
+  Set-PSReadLineOption -HistoryNoDuplicates
+  Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+  Set-PSReadLineOption -PredictionViewStyle ListView
+  Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 }
