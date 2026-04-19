@@ -1,16 +1,16 @@
 $env:PATH += ";$env:UserProfile\bin"
 $env:PATH += ";$env:UserProfile\.local\bin"
 $env:EDITOR = "code"
-Set-Alias -Name g -Value git
 Set-Alias -Name e -Value code
 Import-Module gsudoModule
-# Remove built-in aliases that clash with git wrapper functions.
+# Remove built-in aliases that clash with wrapper functions.
 Remove-Item alias:gc -Force -ErrorAction SilentlyContinue
 Remove-Item alias:gp -Force -ErrorAction SilentlyContinue
 
-# Git wrapper functions — generated from .chezmoidata/git_aliases.yaml
-{{ range .git_aliases -}}
-function {{ .name }} { git {{ .cmd }} @args }
+# Shortcuts — generated from .chezmoidata/aliases.yaml
+# (On Linux/Darwin these are handled by zabrze abbreviations instead.)
+{{ range .aliases -}}
+function {{ .name }} { {{ .cmd }} @args }
 {{ end -}}
 
 # Emacs/readline-style key bindings for PSReadLine.
