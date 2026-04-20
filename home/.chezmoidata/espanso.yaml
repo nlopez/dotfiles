@@ -11,6 +11,7 @@ espanso:
     base: []
     # Home/personal machine snippets.
     personal:
+    - { replace: "╞════╡", triggers: [ ":hr" ] }
     - { replace: ":_KannaShiny:", triggers: [ ":kshiny" ] }
     - { replace: ":_KannaLove:", triggers: [ ":klove" ] }
     - { replace: ":_KannaNoU:", triggers: [ ":knou" ] }
