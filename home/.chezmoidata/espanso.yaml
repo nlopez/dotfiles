@@ -14,7 +14,7 @@ espanso:
     - { replace: ":_KannaShiny:", triggers: [ ":kshiny" ] }
     - { replace: ":_KannaLove:", triggers: [ ":klove" ] }
     - { replace: ":_KannaNoU:", triggers: [ ":knou" ] }
-    - { replace: ":_KannaLMAO:", triggers: [ ":klol", ":klmao" ] }
+    - { replace: ":_KannaLMAO:", triggers: [ ":klol", ":klmao", ":klaugh" ] }
     - { replace: ":_KannaHiHi::_KannaHiHi:", triggers: [ ":khihi" ] }
     - { replace: ":_KannaQua:", triggers: [ ":kqua" ] }
     - { replace: ":_KannaHeadpat:", triggers: [ ":khp", ":kpat" ] }
@@ -43,6 +43,7 @@ espanso:
     - { replace: ":_KannaLimina:", triggers: [ ":klim" ] }
     - { replace: ":_KannaHiyori:", triggers: [ ":khiyo" ] }
     - { replace: ":_KannaAmaya:", triggers: [ ":kamaya" ] }
+    - { replace: ":_KannaLucky:", triggers: [ ":kluck" ] }
     # Work machine snippets.
     work: []
     # OS-specific snippets.
