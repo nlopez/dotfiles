@@ -58,5 +58,7 @@ packages:
         - signal
         - discord
         - telegram
+        - foobar2000
+        - foobar2000-encoders
         personal: []
         work: []
