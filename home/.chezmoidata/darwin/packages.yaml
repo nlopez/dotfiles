@@ -71,9 +71,7 @@ packages:
         - pre-commit
         - unique-namer
       mas:
-        base:
-        - name: "1Password for Safari"
-          id: 1569813296
+        base: []
         personal:
         - name: "1Blocker"
           id: 1365531024
@@ -93,7 +91,6 @@ packages:
         - tamasfe.even-better-toml
         - timonwong.shellcheck
         - datadog.datadog-vscode
-        - github.copilot-chat
         - tailscale.vscode-tailscale
         personal:
         - ms-vscode-remote.remote-wsl
@@ -101,7 +98,6 @@ packages:
         work:
       casks:
         base:
-        - digikam
         - grandperspective
         - claude-code
         - fsmonitor
@@ -125,13 +121,13 @@ packages:
         - espanso
         - smittytone/homebrew-smittytone/utitool
         personal:
+        - digikam
         - brave-browser
         - mpv
         - losslesscut
         - mediainfo
         - signal
         - telegram-desktop
-        - discord
         work:
         - slack
         - google-drive
