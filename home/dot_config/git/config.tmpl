@@ -8,13 +8,16 @@
   default = current
   autoSetupRemote = true
 
-  [core]
-    quotepath = false
-    autocrlf = input
-    safecrlf = false
-    symlinks = true
-    editor = vim
-    fsmonitor = true
+[core]
+  quotepath = false
+  autocrlf = input
+  safecrlf = false
+  symlinks = true
+  editor = vim
+  fsmonitor = true
+{{- if or .wsl (eq .chezmoi.os "windows") }}
+  sshCommand = ssh.exe
+{{- end }}
 
 [feature]
   manyFiles = true
@@ -22,22 +25,19 @@
 [index]
   threads = true
   version = 4
-  {{- if or .wsl (eq .chezmoi.os "windows") }}
-    sshCommand = ssh.exe
-  {{- end }}
 
-  [credential]
-  {{- if or .wsl (eq .chezmoi.os "windows") }}
-    helper = manager.exe
-  {{- else }}
-    helper = manager
-  {{- end }}
+[credential]
+{{- if or .wsl (eq .chezmoi.os "windows") }}
+  helper = manager.exe
+{{- else }}
+  helper = manager
+{{- end }}
 
-  [pull]
+[pull]
   rebase = true
 
 [checkout]
-  defeaultRemote = origin
+  defaultRemote = origin
 
 [worktree]
 	guessRemote = true
