@@ -48,6 +48,8 @@ ephemeral = {{ $ephemeral }}
 headless = {{ $headless }}
 
 zshPlugins = [
+  # fzf-tab must load before widget-wrapping plugins (zsh-autosuggestions, zsh-syntax-highlighting)
+  "fzf-tab",
   "zsh-autosuggestions",
   "zoxide",
   "fzf",
