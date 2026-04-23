@@ -7,7 +7,9 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["(^|/)home/\\.chezmoiexternal\\.toml\\.tmpl$"],
+      "managerFilePatterns": [
+        "/(^|/)home/\\.chezmoiexternal\\.toml\\.tmpl$/"
+      ],
       "matchStrings": [
         "url = \"https://github\\.com/(?<packageName>[^/]+/[^/]+)/archive/(?<currentValue>v?\\d[^/]+)\\.tar\\.gz\"",
         "url = \"https://raw\\.githubusercontent\\.com/(?<packageName>[^/]+/[^/]+)/(?<currentValue>v?\\d[^/]+)/[^\"]+\""
@@ -17,7 +19,7 @@
   ],
   "packageRules": [
     {
-      "matchManagers": ["regex"],
+      "matchManagers": ["custom.regex"],
       "groupName": "chezmoi externals",
       "automerge": true,
       "automergeType": "pr",
