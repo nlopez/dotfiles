@@ -2,6 +2,16 @@ export XDG_DATA_HOME=$HOME/.local/share
 export XDG_CONFIG_HOME=$HOME/.config
 export XDG_STATE_HOME=$HOME/.local/state
 export XDG_CACHE_HOME=$HOME/.cache
+
+# Homebrew: run auto-update at most once per day (default behavior)
+export HOMEBREW_AUTO_UPDATE_SECS=86400
+# Homebrew: disable analytics/telemetry
+export HOMEBREW_NO_ANALYTICS=1
+
+# gh CLI: disable telemetry
+export GH_TELEMETRY=false
+# gh CLI: disable update notifications
+export GH_NO_UPDATE_NOTIFIER=1
 {{- if .work }}
 export OTEL_TRACES_EXPORTER=
 {{- end }}
