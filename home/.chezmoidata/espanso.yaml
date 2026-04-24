@@ -46,7 +46,8 @@ espanso:
     - { replace: ":_KannaAmaya:", triggers: [ ":kamaya" ] }
     - { replace: ":_KannaLucky:", triggers: [ ":kluck" ] }
     # Work machine snippets.
-    work: []
+    work:
+    - { replace: "join aws.iam_account a on a.account_id = ", triggers: [ ":account" ] }
     # OS-specific snippets.
     darwin: []
     windows: []
