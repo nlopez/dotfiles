@@ -1,5 +1,11 @@
 {
   "autoUpdatesChannel": "stable",
+  "cleanupPeriodDays": 90,
+  "theme": "light",
+  "effortLevel": "medium",
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true
+  },
   "permissions": {
     "defaultMode": "acceptEdits"
   },
