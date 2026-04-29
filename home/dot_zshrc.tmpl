@@ -220,6 +220,7 @@ function claude() {
 ###############################################################################
 export EDITOR="zed"
 alias e="${EDITOR} --add"
+compdef _files zed
 
 {{- if .work }}
 export AWS_VAULT_KEYCHAIN_NAME=login
