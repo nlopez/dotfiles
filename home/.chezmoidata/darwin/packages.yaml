@@ -24,6 +24,7 @@ packages:
         - htop
         - kubectl
         - ripgrep
+        - rustup
         - ryooooooga/tap/zabrze
         - tmux
         - yq

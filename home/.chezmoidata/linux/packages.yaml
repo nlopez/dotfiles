@@ -62,6 +62,7 @@ packages:
         - yazi
         - helm
         - oxipng
+        - rustup
         personal: []
         work: []
         wsl: []
