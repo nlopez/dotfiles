@@ -10,7 +10,7 @@
 set -eu
 
 echo "==> terraform plan → tfplan.bin"
-terraform plan -out="tfplan.bin" "$@"
+terraform plan -lock=false -out="tfplan.bin" "$@"
 
 echo "==> terraform show (text) → tfplan.txt"
 terraform show "tfplan.bin" > "tfplan.txt"
