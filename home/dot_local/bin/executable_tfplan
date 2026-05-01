@@ -1,0 +1,23 @@
+#!/bin/sh
+# tfplan — run terraform plan and save output in binary (.bin), text (.txt),
+# and JSON (.json) formats. All extra arguments are forwarded to terraform plan.
+#
+# Output files are written to the current directory:
+#   tfplan.bin   binary plan (for terraform apply)
+#   tfplan.txt   human-readable text
+#   tfplan.json  machine-readable JSON
+
+set -eu
+
+echo "==> terraform plan → tfplan.bin"
+terraform plan -out="tfplan.bin" "$@"
+
+echo "==> terraform show (text) → tfplan.txt"
+terraform show "tfplan.bin" > "tfplan.txt"
+
+echo "==> terraform show (JSON) → tfplan.json"
+terraform show -json "tfplan.bin" > "tfplan.json"
+
+echo ""
+echo "Plans written: tfplan.bin  tfplan.txt  tfplan.json"
+echo "Apply with:    terraform apply tfplan.bin"
