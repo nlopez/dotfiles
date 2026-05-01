@@ -32,14 +32,6 @@ trigger = "groot"
 snippet = "\"$(git rev-parse --show-toplevel)\""
 global = true
 
-# ── Terraform (complex — shell expansion, zsh only) ──────────────────────────
-
-[[snippets]]
-name = "tfplan"
-trigger = "tfplan"
-snippet = "terraform plan -lock=false -out=tfplan.bin | tee >( sed \"s/\\x1B\\[[0-9;]\\{1,\\}[A-Za-z]//g\" >tfplan.txt)"
-global = true
-
 # ── Misc (tool/OS-specific, not portable to PowerShell) ───────────────────────
 
 [[snippets]]
