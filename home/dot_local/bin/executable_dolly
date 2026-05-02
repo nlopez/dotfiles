@@ -41,7 +41,8 @@ def main() -> int:
 
     url = urlparse(args.url)
     netloc = url.netloc.split("@")[-1]
-    dest = Path.home() / "src" / netloc / url.path.lstrip("/")
+    dest = Path.home() / "src" / netloc / url.path.lstrip("/").removesuffix(".git")
+    clone_url = url._replace(path=url.path if url.path.endswith(".git") else url.path + ".git").geturl()
     bare = dest / ".bare"
 
     if dest.exists() and any(dest.iterdir()):
@@ -52,7 +53,7 @@ def main() -> int:
 
     try:
         run(
-            ["git", "clone", "--bare", *args.git_args, url.geturl(), str(bare)],
+            ["git", "clone", "--bare", *args.git_args, clone_url, str(bare)],
             check=True,
         )
         (dest / ".git").write_text("gitdir: ./.bare\n", encoding="utf-8")
