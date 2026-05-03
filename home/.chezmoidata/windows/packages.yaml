@@ -60,5 +60,7 @@ packages:
         - telegram
         - foobar2000
         - foobar2000-encoders
+        - mediainfo-gui
+        - handbrake
         personal: []
         work: []
