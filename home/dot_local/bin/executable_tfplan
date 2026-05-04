@@ -9,15 +9,6 @@
 
 set -eu
 
-echo "==> terraform plan → tfplan.bin"
 terraform plan -lock=false -out="tfplan.bin" "$@"
-
-echo "==> terraform show (text) → tfplan.txt"
 terraform show "tfplan.bin" > "tfplan.txt"
-
-echo "==> terraform show (JSON) → tfplan.json"
 terraform show -json "tfplan.bin" > "tfplan.json"
-
-echo ""
-echo "Plans written: tfplan.bin  tfplan.txt  tfplan.json"
-echo "Apply with:    terraform apply tfplan.bin"
