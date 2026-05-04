@@ -12,7 +12,8 @@
       ],
       "matchStrings": [
         "url = \"https://github\\.com/(?<packageName>[^/]+/[^/]+)/archive/(?<currentValue>v?\\d[^/]+)\\.tar\\.gz\"",
-        "url = \"https://raw\\.githubusercontent\\.com/(?<packageName>[^/]+/[^/]+)/(?<currentValue>v?\\d[^/]+)/[^\"]+\""
+        "url = \"https://raw\\.githubusercontent\\.com/(?<packageName>[^/]+/[^/]+)/(?<currentValue>v?\\d[^/]+)/[^\"]+\"",
+        "# renovate: datasource=(?<datasource>github-releases) depName=(?<depName>[^\\s]+)[\\s\\S]*?:= \"(?<currentValue>v?\\d[^\"]+)\""
       ],
       "datasourceTemplate": "github-tags"
     }

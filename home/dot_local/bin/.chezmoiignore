@@ -1,1 +1,3 @@
 {{ if not .work }}brew{{ end }}
+{{/* gitcache symlink shim is only needed on darwin (where the binary lives in ~/.local/share/gitcache). */}}
+{{ if ne .chezmoi.os "darwin" }}gitcache{{ end }}
