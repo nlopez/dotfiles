@@ -12,6 +12,9 @@ export HOMEBREW_NO_ANALYTICS=1
 export GH_TELEMETRY=false
 # gh CLI: disable update notifications
 export GH_NO_UPDATE_NOTIFIER=1
+
+# gitcache: keep mirrors + config under XDG_CACHE_HOME instead of ~/.gitcache
+export GITCACHE_DIR="$XDG_CACHE_HOME/gitcache"
 {{- if .work }}
 export OTEL_TRACES_EXPORTER=
 {{- end }}
