@@ -4,6 +4,7 @@
   "timezone": "America/New_York",
   "schedule": ["before 9am on monday"],
   "semanticCommits": "enabled",
+  "minimumReleaseAge": "10 days",
   "customManagers": [
     {
       "customType": "regex",
