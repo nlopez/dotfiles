@@ -1,0 +1,21 @@
+#!/bin/sh
+# Preserves favorite_config_option_values, which Zed writes at runtime
+# (e.g. agent mode toggles like bypassPermissions).
+set -eu
+
+strip_jsonc='s|^[[:space:]]*//.*$||'
+
+tmp=$(mktemp)
+trap 'rm -f "$tmp" "$tmp.desired"' EXIT
+cat >"$tmp"
+cat >"$tmp.desired" <<'CHEZMOI_EOF'
+{{ includeTemplate "zed_settings.json.tmpl" . }}
+CHEZMOI_EOF
+
+preserved=$(sed "$strip_jsonc" "$tmp" | jq 'try .agent_servers."claude-acp".favorite_config_option_values // empty' 2>/dev/null || true)
+
+if [ -n "$preserved" ] && [ "$preserved" != "null" ]; then
+  sed "$strip_jsonc" "$tmp.desired" | jq --argjson p "$preserved" '.agent_servers["claude-acp"].favorite_config_option_values = $p'
+else
+  sed "$strip_jsonc" "$tmp.desired" | jq .
+fi
