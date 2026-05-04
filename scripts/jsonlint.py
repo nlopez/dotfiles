@@ -40,6 +40,9 @@ def main() -> None:
         override_data, user_data = build_data(root, os_name)
 
         for tmpl in sorted(root.rglob("*.json.tmpl")):
+            # modify_*.json.tmpl files are chezmoi modify-scripts (shell), not JSON.
+            if tmpl.name.startswith("modify_"):
+                continue
             label = f"{os_name}/{tmpl.relative_to(root)}"
             errors += render_and_lint(
                 tmpl, override_data, user_data, label, args.verbose
