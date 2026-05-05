@@ -16,8 +16,9 @@ def chezmoi_root() -> Path:
     return Path(subprocess.check_output(["chezmoi", "source-path"]).decode().strip())
 
 
-def build_data(root: Path, os_name: str) -> tuple[dict, dict]:
-    override_data: dict = {
+def build_data(root: Path, os_name: str) -> dict:
+    """Build override and user data for template rendering."""
+    override_data = {
         "chezmoi": {
             "os": os_name,
             "osRelease": {
@@ -27,7 +28,7 @@ def build_data(root: Path, os_name: str) -> tuple[dict, dict]:
         },
     }
 
-    user_data: dict = {
+    user_data = {
         "personal": True,
         "work": False,
         "wsl": False,
@@ -40,21 +41,18 @@ def build_data(root: Path, os_name: str) -> tuple[dict, dict]:
         with open(pkg_file) as f:
             user_data.update(yaml.safe_load(f))
 
-    return override_data, user_data
+    return {**override_data, **user_data}
 
 
-def render_template(
-    tmpl: Path, override_data: dict, user_data: dict
-) -> tuple[str | None, str | None]:
-    """Render a chezmoi template file, returning (output, error). One will always be None."""
-    merged = {**user_data, **override_data}
+def render_template(tmpl: Path, data: dict) -> tuple[str | None, str | None]:
+    """Render a chezmoi template file, returning (output, error)."""
     result = subprocess.run(
         [
             "chezmoi",
             "execute-template",
             "--file",
             "--override-data",
-            json.dumps(merged),
+            json.dumps(data),
             str(tmpl),
         ],
         capture_output=True,
@@ -65,9 +63,12 @@ def render_template(
     return result.stdout, None
 
 
-def print_verbose(label: str, override_data: dict, user_data: dict) -> None:
-    chezmoi = override_data["chezmoi"]
-    vars_: dict = {"chezmoi.os": chezmoi["os"]}
-    vars_.update({k: v for k, v in user_data.items() if k != "packages"})
-    vars_str = "  ".join(f"{k}={json.dumps(v)}" for k, v in vars_.items())
-    print(f"  {label}  [{vars_str}]")
+def print_verbose(label: str, os_name: str, user_data: dict) -> None:
+    """Print verbose output with OS and user configuration."""
+    vars_str = " ".join(
+        f"{k}={json.dumps(v)}"
+        for k, v in {**{"chezmoi.os": os_name}, **{
+            k: v for k, v in user_data.items() if k != "packages"
+        }.items()}
+    )
+    print(f"{label} [{vars_str}]")
