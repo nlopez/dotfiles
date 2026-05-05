@@ -57,3 +57,4 @@ confirm-close-surface = false
 # cursor-style = block
 # cursor-style-blink = true
 shell-integration-features = no-cursor
+command = tmux new-session -A -s 0
