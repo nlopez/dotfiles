@@ -3,6 +3,7 @@ packages:
     brew:
       brews:
         base:
+        - opencode
         - git-lfs
         - jj
         - flock
