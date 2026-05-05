@@ -127,6 +127,7 @@ packages:
         - espanso
         - smittytone/homebrew-smittytone/utitool
         personal:
+        - balenaetcher
         - digikam
         - brave-browser
         - mpv
