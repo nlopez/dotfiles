@@ -1,15 +1,19 @@
 repos:
+- repo: https://github.com/gitleaks/gitleaks
+  rev: v8.30.0
+  hooks:
+  - id: gitleaks
 - repo: local
   hooks:
   - id: jsonlint
     name: jsonlint
     language: system
-    entry: .venv/bin/python scripts/jsonlint.py
+    entry: scripts/jsonlint.py
     pass_filenames: false
     always_run: true
   - id: shellcheck
     name: shellcheck
     language: system
-    entry: .venv/bin/python scripts/shellcheck.py
+    entry: scripts/shellcheck.py
     pass_filenames: false
     always_run: true

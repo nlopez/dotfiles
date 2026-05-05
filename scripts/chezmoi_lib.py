@@ -1,4 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pyyaml"]
+# ///
 import json
 import subprocess
 from pathlib import Path
