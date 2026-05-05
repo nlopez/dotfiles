@@ -73,6 +73,7 @@ packages:
         - graphifyy
         - pre-commit
         - unique-namer
+        - huggingface_hub
       mas:
         base: []
         personal:
