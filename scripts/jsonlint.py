@@ -16,13 +16,13 @@ from chezmoi_lib import OSES, build_data, chezmoi_root, print_verbose, render_te
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Render chezmoi templates and lint .json files"
-    )
+     )
     parser.add_argument(
-        "-v",
-        "--verbose",
+         "-v",
+         "--verbose",
         action="store_true",
         help="Print filename and variable inputs for each check",
-    )
+     )
     args = parser.parse_args()
 
     root = chezmoi_root()
@@ -37,20 +37,18 @@ def main() -> None:
             content,
             str(json_file.relative_to(root)),
             args.verbose,
-        )
+         )
 
     # Render and lint .json.tmpl files for each OS
     for os_name in OSES:
-        override_data, user_data = build_data(root, os_name)
+        data = build_data(root, os_name)
 
         for tmpl in sorted(root.rglob("*.json.tmpl")):
-            # modify_*.json.tmpl files are chezmoi modify-scripts (shell), not JSON.
+             # modify_*.json.tmpl files are chezmoi modify-scripts (shell), not JSON.
             if tmpl.name.startswith("modify_"):
                 continue
             label = f"{os_name}/{tmpl.relative_to(root)}"
-            errors += render_and_lint(
-                tmpl, override_data, user_data, label, args.verbose
-            )
+            errors += render_and_lint(tmpl, data, label, args.verbose)
 
     if errors:
         print(f"\n{errors} error(s)", file=sys.stderr)
@@ -58,15 +56,13 @@ def main() -> None:
     print("\nAll checks passed.")
 
 
-def render_and_lint(
-    tmpl: Path, override_data: dict, user_data: dict, label: str, verbose: bool
-) -> int:
+def render_and_lint(tmpl: Path, data: dict, label: str, verbose: bool) -> int:
     if verbose:
-        print_verbose(label, override_data, user_data)
+        print_verbose(label, data["chezmoi"]["os"], data)
     else:
         print(f"jsonlint: {label}")
 
-    output, error = render_template(tmpl, override_data, user_data)
+    output, error = render_template(tmpl, data)
     if error is not None or output is None:
         print(f"RENDER FAILED: {label}\n{error}", file=sys.stderr)
         return 1

@@ -48,19 +48,6 @@ packages:
         - uv
         - yazi
         - helm
-        - yamlfmt
-        - sql-formatter
-        - fx # json tui
-        - zsh-autosuggestions
-        - zsh-fast-syntax-highlighting
-        - argocd
-        - atuin
-        - ryooooooga/tap/zabrze
-        - rclone
-        - go
-        - uv
-        - yazi
-        - helm
         - oxipng
         - rustup
         personal: []

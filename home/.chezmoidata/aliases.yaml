@@ -11,35 +11,34 @@
 # global: true — zabrze expands the snippet anywhere on the line (not just at
 # the start). PowerShell functions work anywhere regardless, so the field is
 # ignored there.
-
 aliases:
-- { name: g, cmd: "git" }
-- { name: ga, cmd: "git add" }
-- { name: gc, cmd: "git commit" }
-- { name: gcane, cmd: "git commit --amend --no-edit" }
-- { name: gconf, cmd: "git config --list --show-origin --show-scope --includes" }
-- { name: gd, cmd: "git diff" }
-- { name: gdc, cmd: "git diff --cached" }
-- { name: gp, cmd: "git push" }
-- { name: grc, cmd: "git rebase --continue" }
-- { name: grhh, cmd: "git reset --hard HEAD" }
-- { name: gst, cmd: "git status" }
-- { name: gup, cmd: "git pull --rebase" }
-- { name: gwa, cmd: "git worktree add" }
-- { name: gwr, cmd: "git worktree remove" }
-- { name: gwl, cmd: "git worktree list" }
-- { name: gwm, cmd: "git worktree move" }
-- { name: k, cmd: "kubectl" }
-- { name: kd, cmd: "kubectl describe" }
-- { name: kdp, cmd: "kubectl describe pod" }
-- { name: ke, cmd: "kubectl exec -it" }
-- { name: kg, cmd: "kubectl get" }
-- { name: kgp, cmd: "kubectl get pod" }
-- { name: kns, cmd: "kubens" }
-- { name: kctx, cmd: "kubectx" }
-- { name: tfinit, cmd: "terraform init", global: true }
-- { name: tfapply, cmd: "terraform apply tfplan.bin", global: true }
-- { name: tfshow, cmd: "terraform show tfplan", global: true }
-- { name: tfsl, cmd: "terraform state list", global: true }
-- { name: tfss, cmd: "terraform state show", global: true }
-- { name: tfu, cmd: "terraform force-unlock -force", global: true }
+- {name: g, cmd: "git"}
+- {name: ga, cmd: "git add"}
+- {name: gc, cmd: "git commit"}
+- {name: gcane, cmd: "git commit --amend --no-edit"}
+- {name: gconf, cmd: "git config --list --show-origin --show-scope --includes"}
+- {name: gd, cmd: "git diff"}
+- {name: gdc, cmd: "git diff --cached"}
+- {name: gp, cmd: "git push"}
+- {name: grc, cmd: "git rebase --continue"}
+- {name: grhh, cmd: "git reset --hard HEAD"}
+- {name: gst, cmd: "git status"}
+- {name: gup, cmd: "git pull --rebase"}
+- {name: gwa, cmd: "git worktree add"}
+- {name: gwr, cmd: "git worktree remove"}
+- {name: gwl, cmd: "git worktree list"}
+- {name: gwm, cmd: "git worktree move"}
+- {name: k, cmd: "kubectl"}
+- {name: kd, cmd: "kubectl describe"}
+- {name: kdp, cmd: "kubectl describe pod"}
+- {name: ke, cmd: "kubectl exec -it"}
+- {name: kg, cmd: "kubectl get"}
+- {name: kgp, cmd: "kubectl get pod"}
+- {name: kns, cmd: "kubens"}
+- {name: kctx, cmd: "kubectx"}
+- {name: tfinit, cmd: "terraform init", global: true}
+- {name: tfapply, cmd: "terraform apply tfplan.bin", global: true}
+- {name: tfshow, cmd: "terraform show tfplan", global: true}
+- {name: tfsl, cmd: "terraform state list", global: true}
+- {name: tfss, cmd: "terraform state show", global: true}
+- {name: tfu, cmd: "terraform force-unlock -force", global: true}
