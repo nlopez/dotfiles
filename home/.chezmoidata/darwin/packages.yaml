@@ -64,6 +64,7 @@ packages:
         - oxipng
         - argocd
         - media-info
+        - ollama
         work:
         - awscli
         - tenv
