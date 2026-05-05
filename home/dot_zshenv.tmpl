@@ -18,3 +18,4 @@ export GITCACHE_DIR="$XDG_CACHE_HOME/gitcache"
 {{- if .work }}
 export OTEL_TRACES_EXPORTER=
 {{- end }}
+export HF_TOKEN={{ onepasswordRead "op://copxopw5gkuo2m3cv7acvkrfxy/naslt4c3idtxr67oj2ejjg5trq/credential" }}
