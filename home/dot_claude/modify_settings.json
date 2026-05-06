@@ -1,7 +1,22 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- $existing := .chezmoi.stdin | fromJson -}}
 {{- $managed := include ".chezmoitemplates/claude_settings.json" | fromJson -}}
-{{- if hasKey $existing "model" -}}
-{{-   $_ := set $managed "model" (get $existing "model") -}}
+{{- /* Preserve runtime-configurable fields that /config may update */ -}}
+{{- range list "model" "effortLevel" "theme" -}}
+  {{- if hasKey $existing . -}}
+    {{- $_ := set $managed . (get $existing .) -}}
+  {{- end -}}
+{{- end -}}
+{{- if hasKey $existing "permissions" -}}
+  {{- $existingPerms := get $existing "permissions" -}}
+  {{- if hasKey $existingPerms "defaultMode" -}}
+    {{- $managedPerms := get $managed "permissions" -}}
+    {{- $_ := set $managedPerms "defaultMode" (get $existingPerms "defaultMode") -}}
+  {{- end -}}
+{{- end -}}
+{{- if .work -}}
+  {{- $plugins := get $managed "enabledPlugins" -}}
+  {{- $_ := set $plugins "dual-agents-review@datadog-claude-plugins" true -}}
+  {{- $_ := set $managed "extraKnownMarketplaces" (dict "datadog-claude-plugins" (dict "source" (dict "source" "git" "url" "https://github.com/DataDog/claude-marketplace.git"))) -}}
 {{- end -}}
 {{- $managed | toPrettyJson -}}
