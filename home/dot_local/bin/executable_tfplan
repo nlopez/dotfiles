@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # tfplan — run terraform plan and save output in binary (.bin), text (.txt),
 # and JSON (.json) formats. All extra arguments are forwarded to terraform plan.
 #
@@ -9,6 +9,12 @@
 
 set -eu
 
+trap 'trap - INT TERM; kill 0' INT TERM
+
 terraform plan -lock=false -out="tfplan.bin" "$@"
-terraform show "tfplan.bin" > "tfplan.txt"
-terraform show -json "tfplan.bin" > "tfplan.json"
+
+terraform show          "tfplan.bin"              & pid_console=$!
+terraform show -no-color "tfplan.bin" > "tfplan.txt" & pid_txt=$!
+terraform show -json    "tfplan.bin" > "tfplan.json" & pid_json=$!
+
+wait $pid_console $pid_txt $pid_json
