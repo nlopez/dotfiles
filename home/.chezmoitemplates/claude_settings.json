@@ -16,15 +16,43 @@
             "command": "bash ~/.claude/hooks/bash-regex-permission.sh"
           }
         ]
-      }
-    ],
-    "Notification": [
+      },
       {
-        "matcher": "permission_prompt",
+        "matcher": "AskFollowupQuestion",
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.message // \"Claude is waiting for your input\"' | { read -r msg; terminal-notifier -title \"Claude Code\" -subtitle \"Input Required\" -message \"$msg\" -sound default -timeout 10; } 2>/dev/null || true"
+            "command": "bash ~/.claude/hooks/post-tool-use.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/post-tool-use.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/post-tool-use.sh"
           }
         ]
       }
@@ -34,7 +62,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "terminal-notifier -title \"Claude Code\" -subtitle \"Session Complete\" -message \"Finished working in $(basename \"$PWD\")\" -sound default -timeout 10"
+            "command": "bash ~/.claude/hooks/stop.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
           }
         ]
       }
