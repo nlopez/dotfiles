@@ -148,12 +148,8 @@ bindkey '^x^e' _edit_command_line
 alias e="${VISUAL} --add"
 compdef _files zed
 
-{{- if .work }}
-[ -f /opt/shadowfax/shell ] && . /opt/shadowfax/shell
-{{- end }}
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# Re-assert last — after shadowfax, zshrc_local, and all plugins.
+# Re-assert last — after zshrc_local and all plugins.
 path=($HOME/.local/bin $path)

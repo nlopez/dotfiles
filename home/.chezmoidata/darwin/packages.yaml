@@ -96,12 +96,12 @@ packages:
         - redhat.vscode-yaml
         - tamasfe.even-better-toml
         - timonwong.shellcheck
-        - datadog.datadog-vscode
         - tailscale.vscode-tailscale
         personal:
         - ms-vscode-remote.remote-wsl
         - ms-vscode.powershell
         work:
+        - datadog.datadog-vscode
       casks:
         base:
         - grandperspective

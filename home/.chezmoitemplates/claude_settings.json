@@ -1,13 +1,10 @@
 {
   "autoUpdatesChannel": "stable",
   "cleanupPeriodDays": 90,
-  "theme": "light",
   "effortLevel": "medium",
   "enabledPlugins": {
-    "gopls-lsp@claude-plugins-official": true
-  },
-  "permissions": {
-    "defaultMode": "acceptEdits"
+    "gopls-lsp@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true
   },
   "hooks": {
     "PreToolUse": [
@@ -17,6 +14,17 @@
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/bash-regex-permission.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.message // \"Claude is waiting for your input\"' | { read -r msg; terminal-notifier -title \"Claude Code\" -subtitle \"Input Required\" -message \"$msg\" -sound default -timeout 10; } 2>/dev/null || true"
           }
         ]
       }
@@ -31,5 +39,10 @@
         ]
       }
     ]
-  }
+  },
+  "permissions": {
+    "defaultMode": "acceptEdits"
+  },
+  "skipAutoPermissionPrompt": true,
+  "theme": "light"
 }
