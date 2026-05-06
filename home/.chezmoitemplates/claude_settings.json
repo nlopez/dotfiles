@@ -19,72 +19,6 @@
             "command": "bash ~/.claude/hooks/bash-regex-permission.sh"
           }
         ]
-      },
-      {
-        "matcher": "AskFollowupQuestion",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/post-tool-use.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "AskUserQuestion",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/post-tool-use.sh"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "AskFollowupQuestion",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "AskUserQuestion",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "ExitPlanMode",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/post-tool-use.sh"
-          }
-        ]
       }
     ],
     "Stop": [
@@ -92,17 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/stop.sh"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
+            "command": "terminal-notifier -title \"Claude Code\" -subtitle \"Session Complete\" -message \"Finished working in $(basename \"$PWD\")\" -sound default -timeout 10"
           }
         ]
       }
