@@ -1,8 +1,69 @@
-{{- $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
-{{- range $brewPrefix := $brewPrefixes -}}
-{{ if stat (printf "%s/bin/brew" $brewPrefix) -}}
-fpath+=("{{ output (printf "%s/bin/brew" $brewPrefix) "--prefix" | trim }}/share/zsh/site-functions")
+{{- /* zprofile runs once per login shell, before zshrc. PATH and shell-env
+       exports live here so non-interactive subshells (scripts, editor
+       subprocesses) inherit them too. Interactive-only setup (aliases, plugins,
+       prompts, zle bindings) stays in zshrc. */ -}}
 
-eval "$({{ printf "%s/bin/brew" $brewPrefix }} shellenv)"
-{{ end -}}
+{{- $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
+{{- $foundBrewPrefix := "" -}}
+{{- range $brewPrefix := $brewPrefixes -}}
+  {{- if and (not $foundBrewPrefix) (stat (printf "%s/bin/brew" $brewPrefix)) -}}
+    {{- $foundBrewPrefix = $brewPrefix -}}
+  {{- end -}}
+{{- end }}
+{{- if $foundBrewPrefix }}
+fpath+=("{{ $foundBrewPrefix }}/share/zsh/site-functions")
+eval "$({{ $foundBrewPrefix }}/bin/brew shellenv)"
+{{- end }}
+
+{{- $homeDir := .chezmoi.homeDir -}}
+{{- $paths := list -}}
+{{- range $_, $relPath := list "go/bin" ".cargo/bin" -}}
+  {{- $p := joinPath $homeDir $relPath -}}
+  {{- if stat $p -}}{{ $paths = mustAppend $paths $p }}{{- end -}}
 {{- end -}}
+{{- if .work -}}
+  {{- range $_, $workPath := list "/opt/dogbrew/bin" -}}
+    {{- if stat $workPath -}}{{ $paths = mustAppend $paths $workPath }}{{- end -}}
+  {{- end -}}
+{{- end }}
+{{- if $paths }}
+path=({{ toStrings $paths | join ":" }} $path)
+{{- end }}
+
+{{- if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
+  {{- $gPathAdds := list }}
+  {{- $gManpathAdds := list }}
+  {{- $gFormulas := list "coreutils" "gnu-sed" "findutils" "gawk" "gnu-tar" "gnu-time" "gnu-getopt" "gnu-indent" "gnu-which" "grep" }}
+  {{- range $formula := $gFormulas }}
+    {{- $gnubin := printf "%s/opt/%s/libexec/gnubin" $foundBrewPrefix $formula }}
+    {{- $gnuman := printf "%s/opt/%s/libexec/gnuman" $foundBrewPrefix $formula }}
+    {{- if stat $gnubin }}{{ $gPathAdds = mustAppend $gPathAdds $gnubin }}{{ end }}
+    {{- if stat $gnuman }}{{ $gManpathAdds = mustAppend $gManpathAdds $gnuman }}{{ end }}
+  {{- end }}
+  {{- /* Prepend GNU *gnubin / *gnuman so they beat macOS /usr/bin and man paths */}}
+  {{- if $gPathAdds }}
+path=({{ toStrings $gPathAdds | join ":" }} $path)
+  {{- end }}
+  {{- if $gManpathAdds }}
+manpath=({{ toStrings $gManpathAdds | join ":" }} $manpath)
+  {{- end }}
+{{- end }}
+
+# Keep ~/.local/bin first in the path.
+path=({{ joinPath $homeDir ".local/bin" }} $path)
+
+{{- if eq .chezmoi.os "darwin" }}
+export SSH_AUTH_SOCK="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_ENV_HINTS=1
+{{- end }}
+
+export TENV_AUTO_INSTALL=true
+export TFENV_AUTO_INSTALL=true
+export TF_PLUGIN_CACHE_DIR="${XDG_CACHE_HOME}/terraform/plugin-cache"
+export GOPATH="${XDG_DATA_HOME}/go"
+export EDITOR="zed"
+
+{{- if .work }}
+export AWS_VAULT_KEYCHAIN_NAME=login
+{{- end }}
