@@ -1,1 +1,6 @@
 .venv
+
+# graphify -- local metadata, not shared
+graphify-out/manifest.json
+graphify-out/cost.json
+# graphify-out/cache/   # optional: uncomment to reduce repo size
