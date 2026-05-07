@@ -106,6 +106,7 @@ packages:
         - datadog.datadog-vscode
       casks:
         base:
+        - docker/tap/sbx
         - codex
         - grandperspective
         - claude-code
