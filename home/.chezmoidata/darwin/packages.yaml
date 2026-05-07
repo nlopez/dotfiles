@@ -3,6 +3,7 @@ packages:
     brew:
       brews:
         base:
+        - hermes-agent
         - pi-coding-agent
         - opencode
         - git-lfs
@@ -104,6 +105,7 @@ packages:
         - datadog.datadog-vscode
       casks:
         base:
+        - codex
         - grandperspective
         - claude-code
         - fsmonitor
