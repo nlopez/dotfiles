@@ -30,6 +30,7 @@ packages:
         - ripgrep
         - rustup
         - ryooooooga/tap/zabrze
+        - sheeki03/tap/tirith
         - tmux
         - yq
         - jq

@@ -153,3 +153,9 @@ compdef _files zed
 
 # Re-assert last — after zshrc_local and all plugins.
 path=($HOME/.local/bin $path)
+
+###############################################################################
+# Security: shell hook for command interception
+###############################################################################
+# Tirith — URL security analysis for shell environments
+eval "$(tirith init --shell zsh)"
