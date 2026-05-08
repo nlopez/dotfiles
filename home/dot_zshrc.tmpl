@@ -85,7 +85,7 @@ plugins=(
 
 # Load completions before OMZ https://github.com/zsh-users/zsh-completions/tree/0.36.0?tab=readme-ov-file#using-zsh-frameworks
 fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
-autoload -U compinit && compinit
+ZSH_DISABLE_COMPFIX=true
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -125,6 +125,19 @@ function _command() {
   command -v $1 >/dev/null 2>&1
 }
 
+# Cache the output of slow shell-init binaries; regenerate when the binary changes.
+function _cached_eval() {
+  local name="$1"; shift
+  local cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/${name}.zsh"
+  local bin
+  bin=$(command -v "$1" 2>/dev/null)
+  if [[ -n "$bin" && (! -f "$cache" || "$bin" -nt "$cache") ]]; then
+    mkdir -p "${cache:h}"
+    "$@" > "$cache" 2>/dev/null
+  fi
+  [[ -f "$cache" ]] && source "$cache"
+}
+
 # PATH, brew shellenv, and shell-env exports live in ~/.zprofile so they're
 # available to non-interactive subshells too.
 
@@ -132,8 +145,10 @@ function _command() {
 _source ~/.zshrc_local
 
 {{- if lookPath "zabrze" }}
-eval "$(zabrze init --bind-keys)"
+_cached_eval zabrze zabrze init --bind-keys
 {{- end }}
+_cached_eval atuin  atuin init zsh
+_cached_eval zoxide zoxide init zsh
 
 autoload -U edit-command-line
 zle -N edit-command-line
@@ -167,7 +182,3 @@ compdef _files zed
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 ###############################################################################
-# Security: shell hook for command interception
-###############################################################################
-# Tirith — URL security analysis for shell environments
-eval "$(tirith init --shell zsh)"
