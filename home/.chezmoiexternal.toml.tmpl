@@ -26,16 +26,6 @@
 {{- end }}
 
 {{- if ne .chezmoi.os "windows" }}
-[".tmux/plugins/tmux-resurrect"]
-    type = "archive"
-    url = "https://github.com/tmux-plugins/tmux-resurrect/archive/v4.0.0.tar.gz"
-    exact = true
-    stripComponents = 1
-[".tmux/plugins/tmux-continuum"]
-    type = "archive"
-    url = "https://github.com/tmux-plugins/tmux-continuum/archive/v3.1.0.tar.gz"
-    exact = true
-    stripComponents = 1
 [".oh-my-zsh"]
     type = "archive"
     url = "https://github.com/ohmyzsh/ohmyzsh/archive/master.tar.gz"
