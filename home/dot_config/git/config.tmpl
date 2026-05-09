@@ -62,8 +62,10 @@
 
 [gpg "ssh"]
   allowedSignersFile = ~/.config/git/allowed_signers
-{{- if or .wsl (eq .chezmoi.os "windows") }}
+{{- if .wsl }}
   program = op-ssh-sign-wsl.exe
+{{- else if eq .chezmoi.os "windows" }}
+  program = op-ssh-sign.exe
 {{- end }}
 
 [alias]

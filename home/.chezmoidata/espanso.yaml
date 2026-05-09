@@ -3,9 +3,9 @@ espanso:
     show_notifications: false
     toggle_key: OFF
     darwin:
-      search_shortcut: ALT+SPACE
+      search_shortcut: off
     windows:
-      search_shortcut: ALT+SPACE
+      search_shortcut: off
   matches:
     base: []
     # Home/personal machine snippets.

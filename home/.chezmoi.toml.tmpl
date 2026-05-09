@@ -61,4 +61,7 @@ zshPlugins = [
 {{- if eq .chezmoi.os "windows" }}
 [cd]
 command = "powershell.exe"
+
+[interpreters.json]
+command = "python"
 {{- end }}
