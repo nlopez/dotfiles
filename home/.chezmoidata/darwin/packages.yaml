@@ -131,6 +131,7 @@ packages:
         - espanso
         - smittytone/homebrew-smittytone/utitool
         personal:
+        - eugene1g/safehouse/agent-safehouse
         - balenaetcher
         - digikam
         - brave-browser
@@ -140,6 +141,7 @@ packages:
         - signal
         - telegram-desktop
         - zen
+        - keepingyouawake
         work:
         - slack
         - google-drive
