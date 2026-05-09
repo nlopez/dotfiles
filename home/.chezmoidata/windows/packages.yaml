@@ -62,5 +62,7 @@ packages:
         - foobar2000-encoders
         - mediainfo-gui
         - handbrake
+        - zed
+        - uv
         personal: []
         work: []
