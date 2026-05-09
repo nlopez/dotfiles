@@ -67,6 +67,7 @@ packages:
         - argocd
         - media-info
         - ollama
+        - eugene1g/safehouse/agent-safehouse
         work:
         - awscli
         - tenv
@@ -131,7 +132,6 @@ packages:
         - espanso
         - smittytone/homebrew-smittytone/utitool
         personal:
-        - eugene1g/safehouse/agent-safehouse
         - balenaetcher
         - digikam
         - brave-browser
@@ -142,6 +142,7 @@ packages:
         - telegram-desktop
         - zen
         - keepingyouawake
+        - rustdesk
         work:
         - slack
         - google-drive
