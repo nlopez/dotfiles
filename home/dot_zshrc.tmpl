@@ -141,7 +141,6 @@ _source ~/.zshrc_local
 _cached_eval zabrze zabrze init --bind-keys
 {{- end }}
 _cached_eval atuin  atuin init zsh
-_cached_eval zoxide zoxide init zsh
 
 autoload -U edit-command-line
 zle -N edit-command-line
@@ -172,3 +171,4 @@ alias e="${VISUAL} --add"
 compdef _files zed
 
 ###############################################################################
+_cached_eval zoxide zoxide init zsh
