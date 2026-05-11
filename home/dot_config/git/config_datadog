@@ -1,2 +1,15 @@
 [core]
   hooksPath = /usr/local/dd/global_hooks
+
+[user]
+  email = nick.lopez@datadoghq.com
+  signingkey = key::ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBBR+gLNzHTbzl9kHvh2oWeBgsSEGMUYlKXqr3Tm6LTR
+
+[url "git@github.com:DataDog/"]
+  insteadOf = https://github.com/DataDog/
+
+[url "git@github.com:ddoghq/"]
+  insteadOf = https://github.com/ddoghq/
+
+[url "git@github.com:ddoghq-sandbox/"]
+  insteadOf = https://github.com/ddoghq-sandbox/
