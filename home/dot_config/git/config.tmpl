@@ -110,6 +110,12 @@
 
 [includeIf "gitdir:~/src/github.com/datadog/"]
   path = config_datadog
+
+[includeIf "gitdir:~/src/github.com/ddoghq/"]
+  path = config_datadog
+
+[includeIf "gitdir:~/src/github.com/ddoghq-sandbox/"]
+  path = config_datadog
 {{- end }}
 {{- if .personal }}
 
