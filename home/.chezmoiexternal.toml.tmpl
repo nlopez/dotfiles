@@ -1,30 +1,3 @@
-# gitcache: https://github.com/seeraven/gitcache — wraps `git` via $PATH-shadow symlink.
-# renovate: datasource=github-releases depName=seeraven/gitcache
-{{- $gitcacheVersion := "v1.0.33" }}
-
-{{- if eq .chezmoi.os "linux" }}
-{{-   $arch := "" }}
-{{-   if eq .chezmoi.arch "amd64" }}{{ $arch = "x86_64" }}
-{{-   else if eq .chezmoi.arch "arm64" }}{{ $arch = "aarch64" }}
-{{-   end }}
-# Single PyInstaller binary; lands directly on PATH.
-[".local/bin/gitcache"]
-    type = "file"
-    url = "https://github.com/seeraven/gitcache/releases/download/{{ $gitcacheVersion }}/gitcache_{{ $gitcacheVersion }}_Ubuntu24.04_{{ $arch }}"
-    executable = true
-{{- else if eq .chezmoi.os "darwin" }}
-{{-   $arch := "" }}
-{{-   if eq .chezmoi.arch "amd64" }}{{ $arch = "x86_64" }}
-{{-   else if eq .chezmoi.arch "arm64" }}{{ $arch = "arm64" }}
-{{-   end }}
-# macOS ships a directory bundle (single-file PyInstaller is too slow on darwin).
-[".local/share/gitcache"]
-    type = "archive"
-    url = "https://github.com/seeraven/gitcache/releases/download/{{ $gitcacheVersion }}/gitcache_{{ $gitcacheVersion }}_Darwin_{{ $arch }}.tgz"
-    exact = true
-    stripComponents = 1
-{{- end }}
-
 {{- if ne .chezmoi.os "windows" }}
 [".oh-my-zsh"]
     type = "archive"
