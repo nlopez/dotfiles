@@ -34,7 +34,7 @@ pre-commit run --all-files
 ```
 home/                          # chezmoi "home" directory — files here map to ~
   .chezmoi.toml.tmpl           # Main config: OS detection (personal/work/headless), zsh plugin list
-  .chezmoiexternal.toml.tmpl   # External deps: oh-my-zsh plugins, tmux plugins, HashiCorp skills, gitcache
+  .chezmoiexternal.toml.tmpl   # External deps: oh-my-zsh plugins, tmux plugins, HashiCorp skills
   .chezmoiignore.tmpl          # OS-specific ignore rules
   .chezmoidata/                # Per-OS override data
     darwin/packages.yaml       # Brew packages, mas apps for macOS
@@ -43,7 +43,7 @@ home/                          # chezmoi "home" directory — files here map to 
     aliases.yaml               # Shell abbreviations (zabrze + PowerShell)
     espanso.yaml               # Espanso expansions
   .chezmoiscripts/             # Per-OS installation scripts
-    darwin/                    # brew bundle, gitcache, filetypes, desktop config
+    darwin/                    # brew bundle, filetypes, desktop config
     linux/                     # apt packages, brew, tailscale, chsh
     windows/                   # scoop, browser autoupdate
   .chezmoidata/                # Data files (see above)
@@ -57,7 +57,7 @@ home/                          # chezmoi "home" directory — files here map to 
     jj/                        #jj (josh) config
     zabrze/                    # zabrze aliases config
   dot_local/                   # Files deployed to ~/.local/
-    bin/                       # Executables: brew, dolly, tfenv, tfplan, symlink_git, symlink_gitcache
+    bin/                       # Executables: brew, dolly, tfenv, tfplan, symlink_git
   dot_ssh/                     # SSH config
   dot_claude/                  # Claude-specific: hooks/bash-regex-permission.sh, skills/graphify
   dot_aerospace.toml           # → ~/.aerospace.toml (window manager)
@@ -84,7 +84,7 @@ scripts/                       # Python validation scripts (uv-managed)
 
 - **Templates**: Files ending in `.tmpl` are Go templates rendered by `chezmoi execute-template`. They use `{{- if eq .chezmoi.os "darwin" -}}` style conditionals.
 - **Data-driven config**: `.chezmoi.toml.tmpl` detects OS, hostname, personal vs work, headless mode. Per-OS packages live in `.chezmoidata/{darwin,linux,windows}/packages.yaml`.
-- **External deps**: `.chezmoiexternal.toml.tmpl` pulls in oh-my-zsh plugins, tmux plugins, HashiCorp skills, gitcache, etc. from GitHub archives.
+- **External deps**: `.chezmoiexternal.toml.tmpl` pulls in oh-my-zsh plugins, tmux plugins, HashiCorp skills, etc. from GitHub archives.
 - **Pre-commit hooks**: `.pre-commit-config.yaml` runs gitleaks, yamlfmt, jsonlint (via `scripts/jsonlint.py`), shellcheck (via `scripts/shellcheck.py`).
 - **Renovate**: Auto-updates dependencies (external archives, HashiCorp skills) with automerge PRs. See `renovate.json`.
 
