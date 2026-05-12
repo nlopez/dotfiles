@@ -12,12 +12,18 @@ Host *
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
   {{- end }}
 
-#Default github.com → personal/nlopez key (DataDog org access goes through nlopez).
+# Default github.com is anonymous — no key offered. All org access must go
+# through one of the org-specific aliases below (driven by git insteadOf rules).
 Host github.com
   User git
   IdentitiesOnly yes
-  IdentityFile ~/.ssh/id_nlopez.pub
 
+# Aliased host for personal/nlopez orgs (DataDog, nlopez). Routed via git insteadOf.
+Host github.com-nlopez
+  HostName github.com
+  User git
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/id_nlopez.pub
 {{- if .personal }}
 
 # Aliased host for hobby orgs (silentshout42, kamotimestamps). Routed via git insteadOf.
@@ -29,7 +35,7 @@ Host github.com-hobby
 {{- end }}
 {{- if .work }}
 
-#Aliased host for ddoghq + ddoghq-sandbox orgs. Routed via git insteadOf.
+# Aliased host for ddoghq + ddoghq-sandbox orgs. Routed via git insteadOf.
 Host github.com-ddog
   HostName github.com
   User git
