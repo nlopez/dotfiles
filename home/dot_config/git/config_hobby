@@ -1,7 +1,7 @@
 [user]
   name = Silent Shout
   email = 161982876+SilentShout42@users.noreply.github.com
-  signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGdsuL9gfvu+aqCFhs12VeEv+uUkbtUskZ1Ny8T7ZkxZ
+  signingkey = key::ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGdsuL9gfvu+aqCFhs12VeEv+uUkbtUskZ1Ny8T7ZkxZ
 
 [credential "https://github.com"]
   username = SilentShout42
