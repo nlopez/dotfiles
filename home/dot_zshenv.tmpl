@@ -15,12 +15,13 @@ export GH_TELEMETRY=false
 # gh CLI: disable update notifications
 export GH_NO_UPDATE_NOTIFIER=1
 
-# Supply-chain security: every shell starts with a fresh "10 days ago" cutoff.
+# Supply-chain security: every shell starts with a fresh "N days ago" cutoff.
+# Delay window is defined in .chezmoidata/security.yaml (supplyChainDelayDays).
 # npm/pnpm honor $npm_config_before; uv honors $UV_EXCLUDE_NEWER.
 # Use zsh/datetime (pure-zsh) to avoid depending on a `date` binary that
 # may or may not be GNU at this point in startup.
 zmodload zsh/datetime
-strftime -s __supplychain_cutoff '%Y-%m-%d' $((EPOCHSECONDS - 10*86400))
+strftime -s __supplychain_cutoff '%Y-%m-%d' $((EPOCHSECONDS - {{ .supplyChainDelayDays }}*86400))
 export npm_config_before="$__supplychain_cutoff"
 export UV_EXCLUDE_NEWER="$__supplychain_cutoff"
 unset __supplychain_cutoff
