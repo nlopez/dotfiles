@@ -1,0 +1,3 @@
+# Days to delay package installs (npm, pnpm, uv). Lets malicious releases be
+# reported and yanked before we pull them in.
+supplyChainDelayDays: 10
