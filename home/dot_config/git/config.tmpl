@@ -1,8 +1,7 @@
 [user]
   useConfigOnly = true
-  name = {{ .name | quote }}
-  email = {{ .email | quote }}
-  signingkey = {{ .signingkey | quote }}
+  name = Anonymous
+  email = noreply@example.org
 
 [push]
   default = current
@@ -42,9 +41,6 @@
 [worktree]
 	guessRemote = true
 
-[credential "https://github.com"]
-  username = nlopez
-
 [url "git@github.com:"]
   insteadOf = https://github.com/
 
@@ -55,10 +51,10 @@
   renameLimit = 10000
 
 [commit]
-  gpgsign = true
+  gpgsign = false
 
 [tag]
-  gpgsign = true
+  gpgsign = false
 
 [gpg]
   format = ssh
@@ -102,6 +98,7 @@
   branches = for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/heads
   branchesr = for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/remotes
   prettylog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short
+  whoami = "!printf 'name:       %s\\nemail:      %s\\nsigningkey: %s\\n' \"$(git config user.name)\" \"$(git config user.email)\" \"$(git config user.signingkey)\""
 
 {{- if eq .chezmoi.os "windows" }}
 [safe]
@@ -109,25 +106,21 @@
 {{- end -}}
 
 {{/* Last values win -- keep identity related includes last so they override defaults set earlier */}}
-{{- if .work }}
 
-[includeIf "gitdir:~/src/github.com/datadog/"]
+[includeIf "gitdir/i:~/src/github.com/datadog/"]
+  path = config_nlopez
+
+[includeIf "gitdir/i:~/src/github.com/ddoghq/"]
   path = config_datadog
 
-[includeIf "gitdir:~/src/github.com/ddoghq/"]
+[includeIf "gitdir/i:~/src/github.com/ddoghq-sandbox/"]
   path = config_datadog
-
-[includeIf "gitdir:~/src/github.com/ddoghq-sandbox/"]
-  path = config_datadog
-{{- end }}
-{{- if .personal }}
 
 [includeIf "gitdir/i:**/silentshout42/**"]
   path = config_hobby
 
 [includeIf "gitdir/i:**/kamotimestamps/**"]
   path = config_hobby
-{{- end }}
 
 [includeIf "gitdir:~/.local/share/chezmoi/"]
   path = config_nlopez
