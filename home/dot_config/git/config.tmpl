@@ -107,20 +107,23 @@
 
 {{/* Last values win -- keep identity related includes last so they override defaults set earlier */}}
 
-[includeIf "gitdir/i:~/src/github.com/datadog/"]
+[includeIf "gitdir/i:~/src/github.com/datadog/**"]
   path = config_nlopez
 
-[includeIf "gitdir/i:~/src/github.com/ddoghq/"]
+[includeIf "gitdir/i:~/src/github.com/ddoghq/**"]
   path = config_datadog
 
-[includeIf "gitdir/i:~/src/github.com/ddoghq-sandbox/"]
+[includeIf "gitdir/i:~/src/github.com/ddoghq-sandbox/**"]
   path = config_datadog
 
-[includeIf "gitdir/i:**/silentshout42/**"]
+[includeIf "gitdir/i:~/src/github.com/silentshout42/**"]
   path = config_hobby
 
-[includeIf "gitdir/i:**/kamotimestamps/**"]
+[includeIf "gitdir/i:~/src/github.com/kamotimestamps/**"]
   path = config_hobby
 
-[includeIf "gitdir:~/.local/share/chezmoi/"]
+[includeIf "gitdir:~/.local/share/chezmoi/.git"]
+  path = config_nlopez
+
+[includeIf "gitdir:~/.local/share/chezmoi/.git/worktrees/**"]
   path = config_nlopez
