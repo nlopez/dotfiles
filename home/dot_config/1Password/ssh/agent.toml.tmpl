@@ -1,0 +1,9 @@
+# 1Password SSH agent config — selects which vaults the agent offers keys from.
+# Docs: https://developer.1password.com/docs/ssh/agent/config
+
+[[ssh-keys]]
+vault = "Private"
+{{ if .work }}
+[[ssh-keys]]
+vault = "Employee"
+{{- end }}

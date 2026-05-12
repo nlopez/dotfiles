@@ -41,8 +41,32 @@
 [worktree]
 	guessRemote = true
 
+; Default: rewrite https://github.com/... → git@github.com:... for SSH.
 [url "git@github.com:"]
   insteadOf = https://github.com/
+
+; Per-org SSH host alias rewriting so each org clones via a host that's pinned
+; to the correct 1Password-managed key. Longest-match wins, so these override
+; the rule above for the listed orgs.
+{{- if .work }}
+[url "git@github.com-ddog:ddoghq/"]
+  insteadOf = git@github.com:ddoghq/
+  insteadOf = https://github.com/ddoghq/
+
+[url "git@github.com-ddog:ddoghq-sandbox/"]
+  insteadOf = git@github.com:ddoghq-sandbox/
+  insteadOf = https://github.com/ddoghq-sandbox/
+{{- end }}
+
+{{- if .personal }}
+[url "git@github.com-hobby:silentshout42/"]
+  insteadOf = git@github.com:silentshout42/
+  insteadOf = https://github.com/silentshout42/
+
+[url "git@github.com-hobby:kamotimestamps/"]
+  insteadOf = git@github.com:kamotimestamps/
+  insteadOf = https://github.com/kamotimestamps/
+{{- end }}
 
 [init]
   defaultBranch = main
@@ -98,7 +122,19 @@
   branches = for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/heads
   branchesr = for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/remotes
   prettylog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short
-  whoami = "!printf 'name:       %s\\nemail:      %s\\nsigningkey: %s\\n' \"$(git config user.name)\" \"$(git config user.email)\" \"$(git config user.signingkey)\""
+  whoami = "!\
+    url=$(git ls-remote --get-url origin 2>/dev/null); \
+    host=github.com; \
+    case \"$url\" in \
+      git@*:*) h=${url#git@}; host=${h%%:*} ;; \
+      https://*) h=${url#https://}; host=${h%%/*} ;; \
+    esac; \
+    printf 'name:       %s\\nemail:      %s\\nsigningkey: %s\\nssh:        ' \
+      \"$(git config user.name)\" \
+      \"$(git config user.email)\" \
+      \"$(git config user.signingkey)\"; \
+    ssh -T git@$host 2>&1 | head -1 \
+  "
 
 {{- if eq .chezmoi.os "windows" }}
 [safe]
@@ -107,21 +143,47 @@
 
 {{/* Last values win -- keep identity related includes last so they override defaults set earlier */}}
 
-[includeIf "gitdir/i:~/src/github.com/datadog/**"]
+; Match on the remote URL — works immediately after `git clone` regardless of
+; local path, and survives moving the worktree. Requires git 2.36+.
+; `hasconfig` matches the URL stored in .git/config (the form the user typed
+; at clone time), not the insteadOf-rewritten form — so we list every variant.
+
+[includeIf "hasconfig:remote.*.url:git@github.com:DataDog/**"]
+  path = config_nlopez
+[includeIf "hasconfig:remote.*.url:https://github.com/DataDog/**"]
   path = config_nlopez
 
-[includeIf "gitdir/i:~/src/github.com/ddoghq/**"]
+[includeIf "hasconfig:remote.*.url:git@github.com:ddoghq/**"]
+  path = config_datadog
+[includeIf "hasconfig:remote.*.url:https://github.com/ddoghq/**"]
+  path = config_datadog
+[includeIf "hasconfig:remote.*.url:git@github.com-ddog:ddoghq/**"]
   path = config_datadog
 
-[includeIf "gitdir/i:~/src/github.com/ddoghq-sandbox/**"]
+[includeIf "hasconfig:remote.*.url:git@github.com:ddoghq-sandbox/**"]
+  path = config_datadog
+[includeIf "hasconfig:remote.*.url:https://github.com/ddoghq-sandbox/**"]
+  path = config_datadog
+[includeIf "hasconfig:remote.*.url:git@github.com-ddog:ddoghq-sandbox/**"]
   path = config_datadog
 
-[includeIf "gitdir/i:~/src/github.com/silentshout42/**"]
+{{- if .personal }}
+[includeIf "hasconfig:remote.*.url:git@github.com:silentshout42/**"]
+  path = config_hobby
+[includeIf "hasconfig:remote.*.url:https://github.com/silentshout42/**"]
+  path = config_hobby
+[includeIf "hasconfig:remote.*.url:git@github.com-hobby:silentshout42/**"]
   path = config_hobby
 
-[includeIf "gitdir/i:~/src/github.com/kamotimestamps/**"]
+[includeIf "hasconfig:remote.*.url:git@github.com:kamotimestamps/**"]
   path = config_hobby
+[includeIf "hasconfig:remote.*.url:https://github.com/kamotimestamps/**"]
+  path = config_hobby
+[includeIf "hasconfig:remote.*.url:git@github.com-hobby:kamotimestamps/**"]
+  path = config_hobby
+{{- end }}
 
+; chezmoi repo has no remote-URL signal usable for matching, so keep a gitdir rule.
 [includeIf "gitdir:~/.local/share/chezmoi/.git"]
   path = config_nlopez
 
