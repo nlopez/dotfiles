@@ -5,5 +5,7 @@
 {
   "file_types": {
     "Go": ["*.tmpl"],
+    "Git Config": ["home/dot_config/git/config*"],
+    "Git Ignore": ["home/dot_config/git/ignore"],
   },
 }
