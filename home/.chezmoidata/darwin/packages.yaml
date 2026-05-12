@@ -35,6 +35,7 @@ packages:
         - jq
         - shellcheck
         - uv
+        - pnpm
         - zoxide
         - k9s
         - go
