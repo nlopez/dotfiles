@@ -2,3 +2,6 @@
 .local/bin/gitcache
 .local/bin/git-use-gitcache
 .local/share/gitcache
+.npmrc
+.config/uv/uv.toml
+.config/pnpm/rc
