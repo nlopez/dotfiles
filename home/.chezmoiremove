@@ -1,0 +1,4 @@
+.local/bin/git
+.local/bin/gitcache
+.local/bin/git-use-gitcache
+.local/share/gitcache
