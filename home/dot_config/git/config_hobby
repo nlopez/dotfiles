@@ -3,5 +3,8 @@
   email = 161982876+SilentShout42@users.noreply.github.com
   signingkey = key::ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGdsuL9gfvu+aqCFhs12VeEv+uUkbtUskZ1Ny8T7ZkxZ
 
-[credential "https://github.com"]
-  username = SilentShout42
+[commit]
+  gpgsign = true
+
+[tag]
+  gpgsign = true
