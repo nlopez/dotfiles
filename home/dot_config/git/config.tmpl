@@ -41,13 +41,17 @@
 [worktree]
 	guessRemote = true
 
-; Default: rewrite https://github.com/... → git@github.com:... for SSH.
-[url "git@github.com:"]
-  insteadOf = https://github.com/
+; Default github.com is anonymous (no key). All org clones must be routed
+; through a per-org SSH alias below. Longest-match wins for insteadOf, so the
+; per-org rules override any generic https→ssh rewrite.
 
-; Per-org SSH host alias rewriting so each org clones via a host that's pinned
-; to the correct 1Password-managed key. Longest-match wins, so these override
-; the rule above for the listed orgs.
+[url "git@github.com-nlopez:DataDog/"]
+  insteadOf = git@github.com:DataDog/
+  insteadOf = https://github.com/DataDog/
+
+[url "git@github.com-nlopez:nlopez/"]
+  insteadOf = git@github.com:nlopez/
+  insteadOf = https://github.com/nlopez/
 {{- if .work }}
 [url "git@github.com-ddog:ddoghq/"]
   insteadOf = git@github.com:ddoghq/
@@ -151,6 +155,14 @@
 [includeIf "hasconfig:remote.*.url:git@github.com:DataDog/**"]
   path = config_nlopez
 [includeIf "hasconfig:remote.*.url:https://github.com/DataDog/**"]
+  path = config_nlopez
+[includeIf "hasconfig:remote.*.url:git@github.com-nlopez:DataDog/**"]
+  path = config_nlopez
+[includeIf "hasconfig:remote.*.url:git@github.com:nlopez/**"]
+  path = config_nlopez
+[includeIf "hasconfig:remote.*.url:https://github.com/nlopez/**"]
+  path = config_nlopez
+[includeIf "hasconfig:remote.*.url:git@github.com-nlopez:nlopez/**"]
   path = config_nlopez
 
 [includeIf "hasconfig:remote.*.url:git@github.com:ddoghq/**"]

@@ -1,9 +1,15 @@
-# 1Password SSH agent config — selects which vaults the agent offers keys from.
+# 1Password SSH agent config — pin the exact items the agent offers.
 # Docs: https://developer.1password.com/docs/ssh/agent/config
 
 [[ssh-keys]]
+item = "GitHub - nlopez"
 vault = "Private"
 {{ if .work }}
 [[ssh-keys]]
+item = "GitHub - nick-lopez_ddog"
 vault = "Employee"
+{{- else if .personal }}
+[[ssh-keys]]
+item = "GitHub - SilentShout42"
+vault = "Private"
 {{- end }}
