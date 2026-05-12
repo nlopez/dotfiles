@@ -1,0 +1,6 @@
+[user]
+  email = 20211302+nlopez@users.noreply.github.com
+  signingkey = key::ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEvDNgTluafxfN++WnyRNqyVO7LfbvpTY5M6N24Kr9dI
+
+[credential "https://github.com"]
+  username = nlopez
