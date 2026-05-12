@@ -1,30 +1,36 @@
 {{- $brewConfig := .packages.darwin.brew -}}
 {{- $brews    := $brewConfig.brews.base   | default list -}}
 {{- $casks    := $brewConfig.casks.base   | default list -}}
+{{- $unsigned := (index $brewConfig "casks_unsigned" | default dict).base | default list -}}
 {{- $uvTools  := $brewConfig.uv.base      | default list -}}
 {{- $masApps  := $brewConfig.mas.base     | default list -}}
 {{- $vscode   := $brewConfig.vscode.base  | default list -}}
 
 {{- if .personal -}}
-{{-   if index $brewConfig.brews   "personal" -}}{{- $brews   = concat $brews   (index $brewConfig.brews   "personal") -}}{{- end -}}
-{{-   if index $brewConfig.casks   "personal" -}}{{- $casks   = concat $casks   (index $brewConfig.casks   "personal") -}}{{- end -}}
-{{-   if index $brewConfig.uv      "personal" -}}{{- $uvTools = concat $uvTools (index $brewConfig.uv      "personal") -}}{{- end -}}
-{{-   if index $brewConfig.mas     "personal" -}}{{- $masApps = concat $masApps (index $brewConfig.mas     "personal") -}}{{- end -}}
-{{-   if index $brewConfig.vscode  "personal" -}}{{- $vscode  = concat $vscode  (index $brewConfig.vscode  "personal") -}}{{- end -}}
+{{-   if index $brewConfig.brews   "personal" -}}{{- $brews    = concat $brews    (index $brewConfig.brews   "personal") -}}{{- end -}}
+{{-   if index $brewConfig.casks   "personal" -}}{{- $casks    = concat $casks    (index $brewConfig.casks   "personal") -}}{{- end -}}
+{{-   if index (index $brewConfig "casks_unsigned" | default dict) "personal" -}}{{- $unsigned = concat $unsigned (index $brewConfig.casks_unsigned "personal") -}}{{- end -}}
+{{-   if index $brewConfig.uv      "personal" -}}{{- $uvTools  = concat $uvTools  (index $brewConfig.uv      "personal") -}}{{- end -}}
+{{-   if index $brewConfig.mas     "personal" -}}{{- $masApps  = concat $masApps  (index $brewConfig.mas     "personal") -}}{{- end -}}
+{{-   if index $brewConfig.vscode  "personal" -}}{{- $vscode   = concat $vscode   (index $brewConfig.vscode  "personal") -}}{{- end -}}
 {{- end -}}
 
 {{- if .work -}}
-{{-   if index $brewConfig.brews   "work" -}}{{- $brews   = concat $brews   (index $brewConfig.brews   "work") -}}{{- end -}}
-{{-   if index $brewConfig.casks   "work" -}}{{- $casks   = concat $casks   (index $brewConfig.casks   "work") -}}{{- end -}}
-{{-   if index $brewConfig.uv      "work" -}}{{- $uvTools = concat $uvTools (index $brewConfig.uv      "work") -}}{{- end -}}
-{{-   if index $brewConfig.mas     "work" -}}{{- $masApps = concat $masApps (index $brewConfig.mas     "work") -}}{{- end -}}
-{{-   if index $brewConfig.vscode  "work" -}}{{- $vscode  = concat $vscode  (index $brewConfig.vscode  "work") -}}{{- end -}}
+{{-   if index $brewConfig.brews   "work" -}}{{- $brews    = concat $brews    (index $brewConfig.brews   "work") -}}{{- end -}}
+{{-   if index $brewConfig.casks   "work" -}}{{- $casks    = concat $casks    (index $brewConfig.casks   "work") -}}{{- end -}}
+{{-   if index (index $brewConfig "casks_unsigned" | default dict) "work" -}}{{- $unsigned = concat $unsigned (index $brewConfig.casks_unsigned "work") -}}{{- end -}}
+{{-   if index $brewConfig.uv      "work" -}}{{- $uvTools  = concat $uvTools  (index $brewConfig.uv      "work") -}}{{- end -}}
+{{-   if index $brewConfig.mas     "work" -}}{{- $masApps  = concat $masApps  (index $brewConfig.mas     "work") -}}{{- end -}}
+{{-   if index $brewConfig.vscode  "work" -}}{{- $vscode   = concat $vscode   (index $brewConfig.vscode  "work") -}}{{- end -}}
 {{- end -}}
 
 {{ range ($brews | sortAlpha | uniq) -}}
 brew {{ . | quote }}
 {{ end -}}
 {{ range ($casks | sortAlpha | uniq) -}}
+cask {{ . | quote }}, args: { require_sha: true }
+{{ end -}}
+{{ range ($unsigned | sortAlpha | uniq) -}}
 cask {{ . | quote }}
 {{ end -}}
 {{ range $masApps -}}

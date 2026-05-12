@@ -105,11 +105,14 @@ packages:
         - ms-vscode.powershell
         work:
         - datadog.datadog-vscode
+      # Casks listed here will be installed with `--require-sha`. If a cask is
+      # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:
         base:
         - docker/tap/sbx
         - codex
         - grandperspective
+        - obsidian
         - claude-code
         - fsmonitor
         - wireshark-app
@@ -149,3 +152,10 @@ packages:
         - google-drive
         - finicky
         - cursor
+      # Casks that intentionally have no SHA (autoupdate or :latest). Installed
+      # without --require-sha. Add entries here when a normal install fails with
+      # "no checksum".
+      casks_unsigned:
+        base: []
+        personal: []
+        work: []

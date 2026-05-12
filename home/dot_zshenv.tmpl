@@ -9,6 +9,14 @@ export XDG_CACHE_HOME=$HOME/.cache
 export HOMEBREW_AUTO_UPDATE_SECS=86400
 # Homebrew: disable analytics/telemetry
 export HOMEBREW_NO_ANALYTICS=1
+# Homebrew: verify SLSA build-provenance attestations on homebrew-core bottles.
+# Catches the case where a bottle is swapped out under us. Requires `gh`.
+export HOMEBREW_VERIFY_ATTESTATIONS=1
+# Homebrew: refuse insecure HTTP redirects during downloads.
+export HOMEBREW_NO_INSECURE_REDIRECT=1
+# Homebrew: require casks to have a SHA. Bypass for one-off installs of
+# autoupdate casks via:  HOMEBREW_CASK_OPTS= brew install --cask <name>
+export HOMEBREW_CASK_OPTS="--require-sha"
 
 # gh CLI: disable telemetry
 export GH_TELEMETRY=false
