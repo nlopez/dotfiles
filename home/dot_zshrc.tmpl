@@ -179,6 +179,10 @@ compdef _files zed
 # Inject psvar[21] into PROMPT before pure's exec-time segment (%(19V.)).
 # Runs once after OMZ/pure have initialized PROMPT.
 function _aws_prompt_setup() {
+  # Abbreviate long paths: first component + … + last 3 when ≥5 deep
+  local _path_fmt='%(5~|%-1~/…/%3~|%~)'
+  PROMPT="${PROMPT/\%\~/${_path_fmt}}"
+  # Inject psvar[21] (AWS profile) before pure's exec-time segment
   local before="${PROMPT%%\%[(]19V.*}"
   local after="${PROMPT#*\%[(]19V.}"
   [[ "$before" != "$PROMPT" ]] && PROMPT="${before}%(21V. %F{yellow}%21v%f.)%(19V.${after}"
