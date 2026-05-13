@@ -1,5 +1,6 @@
 {
   "autoUpdatesChannel": "stable",
+  "model": "claude-sonnet-4-6",
   "cleanupPeriodDays": 90,
   "effortLevel": "medium",
   "env": {
