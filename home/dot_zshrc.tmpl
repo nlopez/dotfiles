@@ -187,11 +187,12 @@ function _smart_path_precmd() {
 
   p="${PWD/#$HOME/~}"
 
-  # Abbreviate a prefix of path parts: keep last 3 full, shorten earlier ones
-  # to leading-dots + first-non-dot char. Sets repo_root or _pure_path.
+  # Abbreviate path parts: keep last 3 full, shorten earlier ones to
+  # leading-dots + first-non-dot char. Result in global _abbrev_result.
   _abbrev_parts() {
-    local -a pp=("$@") res="~"
-    local au=$(( ${#pp} - 3 )) s d r
+    local -a pp=("$@")
+    local res="~" i au s d r
+    au=$(( ${#pp} - 3 ))
     for (( i = 1; i <= ${#pp}; i++ )); do
       s="${pp[$i]}"
       if (( i <= au )); then
