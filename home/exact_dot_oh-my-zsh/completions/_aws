@@ -1,0 +1,97 @@
+#compdef aws
+# zsh completion for the aws shim at ~/.local/bin/aws.
+#
+# --profile / -p: reads profiles from ~/.aws/config.
+#   - fzf available: interactive fuzzy picker with preview pane.
+#   - fzf absent:    standard zsh menu/inline completion.
+# Everything else: delegates to aws_completer for full sub-command/flag completion.
+
+# ---------------------------------------------------------------------------
+# Helper: extract profile names from ~/.aws/config, one per line.
+# ---------------------------------------------------------------------------
+_aws_profiles() {
+  local config="${AWS_CONFIG_FILE:-$HOME/.aws/config}"
+  [[ -f "$config" ]] || return 1
+  grep -E '^\[(profile [^]]+|default)\]' "$config" \
+    | sed -E 's/^\[profile ([^]]+)\]$/\1/; s/^\[default\]$/default/'
+}
+
+# ---------------------------------------------------------------------------
+# Complete a profile value, using fzf when available and plain compadd otherwise.
+#   $1  optional prefix to pre-fill as the fzf query / filter compadd candidates
+#   $2  optional compadd prefix flag (e.g. "--profile=") for the equals form
+# ---------------------------------------------------------------------------
+_aws_complete_profile() {
+  local query="${1:-}"
+  local compadd_prefix="${2:-}"
+  local -a profile_list
+  profile_list=("${(@f)$(_aws_profiles)}")
+  (( ${#profile_list} )) || return 1
+
+  if command -v fzf &>/dev/null; then
+    local chosen
+    chosen="$(printf '%s\n' "${profile_list[@]}" | fzf \
+      --height=40% \
+      --layout=reverse \
+      --border \
+      --prompt='AWS profile> ' \
+      --query="$query" \
+      --preview='aws configure list --profile {} 2>/dev/null || echo "(no details)"' \
+      --preview-window='right:50%:wrap'
+    )" || return 0  # user cancelled — leave line untouched
+    if [[ -n "$compadd_prefix" ]]; then
+      compadd -Q -P "$compadd_prefix" -- "$chosen"
+    else
+      compadd -Q -- "$chosen"
+    fi
+  else
+    # Plain zsh completion — filter by prefix if provided.
+    local -a matches
+    if [[ -n "$query" ]]; then
+      matches=("${(@)profile_list:#${~query}*}")
+      # If no glob match, fall back to substring filter.
+      (( ${#matches} )) || matches=("${(@)profile_list[(R)*${query}*]}")
+    else
+      matches=("${profile_list[@]}")
+    fi
+    if [[ -n "$compadd_prefix" ]]; then
+      compadd -Q -P "$compadd_prefix" -- "${matches[@]}"
+    else
+      compadd -Q -- "${matches[@]}"
+    fi
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Main completion function
+# ---------------------------------------------------------------------------
+_aws() {
+  local cur prev
+  cur="${words[CURRENT]}"
+  prev="${words[CURRENT-1]}"
+
+  # --profile <TAB> or -p <TAB>
+  if [[ "$prev" == "--profile" || "$prev" == "-p" ]]; then
+    _aws_complete_profile
+    return
+  fi
+
+  # --profile=<TAB> or --profile=partial<TAB>
+  if [[ "$cur" == --profile=* ]]; then
+    _aws_complete_profile "${cur#--profile=}" "--profile="
+    return
+  fi
+
+  # Everything else: delegate to the official AWS completer.
+  if command -v aws_completer &>/dev/null; then
+    local COMP_LINE COMP_POINT
+    COMP_LINE="${words[*]}"
+    COMP_POINT="${#COMP_LINE}"
+    local IFS=$'\n'
+    local -a completions
+    completions=($(COMP_LINE="$COMP_LINE" COMP_POINT="$COMP_POINT" aws_completer 2>/dev/null))
+    compadd -- "${completions[@]}"
+  fi
+}
+
+_aws "$@"
