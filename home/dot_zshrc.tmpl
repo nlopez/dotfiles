@@ -176,12 +176,76 @@ compdef _files zed
 ###############################################################################
 # AWS profile in preprompt when typing aws/terraform commands
 ###############################################################################
+# _pure_path: smart path string, updated each precmd. In git repos keeps
+# everything from the repo root downward unabbreviated and abbreviates above it
+# (last 3 components shown). Outside git repos abbreviates at ≥4 dirs after ~.
+typeset -g _pure_path=""
+
+function _smart_path_precmd() {
+  local git_prefix git_rel repo_root p i au s d r
+  local -a parts
+
+  p="${PWD/#$HOME/~}"
+
+  # Abbreviate a prefix of path parts: keep last 3 full, shorten earlier ones
+  # to leading-dots + first-non-dot char. Sets repo_root or _pure_path.
+  _abbrev_parts() {
+    local -a pp=("$@") res="~"
+    local au=$(( ${#pp} - 3 )) s d r
+    for (( i = 1; i <= ${#pp}; i++ )); do
+      s="${pp[$i]}"
+      if (( i <= au )); then
+        d="" r="$s"
+        while [[ "$r" == .* ]]; do d="${d}."; r="${r:1}"; done
+        res="${res}/${d}${r:0:1}"
+      else
+        res="${res}/${s}"
+      fi
+    done
+    _abbrev_result="$res"
+  }
+
+  if git_prefix=$(git rev-parse --show-prefix 2>/dev/null); then
+    # --show-prefix: path from repo root to CWD with trailing slash, empty at root
+    if [[ -n "$git_prefix" ]]; then
+      git_rel="${git_prefix%/}"
+      repo_root="${p%/$git_rel}"
+    else
+      git_rel=""
+      repo_root="$p"
+    fi
+    # Abbreviate the pre-root portion; \~/ escapes ~ for EXTENDED_GLOB safety
+    if [[ "$repo_root" == "~/"* ]]; then
+      parts=("${(@s:/:)${repo_root#\~/}}")
+      if (( ${#parts} >= 4 )); then
+        _abbrev_parts "${parts[@]}"
+        repo_root="$_abbrev_result"
+      fi
+    fi
+    _pure_path="${repo_root}${git_rel:+/$git_rel}"
+  else
+    if [[ "$p" == "~/"* ]]; then
+      parts=("${(@s:/:)${p#\~/}}")
+      if (( ${#parts} >= 4 )); then
+        _abbrev_parts "${parts[@]}"
+        _pure_path="$_abbrev_result"
+      else
+        _pure_path="$p"
+      fi
+    else
+      _pure_path="$p"
+    fi
+  fi
+}
+add-zsh-hook precmd _smart_path_precmd
+_smart_path_precmd  # prime before first prompt
+
 # Inject psvar[21] into PROMPT before pure's exec-time segment (%(19V.)).
 # Runs once after OMZ/pure have initialized PROMPT.
 function _aws_prompt_setup() {
-  # Abbreviate long paths: first component + … + last 3 when ≥5 deep
-  local _path_fmt='%(5~|%-1~/…/%3~|%~)'
-  PROMPT="${PROMPT/\%\~/${_path_fmt}}"
+  # Replace all %~ with ${_pure_path} (expanded by PROMPT_SUBST at render time)
+  local _path_var='${_pure_path}'
+  PROMPT="${PROMPT//\%\~/$_path_var}"
   # Inject psvar[21] (AWS profile) before pure's exec-time segment
   local before="${PROMPT%%\%[(]19V.*}"
   local after="${PROMPT#*\%[(]19V.}"

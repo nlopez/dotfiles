@@ -17,6 +17,8 @@
 {{- if .work -}}
   {{- $plugins := get $managed "enabledPlugins" -}}
   {{- $_ := set $plugins "dual-agents-review@datadog-claude-plugins" true -}}
-  {{- $_ := set $managed "extraKnownMarketplaces" (dict "datadog-claude-plugins" (dict "source" (dict "source" "git" "url" "https://github.com/DataDog/claude-marketplace.git"))) -}}
+  {{- $marketplaces := get $managed "extraKnownMarketplaces" | default dict -}}
+  {{- $_ := set $marketplaces "datadog-claude-plugins" (dict "source" (dict "source" "git" "url" "https://github.com/DataDog/claude-marketplace.git")) -}}
+  {{- $_ := set $managed "extraKnownMarketplaces" $marketplaces -}}
 {{- end -}}
 {{- $managed | toPrettyJson -}}
