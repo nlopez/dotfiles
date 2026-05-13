@@ -22,6 +22,64 @@ cd() {
 
 alias reload='exec env -i PATH=$PATH TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX zsh --login'
 
+###############################################################################
+# AWS profile fzf picker — ZLE widget that intercepts Tab after --profile / -p
+###############################################################################
+_aws_profile_fzf() {
+  # Only activate when the command on the line starts with `aws`.
+  [[ "$BUFFER" != aws\ * ]] && { zle expand-or-complete; return }
+
+  # When Tab is pressed mid-word, zsh may have split the buffer so that the
+  # partial word sits in RBUFFER. Reconstruct the full left context by appending
+  # the current partial word (everything in RBUFFER up to the next space).
+  local full_left="$LBUFFER"
+  local partial_word="${RBUFFER%%[[:space:]]*}"
+  [[ -n "$partial_word" && "$partial_word" != -* ]] && full_left+="$partial_word"
+
+  # Only activate when the cursor is directly after --profile or -p (with optional partial).
+  if [[ ! "$full_left" =~ '(--profile[[:space:]]+|--profile=|-p[[:space:]]+)([-a-zA-Z0-9_.]*)$' ]]; then
+    zle expand-or-complete
+    return
+  fi
+
+  local query="${match[2]}" # partial already typed, may be empty
+
+  # Strip the partial from LBUFFER so we can splice the chosen value in cleanly.
+  local lbuffer_base="${LBUFFER%${query}}"
+
+  local config="${AWS_CONFIG_FILE:-$HOME/.aws/config}"
+  [[ -f "$config" ]] || { zle expand-or-complete; return }
+
+  local profiles
+  profiles=$(grep -E '^\[(profile [^]]+|default)\]' "$config" \
+    | sed -E 's/^\[profile ([^]]+)\]$/\1/; s/^\[default\]$/default/')
+  [[ -z "$profiles" ]] && { zle expand-or-complete; return }
+
+  # Real aws binary (bypass the shim to avoid sts get-caller-identity).
+  local aws_bin
+  aws_bin=$(whence -p aws)
+  [[ "$aws_bin" == "$HOME/.local/bin/aws" ]] && aws_bin=/opt/homebrew/bin/aws
+
+  local chosen
+  chosen=$(printf '%s\n' "$profiles" | fzf \
+    --height=40% \
+    --layout=reverse \
+    --border \
+    --prompt='AWS profile> ' \
+    --query="$query" \
+    --preview="$aws_bin configure list --profile {} 2>/dev/null || echo '(no details)'" \
+    --preview-window='right:50%:wrap' \
+  )
+
+  # Esc / Ctrl-C — leave the buffer untouched.
+  [[ -z "$chosen" ]] && zle redisplay && return 0
+
+  LBUFFER="${lbuffer_base}${chosen}"
+  zle redisplay
+}
+zle -N _aws_profile_fzf
+bindkey '^I' _aws_profile_fzf  # ^I is Tab
+
 {{- if .work }}
 {{- if lookPath "awsv" }}
 eval "$(awsv init)"

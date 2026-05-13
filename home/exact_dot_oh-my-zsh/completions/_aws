@@ -1,10 +1,16 @@
 #compdef aws
 # zsh completion for the aws shim at ~/.local/bin/aws.
 #
-# --profile / -p: reads profiles from ~/.aws/config.
-#   - fzf available: interactive fuzzy picker with preview pane.
-#   - fzf absent:    standard zsh menu/inline completion.
+# --profile / -p: reads profiles from ~/.aws/config and offers them via compadd.
+#                 fzf integration is handled separately by the _aws_profile_fzf
+#                 ZLE widget defined in 00_custom.zsh, which intercepts Tab before
+#                 this completion function is ever called.
 # Everything else: delegates to aws_completer for full sub-command/flag completion.
+#   Results are cached per-subcommand so aws_completer only runs once per context.
+
+# Real aws binary — bypass the shim to avoid sts get-caller-identity overhead.
+_AWS_BIN="${commands[aws]:-/opt/homebrew/bin/aws}"
+[[ "$_AWS_BIN" == "$HOME/.local/bin/aws" ]] && _AWS_BIN=/opt/homebrew/bin/aws
 
 # ---------------------------------------------------------------------------
 # Helper: extract profile names from ~/.aws/config, one per line.
@@ -17,52 +23,6 @@ _aws_profiles() {
 }
 
 # ---------------------------------------------------------------------------
-# Complete a profile value, using fzf when available and plain compadd otherwise.
-#   $1  optional prefix to pre-fill as the fzf query / filter compadd candidates
-#   $2  optional compadd prefix flag (e.g. "--profile=") for the equals form
-# ---------------------------------------------------------------------------
-_aws_complete_profile() {
-  local query="${1:-}"
-  local compadd_prefix="${2:-}"
-  local -a profile_list
-  profile_list=("${(@f)$(_aws_profiles)}")
-  (( ${#profile_list} )) || return 1
-
-  if command -v fzf &>/dev/null; then
-    local chosen
-    chosen="$(printf '%s\n' "${profile_list[@]}" | fzf \
-      --height=40% \
-      --layout=reverse \
-      --border \
-      --prompt='AWS profile> ' \
-      --query="$query" \
-      --preview='aws configure list --profile {} 2>/dev/null || echo "(no details)"' \
-      --preview-window='right:50%:wrap'
-    )" || return 0  # user cancelled — leave line untouched
-    if [[ -n "$compadd_prefix" ]]; then
-      compadd -Q -P "$compadd_prefix" -- "$chosen"
-    else
-      compadd -Q -- "$chosen"
-    fi
-  else
-    # Plain zsh completion — filter by prefix if provided.
-    local -a matches
-    if [[ -n "$query" ]]; then
-      matches=("${(@)profile_list:#${~query}*}")
-      # If no glob match, fall back to substring filter.
-      (( ${#matches} )) || matches=("${(@)profile_list[(R)*${query}*]}")
-    else
-      matches=("${profile_list[@]}")
-    fi
-    if [[ -n "$compadd_prefix" ]]; then
-      compadd -Q -P "$compadd_prefix" -- "${matches[@]}"
-    else
-      compadd -Q -- "${matches[@]}"
-    fi
-  fi
-}
-
-# ---------------------------------------------------------------------------
 # Main completion function
 # ---------------------------------------------------------------------------
 _aws() {
@@ -72,24 +32,52 @@ _aws() {
 
   # --profile <TAB> or -p <TAB>
   if [[ "$prev" == "--profile" || "$prev" == "-p" ]]; then
-    _aws_complete_profile
+    local -a profile_list
+    profile_list=("${(@f)$(_aws_profiles)}")
+    local -a matches
+    if [[ -n "$cur" ]]; then
+      matches=("${(@)profile_list[(R)${cur}*]}")
+      (( ${#matches} )) || matches=("${(@)profile_list[(R)*${cur}*]}")
+    else
+      matches=("${profile_list[@]}")
+    fi
+    compadd -Q -- "${matches[@]}"
     return
   fi
 
   # --profile=<TAB> or --profile=partial<TAB>
   if [[ "$cur" == --profile=* ]]; then
-    _aws_complete_profile "${cur#--profile=}" "--profile="
+    local prefix="${cur#--profile=}"
+    local -a profile_list
+    profile_list=("${(@f)$(_aws_profiles)}")
+    local -a matches
+    if [[ -n "$prefix" ]]; then
+      matches=("${(@)profile_list[(R)${prefix}*]}")
+      (( ${#matches} )) || matches=("${(@)profile_list[(R)*${prefix}*]}")
+    else
+      matches=("${profile_list[@]}")
+    fi
+    compadd -Q -P "--profile=" -- "${matches[@]}"
     return
   fi
 
-  # Everything else: delegate to the official AWS completer.
+  # Everything else: delegate to aws_completer, caching results per command context.
   if command -v aws_completer &>/dev/null; then
-    local COMP_LINE COMP_POINT
-    COMP_LINE="${words[*]}"
-    COMP_POINT="${#COMP_LINE}"
-    local IFS=$'\n'
+    local _AWS_BIN_COMPLETER="${commands[aws_completer]:-/opt/homebrew/bin/aws_completer}"
+
+    # Build a cache key from the current word context (e.g. "aws_s3_ls").
+    local cache_key="aws_${(j:_:)words[1,-2]//[^a-zA-Z0-9]/_}"
     local -a completions
-    completions=($(COMP_LINE="$COMP_LINE" COMP_POINT="$COMP_POINT" aws_completer 2>/dev/null))
+
+    if ! _retrieve_cache "$cache_key"; then
+      local COMP_LINE COMP_POINT
+      COMP_LINE="${words[*]}"
+      COMP_POINT="${#COMP_LINE}"
+      local IFS=$'\n'
+      completions=($(COMP_LINE="$COMP_LINE" COMP_POINT="$COMP_POINT" "$_AWS_BIN_COMPLETER" 2>/dev/null))
+      _store_cache "$cache_key" completions
+    fi
+
     compadd -- "${completions[@]}"
   fi
 }
