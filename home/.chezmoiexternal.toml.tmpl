@@ -79,6 +79,21 @@
     url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/run-acceptance-tests/SKILL.md"
     refreshPeriod = "168h"
 
+# everything-claude-code rules - https://github.com/affaan-m/everything-claude-code
+[".claude/rules/ecc"]
+    type = "archive"
+    url = "https://github.com/affaan-m/everything-claude-code/archive/refs/heads/main.tar.gz"
+    stripComponents = 2
+    refreshPeriod = "240h"
+    include = [
+        "rules/common/**",
+        "rules/typescript/**",
+        "rules/python/**",
+        "rules/golang/**",
+        "rules/rust/**",
+        "rules/web/**",
+    ]
+
 {{- $fontDir := "" }}
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $fontDir = "Library/Fonts" }}
