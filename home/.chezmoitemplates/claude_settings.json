@@ -3,7 +3,10 @@
   "cleanupPeriodDays": 90,
   "effortLevel": "medium",
   "env": {
-    "_ZO_DOCTOR": "0"
+    "_ZO_DOCTOR": "0",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-haiku-4-5-20251001",
+    "MAX_THINKING_TOKENS": "10000"
   },
   "enabledPlugins": {
     "ecc@ecc": true,
