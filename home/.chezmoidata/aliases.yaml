@@ -45,3 +45,4 @@ aliases:
 - {name: tfu, cmd: "terraform force-unlock -force", global: true}
 - {name: tg, cmd: "terragrunt"}
 - {name: tginit, cmd: "terragrunt init", global: true}
+- {name: tgplan, cmd: "terragrunt plan", global: true}
