@@ -33,19 +33,19 @@ path=({{ toStrings $paths | join ":" }} $path)
 {{- if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
   {{- $gPathAdds := list }}
   {{- $gManpathAdds := list }}
-  {{- $gFormulas := list "gnu-sed" "gawk" "gnu-tar" "gnu-time" "gnu-getopt" "gnu-indent" "gnu-which" "grep" }}
+  {{- $gFormulas := list "coreutils" "gnu-sed" "findutils" "gawk" "gnu-tar" "gnu-time" "gnu-getopt" "gnu-indent" "gnu-which" "grep" }}
   {{- range $formula := $gFormulas }}
     {{- $gnubin := printf "%s/opt/%s/libexec/gnubin" $foundBrewPrefix $formula }}
     {{- $gnuman := printf "%s/opt/%s/libexec/gnuman" $foundBrewPrefix $formula }}
     {{- if stat $gnubin }}{{ $gPathAdds = mustAppend $gPathAdds $gnubin }}{{ end }}
     {{- if stat $gnuman }}{{ $gManpathAdds = mustAppend $gManpathAdds $gnuman }}{{ end }}
   {{- end }}
-  {{- /* Append GNU gnubin / gnuman so macOS /usr/bin tools take precedence */}}
+  {{- /* Prepend GNU *gnubin / *gnuman so they beat macOS /usr/bin and man paths */}}
   {{- if $gPathAdds }}
-path=($path {{ toStrings $gPathAdds | join ":" }})
+path=({{ toStrings $gPathAdds | join ":" }} $path)
   {{- end }}
   {{- if $gManpathAdds }}
-manpath=($manpath {{ toStrings $gManpathAdds | join ":" }})
+manpath=({{ toStrings $gManpathAdds | join ":" }} $manpath)
   {{- end }}
 {{- end }}
 

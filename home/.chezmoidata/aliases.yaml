@@ -36,9 +36,12 @@ aliases:
 - {name: kgp, cmd: "kubectl get pod"}
 - {name: kns, cmd: "kubens"}
 - {name: kctx, cmd: "kubectx"}
+- {name: tf, cmd: "terraform"}
 - {name: tfinit, cmd: "terraform init", global: true}
 - {name: tfapply, cmd: "terraform apply tfplan.bin", global: true}
 - {name: tfshow, cmd: "terraform show tfplan", global: true}
 - {name: tfsl, cmd: "terraform state list", global: true}
 - {name: tfss, cmd: "terraform state show", global: true}
 - {name: tfu, cmd: "terraform force-unlock -force", global: true}
+- {name: tg, cmd: "terragrunt"}
+- {name: tginit, cmd: "terragrunt init", global: true}
