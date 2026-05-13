@@ -47,7 +47,9 @@
 
 [url "git@github.com-nlopez:DataDog/"]
   insteadOf = git@github.com:DataDog/
+  insteadOf = git@github.com:datadog/
   insteadOf = https://github.com/DataDog/
+  insteadOf = https://github.com/datadog/
 
 [url "git@github.com-nlopez:nlopez/"]
   insteadOf = git@github.com:nlopez/
@@ -130,7 +132,7 @@
   branchesr = for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/remotes
   prettylog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short
   whoami = "!\
-    url=$(git ls-remote --get-url origin 2>/dev/null); \
+    url=$(git remote get-url origin 2>/dev/null); \
     host=github.com; \
     case \"$url\" in \
       git@*:*) h=${url#git@}; host=${h%%:*} ;; \
