@@ -46,3 +46,4 @@ aliases:
 - {name: tg, cmd: "terragrunt"}
 - {name: tginit, cmd: "terragrunt init", global: true}
 - {name: tgplan, cmd: "terragrunt plan", global: true}
+- {name: tgapply, cmd: "terragrunt apply", global: true}
