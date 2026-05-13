@@ -13,7 +13,6 @@ trap 'trap - INT TERM; kill 0' INT TERM
 
 terraform plan -lock=false -out="tfplan.bin" "$@"
 
-terraform show          "tfplan.bin"              & pid_console=$!
 terraform show -no-color "tfplan.bin" > "tfplan.txt" & pid_txt=$!
 terraform show -json    "tfplan.bin" > "tfplan.json" & pid_json=$!
 
