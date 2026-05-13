@@ -157,15 +157,26 @@
 
 [includeIf "hasconfig:remote.*.url:git@github.com:DataDog/**"]
   path = config_nlopez
+[includeIf "hasconfig:remote.*.url:git@github.com:datadog/**"]
+  path = config_nlopez
 [includeIf "hasconfig:remote.*.url:https://github.com/DataDog/**"]
+  path = config_nlopez
+[includeIf "hasconfig:remote.*.url:https://github.com/datadog/**"]
   path = config_nlopez
 [includeIf "hasconfig:remote.*.url:git@github.com-nlopez:DataDog/**"]
   path = config_nlopez
+[includeIf "hasconfig:remote.*.url:git@github.com-nlopez:datadog/**"]
+  path = config_nlopez
+[includeIf "gitdir/i:~/src/github.com/datadog/**"]
+  path = config_nlopez
+
 [includeIf "hasconfig:remote.*.url:git@github.com:nlopez/**"]
   path = config_nlopez
 [includeIf "hasconfig:remote.*.url:https://github.com/nlopez/**"]
   path = config_nlopez
 [includeIf "hasconfig:remote.*.url:git@github.com-nlopez:nlopez/**"]
+  path = config_nlopez
+[includeIf "gitdir/i:~/src/github.com/nlopez/**"]
   path = config_nlopez
 
 [includeIf "hasconfig:remote.*.url:git@github.com:ddoghq/**"]
@@ -174,12 +185,16 @@
   path = config_datadog
 [includeIf "hasconfig:remote.*.url:git@github.com-ddog:ddoghq/**"]
   path = config_datadog
+[includeIf "gitdir/i:~/src/github.com/ddoghq/**"]
+  path = config_datadog
 
 [includeIf "hasconfig:remote.*.url:git@github.com:ddoghq-sandbox/**"]
   path = config_datadog
 [includeIf "hasconfig:remote.*.url:https://github.com/ddoghq-sandbox/**"]
   path = config_datadog
 [includeIf "hasconfig:remote.*.url:git@github.com-ddog:ddoghq-sandbox/**"]
+  path = config_datadog
+[includeIf "gitdir/i:~/src/github.com/ddoghq-sandbox/**"]
   path = config_datadog
 
 {{- if .personal }}
@@ -189,12 +204,16 @@
   path = config_hobby
 [includeIf "hasconfig:remote.*.url:git@github.com-hobby:silentshout42/**"]
   path = config_hobby
+[includeIf "gitdir/i:~/src/github.com/silentshout42/**"]
+  path = config_hobby
 
 [includeIf "hasconfig:remote.*.url:git@github.com:kamotimestamps/**"]
   path = config_hobby
 [includeIf "hasconfig:remote.*.url:https://github.com/kamotimestamps/**"]
   path = config_hobby
 [includeIf "hasconfig:remote.*.url:git@github.com-hobby:kamotimestamps/**"]
+  path = config_hobby
+[includeIf "gitdir/i:~/src/github.com/kamotimestamps/**"]
   path = config_hobby
 {{- end }}
 
