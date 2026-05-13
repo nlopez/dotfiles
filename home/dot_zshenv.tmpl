@@ -23,6 +23,13 @@ export GH_TELEMETRY=false
 # gh CLI: disable update notifications
 export GH_NO_UPDATE_NOTIFIER=1
 
+# Pager: exit immediately if output fits on screen; keep ANSI colours.
+# -F  quit-if-one-screen
+# -R  raw ANSI colour codes
+# -X  don't clear screen on exit
+export LESS="-FRX"
+export AWS_PAGER=""  # AWS CLI: skip pager entirely (respects LESS poorly)
+
 # Supply-chain security: every shell starts with a fresh "N days ago" cutoff.
 # Delay window is defined in .chezmoidata/security.yaml (supplyChainDelayDays).
 # npm/pnpm honor $npm_config_before; uv honors $UV_EXCLUDE_NEWER.
