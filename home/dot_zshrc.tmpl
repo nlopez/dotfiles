@@ -174,4 +174,27 @@ alias e="${VISUAL} --add"
 compdef _files zed
 
 ###############################################################################
+# AWS profile in preprompt when typing aws/terraform commands
+###############################################################################
+# Inject psvar[21] into PROMPT before pure's exec-time segment (%(19V.)).
+# Runs once after OMZ/pure have initialized PROMPT.
+function _aws_prompt_setup() {
+  local before="${PROMPT%%\%[(]19V.*}"
+  local after="${PROMPT#*\%[(]19V.}"
+  [[ "$before" != "$PROMPT" ]] && PROMPT="${before}%(21V. %F{yellow}%21v%f.)%(19V.${after}"
+}
+_aws_prompt_setup
+unfunction _aws_prompt_setup
+
+function _aws_profile_prompt() {
+  local first_word="${${BUFFER##[[:space:]]#}%% *}"
+  if [[ -n "$AWS_PROFILE" && "$first_word" == (aws|terraform|tfplan|tf) ]]; then
+    psvar[21]="$AWS_PROFILE"
+  else
+    psvar[21]=""
+  fi
+}
+add-zle-hook-widget zle-line-pre-redraw _aws_profile_prompt
+
+###############################################################################
 _cached_eval zoxide zoxide init zsh
