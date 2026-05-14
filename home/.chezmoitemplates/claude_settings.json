@@ -2,7 +2,7 @@
   "autoUpdatesChannel": "stable",
   "model": "claude-sonnet-4-6",
   "cleanupPeriodDays": 90,
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "env": {
     "_ZO_DOCTOR": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
