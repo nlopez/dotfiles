@@ -33,7 +33,7 @@ path=({{ toStrings $paths | join ":" }} $path)
 {{- if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
   {{- $gPathAdds := list }}
   {{- $gManpathAdds := list }}
-  {{- $gFormulas := list "coreutils" "gnu-sed" "findutils" "gawk" "gnu-tar" "gnu-time" "gnu-getopt" "gnu-indent" "gnu-which" "grep" }}
+  {{- $gFormulas := .packages.darwin.gnu_tools }}
   {{- range $formula := $gFormulas }}
     {{- $gnubin := printf "%s/opt/%s/libexec/gnubin" $foundBrewPrefix $formula }}
     {{- $gnuman := printf "%s/opt/%s/libexec/gnuman" $foundBrewPrefix $formula }}
@@ -54,10 +54,10 @@ path=({{ joinPath $homeDir ".local/bin" }} $path)
 
 {{- if eq .chezmoi.os "darwin" }}
 export SSH_AUTH_SOCK="${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-export HOMEBREW_NO_AUTO_UPDATE=1
-export HOMEBREW_NO_ENV_HINTS=1
 {{- end }}
 
+export PNPM_HOME="${XDG_DATA_HOME}/pnpm"
+path=($PNPM_HOME/bin $path)
 export TENV_AUTO_INSTALL=true
 export TFENV_AUTO_INSTALL=true
 export GOPATH="${XDG_DATA_HOME}/go"
