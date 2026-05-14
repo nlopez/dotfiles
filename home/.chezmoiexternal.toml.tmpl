@@ -71,13 +71,28 @@
     ]
 
 # VoltAgent infra subagents - https://github.com/VoltAgent/awesome-claude-code-subagents
-[".claude/agents"]
-    type = "archive"
-    url = "https://github.com/VoltAgent/awesome-claude-code-subagents/archive/refs/heads/main.tar.gz"
-    stripComponents = 3
+{{- range list
+    "azure-infra-engineer"
+    "cloud-architect"
+    "database-administrator"
+    "deployment-engineer"
+    "devops-engineer"
+    "devops-incident-responder"
+    "docker-expert"
+    "incident-responder"
+    "kubernetes-specialist"
+    "network-engineer"
+    "platform-engineer"
+    "security-engineer"
+    "sre-engineer"
+    "terraform-engineer"
+    "terragrunt-expert"
+    "windows-infra-admin" }}
+[".claude/agents/{{ . }}.md"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/{{ . }}.md"
     refreshPeriod = "168h"
-    include = ["categories/03-infrastructure/*.md"]
-    exclude = ["categories/03-infrastructure/README.md"]
+{{ end -}}
 
 {{- $fontDir := "" }}
 {{- if eq .chezmoi.os "darwin" }}
