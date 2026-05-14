@@ -241,6 +241,25 @@ function _smart_path_precmd() {
 add-zsh-hook precmd _smart_path_precmd
 _smart_path_precmd  # prime before first prompt
 
+###############################################################################
+# Push current command into a tmux pane option for pane-border-format. Lets us
+# bump status-interval higher since updates are event-driven, not polled.
+###############################################################################
+if [[ -n "$TMUX" ]]; then
+  function _tmux_cmd_preexec() {
+    # $1 is the command as typed; truncate to keep border tidy.
+    local cmd="${1:0:120}"
+    tmux set-option -p @current_cmd "$cmd" 2>/dev/null
+    tmux refresh-client 2>/dev/null
+  }
+  function _tmux_cmd_precmd() {
+    tmux set-option -pu @current_cmd 2>/dev/null
+    tmux refresh-client 2>/dev/null
+  }
+  add-zsh-hook preexec _tmux_cmd_preexec
+  add-zsh-hook precmd  _tmux_cmd_precmd
+fi
+
 # Inject psvar[21] into PROMPT before pure's exec-time segment (%(19V.)).
 # Runs once after OMZ/pure have initialized PROMPT.
 function _aws_prompt_setup() {
