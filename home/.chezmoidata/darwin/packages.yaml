@@ -58,6 +58,7 @@ packages:
         - lazygit
         - pv
         - terminal-notifier
+        - graphviz
         - helm
         - kubectx
         - kubernetes-cli
