@@ -158,12 +158,12 @@ bindkey '^x^e' _edit_command_line
 function claude() {
   command claude "$@"
   if [[ -n "$TMUX" ]]; then
-    local current
-    current=$(tmux display-message -p '#W')
-    local base
+    local pane="$TMUX_PANE"
+    local current base
+    current=$(tmux display-message -p -t "$pane" '#W')
     base=$(echo "$current" | sed -E 's/^([🤖✳️🛎️ ])+//')
-    tmux rename-window "$base"
-    tmux set-option -w automatic-rename on
+    tmux rename-window -t "$pane" "$base"
+    tmux set-option -w -t "$pane" automatic-rename on
   fi
 }
 
