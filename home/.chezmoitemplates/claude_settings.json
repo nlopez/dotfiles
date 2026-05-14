@@ -102,6 +102,10 @@
   "permissions": {
     "defaultMode": "acceptEdits"
   },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  },
   "skipAutoPermissionPrompt": true,
   "theme": "light"
 }

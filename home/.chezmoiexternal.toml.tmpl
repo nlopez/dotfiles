@@ -34,50 +34,26 @@
 {{- end }}
 
 # HashiCorp Terraform agent skills - https://github.com/hashicorp/agent-skills
-[".claude/skills/terraform-search-import/SKILL.md"]
+{{- range list
+    "code-generation/terraform-search-import"
+    "code-generation/terraform-style-guide"
+    "code-generation/terraform-test"
+    "module-generation/refactor-module"
+    "module-generation/terraform-stacks"
+    "provider-development/new-terraform-provider"
+    "provider-development/provider-actions"
+    "provider-development/provider-docs"
+    "provider-development/provider-resources"
+    "provider-development/provider-test-patterns"
+    "provider-development/run-acceptance-tests" }}
+{{- $parts := splitList "/" . }}
+{{- $cat := index $parts 0 }}
+{{- $skill := index $parts 1 }}
+[".claude/skills/{{ $skill }}/SKILL.md"]
     type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/code-generation/skills/terraform-search-import/SKILL.md"
+    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/{{ $cat }}/skills/{{ $skill }}/SKILL.md"
     refreshPeriod = "168h"
-[".claude/skills/terraform-style-guide/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/code-generation/skills/terraform-style-guide/SKILL.md"
-    refreshPeriod = "168h"
-[".claude/skills/terraform-test/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/code-generation/skills/terraform-test/SKILL.md"
-    refreshPeriod = "168h"
-[".claude/skills/refactor-module/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/module-generation/skills/refactor-module/SKILL.md"
-    refreshPeriod = "168h"
-[".claude/skills/terraform-stacks/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/module-generation/skills/terraform-stacks/SKILL.md"
-    refreshPeriod = "168h"
-[".claude/skills/new-terraform-provider/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/new-terraform-provider/SKILL.md"
-    refreshPeriod = "168h"
-[".claude/skills/provider-actions/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/provider-actions/SKILL.md"
-    refreshPeriod = "168h"
-[".claude/skills/provider-docs/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/provider-docs/SKILL.md"
-    refreshPeriod = "168h"
-[".claude/skills/provider-resources/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/provider-resources/SKILL.md"
-    refreshPeriod = "168h"
-[".claude/skills/provider-test-patterns/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/provider-test-patterns/SKILL.md"
-    refreshPeriod = "168h"
-[".claude/skills/run-acceptance-tests/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/provider-development/skills/run-acceptance-tests/SKILL.md"
-    refreshPeriod = "168h"
+{{ end -}}
 
 # everything-claude-code rules - https://github.com/affaan-m/everything-claude-code
 [".claude/rules/ecc"]
@@ -95,70 +71,28 @@
     ]
 
 # VoltAgent infra subagents - https://github.com/VoltAgent/awesome-claude-code-subagents
-[".claude/agents/azure-infra-engineer.md"]
+{{- range list
+    "azure-infra-engineer"
+    "cloud-architect"
+    "database-administrator"
+    "deployment-engineer"
+    "devops-engineer"
+    "devops-incident-responder"
+    "docker-expert"
+    "incident-responder"
+    "kubernetes-specialist"
+    "network-engineer"
+    "platform-engineer"
+    "security-engineer"
+    "sre-engineer"
+    "terraform-engineer"
+    "terragrunt-expert"
+    "windows-infra-admin" }}
+[".claude/agents/{{ . }}.md"]
     type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/azure-infra-engineer.md"
+    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/{{ . }}.md"
     refreshPeriod = "168h"
-[".claude/agents/cloud-architect.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/cloud-architect.md"
-    refreshPeriod = "168h"
-[".claude/agents/database-administrator.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/database-administrator.md"
-    refreshPeriod = "168h"
-[".claude/agents/deployment-engineer.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/deployment-engineer.md"
-    refreshPeriod = "168h"
-[".claude/agents/devops-engineer.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/devops-engineer.md"
-    refreshPeriod = "168h"
-[".claude/agents/devops-incident-responder.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/devops-incident-responder.md"
-    refreshPeriod = "168h"
-[".claude/agents/docker-expert.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/docker-expert.md"
-    refreshPeriod = "168h"
-[".claude/agents/incident-responder.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/incident-responder.md"
-    refreshPeriod = "168h"
-[".claude/agents/kubernetes-specialist.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/kubernetes-specialist.md"
-    refreshPeriod = "168h"
-[".claude/agents/network-engineer.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/network-engineer.md"
-    refreshPeriod = "168h"
-[".claude/agents/platform-engineer.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/platform-engineer.md"
-    refreshPeriod = "168h"
-[".claude/agents/security-engineer.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/security-engineer.md"
-    refreshPeriod = "168h"
-[".claude/agents/sre-engineer.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/sre-engineer.md"
-    refreshPeriod = "168h"
-[".claude/agents/terraform-engineer.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/terraform-engineer.md"
-    refreshPeriod = "168h"
-[".claude/agents/terragrunt-expert.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/terragrunt-expert.md"
-    refreshPeriod = "168h"
-[".claude/agents/windows-infra-admin.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/windows-infra-admin.md"
-    refreshPeriod = "168h"
+{{ end -}}
 
 {{- $fontDir := "" }}
 {{- if eq .chezmoi.os "darwin" }}

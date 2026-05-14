@@ -73,38 +73,6 @@ packages:
         - awscli
         - tenv
         - glab
-      uv:
-        base:
-        - graphifyy
-        - pre-commit
-        - unique-namer
-        - huggingface_hub
-      mas:
-        base: []
-        personal:
-        - name: "1Blocker"
-          id: 1365531024
-        - name: "Kagi for Safari"
-          id: 1622835804
-        - name: "StopTheMadness Pro"
-          id: 6471380298
-      vscode:
-        base:
-        - anthropic.claude-code
-        - esbenp.prettier-vscode
-        - golang.go
-        - hashicorp.hcl
-        - hashicorp.terraform
-        - pkief.material-icon-theme
-        - redhat.vscode-yaml
-        - tamasfe.even-better-toml
-        - timonwong.shellcheck
-        - tailscale.vscode-tailscale
-        personal:
-        - ms-vscode-remote.remote-wsl
-        - ms-vscode.powershell
-        work:
-        - datadog.datadog-vscode
       # Casks listed here will be installed with `--require-sha`. If a cask is
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:
@@ -159,3 +127,49 @@ packages:
         base: []
         personal: []
         work: []
+    pnpm:
+      base:
+      - mmd
+    uv:
+      base:
+      - graphifyy
+      - pre-commit
+      - unique-namer
+      - huggingface_hub
+    mas:
+      base: []
+      personal:
+      - name: "1Blocker"
+        id: 1365531024
+      - name: "Kagi for Safari"
+        id: 1622835804
+      - name: "StopTheMadness Pro"
+        id: 6471380298
+    vscode:
+      base:
+      - anthropic.claude-code
+      - esbenp.prettier-vscode
+      - golang.go
+      - hashicorp.hcl
+      - hashicorp.terraform
+      - pkief.material-icon-theme
+      - redhat.vscode-yaml
+      - tamasfe.even-better-toml
+      - timonwong.shellcheck
+      - tailscale.vscode-tailscale
+      personal:
+      - ms-vscode-remote.remote-wsl
+      - ms-vscode.powershell
+      work:
+      - datadog.datadog-vscode
+    gnu_tools:
+    - coreutils
+    - gnu-sed
+    - findutils
+    - gawk
+    - gnu-tar
+    - gnu-time
+    - gnu-getopt
+    - gnu-indent
+    - gnu-which
+    - grep
