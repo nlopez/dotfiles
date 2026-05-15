@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Managed by chezmoi.
-# Sets pi theme to solarized-light while preserving runtime-written keys
+# Sets pi theme to atom-one-dark while preserving runtime-written keys
 # such as lastChangelogVersion, defaultProvider, and defaultModel.
 import json
 import sys
@@ -13,6 +13,6 @@ try:
 except Exception:
     pass
 
-current["theme"] = "solarized-light"
+current["theme"] = "atom-one-dark"
 
 print(json.dumps(current, indent=2))
