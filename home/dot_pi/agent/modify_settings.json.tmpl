@@ -15,4 +15,7 @@ except Exception:
 
 current["theme"] = "atom-one-dark"
 
+# Clean up npmCommand override from a previous experiment.
+current.pop("npmCommand", None)
+
 print(json.dumps(current, indent=2))
