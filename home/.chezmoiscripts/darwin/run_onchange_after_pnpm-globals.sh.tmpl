@@ -10,5 +10,5 @@ export PATH="$PNPM_HOME/bin:$PATH"
 export CI=true
 
 {{- range .packages.darwin.pnpm.base }}
-pnpm add -g {{ . }}
+pnpm add -g --yes {{ . }}
 {{- end }}
