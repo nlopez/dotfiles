@@ -67,7 +67,9 @@
 {{- if .personal }}
 [url "git@github.com-hobby:silentshout42/"]
   insteadOf = git@github.com:silentshout42/
+  insteadOf = git@github.com:SilentShout42/
   insteadOf = https://github.com/silentshout42/
+  insteadOf = https://github.com/SilentShout42/
 
 [url "git@github.com-hobby:kamotimestamps/"]
   insteadOf = git@github.com:kamotimestamps/
@@ -202,9 +204,15 @@
 {{- if .personal }}
 [includeIf "hasconfig:remote.*.url:git@github.com:silentshout42/**"]
   path = config_hobby
+[includeIf "hasconfig:remote.*.url:git@github.com:SilentShout42/**"]
+  path = config_hobby
 [includeIf "hasconfig:remote.*.url:https://github.com/silentshout42/**"]
   path = config_hobby
+[includeIf "hasconfig:remote.*.url:https://github.com/SilentShout42/**"]
+  path = config_hobby
 [includeIf "hasconfig:remote.*.url:git@github.com-hobby:silentshout42/**"]
+  path = config_hobby
+[includeIf "hasconfig:remote.*.url:git@github.com-hobby:SilentShout42/**"]
   path = config_hobby
 [includeIf "gitdir/i:~/src/github.com/silentshout42/**"]
   path = config_hobby
@@ -220,8 +228,8 @@
 {{- end }}
 
 ; chezmoi repo has no remote-URL signal usable for matching, so keep a gitdir rule.
-[includeIf "gitdir:~/.local/share/chezmoi/.git"]
+[includeIf "gitdir/i:~/.local/share/chezmoi/.git"]
   path = config_nlopez
 
-[includeIf "gitdir:~/.local/share/chezmoi/.git/worktrees/**"]
+[includeIf "gitdir/i:~/.local/share/chezmoi/.git/worktrees/**"]
   path = config_nlopez

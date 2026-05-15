@@ -15,6 +15,11 @@
  * turn_start is used (rather than before_agent_start) because it fires right
  * as the LLM is called — unambiguously "working" — and re-fires on every
  * tool-calling turn so the emoji stays correct throughout multi-turn runs.
+ *
+ * All setWindowTitle calls are serialised through a promise queue so that a
+ * slow turn_start rename can never land after a faster agent_end rename and
+ * leave the robot stuck. session_shutdown enqueues a final ✳️ reset so the
+ * robot never gets permanently stuck when the agent errors or the user quits.
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
@@ -30,6 +35,18 @@ export default function (pi: ExtensionAPI) {
 	// Only activate inside tmux.
 	const tmuxPane = process.env.TMUX_PANE;
 	if (!process.env.TMUX || !tmuxPane) return;
+
+	// ── serial title queue ───────────────────────────────────────────────────
+	// Serialise every rename through a promise chain so concurrent turn_start
+	// and agent_end calls can't interleave their tmux exec pairs and stamp the
+	// wrong emoji last.
+	let titleQueue: Promise<void> = Promise.resolve();
+
+	function enqueueTitle(emoji: string): void {
+		titleQueue = titleQueue
+			.then(() => setWindowTitle(emoji))
+			.catch(() => {}); // not fatal
+	}
 
 	// ── helpers ──────────────────────────────────────────────────────────────
 
@@ -92,12 +109,8 @@ export default function (pi: ExtensionAPI) {
 	// 🤖 – fires every time the LLM is about to be called (each turn).
 	// Using turn_start rather than before_agent_start because it fires right
 	// as the LLM call begins and re-fires during every tool-calling turn.
-	pi.on("turn_start", async () => {
-		try {
-			await setWindowTitle("🤖");
-		} catch {
-			// Not fatal.
-		}
+	pi.on("turn_start", () => {
+		enqueueTitle("🤖");
 	});
 
 	// ✳️ / 🛎️ – pick emoji based on whether the last assistant message ends "?".
@@ -118,7 +131,7 @@ export default function (pi: ExtensionAPI) {
 
 			const lastChar = lastText.trimEnd().slice(-1);
 			const emoji = lastChar === "?" ? "🛎️" : "✳️";
-			await setWindowTitle(emoji);
+			enqueueTitle(emoji);
 
 			const notifyMsg = lastChar === "?" ? "Waiting for input" : "Complete";
 			await notify(notifyMsg).catch(() => {
@@ -127,5 +140,11 @@ export default function (pi: ExtensionAPI) {
 		} catch {
 			// Not fatal.
 		}
+	});
+
+	// ✳️ – safety-net reset so the robot is never permanently stuck when the
+	// agent errors mid-run (skipping agent_end) or the user quits with Ctrl+C.
+	pi.on("session_shutdown", () => {
+		enqueueTitle("✳️");
 	});
 }
