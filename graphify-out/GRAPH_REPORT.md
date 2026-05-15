@@ -1,12 +1,12 @@
-# Graph Report - .  (2026-05-10)
+# Graph Report - /Users/nick.lopez/.local/share/chezmoi  (2026-05-15)
 
 ## Corpus Check
-- 6 files · ~8,899 words
+- 9 files · ~14,686 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 19 nodes · 27 edges · 8 communities detected
-- Extraction: 70% EXTRACTED · 30% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.8)
+- 35 nodes · 49 edges · 11 communities detected
+- Extraction: 84% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -18,18 +18,21 @@
 - [[_COMMUNITY_Community 5|Community 5]]
 - [[_COMMUNITY_Community 6|Community 6]]
 - [[_COMMUNITY_Community 7|Community 7]]
+- [[_COMMUNITY_Community 8|Community 8]]
+- [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 10|Community 10]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `main()` - 5 edges
+1. `execute()` - 6 edges
 2. `main()` - 5 edges
-3. `render_and_lint()` - 5 edges
-4. `build_data()` - 4 edges
-5. `render_template()` - 4 edges
-6. `print_verbose()` - 4 edges
-7. `render_and_check()` - 4 edges
-8. `run_shellcheck()` - 4 edges
-9. `chezmoi_root()` - 3 edges
-10. `lint_json()` - 3 edges
+3. `main()` - 5 edges
+4. `render_and_lint()` - 5 edges
+5. `build_data()` - 4 edges
+6. `render_template()` - 4 edges
+7. `print_verbose()` - 4 edges
+8. `render_and_check()` - 4 edges
+9. `run_shellcheck()` - 4 edges
+10. `stripWindowEmoji()` - 3 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `chezmoi_root()` --calls--> `main()`  [INFERRED]
@@ -46,60 +49,72 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.5
-Nodes (3): chezmoi_root(), print_verbose(), Print verbose output with OS and user configuration.
+Cohesion: 0.52
+Nodes (6): execute(), searchBrave(), searchGoogle(), searchKagi(), searchSerper(), stripHtml()
 
 ### Community 1 - "Community 1"
-Cohesion: 1.0
-Nodes (3): main(), render_and_check(), run_shellcheck()
+Cohesion: 0.53
+Nodes (4): getWindowBase(), notify(), setWindowTitle(), stripWindowEmoji()
 
 ### Community 2 - "Community 2"
-Cohesion: 1.0
-Nodes (3): lint_json(), main(), render_and_lint()
+Cohesion: 0.5
+Nodes (3): build_data(), chezmoi_root(), Build override and user data for template rendering.
 
 ### Community 3 - "Community 3"
 Cohesion: 1.0
-Nodes (2): build_data(), Build override and user data for template rendering.
+Nodes (3): lint_json(), main(), render_and_lint()
 
 ### Community 4 - "Community 4"
 Cohesion: 1.0
-Nodes (2): Render a chezmoi template file, returning (output, error)., render_template()
+Nodes (3): main(), render_and_check(), run_shellcheck()
 
 ### Community 5 - "Community 5"
 Cohesion: 1.0
-Nodes (0): 
+Nodes (2): isDarkMode(), queryBgLuminance()
 
 ### Community 6 - "Community 6"
 Cohesion: 1.0
-Nodes (0): 
+Nodes (2): Render a chezmoi template file, returning (output, error)., render_template()
 
 ### Community 7 - "Community 7"
+Cohesion: 1.0
+Nodes (2): print_verbose(), Print verbose output with OS and user configuration.
+
+### Community 8 - "Community 8"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 9 - "Community 9"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 10 - "Community 10"
 Cohesion: 1.0
 Nodes (0): 
 
 ## Knowledge Gaps
 - **3 isolated node(s):** `Build override and user data for template rendering.`, `Render a chezmoi template file, returning (output, error).`, `Print verbose output with OS and user configuration.`
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 3`** (2 nodes): `build_data()`, `Build override and user data for template rendering.`
+- **Thin community `Community 6`** (2 nodes): `Render a chezmoi template file, returning (output, error).`, `render_template()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 4`** (2 nodes): `Render a chezmoi template file, returning (output, error).`, `render_template()`
+- **Thin community `Community 7`** (2 nodes): `print_verbose()`, `Print verbose output with OS and user configuration.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 5`** (1 nodes): `symlink_Microsoft.VSCode_profile.ps1`
+- **Thin community `Community 8`** (1 nodes): `symlink_Microsoft.VSCode_profile.ps1`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 6`** (1 nodes): `symlink_Microsoft.PowerShell_profile.ps1`
+- **Thin community `Community 9`** (1 nodes): `symlink_Microsoft.PowerShell_profile.ps1`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 7`** (1 nodes): `symlink_Microsoft.PowerShell.VSCode_profile.ps1`
+- **Thin community `Community 10`** (1 nodes): `symlink_Microsoft.PowerShell.VSCode_profile.ps1`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `render_template()` connect `Community 4` to `Community 0`, `Community 1`, `Community 2`?**
-  _High betweenness centrality (0.136) - this node is a cross-community bridge._
-- **Why does `print_verbose()` connect `Community 0` to `Community 1`, `Community 2`?**
-  _High betweenness centrality (0.136) - this node is a cross-community bridge._
-- **Why does `render_and_lint()` connect `Community 2` to `Community 0`, `Community 4`?**
-  _High betweenness centrality (0.135) - this node is a cross-community bridge._
+- **Why does `render_template()` connect `Community 6` to `Community 2`, `Community 3`, `Community 4`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
+- **Why does `print_verbose()` connect `Community 7` to `Community 2`, `Community 3`, `Community 4`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
+- **Why does `render_and_lint()` connect `Community 3` to `Community 6`, `Community 7`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `main()` (e.g. with `chezmoi_root()` and `build_data()`) actually correct?**
   _`main()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `main()` (e.g. with `chezmoi_root()` and `build_data()`) actually correct?**

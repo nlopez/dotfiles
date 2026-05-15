@@ -18,8 +18,9 @@
  *
  * All setWindowTitle calls are serialised through a promise queue so that a
  * slow turn_start rename can never land after a faster agent_end rename and
- * leave the robot stuck. session_shutdown enqueues a final ✳️ reset so the
- * robot never gets permanently stuck when the agent errors or the user quits.
+ * leave the robot stuck. Title cleanup on exit is handled by the pi() shell
+ * wrapper in .zshrc, which runs after the process exits and is immune to
+ * async timing issues inside the extension.
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
@@ -142,9 +143,5 @@ export default function (pi: ExtensionAPI) {
 		}
 	});
 
-	// ✳️ – safety-net reset so the robot is never permanently stuck when the
-	// agent errors mid-run (skipping agent_end) or the user quits with Ctrl+C.
-	pi.on("session_shutdown", () => {
-		enqueueTitle("✳️");
-	});
+	// Title cleanup is handled by the pi() shell wrapper in .zshrc after exit.
 }
