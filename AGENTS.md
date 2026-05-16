@@ -61,7 +61,6 @@ home/                          # chezmoi "home" directory — files here map to 
   dot_p10k.zsh                 # → ~/.p10k.zsh (Powerlevel10k prompt)
   dot_terraformrc.tmpl         # → ~/.terraformrc
   dot_zprofile.tmpl            # → ~/.zprofile
-  dot_zshenv.tmpl              # → ~/.zshenv (env vars, XDG paths, Homebrew, gh CLI, secrets via 1Password)
   dot_zshrc.tmpl               # → ~/.zshrc (Oh My Zsh + Powerlevel10k + zsh plugins)
   empty_dot_hushlogin          # Empty file to create ~/.hushlogin
   exact_dot_oh-my-zsh/         # Deployed as ~/.oh-my-zsh (exact mode, not a dotfile)

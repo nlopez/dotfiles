@@ -49,6 +49,25 @@ manpath=({{ toStrings $gManpathAdds | join ":" }} $manpath)
   {{- end }}
 {{- end }}
 
+export XDG_DATA_HOME=$HOME/.local/share
+export XDG_CONFIG_HOME=$HOME/.config
+export XDG_STATE_HOME=$HOME/.local/state
+export XDG_CACHE_HOME=$HOME/.cache
+
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_ENV_HINTS=1
+export HOMEBREW_AUTO_UPDATE_SECS=86400
+export HOMEBREW_NO_ANALYTICS=1
+export HOMEBREW_VERIFY_ATTESTATIONS=1
+export HOMEBREW_NO_INSECURE_REDIRECT=1
+export HOMEBREW_CASK_OPTS="--require-sha"
+
+export GH_TELEMETRY=false
+export GH_NO_UPDATE_NOTIFIER=1
+
+export LESS="-FRX"
+export AWS_PAGER=""
+
 # Keep ~/.local/bin first in the path.
 path=({{ joinPath $homeDir ".local/bin" }} $path)
 
@@ -66,4 +85,10 @@ export EDITOR="vi"
 
 {{- if .work }}
 export AWS_VAULT_KEYCHAIN_NAME=login
+{{- end }}
+
+{{- if .personal }}
+export HF_TOKEN={{ onepasswordRead "op://copxopw5gkuo2m3cv7acvkrfxy/naslt4c3idtxr67oj2ejjg5trq/credential" }}
+export LITELLM_MASTER_KEY={{ onepasswordRead "op://copxopw5gkuo2m3cv7acvkrfxy/fmxon2rpst4fc6hbr2okoglcty/credential" }}
+export EXA_API_KEY={{ onepasswordRead "op://bamv726zv6zbcfke3cnbwjtnuu/23vesd2kmo74zwhyhphfj4vn3u/credential" }}
 {{- end }}

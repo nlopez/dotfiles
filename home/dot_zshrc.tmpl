@@ -1,9 +1,18 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
-# Skip interactive-only config when running under Claude Code or Pi — 
-# PATH/env already set via .zshenv/.zprofile.
+# Skip interactive-only config when running under Claude Code or Pi —
+# PATH/env already set via .zprofile.
 [[ -n "${CLAUDECODE:-}" || -n "${PI_CODING_AGENT:-}" ]] && return
+
+# Supply-chain security: every shell starts with a fresh "N days ago" cutoff.
+# Delay window is defined in .chezmoidata/security.yaml (supplyChainDelayDays).
+# npm/pnpm honor $npm_config_before; uv honors $UV_EXCLUDE_NEWER.
+zmodload zsh/datetime
+strftime -s __supplychain_cutoff '%Y-%m-%d' $((EPOCHSECONDS - {{ .supplyChainDelayDays }}*86400))
+export npm_config_before="$__supplychain_cutoff"
+export UV_EXCLUDE_NEWER="$__supplychain_cutoff"
+unset __supplychain_cutoff
 
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
