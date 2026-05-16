@@ -177,14 +177,23 @@ function claude() {
   _tmux_clear_status
 }
 
+###############################################################################
+# Claude / pi — clear tmux status emoji on exit
+###############################################################################
 function pi() {
   command pi "$@"
   _tmux_clear_status
 }
 
-###############################################################################
-# Editor & pager
-###############################################################################
+# ── Helper: reload Pi in the current tmux pane (if any) ───────────────────────
+pi-reload() {
+    [[ -n "$TMUX" ]] || { echo "pi-reload: not in tmux."; return 1; }
+  local pane="$TMUX_PANE"
+  echo "pi-reload: sending /reload to pane $pane."
+  tmux send-keys -t "$pane" "/reload" Enter
+  echo "pi-reload: done."
+}
+
 alias e="${VISUAL} --add"
 compdef _files zed
 

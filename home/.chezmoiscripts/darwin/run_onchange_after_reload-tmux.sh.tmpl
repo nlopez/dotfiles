@@ -1,5 +1,6 @@
 #!/bin/bash
-# Reloads the tmux config and zsh panes after chezmoi apply.
+# Reloads the tmux config, zsh panes, and any running Pi sessions
+# after chezmoi apply.
 #
 # Re-runs whenever any of these source files change:
 # {{ include "dot_config/tmux/tmux.conf" | sha256sum }}
@@ -11,9 +12,33 @@
 set -eufo pipefail
 
 command -v tmux >/dev/null 2>&1 || { echo "tmux: not installed, skipping."; exit 0; }
-tmux ls >/dev/null 2>&1        || { echo "tmux: no server running, skipping."; exit 0; }
+tmux ls >/dev/null 2>&1           || { echo "tmux: no server running, skipping."; exit 0; }
 
-# ── 1. Reload tmux config ────────────────────────────────────────────────────
+# ── Helper: reload any running Pi sessions via /reload ───────────────────────
+_reload_pi_sessions() {
+  while IFS=' ' read -r pane_id pane_pid; do
+    # Find any 'pi' process in this pane's process tree
+    local pi_pids
+    pi_pids=$(pgrep -P "$pane_pid" -f "^pi " 2>/dev/null || true)
+    if [[ -n "$pi_pids" ]]; then
+      tmux send-keys -t "$pane_id" "/reload" Enter 2>/dev/null || true
+      echo "pi: sent /reload to pane $pane_id (pid $pane_pid)."
+    fi
+  done < <(tmux list-panes -a -F '#{pane_id} #{pane_pid}')
+}
+
+# ── Check if any Pi-related files changed recently ───────────────────────────
+PI_CHANGED=false
+if [[ -d "$HOME/.pi/agent" ]]; then
+    # Find any file modified in the last 2 minutes
+  RECENT=$(find "$HOME/.pi" -mmin -2 -type f 2>/dev/null | head -5)
+  if [[ -n "$RECENT" ]]; then
+    PI_CHANGED=true
+    echo "pi config modified recently — will reload Pi sessions"
+  fi
+fi
+
+# ── 1. Reload tmux config ──────────────────────────────────────────────────
 tmux source-file ~/.config/tmux/tmux.conf
 echo "tmux: config reloaded."
 
@@ -49,3 +74,8 @@ while IFS=' ' read -r pane_id pane_pid current_cmd in_mode; do
 done < <(tmux list-panes -a -F '#{pane_id} #{pane_pid} #{pane_current_command} #{pane_in_mode}')
 
 echo "shells: ${reloaded} reloaded immediately, ${queued} queued for next prompt, ${skipped} non-zsh skipped."
+
+# ── 3. If Pi-related files changed, reload any running Pi sessions ───────────
+if [[ "$PI_CHANGED" == "true" ]]; then
+    _reload_pi_sessions
+fi
