@@ -145,6 +145,13 @@ _cached_eval zabrze zabrze init --bind-keys
 {{- end }}
 _cached_eval atuin  atuin init zsh
 
+# Prevent pasted newlines from ever executing a command.
+# bracketed-paste-magic intercepts terminal paste events, converts embedded
+# newlines to spaces, and strips any trailing newline so the Enter key must
+# be pressed deliberately to run a command.
+autoload -Uz bracketed-paste-magic
+zle -N bracketed-paste bracketed-paste-magic
+
 autoload -U edit-command-line
 zle -N edit-command-line
 function _edit_command_line() { EDITOR="zed --new --wait" zle edit-command-line }
