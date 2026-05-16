@@ -100,6 +100,7 @@ tmux source-file ~/.config/tmux/tmux.conf
 echo "tmux: config reloaded."
 
 # ── 2. Reload or queue zsh panes ───────────────────────────────────────────────
+# shellcheck disable=SC2016
 readonly RELOAD_CMD='exec env -i PATH=$PATH TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX TMUX_PANE=$TMUX_PANE zsh --login'
 
 reloaded=0
