@@ -1,6 +1,8 @@
 packages:
   darwin:
     brew:
+      taps:
+        jundot/omlx: "https://github.com/jundot/omlx"
       brews:
         base:
         - hermes-agent
@@ -68,7 +70,7 @@ packages:
         - oxipng
         - argocd
         - media-info
-        - ollama
+        - jundot/omlx/omlx
         - eugene1g/safehouse/agent-safehouse
         work:
         - awscli

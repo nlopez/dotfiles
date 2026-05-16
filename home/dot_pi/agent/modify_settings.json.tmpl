@@ -17,9 +17,9 @@ except Exception:
 
 current["theme"] = "atom-one-dark"
 
-# Default ollama as the primary provider.
-if "ollama" in str(current.get("defaultProvider", "")) or current.get("defaultProvider") is None:
-    current["defaultProvider"] = "ollama"
+# Default ollama/omlx as the primary provider.
+if "ollama" in str(current.get("defaultProvider", "")) or "omlx" in str(current.get("defaultProvider", "")) or current.get("defaultProvider") is None:
+    current["defaultProvider"] = "omlx"
 
 # Clean up npmCommand override from a previous experiment.
 current.pop("npmCommand", None)
