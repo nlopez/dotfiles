@@ -12,72 +12,91 @@
 set -eufo pipefail
 
 command -v tmux >/dev/null 2>&1 || { echo "tmux: not installed, skipping."; exit 0; }
-tmux ls >/dev/null 2>&1             || { echo "tmux: no server running, skipping."; exit 0; }
+tmux ls >/dev/null 2>&1              || { echo "tmux: no server running, skipping."; exit 0; }
 
-# ── Helper: reliably reload every tmux pane that is running Pi ────────────────
-#   For each pane, scan its *entire process tree* (children + grandchildren)
-#   looking for any process named "pi".
-#   On match: C-c → Enter → "/reload" Enter (clear buffer, flush, reload).
+# ── Helper: check if pane's process tree contains a "pi" process ─────────────
+#   Walks: pane root → children → grandchildren.
+#   Checks comm= for "pi", and args= for pi/npx/node scripts.
+#   No pipes → no subshells → return codes propagate correctly.
 _has_pi_process() {
-   local pid="$1"
-   # Check all descendants: children, grandchildren (up to depth 2)
-   local all_pids=()
+  local pane_pid="$1"
+  local all_pids=""
 
-     # Immediate children
-   local children
-   children=$(ps -o pid= -P "$pid" 2>/dev/null || true)
-   for c in $children; do all_pids+=("$c"); done
+    # Pane root itself
+  local pane_comm
+  pane_comm=$(ps -p "$pane_pid" -o comm= 2>/dev/null) || return 1
+  if [[ "$pane_comm" == "pi" ]]; then
+    return 0
+  fi
 
-    # Grandchildren (children of children)
-   for c in $children; do
-     local grandchildren
-     grandchildren=$(ps -o pid= -P "$c" 2>/dev/null || true)
-     for g in $grandchildren; do all_pids+=("$g"); done
-   done
+    # Immediate children
+  local children
+  children=$(ps -o pid= -P "$pane_pid" 2>/dev/null | tr -d ' ') || children=""
 
-     # Now check comm/args for each descendant
-   for p in "${all_pids[@]}"; do
-     [[ "$p" == [0-9]* ]] || continue
-     local comm comm_short
-     comm=$(ps -p "$p" -o comm= 2>/dev/null || true)
-      comm_short="${comm%% *}"  # strip args (e.g. "node -- ..." → "node")
-     if [[ "$comm_short" == "pi" || "$comm" == *"pi" ]]; then
-       return 0
-     fi
-   done
+  if [[ -n "$children" ]]; then
+    all_pids="$children"
+     # Grandchildren (children of children)
+    for c in $children; do
+      local grandchildren
+      grandchildren=$(ps -o pid= -P "$c" 2>/dev/null | tr -d ' ') || continue
+      if [[ -n "$grandchildren" ]]; then
+        all_pids="$all_pids $grandchildren"
+      fi
+    done
+  fi
+
+   # Now check each descendant — no pipe, so return 0 works
+  for p in $all_pids; do
+      [[ "$p" == [0-9]* ]] || continue
+    local comm args
+    comm=$(ps -p "$p" -o comm= 2>/dev/null) || continue
+    
+     # Direct "pi" executable
+    if [[ "$comm" == "pi" ]]; then
+      return 0
+    fi
+
+       # Node / NPM / npx / bun / tsx wrapper
+    args=$(ps -o args= -p "$p" 2>/dev/null) || continue
+    case "$args" in
+      *"pi"*)   return 0 ;;   # e.g. "node /path/to/pi", "npx pi", "tsx pi.ts"
+       ""*)     ;;
+    esac
+  done
+
   return 1
 }
 
+# ── Reload every tmux pane running Pi ────────────────────────────────────────
+#   Clears buffer (C-c), flushes prompt (Enter), sends /reload, with 100ms gaps
 _reload_pi_sessions() {
   local found=false
 
   while IFS=' ' read -r pane_id pane_pid; do
-     [[ "$pane_pid" == [0-9]* ]] || continue
-     # pane root should be zsh
-    local root_cmd
+      [[ "$pane_pid" == [0-9]* ]] || continue
+     local root_cmd
     root_cmd=$(ps -p "$pane_pid" -o comm= 2>/dev/null | sed 's/^-//' | tr -d ' ')
-     [[ "$root_cmd" == "zsh" ]] || continue
+       [[ "$root_cmd" == "zsh" ]] || continue
 
-     # Scan pane's process tree for "pi"
-    if _has_pi_process "$pane_pid"; then
-      found=true
-      echo "pi: reloading pane $pane_id (pid $pane_pid)."
-       # C-c clears buffer, Enter flushes, /reload restarts
-      tmux send-keys -t "$pane_id" C-c 2>/dev/null || true
-      sleep 0.1
-      tmux send-keys -t "$pane_id" Enter 2>/dev/null || true
-      sleep 0.1
-      tmux send-keys -t "$pane_id" '/reload' Enter 2>/dev/null || true
-    fi
+       if _has_pi_process "$pane_pid"; then
+       found=true
+       echo "pi: reloading pane $pane_id (pid $pane_pid)."
+       # C-c → Enter flush → /reload Enter. 100ms gaps prevent key collision.
+       tmux send-keys -t "$pane_id" C-c 2>/dev/null || true
+       sleep 0.1
+       tmux send-keys -t "$pane_id" Enter 2>/dev/null || true
+       sleep 0.1
+       tmux send-keys -t "$pane_id" '/reload' Enter 2>/dev/null || true
+     fi
   done < <(tmux list-panes -a -F '#{pane_id} #{pane_pid}')
 
-   [[ "$found" == "true" ]] || echo "pi: no running Pi sessions found in tmux."
+    [[ "$found" == "true" ]] || echo "pi: no running Pi sessions found in tmux."
 }
 
 # ── Check if any Pi-related files changed recently ───────────────────────────
 PI_CHANGED=false
 if [[ -d "$HOME/.pi/agent" ]]; then
-     # Find any file modified in the last 2 minutes
+    # Find any file modified in the last 2 minutes
   RECENT=$(find "$HOME/.pi" -mmin -2 -type f 2>/dev/null | head -5)
   if [[ -n "$RECENT" ]]; then
     PI_CHANGED=true
@@ -100,8 +119,8 @@ queued=0
 skipped=0
 
 while IFS=' ' read -r pane_id pane_pid current_cmd in_mode; do
-  # Determine whether this pane's root process is a zsh shell.
-  # Strip a leading '-' that login shells report on some systems (e.g. '-zsh').
+     # Determine whether this pane's root process is a zsh shell.
+     # Strip a leading '-' that login shells report on some systems (e.g. '-zsh').
   root_cmd=$(ps -p "$pane_pid" -o comm= 2>/dev/null | sed 's/^-//' | tr -d ' ' || echo "")
   if [[ "$root_cmd" != "zsh" ]]; then
     skipped=$((skipped + 1))
@@ -109,12 +128,12 @@ while IFS=' ' read -r pane_id pane_pid current_cmd in_mode; do
   fi
 
   if [[ "$current_cmd" == "zsh" && "$in_mode" == "0" ]]; then
-     # Idle at prompt — send reload immediately.
+       # Idle at prompt — send reload immediately.
     tmux send-keys -t "$pane_id" "$RELOAD_CMD" Enter
     reloaded=$((reloaded + 1))
   else
-     # Busy (running a child) or in copy/scroll mode — set a pane user option;
-     # the _chezmoi_reload_precmd hook in zshrc picks it up on the next prompt.
+       # Busy (running a child) or in copy/scroll mode — set a pane user option;
+       # the _chezmoi_reload_precmd hook in zshrc picks it up on the next prompt.
     tmux set-option -p -t "$pane_id" @chezmoi_reload 1
     queued=$((queued + 1))
   fi
@@ -124,5 +143,5 @@ echo "shells: ${reloaded} reloaded immediately, ${queued} queued for next prompt
 
 # ── 3. If Pi-related files changed, reload any running Pi sessions ───────────
 if [[ "$PI_CHANGED" == "true" ]]; then
-  _reload_pi_sessions
+     _reload_pi_sessions
 fi
