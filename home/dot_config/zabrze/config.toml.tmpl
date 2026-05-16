@@ -17,6 +17,9 @@ trigger = "{{ .name }}"
 snippet = "{{ .cmd }}"
 {{ if index . "global" -}}
 global = true
+{{ end -}}
+{{ if index . "cursor" -}}
+cursor = "{{ .cursor }}"
 {{ end }}
 {{ end -}}
 # ── Complex snippets (shell expansion, zsh only) ──────────────────────────────
