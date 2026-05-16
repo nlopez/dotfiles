@@ -78,6 +78,8 @@ packages:
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:
         base:
+        - copyq
+        - cursor
         - docker/tap/sbx
         - codex
         - grandperspective
@@ -108,7 +110,7 @@ packages:
         - balenaetcher
         - digikam
         - brave-browser
-        - mpv
+        - stolendata-mpv
         - losslesscut
         - mediainfo
         - signal
@@ -125,7 +127,8 @@ packages:
       # without --require-sha. Add entries here when a normal install fails with
       # "no checksum".
       casks_unsigned:
-        base: []
+        base:
+        - google-chrome
         personal: []
         work: []
     pnpm:
