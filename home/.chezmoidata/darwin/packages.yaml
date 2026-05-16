@@ -140,6 +140,7 @@ packages:
       - pre-commit
       - unique-namer
       - huggingface_hub
+      - osxphotos
     mas:
       base: []
       personal:
