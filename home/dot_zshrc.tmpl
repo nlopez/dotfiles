@@ -1,8 +1,9 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
-# Skip interactive-only config when running under Claude Code — PATH/env already set via .zshenv/.zprofile.
-[[ -n "$CLAUDECODE" ]] && return
+# Skip interactive-only config when running under Claude Code or Pi — 
+# PATH/env already set via .zshenv/.zprofile.
+[[ -n "${CLAUDECODE:-}" || -n "${PI_CODING_AGENT:-}" ]] && return
 
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -177,22 +178,35 @@ function claude() {
   _tmux_clear_status
 }
 
-###############################################################################
-# Claude / pi — clear tmux status emoji on exit
-###############################################################################
-function pi() {
-  command pi "$@"
-  _tmux_clear_status
-}
-
-# ── Helper: reload Pi in the current tmux pane (if any) ───────────────────────
+# ── Helper: reload Pi in the *current* tmux pane safely ──────────────────────
+# Sends C-c + Enter first to clear any partial prompt, then /reload.
 pi-reload() {
-    [[ -n "$TMUX" ]] || { echo "pi-reload: not in tmux."; return 1; }
+   [[ -n "$TMUX" ]] || { echo "pi-reload: not in tmux."; return 1; }
   local pane="$TMUX_PANE"
-  echo "pi-reload: sending /reload to pane $pane."
+  echo "pi-reload: clearing buffer then reloading pane $pane."
+  tmux send-keys -t "$pane" C-c
+  tmux send-keys -t "$pane" Enter
   tmux send-keys -t "$pane" "/reload" Enter
   echo "pi-reload: done."
 }
+
+# ── Reloader: send /reload to *all* tmux panes running Pi ────────────────────
+#   Clears buffer before /reload to avoid corrupting partial prompts.
+pi-reload-all() {
+   [[ -n "${TMUX:-}" ]] || { echo "pi-reload-all: not in tmux."; return 1; }
+   local found=false
+   while IFS=' ' read -r pane_id pane_pid; do
+     if pgrep -P "$pane_pid" -f "^pi " >/dev/null 2>&1; then
+       found=true
+       echo "pi-reload-all: reloading pane $pane_id (pid $pane_pid)"
+       tmux send-keys -t "$pane_id" C-c
+       tmux send-keys -t "$pane_id" Enter
+       tmux send-keys -t "$pane_id" "/reload" Enter
+     fi
+   done < <(tmux list-panes -a -F '#{pane_id} #{pane_pid}')
+  $found || echo "pi-reload-all: no running pi sessions found."
+}
+
 
 alias e="${VISUAL} --add"
 compdef _files zed
