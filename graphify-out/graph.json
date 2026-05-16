@@ -9,7 +9,7 @@
       "source_file": "home/Documents/PowerShell/symlink_Microsoft.VSCode_profile.ps1",
       "source_location": "L1",
       "id": "home_documents_powershell_symlink_microsoft_vscode_profile_ps1",
-      "community": 8,
+      "community": 7,
       "norm_label": "symlink_microsoft.vscode_profile.ps1"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "home/Documents/PowerShell/symlink_Microsoft.PowerShell_profile.ps1",
       "source_location": "L1",
       "id": "home_documents_powershell_symlink_microsoft_powershell_profile_ps1",
-      "community": 9,
+      "community": 8,
       "norm_label": "symlink_microsoft.powershell_profile.ps1"
     },
     {
@@ -27,71 +27,8 @@
       "source_file": "home/Documents/WindowsPowerShell/symlink_Microsoft.PowerShell.VSCode_profile.ps1",
       "source_location": "L1",
       "id": "home_documents_windowspowershell_symlink_microsoft_powershell_vscode_profile_ps1",
-      "community": 10,
+      "community": 9,
       "norm_label": "symlink_microsoft.powershell.vscode_profile.ps1"
-    },
-    {
-      "label": "web-search.ts",
-      "file_type": "code",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L1",
-      "id": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "community": 0,
-      "norm_label": "web-search.ts"
-    },
-    {
-      "label": "stripHtml()",
-      "file_type": "code",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L25",
-      "id": "web_search_striphtml",
-      "community": 0,
-      "norm_label": "striphtml()"
-    },
-    {
-      "label": "searchKagi()",
-      "file_type": "code",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L51",
-      "id": "web_search_searchkagi",
-      "community": 0,
-      "norm_label": "searchkagi()"
-    },
-    {
-      "label": "searchGoogle()",
-      "file_type": "code",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L102",
-      "id": "web_search_searchgoogle",
-      "community": 0,
-      "norm_label": "searchgoogle()"
-    },
-    {
-      "label": "searchBrave()",
-      "file_type": "code",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L135",
-      "id": "web_search_searchbrave",
-      "community": 0,
-      "norm_label": "searchbrave()"
-    },
-    {
-      "label": "searchSerper()",
-      "file_type": "code",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L173",
-      "id": "web_search_searchserper",
-      "community": 0,
-      "norm_label": "searchserper()"
-    },
-    {
-      "label": "execute()",
-      "file_type": "code",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L241",
-      "id": "web_search_execute",
-      "community": 0,
-      "norm_label": "execute()"
     },
     {
       "label": "tmux-status.ts",
@@ -99,7 +36,7 @@
       "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L1",
       "id": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_tmux_status_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "tmux-status.ts"
     },
     {
@@ -108,7 +45,7 @@
       "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L31",
       "id": "tmux_status_stripwindowemoji",
-      "community": 1,
+      "community": 0,
       "norm_label": "stripwindowemoji()"
     },
     {
@@ -117,7 +54,7 @@
       "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L46",
       "id": "tmux_status_enqueuetitle",
-      "community": 1,
+      "community": 0,
       "norm_label": "enqueuetitle()"
     },
     {
@@ -126,7 +63,7 @@
       "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L54",
       "id": "tmux_status_getwindowbase",
-      "community": 1,
+      "community": 0,
       "norm_label": "getwindowbase()"
     },
     {
@@ -135,7 +72,7 @@
       "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L61",
       "id": "tmux_status_setwindowtitle",
-      "community": 1,
+      "community": 0,
       "norm_label": "setwindowtitle()"
     },
     {
@@ -144,32 +81,41 @@
       "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L72",
       "id": "tmux_status_notify",
-      "community": 1,
+      "community": 0,
       "norm_label": "notify()"
+    },
+    {
+      "label": "completion-indicator.ts",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": "L1",
+      "id": "home_dot_pi_agent_extensions_completion_indicator_ts",
+      "community": 4,
+      "norm_label": "completion-indicator.ts"
+    },
+    {
+      "label": "extractLength()",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": "L5",
+      "id": "completion_indicator_extractlength",
+      "community": 4,
+      "norm_label": "extractlength()"
     },
     {
       "label": "auto-theme.ts",
       "file_type": "code",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
       "source_location": "L1",
-      "id": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_auto_theme_ts",
+      "id": "home_dot_pi_agent_extensions_auto_theme_ts",
       "community": 5,
       "norm_label": "auto-theme.ts"
     },
     {
-      "label": "queryBgLuminance()",
-      "file_type": "code",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/auto-theme.ts",
-      "source_location": "L29",
-      "id": "auto_theme_querybgluminance",
-      "community": 5,
-      "norm_label": "querybgluminance()"
-    },
-    {
       "label": "isDarkMode()",
       "file_type": "code",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/auto-theme.ts",
-      "source_location": "L75",
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": "L39",
       "id": "auto_theme_isdarkmode",
       "community": 5,
       "norm_label": "isdarkmode()"
@@ -180,7 +126,7 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L1",
       "id": "scripts_chezmoi_lib_py",
-      "community": 2,
+      "community": 1,
       "norm_label": "chezmoi_lib.py"
     },
     {
@@ -189,7 +135,7 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L15",
       "id": "chezmoi_lib_chezmoi_root",
-      "community": 2,
+      "community": 1,
       "norm_label": "chezmoi_root()"
     },
     {
@@ -198,7 +144,7 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L19",
       "id": "chezmoi_lib_build_data",
-      "community": 2,
+      "community": 1,
       "norm_label": "build_data()"
     },
     {
@@ -216,7 +162,7 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L66",
       "id": "chezmoi_lib_print_verbose",
-      "community": 7,
+      "community": 1,
       "norm_label": "print_verbose()"
     },
     {
@@ -224,7 +170,7 @@
       "file_type": "rationale",
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L20",
-      "community": 2,
+      "community": 1,
       "norm_label": "build override and user data for template rendering.",
       "id": "chezmoi_lib_rationale_20"
     },
@@ -242,7 +188,7 @@
       "file_type": "rationale",
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L67",
-      "community": 7,
+      "community": 1,
       "norm_label": "print verbose output with os and user configuration.",
       "id": "chezmoi_lib_rationale_67"
     },
@@ -252,7 +198,7 @@
       "source_file": "scripts/shellcheck.py",
       "source_location": "L1",
       "id": "scripts_shellcheck_py",
-      "community": 4,
+      "community": 2,
       "norm_label": "shellcheck.py"
     },
     {
@@ -261,7 +207,7 @@
       "source_file": "scripts/shellcheck.py",
       "source_location": "L18",
       "id": "shellcheck_main",
-      "community": 4,
+      "community": 2,
       "norm_label": "main()"
     },
     {
@@ -270,7 +216,7 @@
       "source_file": "scripts/shellcheck.py",
       "source_location": "L52",
       "id": "shellcheck_render_and_check",
-      "community": 4,
+      "community": 2,
       "norm_label": "render_and_check()"
     },
     {
@@ -279,7 +225,7 @@
       "source_file": "scripts/shellcheck.py",
       "source_location": "L70",
       "id": "shellcheck_run_shellcheck",
-      "community": 4,
+      "community": 2,
       "norm_label": "run_shellcheck()"
     },
     {
@@ -320,138 +266,6 @@
     }
   ],
   "links": [
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L25",
-      "weight": 1.0,
-      "_src": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "_tgt": "web_search_striphtml",
-      "source": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "target": "web_search_striphtml",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L51",
-      "weight": 1.0,
-      "_src": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "_tgt": "web_search_searchkagi",
-      "source": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "target": "web_search_searchkagi",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L102",
-      "weight": 1.0,
-      "_src": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "_tgt": "web_search_searchgoogle",
-      "source": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "target": "web_search_searchgoogle",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L135",
-      "weight": 1.0,
-      "_src": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "_tgt": "web_search_searchbrave",
-      "source": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "target": "web_search_searchbrave",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L173",
-      "weight": 1.0,
-      "_src": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "_tgt": "web_search_searchserper",
-      "source": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "target": "web_search_searchserper",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L283",
-      "weight": 1.0,
-      "_src": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "_tgt": "web_search_execute",
-      "source": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_web_search_ts",
-      "target": "web_search_execute",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L303",
-      "weight": 1.0,
-      "_src": "web_search_execute",
-      "_tgt": "web_search_striphtml",
-      "source": "web_search_striphtml",
-      "target": "web_search_execute",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L245",
-      "weight": 1.0,
-      "_src": "web_search_execute",
-      "_tgt": "web_search_searchkagi",
-      "source": "web_search_searchkagi",
-      "target": "web_search_execute",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L254",
-      "weight": 1.0,
-      "_src": "web_search_execute",
-      "_tgt": "web_search_searchgoogle",
-      "source": "web_search_searchgoogle",
-      "target": "web_search_execute",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L248",
-      "weight": 1.0,
-      "_src": "web_search_execute",
-      "_tgt": "web_search_searchbrave",
-      "source": "web_search_searchbrave",
-      "target": "web_search_execute",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/web-search.ts",
-      "source_location": "L251",
-      "weight": 1.0,
-      "_src": "web_search_execute",
-      "_tgt": "web_search_searchserper",
-      "source": "web_search_searchserper",
-      "target": "web_search_execute",
-      "confidence_score": 1.0
-    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -551,36 +365,24 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/auto-theme.ts",
-      "source_location": "L29",
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": "L5",
       "weight": 1.0,
-      "_src": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_auto_theme_ts",
-      "_tgt": "auto_theme_querybgluminance",
-      "source": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_auto_theme_ts",
-      "target": "auto_theme_querybgluminance",
+      "_src": "home_dot_pi_agent_extensions_completion_indicator_ts",
+      "_tgt": "completion_indicator_extractlength",
+      "source": "home_dot_pi_agent_extensions_completion_indicator_ts",
+      "target": "completion_indicator_extractlength",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/auto-theme.ts",
-      "source_location": "L75",
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": "L39",
       "weight": 1.0,
-      "_src": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_auto_theme_ts",
+      "_src": "home_dot_pi_agent_extensions_auto_theme_ts",
       "_tgt": "auto_theme_isdarkmode",
-      "source": "users_nick_lopez_local_share_chezmoi_home_dot_pi_agent_extensions_auto_theme_ts",
-      "target": "auto_theme_isdarkmode",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "/Users/nick.lopez/.local/share/chezmoi/home/dot_pi/agent/extensions/auto-theme.ts",
-      "source_location": "L76",
-      "weight": 1.0,
-      "_src": "auto_theme_isdarkmode",
-      "_tgt": "auto_theme_querybgluminance",
-      "source": "auto_theme_querybgluminance",
+      "source": "home_dot_pi_agent_extensions_auto_theme_ts",
       "target": "auto_theme_isdarkmode",
       "confidence_score": 1.0
     },
