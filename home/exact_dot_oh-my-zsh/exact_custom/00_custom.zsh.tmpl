@@ -20,7 +20,7 @@ cd() {
   fi
 }
 
-alias reload='exec env -i PATH=$PATH TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX zsh --login'
+alias reload='exec env -i PATH=$PATH TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX TMUX_PANE=$TMUX_PANE zsh --login'
 
 ###############################################################################
 # AWS profile fzf picker — ZLE widget that intercepts Tab after --profile / -p
