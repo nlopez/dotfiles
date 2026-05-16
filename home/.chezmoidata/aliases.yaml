@@ -44,6 +44,6 @@ aliases:
 - {name: tfss, cmd: "terraform state show", global: true}
 - {name: tfu, cmd: "terraform force-unlock -force", global: true}
 - {name: tg, cmd: "terragrunt"}
-- {name: tginit, cmd: "terragrunt init", global: true}
-- {name: tgplan, cmd: "terragrunt plan", global: true}
-- {name: tgapply, cmd: "terragrunt apply", global: true}
+- {name: tginit, cmd: "terragrunt run --all -- init", global: true}
+- {name: tgplan, cmd: "terragrunt run --all --out-dir /tmp/tfplan --json-out-dir /tmp/tfplan -- plan", global: true}
+- {name: tgapply, cmd: "terragrunt run --all --out-dir /tmp/tfplan --  apply", global: true}
