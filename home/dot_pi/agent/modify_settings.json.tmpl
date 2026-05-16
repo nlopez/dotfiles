@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # Managed by chezmoi.
-# Sets pi theme to atom-one-dark while preserving runtime-written keys
-# such as lastChangelogVersion, defaultProvider, and defaultModel.
+# Sets pi theme to atom-one-dark and ensures required packages are present,
+# while preserving runtime-written keys such as lastChangelogVersion,
+# defaultProvider, and defaultModel.
 import json
 import sys
 
@@ -17,5 +18,22 @@ current["theme"] = "atom-one-dark"
 
 # Clean up npmCommand override from a previous experiment.
 current.pop("npmCommand", None)
+
+# Ensure required packages are present without removing runtime-added packages.
+required_packages = ["npm:pi-web-access", "npm:pi-subagents"]
+existing_packages = current.get("packages", [])
+
+existing_sources = set()
+for p in existing_packages:
+    if isinstance(p, str):
+        existing_sources.add(p)
+    elif isinstance(p, dict):
+        existing_sources.add(p.get("source", ""))
+
+for pkg in required_packages:
+    if pkg not in existing_sources:
+        existing_packages.append(pkg)
+
+current["packages"] = existing_packages
 
 print(json.dumps(current, indent=2))
