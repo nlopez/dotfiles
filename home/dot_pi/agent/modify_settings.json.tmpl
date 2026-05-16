@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # Managed by chezmoi.
-# Sets pi theme to atom-one-dark and ensures required packages are present,
-# while preserving runtime-written keys such as lastChangelogVersion,
-# defaultProvider, and defaultModel.
+# Sets pi theme to atom-one-dark, defaults provider to ollama,
+# ensures required packages are present, while preserving
+# runtime-written keys such as lastChangelogVersion, defaultProvider,
+# and defaultModel.
 import json
 import sys
 
@@ -15,6 +16,10 @@ except Exception:
     pass
 
 current["theme"] = "atom-one-dark"
+
+# Default ollama as the primary provider.
+if "ollama" in str(current.get("defaultProvider", "")) or current.get("defaultProvider") is None:
+    current["defaultProvider"] = "ollama"
 
 # Clean up npmCommand override from a previous experiment.
 current.pop("npmCommand", None)
