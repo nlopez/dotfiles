@@ -49,4 +49,5 @@ export OTEL_TRACES_EXPORTER=
 {{- if .personal }}
 export HF_TOKEN={{ onepasswordRead "op://copxopw5gkuo2m3cv7acvkrfxy/naslt4c3idtxr67oj2ejjg5trq/credential" }}
 export LITELLM_MASTER_KEY={{ onepasswordRead "op://copxopw5gkuo2m3cv7acvkrfxy/fmxon2rpst4fc6hbr2okoglcty/credential" }}
+export EXA_API_KEY={{ onepasswordRead "op://bamv726zv6zbcfke3cnbwjtnuu/23vesd2kmo74zwhyhphfj4vn3u/credential" }}
 {{- end }}
