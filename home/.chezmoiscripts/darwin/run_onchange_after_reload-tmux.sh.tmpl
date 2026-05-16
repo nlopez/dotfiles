@@ -12,25 +12,72 @@
 set -eufo pipefail
 
 command -v tmux >/dev/null 2>&1 || { echo "tmux: not installed, skipping."; exit 0; }
-tmux ls >/dev/null 2>&1           || { echo "tmux: no server running, skipping."; exit 0; }
+tmux ls >/dev/null 2>&1             || { echo "tmux: no server running, skipping."; exit 0; }
 
-# ── Helper: reload any running Pi sessions via /reload ───────────────────────
+# ── Helper: reliably reload every tmux pane that is running Pi ────────────────
+#   For each pane, scan its *entire process tree* (children + grandchildren)
+#   looking for any process named "pi".
+#   On match: C-c → Enter → "/reload" Enter (clear buffer, flush, reload).
+_has_pi_process() {
+   local pid="$1"
+   # Check all descendants: children, grandchildren (up to depth 2)
+   local all_pids=()
+
+     # Immediate children
+   local children
+   children=$(ps -o pid= -P "$pid" 2>/dev/null || true)
+   for c in $children; do all_pids+=("$c"); done
+
+    # Grandchildren (children of children)
+   for c in $children; do
+     local grandchildren
+     grandchildren=$(ps -o pid= -P "$c" 2>/dev/null || true)
+     for g in $grandchildren; do all_pids+=("$g"); done
+   done
+
+     # Now check comm/args for each descendant
+   for p in "${all_pids[@]}"; do
+     [[ "$p" == [0-9]* ]] || continue
+     local comm comm_short
+     comm=$(ps -p "$p" -o comm= 2>/dev/null || true)
+      comm_short="${comm%% *}"  # strip args (e.g. "node -- ..." → "node")
+     if [[ "$comm_short" == "pi" || "$comm" == *"pi" ]]; then
+       return 0
+     fi
+   done
+  return 1
+}
+
 _reload_pi_sessions() {
+  local found=false
+
   while IFS=' ' read -r pane_id pane_pid; do
-    # Find any 'pi' process in this pane's process tree
-    local pi_pids
-    pi_pids=$(pgrep -P "$pane_pid" -f "^pi " 2>/dev/null || true)
-    if [[ -n "$pi_pids" ]]; then
-      tmux send-keys -t "$pane_id" "/reload" Enter 2>/dev/null || true
-      echo "pi: sent /reload to pane $pane_id (pid $pane_pid)."
+     [[ "$pane_pid" == [0-9]* ]] || continue
+     # pane root should be zsh
+    local root_cmd
+    root_cmd=$(ps -p "$pane_pid" -o comm= 2>/dev/null | sed 's/^-//' | tr -d ' ')
+     [[ "$root_cmd" == "zsh" ]] || continue
+
+     # Scan pane's process tree for "pi"
+    if _has_pi_process "$pane_pid"; then
+      found=true
+      echo "pi: reloading pane $pane_id (pid $pane_pid)."
+       # C-c clears buffer, Enter flushes, /reload restarts
+      tmux send-keys -t "$pane_id" C-c 2>/dev/null || true
+      sleep 0.1
+      tmux send-keys -t "$pane_id" Enter 2>/dev/null || true
+      sleep 0.1
+      tmux send-keys -t "$pane_id" '/reload' Enter 2>/dev/null || true
     fi
   done < <(tmux list-panes -a -F '#{pane_id} #{pane_pid}')
+
+   [[ "$found" == "true" ]] || echo "pi: no running Pi sessions found in tmux."
 }
 
 # ── Check if any Pi-related files changed recently ───────────────────────────
 PI_CHANGED=false
 if [[ -d "$HOME/.pi/agent" ]]; then
-    # Find any file modified in the last 2 minutes
+     # Find any file modified in the last 2 minutes
   RECENT=$(find "$HOME/.pi" -mmin -2 -type f 2>/dev/null | head -5)
   if [[ -n "$RECENT" ]]; then
     PI_CHANGED=true
@@ -62,12 +109,12 @@ while IFS=' ' read -r pane_id pane_pid current_cmd in_mode; do
   fi
 
   if [[ "$current_cmd" == "zsh" && "$in_mode" == "0" ]]; then
-    # Idle at prompt — send reload immediately.
+     # Idle at prompt — send reload immediately.
     tmux send-keys -t "$pane_id" "$RELOAD_CMD" Enter
     reloaded=$((reloaded + 1))
   else
-    # Busy (running a child) or in copy/scroll mode — set a pane user option;
-    # the _chezmoi_reload_precmd hook in zshrc picks it up on the next prompt.
+     # Busy (running a child) or in copy/scroll mode — set a pane user option;
+     # the _chezmoi_reload_precmd hook in zshrc picks it up on the next prompt.
     tmux set-option -p -t "$pane_id" @chezmoi_reload 1
     queued=$((queued + 1))
   fi
@@ -77,5 +124,5 @@ echo "shells: ${reloaded} reloaded immediately, ${queued} queued for next prompt
 
 # ── 3. If Pi-related files changed, reload any running Pi sessions ───────────
 if [[ "$PI_CHANGED" == "true" ]]; then
-    _reload_pi_sessions
+  _reload_pi_sessions
 fi
