@@ -23,7 +23,7 @@
  * async timing issues inside the extension.
  */
 
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 // Codepoints for the three emoji prefixes plus the variation-selector U+FE0F.
 const EMOJI_PREFIX_RE = /^[\u{1F916}\u{2733}\u{1F6CE}\uFE0F\s]+/u;
