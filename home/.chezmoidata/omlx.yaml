@@ -1,13 +1,45 @@
 # omlx configuration data
 # Managed by chezmoi — per-host overrides go under darwin/omlx.yaml etc.
 omlx:
+  # Source-of-truth list of installed MLX models.
+  # Used to generate ~/.pi/agent/models.json.
+  # Add/remove models here to stay in sync.
+  models:
+  - id: "GLM-OCR-bf16"
+    name: "GLM-OCR-bf16"
+    type: "ocr"
+    reasoning: false
+    input:
+    - "text"
+  - id: "Mixtral-8x22B-4bit"
+    name: "Mixtral-8x22B-4bit"
+    type: "llm"
+    reasoning: false
+    input:
+    - "text"
+  - id: "Qwen3.6-35B-A3B-nvfp4"
+    name: "Qwen3.6-35B-A3B-nvfp4"
+    type: "llm"
+    reasoning: true
+    compat:
+      thinkingFormat: "qwen-chat-template"
+    input:
+    - "text"
+  - id: "Qwen3.6-35B-A3B-UD-MLX-4bit"
+    name: "Qwen3.6-35B-A3B-UD-MLX-4bit"
+    type: "llm"
+    reasoning: true
+    compat:
+      thinkingFormat: "qwen-chat-template"
+    input:
+    - "text"
   server:
     host: "127.0.0.1"
     port: 8000
     log_level: "info"
   sampling:
-    max_context_window: 32768
-    max_tokens: 32768
+    max_context_window: 131072
+    max_tokens: 131072
     temperature: 1.0
     top_p: 0.95
     top_k: 0
