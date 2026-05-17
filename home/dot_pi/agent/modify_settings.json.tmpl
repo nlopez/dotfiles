@@ -27,7 +27,7 @@ if "omlx" in str(current.get("defaultProvider", "")) or current.get("defaultProv
 current["npmCommand"] = ["pnpm"]
 
 # Ensure required packages are present without removing runtime-added packages.
-required_packages = ["npm:pi-web-access", "npm:pi-subagents", "npm:context-mode", "npm:pi-intercom", "npm:pi-powerline", "npm:@benvargas/pi-firecrawl"]
+required_packages = ["npm:pi-web-access", "npm:pi-subagents", "npm:context-mode", "npm:pi-intercom", "npm:pi-powerline", "npm:@benvargas/pi-firecrawl", "npm:@mjakl/pi-kagi-search@1.0.2"]
 existing_packages = current.get("packages", [])
 
 existing_sources = set()
