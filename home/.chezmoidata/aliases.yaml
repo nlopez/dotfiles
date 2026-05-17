@@ -24,10 +24,8 @@ aliases:
 - {name: grhh, cmd: "git reset --hard HEAD"}
 - {name: gst, cmd: "git status"}
 - {name: gup, cmd: "git pull --rebase"}
-- {name: gwa, cmd: "git worktree add"}
-- {name: gwr, cmd: "git worktree remove"}
-- {name: gwl, cmd: "git worktree list"}
-- {name: gwm, cmd: "git worktree move"}
+# gwa/gwl/gwr/gwm are zsh functions in oh-my-zsh/custom/git-worktree.zsh;
+# they need repo-root awareness and cannot be plain text snippet expansions.
 - {name: k, cmd: "kubectl"}
 - {name: kd, cmd: "kubectl describe"}
 - {name: kdp, cmd: "kubectl describe pod"}
