@@ -1,0 +1,86 @@
+{
+  "/Users/localuser/.local/share/chezmoi/home/dot_local/bin/executable_tfplan": {
+    "mtime": 1778993164.4516077,
+    "hash": "dd544a7a20b5d1e47ad61637d62b341c"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_local/bin/executable_aws": {
+    "mtime": 1778800692.753781,
+    "hash": "c03019a0044eae457ce8dd4b5fd46c48"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_local/bin/executable_tfenv": {
+    "mtime": 1776208175.1590466,
+    "hash": "fc5283abc78a771040ef49018131d031"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/Documents/PowerShell/symlink_Microsoft.VSCode_profile.ps1": {
+    "mtime": 1773875582.393864,
+    "hash": "402fdda3cda1de0cd468c71b88b64b7b"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/Documents/PowerShell/symlink_Microsoft.PowerShell_profile.ps1": {
+    "mtime": 1773875582.3937962,
+    "hash": "402fdda3cda1de0cd468c71b88b64b7b"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/Documents/WindowsPowerShell/symlink_Microsoft.PowerShell.VSCode_profile.ps1": {
+    "mtime": 1773875582.3940659,
+    "hash": "c83b7c1257557cb3392c1923107d97d4"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_pi/agent/extensions/tmux-status.ts": {
+    "mtime": 1779000472.8491535,
+    "hash": "7e504401cb16a7b7c55c6cf534e5a3c1"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_pi/agent/extensions/completion-indicator.ts": {
+    "mtime": 1778964755.970608,
+    "hash": "4695192f17e1bbce12443b03545bfabc"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_pi/agent/extensions/auto-theme.ts": {
+    "mtime": 1779000472.8491447,
+    "hash": "856845b05595dc0bab9c075983aed4be"
+  },
+  "/Users/localuser/.local/share/chezmoi/scripts/chezmoi_lib.py": {
+    "mtime": 1778002375.9132822,
+    "hash": "9040fa5d8b01d4f7c9e40e19c195f474"
+  },
+  "/Users/localuser/.local/share/chezmoi/scripts/shellcheck.py": {
+    "mtime": 1778002566.672298,
+    "hash": "b73939f2a2bf3d293a24c97a0e7366e1"
+  },
+  "/Users/localuser/.local/share/chezmoi/scripts/jsonlint.py": {
+    "mtime": 1778002580.5748317,
+    "hash": "e39a3cd6a8b60278677a692af4b861fc"
+  },
+  "/Users/localuser/.local/share/chezmoi/README.md": {
+    "mtime": 1773875582.3923717,
+    "hash": "bf11a4cf1858906e8109926a16a97837"
+  },
+  "/Users/localuser/.local/share/chezmoi/AGENTS.md": {
+    "mtime": 1779001883.0324228,
+    "hash": "92c45c7d864864e18a9393a085af2138"
+  },
+  "/Users/localuser/.local/share/chezmoi/CLAUDE.md": {
+    "mtime": 1779001883.0324228,
+    "hash": "92c45c7d864864e18a9393a085af2138"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_config/k9s/skins/solarized-light.yml": {
+    "mtime": 1775922141.8830738,
+    "hash": "ad98031880df62d0f8ae013146f6470e"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_pi/agent/prompts/plan.md": {
+    "mtime": 1778813496.231092,
+    "hash": "441d8776ff8e2c48dd896e8ba9fb9ca9"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_pi/agent/prompts/ask.md": {
+    "mtime": 1778998384.9261763,
+    "hash": "d03cae959276832fd284e9cfbd472541"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_pi/agent/skills/graphify/SKILL.md": {
+    "mtime": 1779001169.491696,
+    "hash": "d8e01b5d7f82a08431b5764e11b107f9"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_claude/CLAUDE.md": {
+    "mtime": 1776393329.3878717,
+    "hash": "a639aa823160d53b86efd5fa5ea0eb76"
+  },
+  "/Users/localuser/.local/share/chezmoi/home/dot_claude/skills/graphify/SKILL.md": {
+    "mtime": 1776393329.388817,
+    "hash": "728a74137ea821983b27560181299341"
+  }
+}

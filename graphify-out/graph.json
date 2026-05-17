@@ -1,7 +1,65 @@
 {
   "directed": false,
   "multigraph": false,
-  "graph": {},
+  "graph": {
+    "hyperedges": [
+      {
+        "id": "pi_agent_extensions",
+        "label": "Pi Agent Extensions",
+        "nodes": [
+          "tmux_status_extension",
+          "completion_indicator_extension",
+          "auto_theme_extension"
+        ],
+        "relation": "participate_in",
+        "confidence": "EXTRACTED",
+        "confidence_score": 0.9,
+        "source_file": "home/dot_pi/agent/extensions/"
+      },
+      {
+        "id": "chezmoi_linting_ecosystem",
+        "label": "Chezmoi Linting Ecosystem",
+        "nodes": [
+          "shellcheck_linter",
+          "jsonlint_linter",
+          "chezmoi_lib_library"
+        ],
+        "relation": "implement",
+        "confidence": "EXTRACTED",
+        "confidence_score": 0.9,
+        "source_file": "scripts/"
+      },
+      {
+        "id": "cross_platform_dotfile_system",
+        "label": "Cross-platform Dotfile System",
+        "nodes": [
+          "executable_tfplan_tfplan",
+          "executable_aws_aws_shim",
+          "executable_tfenv_tfenv_shim",
+          "vscode_profile_powershell",
+          "windows_powershell_profile",
+          "k9s_skin_solarized_light"
+        ],
+        "relation": "implement",
+        "confidence": "INFERRED",
+        "confidence_score": 0.6,
+        "source_file": "home/dot_pi/agent/prompts/ask.md"
+      },
+      {
+        "id": "agent_prompt_system",
+        "label": "Agent Prompt System",
+        "nodes": [
+          "plan_prompt_planner",
+          "ask_prompt_researcher",
+          "graphify_skill_pi_skill"
+        ],
+        "relation": "form",
+        "confidence": "INFERRED",
+        "confidence_score": 0.7,
+        "source_file": "home/dot_pi/agent/prompts/ask.md"
+      }
+    ]
+  },
   "nodes": [
     {
       "label": "symlink_Microsoft.VSCode_profile.ps1",
@@ -9,7 +67,7 @@
       "source_file": "home/Documents/PowerShell/symlink_Microsoft.VSCode_profile.ps1",
       "source_location": "L1",
       "id": "home_documents_powershell_symlink_microsoft_vscode_profile_ps1",
-      "community": 7,
+      "community": 18,
       "norm_label": "symlink_microsoft.vscode_profile.ps1"
     },
     {
@@ -18,7 +76,7 @@
       "source_file": "home/Documents/PowerShell/symlink_Microsoft.PowerShell_profile.ps1",
       "source_location": "L1",
       "id": "home_documents_powershell_symlink_microsoft_powershell_profile_ps1",
-      "community": 8,
+      "community": 19,
       "norm_label": "symlink_microsoft.powershell_profile.ps1"
     },
     {
@@ -27,7 +85,7 @@
       "source_file": "home/Documents/WindowsPowerShell/symlink_Microsoft.PowerShell.VSCode_profile.ps1",
       "source_location": "L1",
       "id": "home_documents_windowspowershell_symlink_microsoft_powershell_vscode_profile_ps1",
-      "community": 9,
+      "community": 20,
       "norm_label": "symlink_microsoft.powershell.vscode_profile.ps1"
     },
     {
@@ -36,7 +94,7 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L1",
       "id": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "community": 0,
+      "community": 8,
       "norm_label": "tmux-status.ts"
     },
     {
@@ -45,7 +103,7 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L31",
       "id": "tmux_status_stripwindowemoji",
-      "community": 0,
+      "community": 8,
       "norm_label": "stripwindowemoji()"
     },
     {
@@ -54,7 +112,7 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L46",
       "id": "tmux_status_enqueuetitle",
-      "community": 0,
+      "community": 8,
       "norm_label": "enqueuetitle()"
     },
     {
@@ -63,7 +121,7 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L54",
       "id": "tmux_status_getwindowbase",
-      "community": 0,
+      "community": 8,
       "norm_label": "getwindowbase()"
     },
     {
@@ -72,7 +130,7 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L61",
       "id": "tmux_status_setwindowtitle",
-      "community": 0,
+      "community": 8,
       "norm_label": "setwindowtitle()"
     },
     {
@@ -81,7 +139,7 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L72",
       "id": "tmux_status_notify",
-      "community": 0,
+      "community": 8,
       "norm_label": "notify()"
     },
     {
@@ -90,7 +148,7 @@
       "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
       "source_location": "L1",
       "id": "home_dot_pi_agent_extensions_completion_indicator_ts",
-      "community": 4,
+      "community": 16,
       "norm_label": "completion-indicator.ts"
     },
     {
@@ -99,7 +157,7 @@
       "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
       "source_location": "L5",
       "id": "completion_indicator_extractlength",
-      "community": 4,
+      "community": 16,
       "norm_label": "extractlength()"
     },
     {
@@ -108,7 +166,7 @@
       "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
       "source_location": "L1",
       "id": "home_dot_pi_agent_extensions_auto_theme_ts",
-      "community": 5,
+      "community": 17,
       "norm_label": "auto-theme.ts"
     },
     {
@@ -117,7 +175,7 @@
       "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
       "source_location": "L39",
       "id": "auto_theme_isdarkmode",
-      "community": 5,
+      "community": 17,
       "norm_label": "isdarkmode()"
     },
     {
@@ -126,7 +184,7 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L1",
       "id": "scripts_chezmoi_lib_py",
-      "community": 1,
+      "community": 2,
       "norm_label": "chezmoi_lib.py"
     },
     {
@@ -135,7 +193,7 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L15",
       "id": "chezmoi_lib_chezmoi_root",
-      "community": 1,
+      "community": 2,
       "norm_label": "chezmoi_root()"
     },
     {
@@ -144,7 +202,7 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L19",
       "id": "chezmoi_lib_build_data",
-      "community": 1,
+      "community": 2,
       "norm_label": "build_data()"
     },
     {
@@ -153,7 +211,7 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L47",
       "id": "chezmoi_lib_render_template",
-      "community": 6,
+      "community": 2,
       "norm_label": "render_template()"
     },
     {
@@ -162,7 +220,7 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L66",
       "id": "chezmoi_lib_print_verbose",
-      "community": 1,
+      "community": 2,
       "norm_label": "print_verbose()"
     },
     {
@@ -170,27 +228,27 @@
       "file_type": "rationale",
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L20",
-      "community": 1,
-      "norm_label": "build override and user data for template rendering.",
-      "id": "chezmoi_lib_rationale_20"
+      "id": "chezmoi_lib_rationale_20",
+      "community": 2,
+      "norm_label": "build override and user data for template rendering."
     },
     {
       "label": "Render a chezmoi template file, returning (output, error).",
       "file_type": "rationale",
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L48",
-      "community": 6,
-      "norm_label": "render a chezmoi template file, returning (output, error).",
-      "id": "chezmoi_lib_rationale_48"
+      "id": "chezmoi_lib_rationale_48",
+      "community": 2,
+      "norm_label": "render a chezmoi template file, returning (output, error)."
     },
     {
       "label": "Print verbose output with OS and user configuration.",
       "file_type": "rationale",
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L67",
-      "community": 1,
-      "norm_label": "print verbose output with os and user configuration.",
-      "id": "chezmoi_lib_rationale_67"
+      "id": "chezmoi_lib_rationale_67",
+      "community": 2,
+      "norm_label": "print verbose output with os and user configuration."
     },
     {
       "label": "shellcheck.py",
@@ -234,7 +292,7 @@
       "source_file": "scripts/jsonlint.py",
       "source_location": "L1",
       "id": "scripts_jsonlint_py",
-      "community": 3,
+      "community": 2,
       "norm_label": "jsonlint.py"
     },
     {
@@ -243,7 +301,7 @@
       "source_file": "scripts/jsonlint.py",
       "source_location": "L16",
       "id": "jsonlint_main",
-      "community": 3,
+      "community": 2,
       "norm_label": "main()"
     },
     {
@@ -252,7 +310,7 @@
       "source_file": "scripts/jsonlint.py",
       "source_location": "L59",
       "id": "jsonlint_render_and_lint",
-      "community": 3,
+      "community": 2,
       "norm_label": "render_and_lint()"
     },
     {
@@ -261,8 +319,1610 @@
       "source_file": "scripts/jsonlint.py",
       "source_location": "L73",
       "id": "jsonlint_lint_json",
-      "community": 3,
+      "community": 2,
       "norm_label": "lint_json()"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "id": "readme_md",
+      "community": 10,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "Setup",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "id": "chezmoi_readme_setup",
+      "community": 10,
+      "norm_label": "setup"
+    },
+    {
+      "label": "code:block1 (sh -c \"$(curl -fsLS get.chezmoi.io)\" -d -b ~/.local/bin -- i)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L2",
+      "id": "chezmoi_readme_codeblock_1",
+      "community": 10,
+      "norm_label": "code:block1 (sh -c \"$(curl -fsls get.chezmoi.io)\" -d -b ~/.local/bin -- i)"
+    },
+    {
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "id": "claude_md",
+      "community": 3,
+      "norm_label": "claude.md"
+    },
+    {
+      "label": "Agent Guidelines \u2014 Dotfile Management with Chezmoi",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "id": "chezmoi_claude_agent_guidelines_dotfile_management_with_chezmoi",
+      "community": 3,
+      "norm_label": "agent guidelines \u2014 dotfile management with chezmoi"
+    },
+    {
+      "label": "What this repo is",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L3",
+      "id": "chezmoi_claude_what_this_repo_is",
+      "community": 3,
+      "norm_label": "what this repo is"
+    },
+    {
+      "label": "Setup",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L7",
+      "id": "chezmoi_claude_setup",
+      "community": 3,
+      "norm_label": "setup"
+    },
+    {
+      "label": "code:sh (# Install chezmoi)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L9",
+      "id": "chezmoi_claude_codeblock_1",
+      "community": 3,
+      "norm_label": "code:sh (# install chezmoi)"
+    },
+    {
+      "label": "Core Concepts & Best Practices",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L19",
+      "id": "chezmoi_claude_core_concepts_best_practices",
+      "community": 3,
+      "norm_label": "core concepts & best practices"
+    },
+    {
+      "label": "Source state \u2192 destination state",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L21",
+      "id": "chezmoi_claude_source_state_destination_state",
+      "community": 3,
+      "norm_label": "source state \u2192 destination state"
+    },
+    {
+      "label": "code:sh (chezmoi source-path       # Show the source file for a given)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L30",
+      "id": "chezmoi_claude_codeblock_2",
+      "community": 3,
+      "norm_label": "code:sh (chezmoi source-path       # show the source file for a given)"
+    },
+    {
+      "label": "Source file naming convention",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L38",
+      "id": "chezmoi_claude_source_file_naming_convention",
+      "community": 3,
+      "norm_label": "source file naming convention"
+    },
+    {
+      "label": "Templates",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L51",
+      "id": "chezmoi_claude_templates",
+      "community": 3,
+      "norm_label": "templates"
+    },
+    {
+      "label": "code:gotemplate ({{- if eq .chezmoi.os \"darwin\" -}})",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L55",
+      "id": "chezmoi_claude_codeblock_3",
+      "community": 3,
+      "norm_label": "code:gotemplate ({{- if eq .chezmoi.os \"darwin\" -}})"
+    },
+    {
+      "label": "Data files",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L65",
+      "id": "chezmoi_claude_data_files",
+      "community": 3,
+      "norm_label": "data files"
+    },
+    {
+      "label": "code:gotemplate ({{ .mydata.key }})",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L69",
+      "id": "chezmoi_claude_codeblock_4",
+      "community": 3,
+      "norm_label": "code:gotemplate ({{ .mydata.key }})"
+    },
+    {
+      "label": "Scripts",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L75",
+      "id": "chezmoi_claude_scripts",
+      "community": 3,
+      "norm_label": "scripts"
+    },
+    {
+      "label": "code:block5 (.chezmoiscripts/)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L79",
+      "id": "chezmoi_claude_codeblock_5",
+      "community": 3,
+      "norm_label": "code:block5 (.chezmoiscripts/)"
+    },
+    {
+      "label": "External dependencies",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L88",
+      "id": "chezmoi_claude_external_dependencies",
+      "community": 3,
+      "norm_label": "external dependencies"
+    },
+    {
+      "label": "Linting / Validation",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L92",
+      "id": "chezmoi_claude_linting_validation",
+      "community": 3,
+      "norm_label": "linting / validation"
+    },
+    {
+      "label": "code:sh (# Lint all JSON templates (renders for darwin/linux/windows))",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L96",
+      "id": "chezmoi_claude_codeblock_6",
+      "community": 3,
+      "norm_label": "code:sh (# lint all json templates (renders for darwin/linux/windows))"
+    },
+    {
+      "label": "Adding a new dotfile",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L107",
+      "id": "chezmoi_claude_adding_a_new_dotfile",
+      "community": 3,
+      "norm_label": "adding a new dotfile"
+    },
+    {
+      "label": "Useful Chezmoi Commands",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L114",
+      "id": "chezmoi_claude_useful_chezmoi_commands",
+      "community": 3,
+      "norm_label": "useful chezmoi commands"
+    },
+    {
+      "label": "Further Reading",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L128",
+      "id": "chezmoi_claude_further_reading",
+      "community": 3,
+      "norm_label": "further reading"
+    },
+    {
+      "label": "plan.md",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/plan.md",
+      "source_location": "L1",
+      "id": "home_dot_pi_agent_prompts_plan_md",
+      "community": 21,
+      "norm_label": "plan.md"
+    },
+    {
+      "label": "ask.md",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": "L1",
+      "id": "home_dot_pi_agent_prompts_ask_md",
+      "community": 11,
+      "norm_label": "ask.md"
+    },
+    {
+      "label": "Research approach",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": "L9",
+      "id": "prompts_ask_research_approach",
+      "community": 11,
+      "norm_label": "research approach"
+    },
+    {
+      "label": "Rules",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": "L15",
+      "id": "prompts_ask_rules",
+      "community": 11,
+      "norm_label": "rules"
+    },
+    {
+      "label": "SKILL.md",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L1",
+      "id": "home_dot_pi_agent_skills_graphify_skill_md",
+      "community": 0,
+      "norm_label": "skill.md"
+    },
+    {
+      "label": "/graphify",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L7",
+      "id": "graphify_skill_graphify",
+      "community": 0,
+      "norm_label": "/graphify"
+    },
+    {
+      "label": "Usage",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L11",
+      "id": "graphify_skill_usage",
+      "community": 0,
+      "norm_label": "usage"
+    },
+    {
+      "label": "code:block1 (/graphify                                             # full)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L13",
+      "id": "graphify_skill_codeblock_1",
+      "community": 0,
+      "norm_label": "code:block1 (/graphify                                             # full)"
+    },
+    {
+      "label": "What graphify is for",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L41",
+      "id": "graphify_skill_what_graphify_is_for",
+      "community": 0,
+      "norm_label": "what graphify is for"
+    },
+    {
+      "label": "What You Must Do When Invoked",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L56",
+      "id": "graphify_skill_what_you_must_do_when_invoked",
+      "community": 1,
+      "norm_label": "what you must do when invoked"
+    },
+    {
+      "label": "Step 1 - Ensure graphify is installed",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L62",
+      "id": "graphify_skill_step_1_ensure_graphify_is_installed",
+      "community": 1,
+      "norm_label": "step 1 - ensure graphify is installed"
+    },
+    {
+      "label": "code:bash (# Detect the correct Python interpreter (handles pipx, venv,)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L64",
+      "id": "graphify_skill_codeblock_2",
+      "community": 1,
+      "norm_label": "code:bash (# detect the correct python interpreter (handles pipx, venv,)"
+    },
+    {
+      "label": "Step 2 - Detect files",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L85",
+      "id": "graphify_skill_step_2_detect_files",
+      "community": 1,
+      "norm_label": "step 2 - detect files"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L87",
+      "id": "graphify_skill_codeblock_3",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:block4 (Corpus: X files \u00b7 ~Y words)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L99",
+      "id": "graphify_skill_codeblock_4",
+      "community": 1,
+      "norm_label": "code:block4 (corpus: x files \u00b7 ~y words)"
+    },
+    {
+      "label": "Step 2.5 - Transcribe video / audio files (only if video files detected)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L116",
+      "id": "graphify_skill_step_2_5_transcribe_video_audio_files_only_if_video_files_detected",
+      "community": 1,
+      "norm_label": "step 2.5 - transcribe video / audio files (only if video files detected)"
+    },
+    {
+      "label": "code:bash (GRAPHIFY_WHISPER_MODEL=base  # or whatever --whisper-model t)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L137",
+      "id": "graphify_skill_codeblock_5",
+      "community": 1,
+      "norm_label": "code:bash (graphify_whisper_model=base  # or whatever --whisper-model t)"
+    },
+    {
+      "label": "Step 3 - Extract entities and relationships",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L161",
+      "id": "graphify_skill_step_3_extract_entities_and_relationships",
+      "community": 7,
+      "norm_label": "step 3 - extract entities and relationships"
+    },
+    {
+      "label": "Part A - Structural extraction for code files",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L171",
+      "id": "graphify_skill_part_a_structural_extraction_for_code_files",
+      "community": 7,
+      "norm_label": "part a - structural extraction for code files"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L175",
+      "id": "graphify_skill_codeblock_6",
+      "community": 7,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "Part B - Semantic extraction (parallel subagents)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L197",
+      "id": "graphify_skill_part_b_semantic_extraction_parallel_subagents",
+      "community": 7,
+      "norm_label": "part b - semantic extraction (parallel subagents)"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L213",
+      "id": "graphify_skill_codeblock_7",
+      "community": 7,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:block8 ([Agent tool call 1: files 1-15, subagent_type=\"general-purpo)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L244",
+      "id": "graphify_skill_codeblock_8",
+      "community": 7,
+      "norm_label": "code:block8 ([agent tool call 1: files 1-15, subagent_type=\"general-purpo)"
+    },
+    {
+      "label": "code:block9 (You are a graphify extraction subagent. Read the files liste)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L253",
+      "id": "graphify_skill_codeblock_9",
+      "community": 7,
+      "norm_label": "code:block9 (you are a graphify extraction subagent. read the files liste)"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L319",
+      "id": "graphify_skill_codeblock_10",
+      "community": 7,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "Part C - Merge AST + semantic into final extraction",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L363",
+      "id": "graphify_skill_part_c_merge_ast_semantic_into_final_extraction",
+      "community": 7,
+      "norm_label": "part c - merge ast + semantic into final extraction"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L332",
+      "id": "graphify_skill_codeblock_11",
+      "community": 7,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "Step 4 - Build graph, cluster, analyze, generate outputs",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L397",
+      "id": "graphify_skill_step_4_build_graph_cluster_analyze_generate_outputs",
+      "community": 1,
+      "norm_label": "step 4 - build graph, cluster, analyze, generate outputs"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L365",
+      "id": "graphify_skill_codeblock_12",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "Step 5 - Label communities",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L449",
+      "id": "graphify_skill_step_5_label_communities",
+      "community": 1,
+      "norm_label": "step 5 - label communities"
+    },
+    {
+      "label": "code:bash (mkdir -p graphify-out)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L401",
+      "id": "graphify_skill_codeblock_13",
+      "community": 1,
+      "norm_label": "code:bash (mkdir -p graphify-out)"
+    },
+    {
+      "label": "Step 6 - Generate Obsidian vault (opt-in) + HTML",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L489",
+      "id": "graphify_skill_step_6_generate_obsidian_vault_opt_in_html",
+      "community": 1,
+      "norm_label": "step 6 - generate obsidian vault (opt-in) + html"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L455",
+      "id": "graphify_skill_codeblock_14",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L497",
+      "id": "graphify_skill_codeblock_15",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L583",
+      "id": "graphify_skill_step_7_neo4j_export_only_if_neo4j_or_neo4j_push_flag",
+      "community": 1,
+      "norm_label": "step 7 - neo4j export (only if --neo4j or --neo4j-push flag)"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L530",
+      "id": "graphify_skill_codeblock_16",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L559",
+      "id": "graphify_skill_codeblock_17",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "Step 7b - SVG export (only if --svg flag)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L622",
+      "id": "graphify_skill_step_7b_svg_export_only_if_svg_flag",
+      "community": 1,
+      "norm_label": "step 7b - svg export (only if --svg flag)"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L587",
+      "id": "graphify_skill_codeblock_18",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "Step 7c - GraphML export (only if --graphml flag)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L644",
+      "id": "graphify_skill_step_7c_graphml_export_only_if_graphml_flag",
+      "community": 1,
+      "norm_label": "step 7c - graphml export (only if --graphml flag)"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L602",
+      "id": "graphify_skill_codeblock_19",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "Step 7d - MCP server (only if --mcp flag)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L664",
+      "id": "graphify_skill_step_7d_mcp_server_only_if_mcp_flag",
+      "community": 1,
+      "norm_label": "step 7d - mcp server (only if --mcp flag)"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L624",
+      "id": "graphify_skill_codeblock_20",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L646",
+      "id": "graphify_skill_codeblock_21",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "Step 8 - Token reduction benchmark (only if total_words > 5000)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L684",
+      "id": "graphify_skill_step_8_token_reduction_benchmark_only_if_total_words_5000",
+      "community": 1,
+      "norm_label": "step 8 - token reduction benchmark (only if total_words > 5000)"
+    },
+    {
+      "label": "code:bash (python3 -m graphify.serve graphify-out/graph.json)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L666",
+      "id": "graphify_skill_codeblock_22",
+      "community": 1,
+      "norm_label": "code:bash (python3 -m graphify.serve graphify-out/graph.json)"
+    },
+    {
+      "label": "Step 9 - Save manifest, update cost tracker, clean up, and report",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L704",
+      "id": "graphify_skill_step_9_save_manifest_update_cost_tracker_clean_up_and_report",
+      "community": 0,
+      "norm_label": "step 9 - save manifest, update cost tracker, clean up, and report"
+    },
+    {
+      "label": "code:json ({)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L673",
+      "id": "graphify_skill_codeblock_23",
+      "community": 1,
+      "norm_label": "code:json ({)"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L688",
+      "id": "graphify_skill_codeblock_24",
+      "community": 1,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "For --update (incremental re-extraction)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L794",
+      "id": "graphify_skill_for_update_incremental_re_extraction",
+      "community": 0,
+      "norm_label": "for --update (incremental re-extraction)"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L706",
+      "id": "graphify_skill_codeblock_25",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:block26 (Graph complete. Outputs in PATH_TO_DIR/graphify-out/)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L746",
+      "id": "graphify_skill_codeblock_26",
+      "community": 0,
+      "norm_label": "code:block26 (graph complete. outputs in path_to_dir/graphify-out/)"
+    },
+    {
+      "label": "code:bash (if [ ! -f graphify-out/.graphify_python ]; then)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L780",
+      "id": "graphify_skill_codeblock_27",
+      "community": 0,
+      "norm_label": "code:bash (if [ ! -f graphify-out/.graphify_python ]; then)"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L798",
+      "id": "graphify_skill_codeblock_28",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "For --cluster-only",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L902",
+      "id": "graphify_skill_for_cluster_only",
+      "community": 0,
+      "norm_label": "for --cluster-only"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L817",
+      "id": "graphify_skill_codeblock_29",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "For /graphify query",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L949",
+      "id": "graphify_skill_for_graphify_query",
+      "community": 0,
+      "norm_label": "for /graphify query"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L837",
+      "id": "graphify_skill_codeblock_30",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L872",
+      "id": "graphify_skill_codeblock_31",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L906",
+      "id": "graphify_skill_codeblock_32",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "For /graphify path",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1076",
+      "id": "graphify_skill_for_graphify_path",
+      "community": 0,
+      "norm_label": "for /graphify path"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L959",
+      "id": "graphify_skill_codeblock_33",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L977",
+      "id": "graphify_skill_codeblock_34",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -m graphify save-result)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1068",
+      "id": "graphify_skill_codeblock_35",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -m graphify save-result)"
+    },
+    {
+      "label": "For /graphify explain",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1149",
+      "id": "graphify_skill_for_graphify_explain",
+      "community": 0,
+      "norm_label": "for /graphify explain"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1081",
+      "id": "graphify_skill_codeblock_36",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1091",
+      "id": "graphify_skill_codeblock_37",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -m graphify save-result)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1143",
+      "id": "graphify_skill_codeblock_38",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -m graphify save-result)"
+    },
+    {
+      "label": "For /graphify add",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1215",
+      "id": "graphify_skill_for_graphify_add",
+      "community": 0,
+      "norm_label": "for /graphify add"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1154",
+      "id": "graphify_skill_codeblock_39",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "For --watch",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1249",
+      "id": "graphify_skill_for_watch",
+      "community": 0,
+      "norm_label": "for --watch"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1164",
+      "id": "graphify_skill_codeblock_40",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "For git commit hook",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1270",
+      "id": "graphify_skill_for_git_commit_hook",
+      "community": 0,
+      "norm_label": "for git commit hook"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -m graphify save-result)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1209",
+      "id": "graphify_skill_codeblock_41",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -m graphify save-result)"
+    },
+    {
+      "label": "For native CLAUDE.md integration",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1286",
+      "id": "graphify_skill_for_native_claude_md_integration",
+      "community": 0,
+      "norm_label": "for native claude.md integration"
+    },
+    {
+      "label": "code:bash ($(cat graphify-out/.graphify_python) -c \")",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1219",
+      "id": "graphify_skill_codeblock_42",
+      "community": 0,
+      "norm_label": "code:bash ($(cat graphify-out/.graphify_python) -c \")"
+    },
+    {
+      "label": "code:bash (python3 -m graphify.watch INPUT_PATH --debounce 3)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1253",
+      "id": "graphify_skill_codeblock_43",
+      "community": 0,
+      "norm_label": "code:bash (python3 -m graphify.watch input_path --debounce 3)"
+    },
+    {
+      "label": "Honesty Rules",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1302",
+      "id": "graphify_skill_honesty_rules",
+      "community": 0,
+      "norm_label": "honesty rules"
+    },
+    {
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "home/dot_claude/CLAUDE.md",
+      "source_location": "L1",
+      "id": "home_dot_claude_claude_md",
+      "community": 12,
+      "norm_label": "claude.md"
+    },
+    {
+      "label": "graphify",
+      "file_type": "document",
+      "source_file": "home/dot_claude/CLAUDE.md",
+      "source_location": "L1",
+      "id": "dot_claude_claude_graphify",
+      "community": 12,
+      "norm_label": "graphify"
+    },
+    {
+      "label": "Terraform Skills (HashiCorp)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/CLAUDE.md",
+      "source_location": "L5",
+      "id": "dot_claude_claude_terraform_skills_hashicorp",
+      "community": 12,
+      "norm_label": "terraform skills (hashicorp)"
+    },
+    {
+      "label": "SKILL.md",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1",
+      "id": "home_dot_claude_skills_graphify_skill_md",
+      "community": 0,
+      "norm_label": "skill.md"
+    },
+    {
+      "label": "Step 6b - Wiki (only if --wiki flag)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L553",
+      "id": "graphify_skill_step_6b_wiki_only_if_wiki_flag",
+      "community": 1,
+      "norm_label": "step 6b - wiki (only if --wiki flag)"
+    },
+    {
+      "label": "Interpreter guard for subcommands",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L776",
+      "id": "graphify_skill_interpreter_guard_for_subcommands",
+      "community": 0,
+      "norm_label": "interpreter guard for subcommands"
+    },
+    {
+      "label": "code:bash (graphify hook install    # install)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1274",
+      "id": "graphify_skill_codeblock_44",
+      "community": 0,
+      "norm_label": "code:bash (graphify hook install    # install)"
+    },
+    {
+      "label": "code:bash (graphify claude install)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1290",
+      "id": "graphify_skill_codeblock_45",
+      "community": 0,
+      "norm_label": "code:bash (graphify claude install)"
+    },
+    {
+      "label": "code:bash (graphify claude uninstall  # remove the section)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1296",
+      "id": "graphify_skill_codeblock_46",
+      "community": 0,
+      "norm_label": "code:bash (graphify claude uninstall  # remove the section)"
+    },
+    {
+      "label": "Terraform Plan Script",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "terraform plan script",
+      "id": "executable_tfplan_tfplan"
+    },
+    {
+      "label": "Terraform CLI",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "terraform cli",
+      "id": "executable_tfplan_terraform"
+    },
+    {
+      "label": "Lock-less Terraform Execution",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "lock-less terraform execution",
+      "id": "executable_tfplan_lock_false"
+    },
+    {
+      "label": "Multi-format Plan Output (binary/text/JSON)",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "multi-format plan output (binary/text/json)",
+      "id": "executable_tfplan_output_formats"
+    },
+    {
+      "label": "Parallel Plan Show Execution",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "parallel plan show execution",
+      "id": "executable_tfplan_parallel_show"
+    },
+    {
+      "label": "AWS CLI Shadow Wrapper",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "aws cli shadow wrapper",
+      "id": "executable_aws_aws_shim"
+    },
+    {
+      "label": "AWS SSO Auto-login",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "aws sso auto-login",
+      "id": "executable_aws_sso_login"
+    },
+    {
+      "label": "SSO Auth Error Detection",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "sso auth error detection",
+      "id": "executable_aws_auth_error_detection"
+    },
+    {
+      "label": "AWS Profile Detection (CLI env)",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "aws profile detection (cli env)",
+      "id": "executable_aws_profile_detection"
+    },
+    {
+      "label": "Real AWS Binary Locator",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "real aws binary locator",
+      "id": "executable_aws_real_aws_locator"
+    },
+    {
+      "label": "Lazy Auth Pattern",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "lazy auth pattern",
+      "id": "executable_aws_lazy_auth"
+    },
+    {
+      "label": "Terraform Version Manager Shim",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_tfenv",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "terraform version manager shim",
+      "id": "executable_tfenv_tfenv_shim"
+    },
+    {
+      "label": "Tenv Version Manager",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_tfenv",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "tenv version manager",
+      "id": "executable_tfenv_tenv"
+    },
+    {
+      "label": "Terraform Version Management",
+      "file_type": "code",
+      "source_file": "home/dot_local/bin/executable_tfenv",
+      "source_location": null,
+      "community": 5,
+      "norm_label": "terraform version management",
+      "id": "executable_tfenv_terraform_versions"
+    },
+    {
+      "label": "VSCode PowerShell Profile",
+      "file_type": "code",
+      "source_file": "home/Documents/PowerShell/symlink_Microsoft.VSCode_profile.ps1",
+      "source_location": null,
+      "community": 13,
+      "norm_label": "vscode powershell profile",
+      "id": "vscode_profile_powershell"
+    },
+    {
+      "label": "Default PowerShell Profile",
+      "file_type": "code",
+      "source_file": "home/Documents/PowerShell/symlink_Microsoft.PowerShell_profile.ps1",
+      "source_location": null,
+      "community": 13,
+      "norm_label": "default powershell profile",
+      "id": "default_profile_powershell"
+    },
+    {
+      "label": "Windows PowerShell Profile",
+      "file_type": "code",
+      "source_file": "home/Documents/WindowsPowerShell/symlink_Microsoft.PowerShell.VSCode_profile.ps1",
+      "source_location": null,
+      "community": 13,
+      "norm_label": "windows powershell profile",
+      "id": "windows_powershell_profile"
+    },
+    {
+      "label": "Tmux Status Extension (pi)",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "tmux status extension (pi)",
+      "id": "tmux_status_extension"
+    },
+    {
+      "label": "Emoji State Machine (\ud83e\udd16/\u2733\ufe0f/\ud83d\udece\ufe0f)",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "emoji state machine (\ud83e\udd16/\u2733\ufe0f/\ud83d\udece\ufe0f)",
+      "id": "tmux_status_emoji_states"
+    },
+    {
+      "label": "Serialized Window Title Queue",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "serialized window title queue",
+      "id": "tmux_status_title_queue"
+    },
+    {
+      "label": "Cross-terminal Notification System",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "cross-terminal notification system",
+      "id": "tmux_status_terminal_notify"
+    },
+    {
+      "label": "LLM Turn-start Hook",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "llm turn-start hook",
+      "id": "tmux_status_turn_start"
+    },
+    {
+      "label": "Agent-end Hook with Question Detection",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "agent-end hook with question detection",
+      "id": "tmux_status_agent_end"
+    },
+    {
+      "label": "TMUX Pane Environment Detection",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "tmux pane environment detection",
+      "id": "tmux_status_tmux_pane_detection"
+    },
+    {
+      "label": "Terminal App Bundle Detection",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "terminal app bundle detection",
+      "id": "tmux_status_terminal_app_ids"
+    },
+    {
+      "label": "Completion Indicator Extension (pi)",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "completion indicator extension (pi)",
+      "id": "completion_indicator_extension"
+    },
+    {
+      "label": "Tool/Char Count Extractor",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "tool/char count extractor",
+      "id": "completion_indicator_stats_extractor"
+    },
+    {
+      "label": "Agent-start Hook (reset)",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "agent-start hook (reset)",
+      "id": "completion_indicator_agent_start"
+    },
+    {
+      "label": "Context Message Injector",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "context message injector",
+      "id": "completion_indicator_context_inject"
+    },
+    {
+      "label": "UI Notification System",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": null,
+      "community": 6,
+      "norm_label": "ui notification system",
+      "id": "completion_indicator_ui_notify"
+    },
+    {
+      "label": "Auto Theme Extension (pi/macOS)",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "auto theme extension (pi/macos)",
+      "id": "auto_theme_extension"
+    },
+    {
+      "label": "macOS Dark/Light Mode Detection",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "macos dark/light mode detection",
+      "id": "auto_theme_dark_mode_detect"
+    },
+    {
+      "label": "Periodic Theme Polling (2s)",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "periodic theme polling (2s)",
+      "id": "auto_theme_theme_polling"
+    },
+    {
+      "label": "Double-read Theme Confirmation",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "double-read theme confirmation",
+      "id": "auto_theme_theme_confirmation"
+    },
+    {
+      "label": "macOS-only Platform Guard",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "macos-only platform guard",
+      "id": "auto_theme_platform_guard"
+    },
+    {
+      "label": "Atom One Dark Theme",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "atom one dark theme",
+      "id": "atom_one_dark_theme"
+    },
+    {
+      "label": "Solarized Light Theme",
+      "file_type": "code",
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "solarized light theme",
+      "id": "solarized_light_theme"
+    },
+    {
+      "label": "Chezmoi Library (Python)",
+      "file_type": "code",
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": null,
+      "community": 2,
+      "norm_label": "chezmoi library (python)",
+      "id": "chezmoi_lib_library"
+    },
+    {
+      "label": "Cross-OS Support (darwin/linux/windows)",
+      "file_type": "code",
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": null,
+      "community": 2,
+      "norm_label": "cross-os support (darwin/linux/windows)",
+      "id": "chezmoi_lib_oses"
+    },
+    {
+      "label": "YAML Package Data Loading",
+      "file_type": "code",
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": null,
+      "community": 2,
+      "norm_label": "yaml package data loading",
+      "id": "chezmoi_lib_yaml_data"
+    },
+    {
+      "label": "Subprocess Execution for chezmoi commands",
+      "file_type": "code",
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": null,
+      "community": 2,
+      "norm_label": "subprocess execution for chezmoi commands",
+      "id": "chezmoi_lib_subprocess"
+    },
+    {
+      "label": "Shellcheck Linter Script",
+      "file_type": "code",
+      "source_file": "scripts/shellcheck.py",
+      "source_location": null,
+      "community": 2,
+      "norm_label": "shellcheck linter script",
+      "id": "shellcheck_linter"
+    },
+    {
+      "label": "Chezmoi Library Import",
+      "file_type": "code",
+      "source_file": "scripts/shellcheck.py",
+      "source_location": null,
+      "community": 2,
+      "norm_label": "chezmoi library import",
+      "id": "shellcheck_chezmoi_lib_import"
+    },
+    {
+      "label": "JSON Linter Script",
+      "file_type": "code",
+      "source_file": "scripts/jsonlint.py",
+      "source_location": null,
+      "community": 2,
+      "norm_label": "json linter script",
+      "id": "jsonlint_linter"
+    },
+    {
+      "label": "Plain JSON File Linting",
+      "file_type": "code",
+      "source_file": "scripts/jsonlint.py",
+      "source_location": null,
+      "community": 2,
+      "norm_label": "plain json file linting",
+      "id": "jsonlint_plain_json"
+    },
+    {
+      "label": "JSON5 Parser",
+      "file_type": "code",
+      "source_file": "scripts/jsonlint.py",
+      "source_location": null,
+      "community": 2,
+      "norm_label": "json5 parser",
+      "id": "jsonlint_json5_parser"
+    },
+    {
+      "label": "Chezmoi Library Import",
+      "file_type": "code",
+      "source_file": "scripts/jsonlint.py",
+      "source_location": null,
+      "community": 2,
+      "norm_label": "chezmoi library import",
+      "id": "jsonlint_chezmoi_lib_import"
+    },
+    {
+      "label": "Project README (chezmoi setup)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "community": 14,
+      "norm_label": "project readme (chezmoi setup)",
+      "id": "readme_project_readme"
+    },
+    {
+      "label": "Agent Guidelines for Chezmoi",
+      "file_type": "document",
+      "source_file": "AGENTS.md",
+      "source_location": null,
+      "community": 14,
+      "norm_label": "agent guidelines for chezmoi",
+      "id": "agents_md_agent_guidelines"
+    },
+    {
+      "label": "Claude Agent Guidelines for Chezmoi",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "community": 14,
+      "norm_label": "claude agent guidelines for chezmoi",
+      "id": "claude_md_claude_guidelines"
+    },
+    {
+      "label": "K9s Solarized Light Skin",
+      "file_type": "code",
+      "source_file": "home/dot_config/k9s/skins/solarized-light.yml",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "k9s solarized light skin",
+      "id": "k9s_skin_solarized_light"
+    },
+    {
+      "label": "Solarized Color Palette",
+      "file_type": "code",
+      "source_file": "home/dot_config/k9s/skins/solarized-light.yml",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "solarized color palette",
+      "id": "k9s_skin_solarized_palette"
+    },
+    {
+      "label": "K9s UI Theme Configuration",
+      "file_type": "code",
+      "source_file": "home/dot_config/k9s/skins/solarized-light.yml",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "k9s ui theme configuration",
+      "id": "k9s_skin_k9s_ui_theme"
+    },
+    {
+      "label": "Plan Prompt Template",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/plan.md",
+      "source_location": null,
+      "community": 15,
+      "norm_label": "plan prompt template",
+      "id": "plan_prompt_planner"
+    },
+    {
+      "label": "Structured Planning Method (Understand/Explore/Design/Steps/Risks/Questions)",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/plan.md",
+      "source_location": null,
+      "community": 15,
+      "norm_label": "structured planning method (understand/explore/design/steps/risks/questions)",
+      "id": "plan_prompt_planning_method"
+    },
+    {
+      "label": "No-Code-Until-Confirmed Rule",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/plan.md",
+      "source_location": null,
+      "community": 15,
+      "norm_label": "no-code-until-confirmed rule",
+      "id": "plan_prompt_no_code_rule"
+    },
+    {
+      "label": "Research/Ask Prompt Template",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": null,
+      "community": 9,
+      "norm_label": "research/ask prompt template",
+      "id": "ask_prompt_researcher"
+    },
+    {
+      "label": "Deep Research Method (explore/synthesis/clarify)",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": null,
+      "community": 9,
+      "norm_label": "deep research method (explore/synthesis/clarify)",
+      "id": "ask_prompt_research_method"
+    },
+    {
+      "label": "No-Implementation Rule (pure research)",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": null,
+      "community": 9,
+      "norm_label": "no-implementation rule (pure research)",
+      "id": "ask_prompt_no_impl_rule"
+    },
+    {
+      "label": "Knowledge Graph Reference (graphify)",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": null,
+      "community": 9,
+      "norm_label": "knowledge graph reference (graphify)",
+      "id": "ask_prompt_graph_ref"
+    },
+    {
+      "label": "Graphify Knowledge Graph Skill (pi)",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "graphify knowledge graph skill (pi)",
+      "id": "graphify_skill_pi_skill"
+    },
+    {
+      "label": "Graphify Skill (Claude)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "graphify skill (claude)",
+      "id": "graphify_claude_claude_skill"
+    },
+    {
+      "label": "Claude Skill Registry (graphify + Terraform)",
+      "file_type": "document",
+      "source_file": "home/dot_claude/CLAUDE.md",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "claude skill registry (graphify + terraform)",
+      "id": "claude_skills_skill_registry"
+    },
+    {
+      "label": "Terraform/HashiCorp Skills Registry",
+      "file_type": "document",
+      "source_file": "home/dot_claude/CLAUDE.md",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "terraform/hashicorp skills registry",
+      "id": "terraform_skills_hashicorp_skills"
+    },
+    {
+      "label": "Deep Knowledge Graph Analysis",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "deep knowledge graph analysis",
+      "id": "deepgraph_graph_concept"
+    },
+    {
+      "label": "Community Detection Algorithm",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "community detection algorithm",
+      "id": "community_detection_algorithm"
+    },
+    {
+      "label": "Edge Confidence Audit Trail (EXTRACTED/INFERRED/AMBIGUOUS)",
+      "file_type": "document",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": null,
+      "community": 4,
+      "norm_label": "edge confidence audit trail (extracted/inferred/ambiguous)",
+      "id": "audit_trail_edge_confidence"
     }
   ],
   "links": [
@@ -272,11 +1932,9 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L31",
       "weight": 1.0,
-      "_src": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "_tgt": "tmux_status_stripwindowemoji",
+      "confidence_score": 1.0,
       "source": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "target": "tmux_status_stripwindowemoji",
-      "confidence_score": 1.0
+      "target": "tmux_status_stripwindowemoji"
     },
     {
       "relation": "contains",
@@ -284,11 +1942,9 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L46",
       "weight": 1.0,
-      "_src": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "_tgt": "tmux_status_enqueuetitle",
+      "confidence_score": 1.0,
       "source": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "target": "tmux_status_enqueuetitle",
-      "confidence_score": 1.0
+      "target": "tmux_status_enqueuetitle"
     },
     {
       "relation": "contains",
@@ -296,11 +1952,9 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L54",
       "weight": 1.0,
-      "_src": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "_tgt": "tmux_status_getwindowbase",
+      "confidence_score": 1.0,
       "source": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "target": "tmux_status_getwindowbase",
-      "confidence_score": 1.0
+      "target": "tmux_status_getwindowbase"
     },
     {
       "relation": "contains",
@@ -308,11 +1962,9 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L61",
       "weight": 1.0,
-      "_src": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "_tgt": "tmux_status_setwindowtitle",
+      "confidence_score": 1.0,
       "source": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "target": "tmux_status_setwindowtitle",
-      "confidence_score": 1.0
+      "target": "tmux_status_setwindowtitle"
     },
     {
       "relation": "contains",
@@ -320,11 +1972,9 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L72",
       "weight": 1.0,
-      "_src": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "_tgt": "tmux_status_notify",
+      "confidence_score": 1.0,
       "source": "home_dot_pi_agent_extensions_tmux_status_ts",
-      "target": "tmux_status_notify",
-      "confidence_score": 1.0
+      "target": "tmux_status_notify"
     },
     {
       "relation": "calls",
@@ -332,11 +1982,9 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L58",
       "weight": 1.0,
-      "_src": "tmux_status_getwindowbase",
-      "_tgt": "tmux_status_stripwindowemoji",
-      "source": "tmux_status_stripwindowemoji",
-      "target": "tmux_status_getwindowbase",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "tmux_status_getwindowbase",
+      "target": "tmux_status_stripwindowemoji"
     },
     {
       "relation": "calls",
@@ -344,11 +1992,9 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L80",
       "weight": 1.0,
-      "_src": "tmux_status_notify",
-      "_tgt": "tmux_status_stripwindowemoji",
-      "source": "tmux_status_stripwindowemoji",
-      "target": "tmux_status_notify",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "tmux_status_notify",
+      "target": "tmux_status_stripwindowemoji"
     },
     {
       "relation": "calls",
@@ -356,11 +2002,9 @@
       "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
       "source_location": "L62",
       "weight": 1.0,
-      "_src": "tmux_status_setwindowtitle",
-      "_tgt": "tmux_status_getwindowbase",
-      "source": "tmux_status_getwindowbase",
-      "target": "tmux_status_setwindowtitle",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "tmux_status_setwindowtitle",
+      "target": "tmux_status_getwindowbase"
     },
     {
       "relation": "contains",
@@ -368,11 +2012,9 @@
       "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
       "source_location": "L5",
       "weight": 1.0,
-      "_src": "home_dot_pi_agent_extensions_completion_indicator_ts",
-      "_tgt": "completion_indicator_extractlength",
+      "confidence_score": 1.0,
       "source": "home_dot_pi_agent_extensions_completion_indicator_ts",
-      "target": "completion_indicator_extractlength",
-      "confidence_score": 1.0
+      "target": "completion_indicator_extractlength"
     },
     {
       "relation": "contains",
@@ -380,11 +2022,9 @@
       "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
       "source_location": "L39",
       "weight": 1.0,
-      "_src": "home_dot_pi_agent_extensions_auto_theme_ts",
-      "_tgt": "auto_theme_isdarkmode",
+      "confidence_score": 1.0,
       "source": "home_dot_pi_agent_extensions_auto_theme_ts",
-      "target": "auto_theme_isdarkmode",
-      "confidence_score": 1.0
+      "target": "auto_theme_isdarkmode"
     },
     {
       "relation": "contains",
@@ -392,11 +2032,9 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L15",
       "weight": 1.0,
-      "_src": "scripts_chezmoi_lib_py",
-      "_tgt": "chezmoi_lib_chezmoi_root",
+      "confidence_score": 1.0,
       "source": "scripts_chezmoi_lib_py",
-      "target": "chezmoi_lib_chezmoi_root",
-      "confidence_score": 1.0
+      "target": "chezmoi_lib_chezmoi_root"
     },
     {
       "relation": "contains",
@@ -404,11 +2042,9 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L19",
       "weight": 1.0,
-      "_src": "scripts_chezmoi_lib_py",
-      "_tgt": "chezmoi_lib_build_data",
+      "confidence_score": 1.0,
       "source": "scripts_chezmoi_lib_py",
-      "target": "chezmoi_lib_build_data",
-      "confidence_score": 1.0
+      "target": "chezmoi_lib_build_data"
     },
     {
       "relation": "contains",
@@ -416,11 +2052,9 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L47",
       "weight": 1.0,
-      "_src": "scripts_chezmoi_lib_py",
-      "_tgt": "chezmoi_lib_render_template",
+      "confidence_score": 1.0,
       "source": "scripts_chezmoi_lib_py",
-      "target": "chezmoi_lib_render_template",
-      "confidence_score": 1.0
+      "target": "chezmoi_lib_render_template"
     },
     {
       "relation": "contains",
@@ -428,35 +2062,31 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L66",
       "weight": 1.0,
-      "_src": "scripts_chezmoi_lib_py",
-      "_tgt": "chezmoi_lib_print_verbose",
+      "confidence_score": 1.0,
       "source": "scripts_chezmoi_lib_py",
-      "target": "chezmoi_lib_print_verbose",
-      "confidence_score": 1.0
+      "target": "chezmoi_lib_print_verbose"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "scripts/shellcheck.py",
       "source_location": "L30",
       "weight": 1.0,
-      "_src": "chezmoi_lib_chezmoi_root",
-      "_tgt": "shellcheck_main",
-      "source": "chezmoi_lib_chezmoi_root",
-      "target": "shellcheck_main"
+      "source": "shellcheck_main",
+      "target": "chezmoi_lib_chezmoi_root"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "scripts/jsonlint.py",
       "source_location": "L28",
       "weight": 1.0,
-      "_src": "chezmoi_lib_chezmoi_root",
-      "_tgt": "jsonlint_main",
-      "source": "chezmoi_lib_chezmoi_root",
-      "target": "jsonlint_main"
+      "source": "jsonlint_main",
+      "target": "chezmoi_lib_chezmoi_root"
     },
     {
       "relation": "rationale_for",
@@ -464,35 +2094,71 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L20",
       "weight": 1.0,
-      "_src": "chezmoi_lib_rationale_20",
-      "_tgt": "chezmoi_lib_build_data",
-      "source": "chezmoi_lib_build_data",
-      "target": "chezmoi_lib_rationale_20",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "chezmoi_lib_rationale_20",
+      "target": "chezmoi_lib_build_data"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "scripts/shellcheck.py",
       "source_location": "L38",
       "weight": 1.0,
-      "_src": "chezmoi_lib_build_data",
-      "_tgt": "shellcheck_main",
-      "source": "chezmoi_lib_build_data",
-      "target": "shellcheck_main"
+      "source": "shellcheck_main",
+      "target": "chezmoi_lib_build_data"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "scripts/jsonlint.py",
       "source_location": "L44",
       "weight": 1.0,
-      "_src": "chezmoi_lib_build_data",
-      "_tgt": "jsonlint_main",
+      "source": "jsonlint_main",
+      "target": "chezmoi_lib_build_data"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chezmoi_lib_library",
+      "target": "chezmoi_lib_build_data"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": null,
+      "weight": 1.0,
       "source": "chezmoi_lib_build_data",
-      "target": "jsonlint_main"
+      "target": "chezmoi_lib_yaml_data"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chezmoi_lib_build_data",
+      "target": "chezmoi_lib_oses"
+    },
+    {
+      "relation": "depends_on",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": "render_template receives data built by build_data",
+      "weight": 1.0,
+      "source": "chezmoi_lib_render_template",
+      "target": "chezmoi_lib_build_data"
     },
     {
       "relation": "rationale_for",
@@ -500,35 +2166,51 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L48",
       "weight": 1.0,
-      "_src": "chezmoi_lib_rationale_48",
-      "_tgt": "chezmoi_lib_render_template",
-      "source": "chezmoi_lib_render_template",
-      "target": "chezmoi_lib_rationale_48",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "chezmoi_lib_rationale_48",
+      "target": "chezmoi_lib_render_template"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "scripts/shellcheck.py",
       "source_location": "L55",
       "weight": 1.0,
-      "_src": "chezmoi_lib_render_template",
-      "_tgt": "shellcheck_render_and_check",
-      "source": "chezmoi_lib_render_template",
-      "target": "shellcheck_render_and_check"
+      "source": "shellcheck_render_and_check",
+      "target": "chezmoi_lib_render_template"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "scripts/jsonlint.py",
       "source_location": "L65",
       "weight": 1.0,
-      "_src": "chezmoi_lib_render_template",
-      "_tgt": "jsonlint_render_and_lint",
+      "source": "jsonlint_render_and_lint",
+      "target": "chezmoi_lib_render_template"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chezmoi_lib_library",
+      "target": "chezmoi_lib_render_template"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": null,
+      "weight": 1.0,
       "source": "chezmoi_lib_render_template",
-      "target": "jsonlint_render_and_lint"
+      "target": "chezmoi_lib_subprocess"
     },
     {
       "relation": "rationale_for",
@@ -536,35 +2218,31 @@
       "source_file": "scripts/chezmoi_lib.py",
       "source_location": "L67",
       "weight": 1.0,
-      "_src": "chezmoi_lib_rationale_67",
-      "_tgt": "chezmoi_lib_print_verbose",
-      "source": "chezmoi_lib_print_verbose",
-      "target": "chezmoi_lib_rationale_67",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "chezmoi_lib_rationale_67",
+      "target": "chezmoi_lib_print_verbose"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "scripts/shellcheck.py",
       "source_location": "L72",
       "weight": 1.0,
-      "_src": "chezmoi_lib_print_verbose",
-      "_tgt": "shellcheck_run_shellcheck",
-      "source": "chezmoi_lib_print_verbose",
-      "target": "shellcheck_run_shellcheck"
+      "source": "shellcheck_run_shellcheck",
+      "target": "chezmoi_lib_print_verbose"
     },
     {
       "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "scripts/jsonlint.py",
       "source_location": "L61",
       "weight": 1.0,
-      "_src": "chezmoi_lib_print_verbose",
-      "_tgt": "jsonlint_render_and_lint",
-      "source": "chezmoi_lib_print_verbose",
-      "target": "jsonlint_render_and_lint"
+      "source": "jsonlint_render_and_lint",
+      "target": "chezmoi_lib_print_verbose"
     },
     {
       "relation": "contains",
@@ -572,11 +2250,9 @@
       "source_file": "scripts/shellcheck.py",
       "source_location": "L18",
       "weight": 1.0,
-      "_src": "scripts_shellcheck_py",
-      "_tgt": "shellcheck_main",
+      "confidence_score": 1.0,
       "source": "scripts_shellcheck_py",
-      "target": "shellcheck_main",
-      "confidence_score": 1.0
+      "target": "shellcheck_main"
     },
     {
       "relation": "contains",
@@ -584,11 +2260,9 @@
       "source_file": "scripts/shellcheck.py",
       "source_location": "L52",
       "weight": 1.0,
-      "_src": "scripts_shellcheck_py",
-      "_tgt": "shellcheck_render_and_check",
+      "confidence_score": 1.0,
       "source": "scripts_shellcheck_py",
-      "target": "shellcheck_render_and_check",
-      "confidence_score": 1.0
+      "target": "shellcheck_render_and_check"
     },
     {
       "relation": "contains",
@@ -596,11 +2270,9 @@
       "source_file": "scripts/shellcheck.py",
       "source_location": "L70",
       "weight": 1.0,
-      "_src": "scripts_shellcheck_py",
-      "_tgt": "shellcheck_run_shellcheck",
+      "confidence_score": 1.0,
       "source": "scripts_shellcheck_py",
-      "target": "shellcheck_run_shellcheck",
-      "confidence_score": 1.0
+      "target": "shellcheck_run_shellcheck"
     },
     {
       "relation": "calls",
@@ -608,11 +2280,9 @@
       "source_file": "scripts/shellcheck.py",
       "source_location": "L41",
       "weight": 1.0,
-      "_src": "shellcheck_main",
-      "_tgt": "shellcheck_render_and_check",
+      "confidence_score": 1.0,
       "source": "shellcheck_main",
-      "target": "shellcheck_render_and_check",
-      "confidence_score": 1.0
+      "target": "shellcheck_render_and_check"
     },
     {
       "relation": "calls",
@@ -620,11 +2290,9 @@
       "source_file": "scripts/shellcheck.py",
       "source_location": "L44",
       "weight": 1.0,
-      "_src": "shellcheck_main",
-      "_tgt": "shellcheck_run_shellcheck",
+      "confidence_score": 1.0,
       "source": "shellcheck_main",
-      "target": "shellcheck_run_shellcheck",
-      "confidence_score": 1.0
+      "target": "shellcheck_run_shellcheck"
     },
     {
       "relation": "calls",
@@ -632,11 +2300,39 @@
       "source_file": "scripts/shellcheck.py",
       "source_location": "L64",
       "weight": 1.0,
-      "_src": "shellcheck_render_and_check",
-      "_tgt": "shellcheck_run_shellcheck",
+      "confidence_score": 1.0,
       "source": "shellcheck_render_and_check",
-      "target": "shellcheck_run_shellcheck",
-      "confidence_score": 1.0
+      "target": "shellcheck_run_shellcheck"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/shellcheck.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "shellcheck_linter",
+      "target": "shellcheck_render_and_check"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/shellcheck.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "shellcheck_render_and_check",
+      "target": "shellcheck_chezmoi_lib_import"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "scripts/jsonlint.py",
+      "source_location": "Both are linting scripts with identical architecture: build_data + render_template + subprocess check",
+      "weight": 1.0,
+      "source": "jsonlint_render_and_lint",
+      "target": "shellcheck_render_and_check"
     },
     {
       "relation": "contains",
@@ -644,11 +2340,9 @@
       "source_file": "scripts/jsonlint.py",
       "source_location": "L16",
       "weight": 1.0,
-      "_src": "scripts_jsonlint_py",
-      "_tgt": "jsonlint_main",
+      "confidence_score": 1.0,
       "source": "scripts_jsonlint_py",
-      "target": "jsonlint_main",
-      "confidence_score": 1.0
+      "target": "jsonlint_main"
     },
     {
       "relation": "contains",
@@ -656,11 +2350,9 @@
       "source_file": "scripts/jsonlint.py",
       "source_location": "L59",
       "weight": 1.0,
-      "_src": "scripts_jsonlint_py",
-      "_tgt": "jsonlint_render_and_lint",
+      "confidence_score": 1.0,
       "source": "scripts_jsonlint_py",
-      "target": "jsonlint_render_and_lint",
-      "confidence_score": 1.0
+      "target": "jsonlint_render_and_lint"
     },
     {
       "relation": "contains",
@@ -668,11 +2360,9 @@
       "source_file": "scripts/jsonlint.py",
       "source_location": "L73",
       "weight": 1.0,
-      "_src": "scripts_jsonlint_py",
-      "_tgt": "jsonlint_lint_json",
+      "confidence_score": 1.0,
       "source": "scripts_jsonlint_py",
-      "target": "jsonlint_lint_json",
-      "confidence_score": 1.0
+      "target": "jsonlint_lint_json"
     },
     {
       "relation": "calls",
@@ -680,11 +2370,9 @@
       "source_file": "scripts/jsonlint.py",
       "source_location": "L36",
       "weight": 1.0,
-      "_src": "jsonlint_main",
-      "_tgt": "jsonlint_lint_json",
+      "confidence_score": 1.0,
       "source": "jsonlint_main",
-      "target": "jsonlint_lint_json",
-      "confidence_score": 1.0
+      "target": "jsonlint_lint_json"
     },
     {
       "relation": "calls",
@@ -692,11 +2380,9 @@
       "source_file": "scripts/jsonlint.py",
       "source_location": "L51",
       "weight": 1.0,
-      "_src": "jsonlint_main",
-      "_tgt": "jsonlint_render_and_lint",
+      "confidence_score": 1.0,
       "source": "jsonlint_main",
-      "target": "jsonlint_render_and_lint",
-      "confidence_score": 1.0
+      "target": "jsonlint_render_and_lint"
     },
     {
       "relation": "calls",
@@ -704,12 +2390,2157 @@
       "source_file": "scripts/jsonlint.py",
       "source_location": "L70",
       "weight": 1.0,
-      "_src": "jsonlint_render_and_lint",
-      "_tgt": "jsonlint_lint_json",
+      "confidence_score": 1.0,
       "source": "jsonlint_render_and_lint",
-      "target": "jsonlint_lint_json",
-      "confidence_score": 1.0
+      "target": "jsonlint_lint_json"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/jsonlint.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "jsonlint_linter",
+      "target": "jsonlint_render_and_lint"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/jsonlint.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "jsonlint_render_and_lint",
+      "target": "jsonlint_chezmoi_lib_import"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_md",
+      "target": "chezmoi_readme_setup"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_readme_setup",
+      "target": "chezmoi_readme_codeblock_1"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_md",
+      "target": "chezmoi_claude_agent_guidelines_dotfile_management_with_chezmoi"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_agent_guidelines_dotfile_management_with_chezmoi",
+      "target": "chezmoi_claude_what_this_repo_is"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_agent_guidelines_dotfile_management_with_chezmoi",
+      "target": "chezmoi_claude_setup"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_agent_guidelines_dotfile_management_with_chezmoi",
+      "target": "chezmoi_claude_core_concepts_best_practices"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L92",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_agent_guidelines_dotfile_management_with_chezmoi",
+      "target": "chezmoi_claude_linting_validation"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L107",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_agent_guidelines_dotfile_management_with_chezmoi",
+      "target": "chezmoi_claude_adding_a_new_dotfile"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L114",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_agent_guidelines_dotfile_management_with_chezmoi",
+      "target": "chezmoi_claude_useful_chezmoi_commands"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L128",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_agent_guidelines_dotfile_management_with_chezmoi",
+      "target": "chezmoi_claude_further_reading"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_setup",
+      "target": "chezmoi_claude_codeblock_1"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_core_concepts_best_practices",
+      "target": "chezmoi_claude_source_state_destination_state"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L38",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_core_concepts_best_practices",
+      "target": "chezmoi_claude_source_file_naming_convention"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_core_concepts_best_practices",
+      "target": "chezmoi_claude_templates"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L65",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_core_concepts_best_practices",
+      "target": "chezmoi_claude_data_files"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L75",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_core_concepts_best_practices",
+      "target": "chezmoi_claude_scripts"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L88",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_core_concepts_best_practices",
+      "target": "chezmoi_claude_external_dependencies"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L30",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_source_state_destination_state",
+      "target": "chezmoi_claude_codeblock_2"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L55",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_templates",
+      "target": "chezmoi_claude_codeblock_3"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L69",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_data_files",
+      "target": "chezmoi_claude_codeblock_4"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L79",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_scripts",
+      "target": "chezmoi_claude_codeblock_5"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L96",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "chezmoi_claude_linting_validation",
+      "target": "chezmoi_claude_codeblock_6"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "home_dot_pi_agent_prompts_ask_md",
+      "target": "prompts_ask_research_approach"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "home_dot_pi_agent_prompts_ask_md",
+      "target": "prompts_ask_rules"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "home_dot_pi_agent_skills_graphify_skill_md",
+      "target": "graphify_skill_graphify"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_usage"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_what_graphify_is_for"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L56",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_what_you_must_do_when_invoked"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L794",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_for_update_incremental_re_extraction"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L902",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_for_cluster_only"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L949",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_for_graphify_query"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1076",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_for_graphify_path"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1149",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_for_graphify_explain"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1215",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_for_graphify_add"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1249",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_for_watch"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1270",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_for_git_commit_hook"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1286",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_for_native_claude_md_integration"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1302",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_honesty_rules"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "home_dot_claude_skills_graphify_skill_md",
+      "target": "graphify_skill_graphify"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L776",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_graphify",
+      "target": "graphify_skill_interpreter_guard_for_subcommands"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_usage",
+      "target": "graphify_skill_codeblock_1"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L62",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_1_ensure_graphify_is_installed"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L85",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_2_detect_files"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L116",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_2_5_transcribe_video_audio_files_only_if_video_files_detected"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L161",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_3_extract_entities_and_relationships"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L397",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_4_build_graph_cluster_analyze_generate_outputs"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L449",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_5_label_communities"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L489",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_6_generate_obsidian_vault_opt_in_html"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L583",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_7_neo4j_export_only_if_neo4j_or_neo4j_push_flag"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L622",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_7b_svg_export_only_if_svg_flag"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L644",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_7c_graphml_export_only_if_graphml_flag"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L664",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_7d_mcp_server_only_if_mcp_flag"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L684",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_8_token_reduction_benchmark_only_if_total_words_5000"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L704",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_9_save_manifest_update_cost_tracker_clean_up_and_report"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L553",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_what_you_must_do_when_invoked",
+      "target": "graphify_skill_step_6b_wiki_only_if_wiki_flag"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L64",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_1_ensure_graphify_is_installed",
+      "target": "graphify_skill_codeblock_2"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L87",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_2_detect_files",
+      "target": "graphify_skill_codeblock_3"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L99",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_2_detect_files",
+      "target": "graphify_skill_codeblock_4"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L137",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_2_5_transcribe_video_audio_files_only_if_video_files_detected",
+      "target": "graphify_skill_codeblock_5"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L171",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_3_extract_entities_and_relationships",
+      "target": "graphify_skill_part_a_structural_extraction_for_code_files"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L197",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_3_extract_entities_and_relationships",
+      "target": "graphify_skill_part_b_semantic_extraction_parallel_subagents"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L363",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_3_extract_entities_and_relationships",
+      "target": "graphify_skill_part_c_merge_ast_semantic_into_final_extraction"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L175",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_part_a_structural_extraction_for_code_files",
+      "target": "graphify_skill_codeblock_6"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L213",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_part_b_semantic_extraction_parallel_subagents",
+      "target": "graphify_skill_codeblock_7"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L244",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_part_b_semantic_extraction_parallel_subagents",
+      "target": "graphify_skill_codeblock_8"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L253",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_part_b_semantic_extraction_parallel_subagents",
+      "target": "graphify_skill_codeblock_9"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L319",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_part_b_semantic_extraction_parallel_subagents",
+      "target": "graphify_skill_codeblock_10"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L332",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_part_b_semantic_extraction_parallel_subagents",
+      "target": "graphify_skill_codeblock_11"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L327",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_part_c_merge_ast_semantic_into_final_extraction",
+      "target": "graphify_skill_codeblock_11"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L365",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_part_c_merge_ast_semantic_into_final_extraction",
+      "target": "graphify_skill_codeblock_12"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L361",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_4_build_graph_cluster_analyze_generate_outputs",
+      "target": "graphify_skill_codeblock_12"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L401",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_4_build_graph_cluster_analyze_generate_outputs",
+      "target": "graphify_skill_codeblock_13"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L415",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_5_label_communities",
+      "target": "graphify_skill_codeblock_13"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L455",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_5_label_communities",
+      "target": "graphify_skill_codeblock_14"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L455",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_6_generate_obsidian_vault_opt_in_html",
+      "target": "graphify_skill_codeblock_14"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L497",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_6_generate_obsidian_vault_opt_in_html",
+      "target": "graphify_skill_codeblock_15"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L530",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_6_generate_obsidian_vault_opt_in_html",
+      "target": "graphify_skill_codeblock_16"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L513",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7_neo4j_export_only_if_neo4j_or_neo4j_push_flag",
+      "target": "graphify_skill_codeblock_16"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L528",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7_neo4j_export_only_if_neo4j_or_neo4j_push_flag",
+      "target": "graphify_skill_codeblock_17"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L587",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7_neo4j_export_only_if_neo4j_or_neo4j_push_flag",
+      "target": "graphify_skill_codeblock_18"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L602",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7_neo4j_export_only_if_neo4j_or_neo4j_push_flag",
+      "target": "graphify_skill_codeblock_19"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L559",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_6b_wiki_only_if_wiki_flag",
+      "target": "graphify_skill_codeblock_17"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L550",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7b_svg_export_only_if_svg_flag",
+      "target": "graphify_skill_codeblock_18"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L624",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7b_svg_export_only_if_svg_flag",
+      "target": "graphify_skill_codeblock_20"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L572",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7c_graphml_export_only_if_graphml_flag",
+      "target": "graphify_skill_codeblock_19"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L646",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7c_graphml_export_only_if_graphml_flag",
+      "target": "graphify_skill_codeblock_21"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L592",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7d_mcp_server_only_if_mcp_flag",
+      "target": "graphify_skill_codeblock_20"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L599",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7d_mcp_server_only_if_mcp_flag",
+      "target": "graphify_skill_codeblock_21"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L666",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7d_mcp_server_only_if_mcp_flag",
+      "target": "graphify_skill_codeblock_22"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L673",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_7d_mcp_server_only_if_mcp_flag",
+      "target": "graphify_skill_codeblock_23"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L614",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_8_token_reduction_benchmark_only_if_total_words_5000",
+      "target": "graphify_skill_codeblock_22"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L688",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_8_token_reduction_benchmark_only_if_total_words_5000",
+      "target": "graphify_skill_codeblock_24"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L632",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_9_save_manifest_update_cost_tracker_clean_up_and_report",
+      "target": "graphify_skill_codeblock_23"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L672",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_9_save_manifest_update_cost_tracker_clean_up_and_report",
+      "target": "graphify_skill_codeblock_24"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L706",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_9_save_manifest_update_cost_tracker_clean_up_and_report",
+      "target": "graphify_skill_codeblock_25"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L746",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_step_9_save_manifest_update_cost_tracker_clean_up_and_report",
+      "target": "graphify_skill_codeblock_26"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L706",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_update_incremental_re_extraction",
+      "target": "graphify_skill_codeblock_25"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L725",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_update_incremental_re_extraction",
+      "target": "graphify_skill_codeblock_26"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L745",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_update_incremental_re_extraction",
+      "target": "graphify_skill_codeblock_27"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L798",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_update_incremental_re_extraction",
+      "target": "graphify_skill_codeblock_28"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L817",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_update_incremental_re_extraction",
+      "target": "graphify_skill_codeblock_29"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L837",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_update_incremental_re_extraction",
+      "target": "graphify_skill_codeblock_30"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L872",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_update_incremental_re_extraction",
+      "target": "graphify_skill_codeblock_31"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L780",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_interpreter_guard_for_subcommands",
+      "target": "graphify_skill_codeblock_27"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L806",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_cluster_only",
+      "target": "graphify_skill_codeblock_29"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L906",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_cluster_only",
+      "target": "graphify_skill_codeblock_32"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L859",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_query",
+      "target": "graphify_skill_codeblock_30"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L877",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_query",
+      "target": "graphify_skill_codeblock_31"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L968",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_query",
+      "target": "graphify_skill_codeblock_32"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L959",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_query",
+      "target": "graphify_skill_codeblock_33"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L977",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_query",
+      "target": "graphify_skill_codeblock_34"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1068",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_query",
+      "target": "graphify_skill_codeblock_35"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L981",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_path",
+      "target": "graphify_skill_codeblock_33"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L991",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_path",
+      "target": "graphify_skill_codeblock_34"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L1043",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_path",
+      "target": "graphify_skill_codeblock_35"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1081",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_path",
+      "target": "graphify_skill_codeblock_36"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1091",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_path",
+      "target": "graphify_skill_codeblock_37"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1143",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_path",
+      "target": "graphify_skill_codeblock_38"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L1054",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_explain",
+      "target": "graphify_skill_codeblock_36"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L1064",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_explain",
+      "target": "graphify_skill_codeblock_37"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L1109",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_explain",
+      "target": "graphify_skill_codeblock_38"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1154",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_explain",
+      "target": "graphify_skill_codeblock_39"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1164",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_explain",
+      "target": "graphify_skill_codeblock_40"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1209",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_explain",
+      "target": "graphify_skill_codeblock_41"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L1119",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_add",
+      "target": "graphify_skill_codeblock_39"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1219",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_graphify_add",
+      "target": "graphify_skill_codeblock_42"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L1152",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_watch",
+      "target": "graphify_skill_codeblock_40"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1253",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_watch",
+      "target": "graphify_skill_codeblock_43"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L1173",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_git_commit_hook",
+      "target": "graphify_skill_codeblock_41"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1274",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_git_commit_hook",
+      "target": "graphify_skill_codeblock_44"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L1189",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_native_claude_md_integration",
+      "target": "graphify_skill_codeblock_42"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": "L1195",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_native_claude_md_integration",
+      "target": "graphify_skill_codeblock_43"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1290",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_native_claude_md_integration",
+      "target": "graphify_skill_codeblock_45"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "L1296",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "graphify_skill_for_native_claude_md_integration",
+      "target": "graphify_skill_codeblock_46"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/CLAUDE.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "home_dot_claude_claude_md",
+      "target": "dot_claude_claude_graphify"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "home/dot_claude/CLAUDE.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "home_dot_claude_claude_md",
+      "target": "dot_claude_claude_terraform_skills_hashicorp"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_tfplan_tfplan",
+      "target": "executable_tfplan_terraform"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_tfplan_tfplan",
+      "target": "executable_tfplan_output_formats"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_tfplan_tfplan",
+      "target": "executable_tfplan_lock_false"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_tfplan_tfplan",
+      "target": "executable_tfplan_parallel_show"
+    },
+    {
+      "relation": "both_manage",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": "Both deal with Terraform - tfplan runs plans, tfenv manages versions",
+      "weight": 1.0,
+      "source": "executable_tfplan_tfplan",
+      "target": "executable_tfenv_tfenv_shim"
+    },
+    {
+      "relation": "shared_terraform_users",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5,
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": "AWS and Terraform are commonly co-used in infrastructure automation",
+      "weight": 1.0,
+      "source": "executable_aws_aws_shim",
+      "target": "executable_tfplan_tfplan"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": "terraform plan -lock=false",
+      "weight": 1.0,
+      "source": "executable_tfplan_terraform",
+      "target": "executable_tfplan_lock_false"
+    },
+    {
+      "relation": "enables",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_tfplan",
+      "source_location": "terraform show -json and -no-color",
+      "weight": 1.0,
+      "source": "executable_tfplan_terraform",
+      "target": "executable_tfplan_output_formats"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_aws_aws_shim",
+      "target": "executable_aws_profile_detection"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_aws_aws_shim",
+      "target": "executable_aws_auth_error_detection"
+    },
+    {
+      "relation": "confirms",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": "sso login handles SSO auth failures",
+      "weight": 1.0,
+      "source": "executable_aws_aws_shim",
+      "target": "executable_aws_sso_login"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_aws_aws_shim",
+      "target": "executable_aws_real_aws_locator"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_aws_aws_shim",
+      "target": "executable_aws_lazy_auth"
+    },
+    {
+      "relation": "responds_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_aws_sso_login",
+      "target": "executable_aws_auth_error_detection"
+    },
+    {
+      "relation": "triggers",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_aws_profile_detection",
+      "target": "executable_aws_sso_login"
+    },
+    {
+      "relation": "depends_on",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "home/dot_local/bin/executable_aws",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_aws_lazy_auth",
+      "target": "executable_aws_auth_error_detection"
+    },
+    {
+      "relation": "wraps",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_tfenv",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_tfenv_tfenv_shim",
+      "target": "executable_tfenv_tenv"
+    },
+    {
+      "relation": "manages",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_local/bin/executable_tfenv",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "executable_tfenv_tfenv_shim",
+      "target": "executable_tfenv_terraform_versions"
+    },
+    {
+      "relation": "symlink_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/Documents/PowerShell/symlink_Microsoft.VSCode_profile.ps1",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "vscode_profile_powershell",
+      "target": "default_profile_powershell"
+    },
+    {
+      "relation": "symlink_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/Documents/WindowsPowerShell/symlink_Microsoft.PowerShell.VSCode_profile.ps1",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "windows_powershell_profile",
+      "target": "default_profile_powershell"
+    },
+    {
+      "relation": "manages",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "tmux_status_extension",
+      "target": "tmux_status_emoji_states"
+    },
+    {
+      "relation": "prevents",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": "Serialization prevents race between turn_start and agent_end",
+      "weight": 1.0,
+      "source": "tmux_status_extension",
+      "target": "tmux_status_title_queue"
+    },
+    {
+      "relation": "integrates_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": "terminal-notifier notification ties into pi agent lifecycle",
+      "weight": 1.0,
+      "source": "tmux_status_terminal_notify",
+      "target": "tmux_status_extension"
+    },
+    {
+      "relation": "hooks_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": "pi.on(\"turn_start\")",
+      "weight": 1.0,
+      "source": "tmux_status_extension",
+      "target": "tmux_status_turn_start"
+    },
+    {
+      "relation": "hooks_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": "pi.on(\"agent_end\")",
+      "weight": 1.0,
+      "source": "tmux_status_extension",
+      "target": "tmux_status_agent_end"
+    },
+    {
+      "relation": "requires",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "tmux_status_extension",
+      "target": "tmux_status_tmux_pane_detection"
+    },
+    {
+      "relation": "parallel_extension",
+      "confidence": "INFERRED",
+      "confidence_score": 0.6,
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": "Both are pi extension APIs, run in parallel",
+      "weight": 1.0,
+      "source": "completion_indicator_extension",
+      "target": "tmux_status_extension"
+    },
+    {
+      "relation": "cross_extension",
+      "confidence": "INFERRED",
+      "confidence_score": 0.5,
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": "Both are pi extensions in ~/.pi/agent/extensions/",
+      "weight": 1.0,
+      "source": "auto_theme_extension",
+      "target": "tmux_status_extension"
+    },
+    {
+      "relation": "controlled_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "tmux_status_emoji_states",
+      "target": "tmux_status_agent_end"
+    },
+    {
+      "relation": "feeds",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "tmux_status_turn_start",
+      "target": "tmux_status_title_queue"
+    },
+    {
+      "relation": "feeds",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "tmux_status_agent_end",
+      "target": "tmux_status_title_queue"
+    },
+    {
+      "relation": "triggers",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "tmux_status_agent_end",
+      "target": "tmux_status_terminal_notify"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "tmux_status_terminal_notify",
+      "target": "tmux_status_terminal_app_ids"
+    },
+    {
+      "relation": "enables",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "home/dot_pi/agent/extensions/tmux-status.ts",
+      "source_location": "TMUX_PANE env var is how notifications know which pane to switch back to",
+      "weight": 1.0,
+      "source": "tmux_status_tmux_pane_detection",
+      "target": "tmux_status_terminal_notify"
+    },
+    {
+      "relation": "no_direct_link",
+      "confidence": "INFERRED",
+      "confidence_score": 0.3,
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": "two separate pi extensions",
+      "weight": 1.0,
+      "source": "tmux_status_agent_end",
+      "target": "completion_indicator_extension"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "completion_indicator_extension",
+      "target": "completion_indicator_stats_extractor"
+    },
+    {
+      "relation": "hooks_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "completion_indicator_extension",
+      "target": "completion_indicator_agent_start"
+    },
+    {
+      "relation": "hooks_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "completion_indicator_extension",
+      "target": "completion_indicator_context_inject"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/completion-indicator.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "completion_indicator_extension",
+      "target": "completion_indicator_ui_notify"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "auto_theme_extension",
+      "target": "auto_theme_dark_mode_detect"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "auto_theme_extension",
+      "target": "auto_theme_theme_polling"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "auto_theme_extension",
+      "target": "auto_theme_theme_confirmation"
+    },
+    {
+      "relation": "enforces",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "auto_theme_extension",
+      "target": "auto_theme_platform_guard"
+    },
+    {
+      "relation": "maps_dark_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "auto_theme_extension",
+      "target": "atom_one_dark_theme"
+    },
+    {
+      "relation": "maps_light_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "auto_theme_extension",
+      "target": "solarized_light_theme"
+    },
+    {
+      "relation": "cross_domain",
+      "confidence": "INFERRED",
+      "confidence_score": 0.4,
+      "source_file": "home/dot_claude/CLAUDE.md",
+      "source_location": "Terraform skills + dotfile management share the chezmoi infrastructure layer",
+      "weight": 1.0,
+      "source": "terraform_skills_hashicorp_skills",
+      "target": "auto_theme_extension"
+    },
+    {
+      "relation": "initializes",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "auto_theme_dark_mode_detect",
+      "target": "auto_theme_theme_polling"
+    },
+    {
+      "relation": "feeds",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/extensions/auto-theme.ts",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "auto_theme_theme_polling",
+      "target": "auto_theme_theme_confirmation"
+    },
+    {
+      "relation": "shares_theme_name",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "home/dot_config/k9s/skins/solarized-light.yml",
+      "source_location": "Both use solarized color scheme - auto-theme.ts maps light mode to solarized-light",
+      "weight": 1.0,
+      "source": "k9s_skin_solarized_palette",
+      "target": "solarized_light_theme"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/chezmoi_lib.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chezmoi_lib_library",
+      "target": "chezmoi_lib_oses"
+    },
+    {
+      "relation": "iterates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/shellcheck.py",
+      "source_location": "loops over OSES for cross-platform shellcheck",
+      "weight": 1.0,
+      "source": "shellcheck_linter",
+      "target": "chezmoi_lib_oses"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/shellcheck.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "shellcheck_linter",
+      "target": "shellcheck_chezmoi_lib_import"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/jsonlint.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "jsonlint_linter",
+      "target": "jsonlint_plain_json"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/jsonlint.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "jsonlint_linter",
+      "target": "jsonlint_json5_parser"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/jsonlint.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "jsonlint_linter",
+      "target": "jsonlint_chezmoi_lib_import"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/jsonlint.py",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "jsonlint_plain_json",
+      "target": "jsonlint_json5_parser"
+    },
+    {
+      "relation": "complements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "AGENTS.md",
+      "source_location": "README is quick setup; AGENTS/CLAUDE docs are deep agent guidelines",
+      "weight": 1.0,
+      "source": "agents_md_agent_guidelines",
+      "target": "readme_project_readme"
+    },
+    {
+      "relation": "identical_content",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "AGENTS.md",
+      "source_location": "AGENTS.md content is duplicated in CLAUDE.md",
+      "weight": 1.0,
+      "source": "agents_md_agent_guidelines",
+      "target": "claude_md_claude_guidelines"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_config/k9s/skins/solarized-light.yml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "k9s_skin_solarized_light",
+      "target": "k9s_skin_solarized_palette"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_config/k9s/skins/solarized-light.yml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "k9s_skin_solarized_light",
+      "target": "k9s_skin_k9s_ui_theme"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/prompts/plan.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "plan_prompt_planner",
+      "target": "plan_prompt_planning_method"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/prompts/plan.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "plan_prompt_planner",
+      "target": "plan_prompt_no_code_rule"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "ask_prompt_researcher",
+      "target": "ask_prompt_research_method"
+    },
+    {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "ask_prompt_researcher",
+      "target": "ask_prompt_no_impl_rule"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/prompts/ask.md",
+      "source_location": "Check graphify-out/GRAPH_REPORT.md",
+      "weight": 1.0,
+      "source": "ask_prompt_researcher",
+      "target": "ask_prompt_graph_ref"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "graphify_skill_pi_skill",
+      "target": "deepgraph_graph_concept"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "graphify_skill_pi_skill",
+      "target": "community_detection_algorithm"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_pi/agent/skills/graphify/SKILL.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "graphify_skill_pi_skill",
+      "target": "audit_trail_edge_confidence"
+    },
+    {
+      "relation": "duplicates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_claude/skills/graphify/SKILL.md",
+      "source_location": "graphify skill exists in both pi and claude agent dirs",
+      "weight": 1.0,
+      "source": "graphify_claude_claude_skill",
+      "target": "graphify_skill_pi_skill"
+    },
+    {
+      "relation": "registers",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_claude/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "claude_skills_skill_registry",
+      "target": "graphify_claude_claude_skill"
+    },
+    {
+      "relation": "registers",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "home/dot_claude/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "claude_skills_skill_registry",
+      "target": "terraform_skills_hashicorp_skills"
     }
   ],
-  "hyperedges": []
+  "hyperedges": [
+    {
+      "id": "pi_agent_extensions",
+      "label": "Pi Agent Extensions",
+      "nodes": [
+        "tmux_status_extension",
+        "completion_indicator_extension",
+        "auto_theme_extension"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.9,
+      "source_file": "home/dot_pi/agent/extensions/"
+    },
+    {
+      "id": "chezmoi_linting_ecosystem",
+      "label": "Chezmoi Linting Ecosystem",
+      "nodes": [
+        "shellcheck_linter",
+        "jsonlint_linter",
+        "chezmoi_lib_library"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.9,
+      "source_file": "scripts/"
+    },
+    {
+      "id": "cross_platform_dotfile_system",
+      "label": "Cross-platform Dotfile System",
+      "nodes": [
+        "executable_tfplan_tfplan",
+        "executable_aws_aws_shim",
+        "executable_tfenv_tfenv_shim",
+        "vscode_profile_powershell",
+        "windows_powershell_profile",
+        "k9s_skin_solarized_light"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.6,
+      "source_file": "home/dot_pi/agent/prompts/ask.md"
+    },
+    {
+      "id": "agent_prompt_system",
+      "label": "Agent Prompt System",
+      "nodes": [
+        "plan_prompt_planner",
+        "ask_prompt_researcher",
+        "graphify_skill_pi_skill"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "home/dot_pi/agent/prompts/ask.md"
+    }
+  ],
+  "built_at_commit": "e3b5c17d045256af0e24d6b3ea68466fc8235397"
 }
