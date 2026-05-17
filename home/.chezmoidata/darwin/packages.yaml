@@ -10,7 +10,6 @@ packages:
       brews:
         base:
         - age
-        - pi-coding-agent
         - git-lfs
         - jj
         - flock
@@ -138,6 +137,7 @@ packages:
     pnpm:
       base:
       - mmd
+      - "@earendil-works/pi-coding-agent"
     uv:
       base:
       - graphifyy
