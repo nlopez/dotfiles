@@ -17,7 +17,7 @@ espanso:
     - {replace: ":_KannaNoU:", triggers: [":knou"]}
     - {replace: ":_KannaLMAO:", triggers: [":klol", ":klmao", ":klaugh"]}
     - {replace: ":_KannaHiHi:", triggers: [":khi"]}
-    - {replace: ":_KannaHiHi::_KannaHiHi: KonKannana! :_KannaQua:", triggers: [":khello"]}
+    - {replace: ":_KannaHiHi: :_KannaHiHi: KonKannana! :_KannaQua:", triggers: [":khello"]}
     - {replace: ":_KannaQua:", triggers: [":kqua"]}
     - {replace: ":_KannaHeadpat:", triggers: [":khp", ":kpat"]}
     - {replace: ":_KannaBuffering:", triggers: [":kbuff", ":kload"]}

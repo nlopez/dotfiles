@@ -35,6 +35,25 @@ chezmoi apply             # Reconcile destination with source
 chezmoi data              # Inspect the rendered data map
 ```
 
+### chezmoi root override — `.chezmoiroot`
+
+This repo uses a `.chezmoiroot` file to set an alternative source root. The file's contents specify which subdirectory is the chezmoi source root:
+
+```sh
+# Contents of .chezmoiroot
+cat .chezmoiroot
+home
+```
+
+**This is critical:** when `.chezmoiroot` is set (e.g. to `home`), all chezmoi special directories live **under that subdirectory**, not at the repo root. Specifically:
+
+- `.chezmoiscripts/` → `home/.chezmoiscripts/` (scripts run as part of `chezmoi apply`)
+- `.chezmoiignore` is at repo root (it is not subject to the root override)
+- `.chezmoidata/` → `home/.chezmoidata/`
+- All dotfile/config/bin sources live under `home/`
+
+**When modifying scripts, always check `.chezmoiroot` first** — the script directory may not be at `.chezmoiscripts/` at the repo root but nested under the configured root instead.
+
 ### Source file naming convention
 
 Files in the repo root are deployed based on naming:
