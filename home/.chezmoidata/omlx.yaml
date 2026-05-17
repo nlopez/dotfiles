@@ -1,0 +1,17 @@
+# omlx configuration data
+# Managed by chezmoi — per-host overrides go under darwin/omlx.yaml etc.
+omlx:
+  server:
+    host: "127.0.0.1"
+    port: 8000
+    log_level: "info"
+  sampling:
+    max_context_window: 32768
+    max_tokens: 32768
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 0
+    repetition_penalty: 1.0
+  integrations:
+    pi_model: "Qwen3.6-35B-A3B-nvfp4"
+    openclaw_tools_profile: "coding"

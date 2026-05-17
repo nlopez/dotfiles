@@ -8,6 +8,12 @@
 .oh-my-zsh/templates/**
 .oh-my-zsh/custom/themes/powerlevel10k/**/*.zwc
 
+# OMLX: ignore runtime-generated files (keep settings.json).
+.omlx/cache/**
+.omlx/logs/**
+.omlx/models/**
+.omlx/stats.json
+
 # Ignore scripts for different operating systems.
 {{ if ne .chezmoi.os "darwin" }}
 .chezmoiscripts/darwin/**
