@@ -138,6 +138,8 @@ packages:
       base:
       - mmd
       - "@earendil-works/pi-coding-agent@0.74.1"
+      personal:
+      - "@benvargas/pi-firecrawl@1.0.0"
     uv:
       base:
       - pre-commit
