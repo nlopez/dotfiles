@@ -1,3 +1,12 @@
+## Package Management
+
+Always prefer **`uv`** for Python and **`pnpm`** for Node.js.
+
+- Python: use `uv pip install`, `uv run`, `uv build` for project work; use `uv tool install` to install tools globally (the equivalent of `pip install --system` or `pipx`). Prefer `uvx <tool>` to run installed tools without pinning them.
+- Node.js: use `pnpm install`, `pnpm run`, `pnpm exec` for project work; use `pnpm dlx` to run one-off packages (the equivalent of `npx`). Always pin versions when possible.
+
+Never use `pip`, `python -m pip`, `npm`, or `yarn` directly. If `uv` or `pnpm` are not available on the system, note the limitation and fall back.
+
 ## Research and Uncertainty Protocol
 
 When you are uncertain about something, or when official documentation and best practices would help you make a better decision, **you must search for authoritative sources before guessing**.
