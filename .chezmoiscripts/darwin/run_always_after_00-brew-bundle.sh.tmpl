@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# run_always: triggers brew bundle --cleanup every chezmoi apply to keep
+# installed packages declaratively synced with packages.yaml
+
+set -eufo pipefail
+
+brew bundle --global --cleanup
