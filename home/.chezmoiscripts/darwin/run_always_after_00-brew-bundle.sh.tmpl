@@ -1,8 +1,0 @@
-#!/bin/bash
-
-# run_always: triggers brew bundle to install any missing packages on each chezmoi apply
-# Does NOT remove packages (no --cleanup) — installed packages are preserved
-
-set -eufo pipefail
-
-brew bundle --global

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Checksum to trigger when brew packages change
+# {{ .packages.darwin.brew | toJson | sha256sum }}
+
+# run_onchange: triggers brew bundle only when packages.yaml brew section changes
+# Does NOT remove packages (no --cleanup) — installed packages are preserved
+
+set -eufo pipefail
+
+brew bundle --global
