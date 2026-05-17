@@ -5,9 +5,8 @@ packages:
         jundot/omlx: "https://github.com/jundot/omlx"
       brews:
         base:
-        - hermes-agent
+        - age
         - pi-coding-agent
-        - opencode
         - git-lfs
         - jj
         - flock
@@ -83,7 +82,6 @@ packages:
         - copyq
         - cursor
         - docker/tap/sbx
-        - codex
         - grandperspective
         - obsidian
         - claude-code
