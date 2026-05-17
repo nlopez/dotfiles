@@ -2,7 +2,11 @@ packages:
   darwin:
     brew:
       taps:
+        8ta4/plist: "https://github.com/8ta4/homebrew-plist"
+        docker/tap: "https://github.com/docker/homebrew-tap"
+        eugene1g/safehouse: "https://github.com/eugene1g/homebrew-safehouse"
         jundot/omlx: "https://github.com/jundot/omlx"
+        ryooooooga/tap: "https://github.com/ryooooooga/homebrew-tap"
       brews:
         base:
         - age
@@ -105,7 +109,7 @@ packages:
         - rectangle
         - little-snitch
         - espanso
-        - smittytone/homebrew-smittytone/utitool
+        - smittytone/smittytone/utitool
         personal:
         - balenaetcher
         - digikam
@@ -139,7 +143,7 @@ packages:
       - graphifyy
       - pre-commit
       - unique-namer
-      - huggingface_hub
+      - huggingface-hub
       - osxphotos
     mas:
       base: []

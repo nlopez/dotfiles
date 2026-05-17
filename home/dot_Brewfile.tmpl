@@ -27,15 +27,15 @@
 {{- end -}}
 
 # Taps (custom repos)
-{{- range $key, $url := $taps -}}
+{{ range $key, $url := $taps -}}
 tap {{ $key | quote }}, {{ $url | quote }}
-{{- end -}}
+{{ end }}
 
 {{ range ($brews | sortAlpha | uniq) -}}
 brew {{ . | quote }}
 {{ end -}}
 {{ range ($casks | sortAlpha | uniq) -}}
-cask {{ . | quote }}, args: { require_sha: true }
+cask {{ . | quote }}
 {{ end -}}
 {{ range ($unsigned | sortAlpha | uniq) -}}
 cask {{ . | quote }}
