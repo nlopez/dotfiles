@@ -137,7 +137,7 @@ packages:
     pnpm:
       base:
       - mmd
-      - "@earendil-works/pi-coding-agent"
+      - "@earendil-works/pi-coding-agent@0.74.1"
     uv:
       base:
       - graphifyy
