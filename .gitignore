@@ -1,6 +1,10 @@
 .venv
 
 # graphify -- local metadata, not shared
-graphify-out/manifest.json
 graphify-out/cost.json
-# graphify-out/cache/   # optional: uncomment to reduce repo size
+# Semantic cache — duplicates graph.json data, grows fast
+graphify-out/cache/
+# Python interpreter path — machine-specific
+graphify-out/.graphify_python
+# Root path — machine-specific
+graphify-out/.graphify_root
