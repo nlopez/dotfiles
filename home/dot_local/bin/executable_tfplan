@@ -11,9 +11,23 @@ set -eu
 
 trap 'trap - INT TERM; kill 0' INT TERM
 
-terraform plan -lock=false -out="tfplan.bin" "$@"
+# Pull -chdir=... out of args so it can be placed right after 'terraform'
+chdir_arg=()
+rest_args=()
+for arg in "$@"; do
+    if [[ "$arg" == -chdir=* || "$arg" == --chdir=* ]]; then
+        chdir_arg=("-chdir=${arg#*=}")
+    else
+        rest_args+=("$arg")
+    fi
+done
 
-terraform show -no-color "tfplan.bin" > "tfplan.txt" & pid_txt=$!
-terraform show -json    "tfplan.bin" > "tfplan.json" & pid_json=$!
+out_dir="${chdir_arg[0]#-chdir=}"
+redir_prefix="${out_dir:+${out_dir}/}tfplan"
 
-wait $pid_console $pid_txt $pid_json
+terraform "${chdir_arg[@]}" plan -lock=false -out="tfplan.bin" "${rest_args[@]}"
+
+terraform "${chdir_arg[@]}" show -no-color "${rest_args[@]}" "tfplan.bin" > "${redir_prefix}.txt"  & pid_txt=$!
+terraform "${chdir_arg[@]}" show -json    "${rest_args[@]}" "tfplan.bin" > "${redir_prefix}.json" & pid_json=$!
+
+wait $pid_txt $pid_json
