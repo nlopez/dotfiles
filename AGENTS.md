@@ -44,6 +44,11 @@ home/                          # chezmoi "home" directory — files here map to 
     windows/                   # scoop, browser autoupdate
   .chezmoidata/                # Data files (see above)
   dot_config/                  # Files deployed to ~/.config/
+
+.chezmoiscripts/               # Per-OS installation scripts (repo root — chezmoi only runs scripts here)
+  darwin/                      # brew bundle, filetypes, desktop config
+  linux/                       # apt packages, brew, tailscale, chsh
+  windows/                     # scoop, browser autoupdate
     git/                       # Git config (multi-file: config, config_hobby, config_datadog, ignore, allowed_signers)
     zed/                       # Zed editor settings
     ghostty/                   # Ghostty terminal config
