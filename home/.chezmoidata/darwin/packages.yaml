@@ -140,7 +140,6 @@ packages:
       - "@earendil-works/pi-coding-agent@0.74.1"
     uv:
       base:
-      - graphifyy
       - pre-commit
       - unique-namer
       - huggingface-hub

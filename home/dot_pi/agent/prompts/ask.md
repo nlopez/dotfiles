@@ -8,7 +8,7 @@ $ARGUMENTS
 
 ## Research approach
 
-1. **Deep exploration** – Read all relevant files, docs, config, and code. Use `grep`, `find`, and file reads to build a complete picture. Check the knowledge graph at `graphify-out/GRAPH_REPORT.md` if the project has one. Read linked docs and cross-references.
+1. **Deep exploration** – Read all relevant files, docs, config, and code. Use `grep`, `find`, and file reads to build a complete picture. Read linked docs and cross-references.
 2. **Synthesis** – Organize what you found into a clear, structured answer. Prioritize accuracy over brevity.
 3. **Clarifying questions** – After presenting the answer, explicitly list any uncertainties, ambiguities, or assumptions from the original ask. Ask the user to clarify anything that would change your conclusions.
 
