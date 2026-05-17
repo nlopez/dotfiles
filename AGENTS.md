@@ -54,6 +54,58 @@ home
 
 **When modifying scripts, always check `.chezmoiroot` first** — the script directory may not be at `.chezmoiscripts/` at the repo root but nested under the configured root instead.
 
+### ⚠️ Do not edit live dotfiles directly
+
+**Never make changes directly to files in `~` or any destination path.** All configuration changes must go through the chezmoi source tree in this repo. Editing a live dotfile will:
+
+1. **Get overwritten on the next `chezmoi apply`** — your changes will be silently reverted to the source-of-truth.
+2. **Not be version-controlled** — your edits will be lost forever on re-init or machine change.
+3. **Create drift** — `chezmoi status` and `chezmoi diff` will no longer accurately reflect what you've customized.
+
+The correct workflow:
+
+1. Locate the **source** file using `chezmoi source-path <destination-path>` (e.g., `chezmoi source-path ~/.gitconfig`)
+2. Edit the source file in the repo (or use `chezmoi edit <destination-path>`)
+3. Validate with `chezmoi diff` and `chezmoi apply --dry-run`
+4. Apply with `chezmoi apply` and commit your changes
+
+If a file is managed by an external tool (e.g., Pi's `settings.json` updated at runtime by `pi install`), update the chezmoi managed version (`modify_settings.json.tmpl` or equivalent) rather than the live file directly.
+
+### Idempotency and reproducibility
+
+**Every chezmoi change must be idempotent and reproducible.** The source tree is the single source of truth — anyone (including you on a fresh install or a new machine) should be able to run:
+
+```sh
+sh -c "$(curl -fsLS get.chezmoi.io)" -d -b ~/.local/bin -- init <owner>/<repo>
+chezmoi apply
+```
+
+and end up with an identical, working configuration. This means:
+
+- **Never rely on side-effects from other tools.** If a package install script installs something, ensure it doesn't leave orphaned config files in `~` that won't be recreated on a fresh apply. Use `empty_` or `dir_` prefixes to handle files/dirs that should exist but aren't managed by templates.
+- **Use templates for conditional logic.** Host-specific or OS-specific config should use `.chezmoi.os`, `.chezmoi.arch`, `.chezmoi.sourcePath`, and data files — not branch the repo or rely on manual post-install steps.
+- **Use scripts for one-time setup.** Package managers, browser extensions, and init steps that can't be expressed as static files belong in `.chezmoiscripts/`. Keep them idempotent — they must succeed even if already run.
+
+#### Removing configurations
+
+When removing a dotfile or config, don't just delete it from the repo. You must also clean up:
+
+1. **The source file** — remove the `dot_<name>`, `config/...`, or `bin/...` entry from the repo.
+2. **Any leftover artifacts** — if the config created ancillary files (e.g., data dirs, symlinks, child configs), add a cleanup script in `.chezmoiscripts/` (e.g., `darwin/01_cleanup_old_config.sh`) that removes them.
+3. **The `empty_`/`dir_` markers** — if you created `empty_` or `dir_` entries just to prevent chezmoi from recreating a path, remove those too once cleanup is done.
+
+This ensures that re-applying chezmoi on a machine that previously had the old config ends up in a clean state rather than leaving stale artifacts.
+
+#### Re-apply guarantee
+
+**`chezmoi apply` must be a safe, complete reset.** Re-running it should:
+- Recreate all managed files to match the source tree
+- Not break any tools that depend on the config
+- Leave no orphaned files from removed configs
+- Produce the same result regardless of how many times it's run
+
+Before committing any change, ask: "If I wiped my home directory and ran `chezmoi apply` from scratch, would everything work?" If the answer is no, the change needs cleanup scripts, empty/dir markers, or additional template guards.
+
 ### Source file naming convention
 
 Files in the repo root are deployed based on naming:
