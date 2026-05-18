@@ -1,0 +1,86 @@
+{{- $s := .solarized -}}
+# Solarized Dark skin — https://ethanschoonover.com/solarized/
+k9s:
+  body:
+    fgColor: "{{ $s.base0 }}"
+    bgColor: "{{ $s.base03 }}"
+    logoColor: "{{ $s.blue }}"
+  prompt:
+    fgColor: "{{ $s.base0 }}"
+    bgColor: "{{ $s.base03 }}"
+    suggestColor: "{{ $s.orange }}"
+  info:
+    fgColor: "{{ $s.magenta }}"
+    sectionColor: "{{ $s.base0 }}"
+  dialog:
+    fgColor: "{{ $s.base0 }}"
+    bgColor: "{{ $s.base03 }}"
+    buttonFgColor: "{{ $s.base0 }}"
+    buttonBgColor: "{{ $s.magenta }}"
+    buttonFocusFgColor: white
+    buttonFocusBgColor: "{{ $s.cyan }}"
+    labelFgColor: "{{ $s.orange }}"
+    fieldFgColor: "{{ $s.base0 }}"
+  frame:
+    border:
+      fgColor: "{{ $s.base02 }}"
+      focusColor: "{{ $s.base0 }}"
+    menu:
+      fgColor: "{{ $s.base0 }}"
+      keyColor: "{{ $s.magenta }}"
+      numKeyColor: "{{ $s.magenta }}"
+    crumbs:
+      fgColor: white
+      bgColor: "{{ $s.cyan }}"
+      activeColor: "{{ $s.yellow }}"
+    status:
+      newColor: "{{ $s.cyan }}"
+      modifyColor: "{{ $s.blue }}"
+      addColor: "{{ $s.green }}"
+      errorColor: "{{ $s.red }}"
+      highlightColor: "{{ $s.orange }}"
+      killColor: "{{ $s.base01 }}"
+      completedColor: "{{ $s.base01 }}"
+    title:
+      fgColor: "{{ $s.base0 }}"
+      bgColor: "{{ $s.base03 }}"
+      highlightColor: "{{ $s.blue }}"
+      counterColor: "{{ $s.magenta }}"
+      filterColor: "{{ $s.magenta }}"
+  views:
+    charts:
+      bgColor: default
+      defaultDialColors:
+        - "{{ $s.blue }}"
+        - "{{ $s.red }}"
+      defaultChartColors:
+        - "{{ $s.blue }}"
+        - "{{ $s.red }}"
+    table:
+      fgColor: "{{ $s.base0 }}"
+      bgColor: "{{ $s.base03 }}"
+      cursorFgColor: white
+      cursorBgColor: "{{ $s.base03 }}"
+      markColor: darkgoldenrod
+      header:
+        fgColor: "{{ $s.base0 }}"
+        bgColor: "{{ $s.base03 }}"
+        sorterColor: "{{ $s.cyan }}"
+    xray:
+      fgColor: "{{ $s.base0 }}"
+      bgColor: "{{ $s.base03 }}"
+      cursorColor: "{{ $s.base02 }}"
+      graphicColor: "{{ $s.blue }}"
+      showIcons: false
+    yaml:
+      keyColor: "{{ $s.magenta }}"
+      colonColor: "{{ $s.blue }}"
+      valueColor: "{{ $s.base0 }}"
+    logs:
+      fgColor: "{{ $s.base0 }}"
+      bgColor: "{{ $s.base03 }}"
+      indicator:
+        fgColor: "{{ $s.base0 }}"
+        bgColor: "{{ $s.base02 }}"
+        toggleOnColor: "{{ $s.magenta }}"
+        toggleOffColor: "{{ $s.blue }}"

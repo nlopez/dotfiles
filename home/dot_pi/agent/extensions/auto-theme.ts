@@ -27,7 +27,7 @@ import { platform } from "node:os";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const THEMES = {
-	dark: "atom-one-dark",
+	dark: "solarized-dark",
 	light: "solarized-light",
 } as const;
 
