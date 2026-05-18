@@ -70,3 +70,7 @@ install_if_healthy() {
 {{- range .packages.darwin.pnpm.base }}
 install_if_healthy "{{ . }}"
 {{- end }}
+
+{{- range .packages.darwin.pnpm.personal }}
+install_if_healthy "{{ . }}"
+{{- end }}
