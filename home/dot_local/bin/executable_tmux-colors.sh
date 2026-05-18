@@ -19,7 +19,7 @@ names=(
 
 for i in $(seq 0 $(( count > 16 ? 15 : count - 1 ))); do
   name=${names[$i]}
-  printf "  \033[${i}m %-30s  colour${i}  [ESC [${i}m   \033[0m\n" "$name"
+  printf "  \033[48;5;${i}m        \033[0m  %-20s  colour${i}\n" "$name"
 done
 
 if (( count > 16 )); then
@@ -39,7 +39,7 @@ if (( count > 16 )); then
       for b in "${cube_blue[@]}"; do
         if (( idx > 255 )); then break 3; fi
         if (( idx < 16 )); then idx=$((idx + 1)); continue; fi
-        printf "  \033[38;5;%dm  %-30s  colour%d  [RGB %d,%d,%d]\033[0m\n" \
+        printf "  \033[48;5;%dm        \033[0m  %-20s  colour%d  [RGB %d,%d,%d]\n" \
           "$idx" "color${idx}" "$idx" "$r" "$g" "$b"
         idx=$((idx + 1))
       done
@@ -48,7 +48,7 @@ if (( count > 16 )); then
 
   for g in "${gray[@]}"; do
     if (( idx > 255 )); then break; fi
-    printf "  \033[38;5;%dm  %-30s  colour%d  [Gray %d]\033[0m\n" \
+    printf "  \033[48;5;%dm        \033[0m  %-20s  colour%d  [Gray %d]\n" \
       "$idx" "gray${idx}" "$idx" "$g"
     idx=$((idx + 1))
   done
