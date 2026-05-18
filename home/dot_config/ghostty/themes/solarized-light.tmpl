@@ -1,0 +1,38 @@
+{{- $s := .solarized -}}
+# Solarized Light — https://ethanschoonover.com/solarized/
+#
+# ANSI palette (spec TERMCOL mapping, identical across light & dark)
+# Slots 0-7  : normal colors
+# Slots 8-15 : bright colors
+
+# normal
+palette = 0={{ $s.base02 }}
+palette = 1={{ $s.red }}
+palette = 2={{ $s.green }}
+palette = 3={{ $s.yellow }}
+palette = 4={{ $s.blue }}
+palette = 5={{ $s.magenta }}
+palette = 6={{ $s.cyan }}
+palette = 7={{ $s.base2 }}
+
+# bright
+palette = 8={{ $s.base03 }}
+palette = 9={{ $s.orange }}
+palette = 10={{ $s.base01 }}
+palette = 11={{ $s.base00 }}
+palette = 12={{ $s.base0 }}
+palette = 13={{ $s.violet }}
+palette = 14={{ $s.base1 }}
+palette = 15={{ $s.base3 }}
+
+# Light-mode semantics (symmetric swap of dark-mode)
+# background  = base3  (lightest)
+# foreground  = base00 (dark content tone)
+# highlights  = base2  (slightly darker bg)
+# secondary   = base01 (de-emphasized text)
+background           = {{ $s.base3 }}
+foreground           = {{ $s.base00 }}
+cursor-color         = {{ $s.base00 }}
+cursor-text          = {{ $s.base3 }}
+selection-background = {{ $s.base2 }}
+selection-foreground = {{ $s.base01 }}
