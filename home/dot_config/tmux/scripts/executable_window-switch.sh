@@ -10,7 +10,6 @@ if [[ -n "$LAST" && "$LAST" != "$CURRENT" ]]; then
   if [[ "$LAST_NAME" == ✳️* ]]; then
     BASE=$(printf '%s' "$LAST_NAME" | sed -E 's/^([🤖✳️🛎️ ])+//')
     tmux rename-window -t "$LAST" "$BASE"
-    tmux set-option -w -t "$LAST" automatic-rename on
   fi
 fi
 
