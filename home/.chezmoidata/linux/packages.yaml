@@ -28,6 +28,7 @@ packages:
         - dnsutils
         - ffmpeg
         - fzf
+        - fonts-noto-color-emoji
         personal: []
         work: []
         wsl: []
