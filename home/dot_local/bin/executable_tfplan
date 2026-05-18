@@ -22,7 +22,8 @@ for arg in "$@"; do
     fi
 done
 
-out_dir="${chdir_arg[0]#-chdir=}"
+out_dir="${chdir_arg[0]:-}"
+out_dir="${out_dir#-chdir=}"
 redir_prefix="${out_dir:+${out_dir}/}tfplan"
 
 terraform "${chdir_arg[@]}" plan -lock=false -out="tfplan.bin" "${rest_args[@]}"
