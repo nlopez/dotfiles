@@ -144,6 +144,7 @@ packages:
       - context-mode
       - pi-intercom
       - pi-powerline
+      - pi-mcp-adapter
       - "@benvargas/pi-firecrawl@1.0.0"
       - "@mjakl/pi-kagi-search@1.0.2"
     uv:
