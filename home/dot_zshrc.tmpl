@@ -94,6 +94,9 @@ fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 ZSH_DISABLE_COMPFIX=true
 source $ZSH/oh-my-zsh.sh
 
+# Prevent pure from setting window/terminal titles.
+zstyle ':prompt:pure:title' show no
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
