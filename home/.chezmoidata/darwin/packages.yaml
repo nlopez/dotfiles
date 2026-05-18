@@ -139,7 +139,13 @@ packages:
       - mmd
       - "@earendil-works/pi-coding-agent@0.74.1"
       personal:
+      - pi-web-access
+      - pi-subagents
+      - context-mode
+      - pi-intercom
+      - pi-powerline
       - "@benvargas/pi-firecrawl@1.0.0"
+      - "@mjakl/pi-kagi-search@1.0.2"
     uv:
       base:
       - pre-commit
