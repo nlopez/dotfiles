@@ -74,3 +74,12 @@ install_if_healthy "{{ . }}"
 {{- range .packages.darwin.pnpm.personal }}
 install_if_healthy "{{ . }}"
 {{- end }}
+
+# Ensure pnpm global packages hoist their dependencies so TypeScript runtimes
+# (like pi's extension loader) can resolve modules via standard Node.js paths.
+GLOBAL_WS="$PNPM_HOME/global/v11/pnpm-workspace.yaml"
+if [[ -f "$GLOBAL_WS" ]] && ! grep -q "shamefullyHoist" "$GLOBAL_WS"; then
+    echo "" >> "$GLOBAL_WS"
+    echo "shamefullyHoist: true" >> "$GLOBAL_WS"
+    echo "✅ Added shamefullyHoist to global pnpm-workspace.yaml"
+fi
