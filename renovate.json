@@ -17,15 +17,31 @@
         "# renovate: datasource=(?<datasource>github-releases) depName=(?<depName>[^\\s]+)[\\s\\S]*?:= \"(?<currentValue>v?\\d[^\"]+)\""
       ],
       "datasourceTemplate": "github-tags"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)home/dot_pi/agent/modify_settings\\.json\\.tmpl$/"
+      ],
+      "matchStrings": [
+        "npm:(?<packageName>(?:@[^/]+/)?[^@\\s\"]+)@(?<currentValue>[0-9][^\\s\",]+)"
+      ],
+      "datasourceTemplate": "npm"
     }
   ],
   "packageRules": [
     {
       "matchManagers": ["custom.regex"],
+      "matchFileNames": ["home/.chezmoiexternal.toml.tmpl"],
       "groupName": "chezmoi externals",
       "automerge": true,
       "automergeType": "pr",
       "automergeStrategy": "squash"
+    },
+    {
+      "matchManagers": ["custom.regex"],
+      "matchFileNames": ["home/dot_pi/agent/modify_settings.json.tmpl"],
+      "groupName": "pi packages"
     }
   ]
 }

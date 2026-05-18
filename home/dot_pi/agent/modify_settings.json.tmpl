@@ -2,8 +2,8 @@
 {{/* chezmoi:modify-template */}}
 # Managed by chezmoi.
 # Sets pi theme to atom-one-dark, defaults provider to omlx,
-# ensures required packages are present, and configures pnpm
-# for package installs/updates, while preserving
+# ensures required packages are present at pinned versions, and
+# configures pnpm for package installs/updates, while preserving
 # runtime-written keys such as lastChangelogVersion.
 import json
 import sys
@@ -26,21 +26,42 @@ if "omlx" in str(current.get("defaultProvider", "")) or current.get("defaultProv
 # and dependency installs inside git packages).
 current["npmCommand"] = ["pnpm"]
 
-# Ensure required packages are present without removing runtime-added packages.
-required_packages = ["npm:pi-web-access", "npm:pi-subagents", "npm:context-mode", "npm:pi-intercom", "npm:pi-powerline", "npm:@benvargas/pi-firecrawl", "npm:@mjakl/pi-kagi-search@1.0.2"]
+def base_name(spec):
+    """Return the base package name (without version) from an npm:name@ver spec."""
+    name = spec[4:] if spec.startswith("npm:") else spec
+    if name.startswith("@"):
+        # Scoped: @scope/pkg[@ver] — last @ after position 0 is the version separator.
+        at_idx = name.rfind("@")
+        base = name[:at_idx] if at_idx > 0 else name
+    else:
+        # Unscoped: pkg[@ver]
+        base = name.split("@")[0]
+    return ("npm:" + base) if spec.startswith("npm:") else base
+
+
+# Required packages pinned to specific versions.
+# Renovate will open PRs when newer versions are available.
+required_packages = [
+    "npm:pi-web-access@0.10.7",
+    "npm:pi-subagents@0.24.3",
+    "npm:context-mode@1.0.135",
+    "npm:pi-intercom@0.6.0",
+    "npm:pi-powerline@0.6.1",
+    "npm:@benvargas/pi-firecrawl@1.0.0",
+    "npm:@mjakl/pi-kagi-search@1.0.2",
+]
+
 existing_packages = current.get("packages", [])
+required_base_names = {base_name(pkg) for pkg in required_packages}
 
-existing_sources = set()
-for p in existing_packages:
-    if isinstance(p, str):
-        existing_sources.add(p)
-    elif isinstance(p, dict):
-        existing_sources.add(p.get("source", ""))
+# Remove existing entries that match required packages (to replace with pinned
+# versions), while preserving runtime-added packages.
+filtered = [
+    p for p in existing_packages
+    if base_name(p if isinstance(p, str) else p.get("source", "")) not in required_base_names
+]
 
-for pkg in required_packages:
-    if pkg not in existing_sources:
-        existing_packages.append(pkg)
-
-current["packages"] = existing_packages
+# Add all required packages at their pinned versions.
+current["packages"] = filtered + required_packages
 
 print(json.dumps(current, indent=2))
