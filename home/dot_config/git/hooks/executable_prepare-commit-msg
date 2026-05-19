@@ -43,9 +43,9 @@ except Exception:
 fi
 
 if [ -n "$PI_MODEL" ]; then
-  CO_AUTHOR="Co-authored-by: Pi (${PI_MODEL}) <pi@earendil.works>"
+  CO_AUTHOR="Co-authored-by: Pi (${PI_MODEL}) <noreply+${model}@example.org>"
 else
-  CO_AUTHOR="Co-authored-by: Pi <pi@earendil.works>"
+  CO_AUTHOR="Co-authored-by: Pi <noreply@example.org>"
 fi
 
 # ---------------------------------------------------------------------------
