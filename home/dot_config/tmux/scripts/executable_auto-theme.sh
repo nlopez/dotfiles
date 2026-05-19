@@ -8,13 +8,9 @@
 #
 # On macOS: reads AppleInterfaceStyle from NSGlobalDomain.
 # On other platforms: always selects "light" (graceful fallback).
-#
-# Uses a cache file to avoid redundant source-file calls — tmux source-file is
-# only invoked when the detected mode actually changes.
 
 set -euo pipefail
 
-CACHE_FILE="${TMPDIR:-/tmp}/tmux-auto-theme"
 COLORS_DIR="$HOME/.config/tmux/colors"
 
 # ── detect current appearance ────────────────────────────────────────────────
@@ -24,12 +20,4 @@ else
   mode="light"
 fi
 
-# ── skip if nothing changed ──────────────────────────────────────────────────
-cached=$(cat "$CACHE_FILE" 2>/dev/null || true)
-if [[ "$mode" == "$cached" ]]; then
-  exit 0
-fi
-
-# ── apply and cache ──────────────────────────────────────────────────────────
-echo "$mode" > "$CACHE_FILE"
 tmux source-file "$COLORS_DIR/solarized-${mode}.conf"
