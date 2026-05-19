@@ -1,8 +1,8 @@
-{{/* boolean feature tags */}}
-{{- $personal := false -}}{{/* true if this machine is for fun */}}
-{{- $work := false -}}{{/* true if this machine is for pay */}}
-{{- $wsl := false -}}{{/* true if we're running inside wsl */}}
-{{- $headless := false -}}{{/* true if we're without a graphical display */}}
+{{/* boolean feature tags — set once at chezmoi init, persisted in local config */}}
+{{- $personal  := promptBoolOnce . "personal"  "Is this a personal machine?" -}}
+{{- $work      := promptBoolOnce . "work"      "Is this a work machine?"     -}}
+{{- $headless  := promptBoolOnce . "headless"  "Is this a headless machine?" -}}
+{{- $wsl       := false -}}{{/* auto-detected from kernel; never prompted */}}
 {{- $ephemeral := false -}}{{/* true if this machine is ephemeral, e.g.: a cloud or VM instance */}}
 
 {{- $osID := .chezmoi.os -}}
@@ -23,18 +23,6 @@
 {{-   $headless = true -}}
 {{- end -}}
 
-{{- $personalHosts := list "raphael" "intelol" "wassail" "akane" }}
-{{- if has $hostname $personalHosts -}}
-{{-   $personal = true -}}
-{{- end -}}
-
-{{- if eq $hostname "wassail" -}}
-{{-   $headless = true -}}
-{{- end -}}
-
-{{- if eq $hostname "COMP-P20H4J4Q12" -}}
-{{-   $work = true -}}
-{{- end -}}
 
 [data]
 name = "Nick Lopez"

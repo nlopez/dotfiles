@@ -52,3 +52,11 @@ Documents
 .config/zed
 .config/ghostty
 {{ end }}
+
+{{ if not .work }}
+.pi/agent/mcp.json
+{{ end }}
+
+{{ if not .personal }}
+.config/rclone/rclone.conf
+{{ end }}

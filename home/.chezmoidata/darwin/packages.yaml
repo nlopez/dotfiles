@@ -138,7 +138,6 @@ packages:
       base:
       - mmd
       - "@earendil-works/pi-coding-agent@0.74.1"
-      personal:
       - pi-web-access
       - pi-subagents
       - context-mode
@@ -147,6 +146,7 @@ packages:
       - pi-mcp-adapter
       - "@benvargas/pi-firecrawl@1.0.0"
       - "@mjakl/pi-kagi-search@1.0.2"
+      personal: []
       work: []
     uv:
       base:
@@ -154,6 +154,8 @@ packages:
       - unique-namer
       - huggingface-hub
       - osxphotos
+      personal: []
+      work: []
     mas:
       base: []
       personal:
