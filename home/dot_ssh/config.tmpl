@@ -23,7 +23,7 @@ Host github.com-nlopez
   HostName github.com
   User git
   IdentitiesOnly yes
-  IdentityFile ~/.ssh/id_nlopez.pub
+  IdentityFile ~/.ssh/id_nlopez
 {{- if .personal }}
 
 # Aliased host for hobby orgs (silentshout42, kamotimestamps). Routed via git insteadOf.
@@ -31,7 +31,7 @@ Host github.com-hobby
   HostName github.com
   User git
   IdentitiesOnly yes
-  IdentityFile ~/.ssh/id_silentshout42.pub
+  IdentityFile ~/.ssh/id_silentshout42
 {{- end }}
 {{- if .work }}
 
@@ -40,5 +40,5 @@ Host github.com-ddog
   HostName github.com
   User git
   IdentitiesOnly yes
-  IdentityFile ~/.ssh/id_ddog.pub
+  IdentityFile ~/.ssh/id_ddog
 {{- end }}
