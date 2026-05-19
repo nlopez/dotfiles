@@ -15,7 +15,8 @@ COMMIT_SOURCE="$2"
 CO_AUTHOR="Co-authored-by: Pi <pi@earendil.works>"
 
 # Don't add a duplicate trailer if it's already present.
-if grep -qF "$CO_AUTHOR" "$COMMIT_MSG_FILE"; then
+# Anchor to line-start so body text mentioning the trailer is not a false positive.
+if grep -q "^${CO_AUTHOR}" "$COMMIT_MSG_FILE"; then
   exit 0
 fi
 
