@@ -61,14 +61,14 @@ packages:
         wsl: []
     pnpm:
       base:
-      - mmd
-      - "@earendil-works/pi-coding-agent@0.74.1"
-      - pi-web-access
-      - pi-subagents
+      - mmd@4.7.1
+      - "@earendil-works/pi-coding-agent@0.75.3"
+      - pi-web-access@0.10.7
+      - pi-subagents@0.24.3
       - context-mode@1.0.144
-      - pi-intercom
-      - pi-powerline
-      - pi-mcp-adapter
+      - pi-intercom@0.6.0
+      - pi-powerline@0.6.1
+      - pi-mcp-adapter@2.6.1
       - "@benvargas/pi-firecrawl@1.0.0"
       - "@mjakl/pi-kagi-search@1.0.2"
       personal: []
