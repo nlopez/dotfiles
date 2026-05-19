@@ -1,0 +1,27 @@
+#!/bin/sh
+# Merge chezmoi-managed keys into mcp.json, preserving runtime keys that pi
+# writes itself (e.g. directTools). Uses jq's recursive-merge operator so the
+# chezmoi overlay wins on conflicts, but unrecognised keys are kept as-is.
+
+OVERLAY=$(cat << 'EOF'
+{
+  "settings": {
+    "autoAuth": true
+  },
+  "mcpServers": {
+    "datadog": {
+      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp",
+      "auth": "oauth"
+    }
+  }
+}
+EOF
+)
+
+current=$(cat)
+
+if [ -z "$current" ]; then
+  printf '%s\n' "$OVERLAY"
+else
+  printf '%s\n' "$current" | jq --argjson overlay "$OVERLAY" '. * $overlay'
+fi
