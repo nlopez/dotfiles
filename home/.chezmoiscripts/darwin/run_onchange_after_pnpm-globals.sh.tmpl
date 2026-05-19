@@ -75,6 +75,12 @@ install_if_healthy "{{ . }}"
 install_if_healthy "{{ . }}"
 {{- end }}
 
+{{- if .work }}
+{{- range .packages.darwin.pnpm.work }}
+install_if_healthy "{{ . }}"
+{{- end }}
+{{- end }}
+
 # Ensure pnpm global packages hoist their dependencies so TypeScript runtimes
 # (like pi's extension loader) can resolve modules via standard Node.js paths.
 GLOBAL_WS="$PNPM_HOME/global/v11/pnpm-workspace.yaml"
