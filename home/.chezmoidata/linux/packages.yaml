@@ -65,7 +65,7 @@ packages:
       - "@earendil-works/pi-coding-agent@0.74.1"
       - pi-web-access
       - pi-subagents
-      - context-mode
+      - context-mode@1.0.144
       - pi-intercom
       - pi-powerline
       - pi-mcp-adapter
