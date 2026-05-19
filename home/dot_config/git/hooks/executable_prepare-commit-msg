@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# prepare-commit-msg: Automatically append Pi as a co-author on every commit.
+#
+# Hook arguments:
+#   $1  Path to the file containing the commit log message.
+#   $2  Source of the message: message | template | merge | squash | commit
+#   $3  Commit SHA-1 (only when amending).
+
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="$2"
+
+# Skip merge commits — the commit message is generated automatically.
+[ "$COMMIT_SOURCE" = "merge" ] && exit 0
+
+CO_AUTHOR="Co-authored-by: Pi <pi@earendil.works>"
+
+# Don't add a duplicate trailer if it's already present.
+if grep -qF "$CO_AUTHOR" "$COMMIT_MSG_FILE"; then
+  exit 0
+fi
+
+# Git trailers must be separated from the message body by a blank line.
+# Append a blank line + trailer at the end of the file.
+printf '\n%s\n' "$CO_AUTHOR" >> "$COMMIT_MSG_FILE"

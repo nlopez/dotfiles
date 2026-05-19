@@ -14,6 +14,7 @@
   symlinks = true
   editor = vim
   fsmonitor = true
+  hooksPath = ~/.config/git/hooks
 {{- if or .wsl (eq .chezmoi.os "windows") }}
   sshCommand = ssh.exe
 {{- end }}
