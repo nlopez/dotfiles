@@ -147,6 +147,7 @@ packages:
       - pi-mcp-adapter
       - "@benvargas/pi-firecrawl@1.0.0"
       - "@mjakl/pi-kagi-search@1.0.2"
+      work: []
     uv:
       base:
       - pre-commit

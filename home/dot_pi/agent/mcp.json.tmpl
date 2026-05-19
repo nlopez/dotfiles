@@ -1,0 +1,15 @@
+{{- if .work -}}
+{
+  "settings": {
+    "autoAuth": true
+  },
+  "mcpServers": {
+    "datadog": {
+      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp",
+      "auth": "oauth"
+    }
+  }
+}
+{{- else -}}
+{}
+{{- end -}}
