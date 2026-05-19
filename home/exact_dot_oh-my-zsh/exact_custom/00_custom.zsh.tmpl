@@ -80,6 +80,36 @@ _aws_profile_fzf() {
 zle -N _aws_profile_fzf
 bindkey '^I' _aws_profile_fzf  # ^I is Tab
 
+###############################################################################
+# gh wrapper — appends a Pi co-authorship footer to issue/PR comments
+###############################################################################
+gh() {
+  # Intercept: gh {issue,pr} comment and gh pr review when --body is given.
+  if (( $# >= 2 )) && {
+       [[ "$1" == "issue" && "$2" == "comment" ]] ||
+       [[ "$1" == "pr"    && ( "$2" == "comment" || "$2" == "review" ) ]]
+     }; then
+    local -a args=("$@")
+    local -a newargs=()
+    local i=1 modified=0
+    while (( i <= ${#args} )); do
+      if [[ "${args[$i]}" == "--body" ]] && (( i + 1 <= ${#args} )); then
+        local pi_name
+        pi_name=$(pi-model-name 2>/dev/null)
+        local footer=$'\n\n---\n'"*Co-authored with Pi${pi_name:+ (${pi_name})}*"
+        newargs+=("--body" "${args[$((i+1))]}${footer}")
+        (( i += 2 ))
+        modified=1
+      else
+        newargs+=("${args[$i]}")
+        (( i++ ))
+      fi
+    done
+    (( modified )) && { command gh "${newargs[@]}"; return }
+  fi
+  command gh "$@"
+}
+
 {{- if .work }}
 {{- if lookPath "awsv" }}
 eval "$(awsv init)"

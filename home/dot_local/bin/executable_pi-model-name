@@ -1,0 +1,82 @@
+#!/usr/bin/env node
+/**
+ * pi-model-name — outputs the friendly display name for the active Pi model.
+ *
+ * Reads ~/.pi/agent/settings.json for the active provider + model ID, then
+ * looks up the human-readable name from Pi's bundled model registry
+ * (models.generated.js).  Falls back to a pattern-based conversion so the
+ * script still works across Pi versions even if the registry path changes.
+ */
+
+"use strict";
+
+const fs   = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
+
+// ---------------------------------------------------------------------------
+// 1. Read active provider + model from Pi settings
+// ---------------------------------------------------------------------------
+const settingsPath = path.join(process.env.HOME, ".pi", "agent", "settings.json");
+let provider = "", modelId = "";
+try {
+  const s = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
+  provider = s.defaultProvider || "";
+  modelId  = s.defaultModel   || "";
+} catch {}
+
+if (!modelId) process.exit(0);
+
+// ---------------------------------------------------------------------------
+// 2. Locate Pi's models.generated.js by walking up from the `pi` binary
+// ---------------------------------------------------------------------------
+function findModelsFile() {
+  try {
+    const piBin  = execSync("which pi", { encoding: "utf8", stdio: ["pipe","pipe","ignore"] }).trim();
+    const realPi = fs.realpathSync(piBin);
+    let   dir    = path.dirname(realPi);
+    for (let i = 0; i < 12; i++) {
+      const candidate = path.join(
+        dir, "node_modules", "@earendil-works", "pi-ai", "dist", "models.generated.js"
+      );
+      if (fs.existsSync(candidate)) return candidate;
+      const up = path.dirname(dir);
+      if (up === dir) break;
+      dir = up;
+    }
+  } catch {}
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// 3. Look up the friendly name; pattern-convert as fallback
+// ---------------------------------------------------------------------------
+let friendlyName = "";
+const modelsFile = findModelsFile();
+if (modelsFile) {
+  try {
+    const { MODELS } = require(modelsFile);
+    const providerModels = MODELS[provider] || {};
+    const entry = Object.values(providerModels).find((m) => m.id === modelId);
+    if (entry && entry.name) friendlyName = entry.name;
+  } catch {}
+}
+
+if (!friendlyName) {
+  // Pattern fallback: "claude-sonnet-4-6" → "Claude Sonnet 4.6"
+  const parts = modelId.split("-");
+  const out = [];
+  for (let i = 0; i < parts.length; i++) {
+    const cur  = parts[i];
+    const next = parts[i + 1];
+    if (/^\d+$/.test(cur) && next !== undefined && /^\d+$/.test(next)) {
+      out.push(`${cur}.${next}`);
+      i++; // skip next — it's now the minor version
+    } else {
+      out.push(cur.charAt(0).toUpperCase() + cur.slice(1));
+    }
+  }
+  friendlyName = out.join(" ");
+}
+
+process.stdout.write(friendlyName);
