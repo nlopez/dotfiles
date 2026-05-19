@@ -59,3 +59,18 @@ packages:
         personal: []
         work: []
         wsl: []
+    pnpm:
+      base:
+      - mmd
+      - "@earendil-works/pi-coding-agent@0.74.1"
+      - pi-web-access
+      - pi-subagents
+      - context-mode
+      - pi-intercom
+      - pi-powerline
+      - pi-mcp-adapter
+      - "@benvargas/pi-firecrawl@1.0.0"
+      - "@mjakl/pi-kagi-search@1.0.2"
+      personal: []
+      work: []
+      wsl: []

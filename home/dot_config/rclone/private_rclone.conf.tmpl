@@ -1,4 +1,3 @@
-{{- if .personal }}
 [do]
 type = s3
 provider = DigitalOcean
@@ -60,4 +59,3 @@ client_secret = {{ onepasswordRead "op://rclone/gdrive_alt/client_secret" }}
 scope = drive
 shared_with_me = false
 token = {{ onepasswordRead "op://rclone/gdrive_alt/token" }}
-{{- end }}
