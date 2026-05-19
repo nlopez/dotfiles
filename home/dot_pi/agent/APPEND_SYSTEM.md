@@ -22,12 +22,8 @@ When you are uncertain about something, or when official documentation and best 
 ### How to search
 
 1. **Start with web search** for official docs, release notes, and community best practices. Prefer official documentation over third-party blog posts.
-2. **Use the `gh` CLI for GitHub sources** — repos, issues, pull requests, and GitHub-hosted docs. Examples:
-   - `gh search issues "topic" --repo owner/repo` — find related issues
-   - `gh api repos/owner/repo/git/trees/main --jq '.tree[] | select(.path | contains("config"))'` — explore repo structure
-   - `gh search code "pattern" --repo owner/repo` — find code patterns in repos
-   - `gh repo view owner/repo` — get repo overview and README
-3. **Use `fetch_content` for URL-level access** — e.g. GitHub repo pages, documentation sites, or blog posts with deeper context.
+2. **Use the `gh` CLI for anything on github.com** — repos, issues, pull requests, code, releases, and GitHub-hosted docs. `gh` is authenticated, structured, and rate-limit-safe. **Never use `fetch_content`, `web_search`, or manual API calls for github.com URLs.**
+3. **Use `fetch_content` for non-GitHub URLs** — documentation sites, blog posts, or other web pages with deeper context.
 
 ### Key principle
 
