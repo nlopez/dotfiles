@@ -54,9 +54,9 @@ install_if_healthy() {
 
     # Install/upgrade the package
     echo "📦 Installing $pkg"
-    pnpm add -g --yes "$pkg" || {
+    pnpm add -g --reporter=append-only "$pkg" || {
         echo "❌ Failed to install $pkg, retrying without cache..."
-        pnpm add -g --yes --prefer-offline "$pkg"
+        pnpm add -g --reporter=append-only --prefer-offline "$pkg"
     }
 
     # Record install timestamp (sanitize package name for filesystem safety)
