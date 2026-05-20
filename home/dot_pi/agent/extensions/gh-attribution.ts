@@ -1,53 +1,104 @@
 /**
  * gh-attribution extension
  *
- * Appends a Pi co-authorship footer to the --body of any gh CLI call
- * that posts or edits GitHub content, whether issued by the agent (tool_call)
- * or by the user inside the pi prompt via ! / !! (user_bash).
+ * Appends a Pi co-authorship footer to GitHub content posted via gh CLI,
+ * whether issued by the agent (tool_call) or the user inside the pi prompt
+ * via ! / !! (user_bash).
  *
- * Covered subcommands: gh {pr,issue} {create,edit,comment,review} --body "..."
+ * Covered subcommands: gh {pr,issue} {create,edit,comment,review}
+ *
+ * Two body delivery mechanisms are handled:
+ *   --body "..."      → footer appended to the inline string in the command
+ *   --body-file <path> → footer appended to the file on disk before gh reads it
+ *                        (-F <path> shorthand also supported; stdin "-" is skipped)
  *
  * Works on compound shell commands (e.g. `cd /path && gh pr edit 1 --body "..."`)
  * by operating on the raw command string before execution.
  *
  * Known limitations:
- * - --body-file is not intercepted (can't modify file content inline)
- * - $'...' ANSI-C quoting is not intercepted
+ * - --body-file - (stdin) cannot be intercepted
+ * - $'...' ANSI-C quoting in --body is not intercepted
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { isToolCallEventType } from "@earendil-works/pi-coding-agent";
+import { readFileSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 
-// gh subcommands that post or edit content and accept --body
-const GH_CONTENT_RE =
-  /\bgh\s+(?:pr|issue)\s+(?:create|edit|comment|review)\b/;
+// gh subcommands that post or edit content
+const GH_CONTENT_RE = /\bgh\s+(?:pr|issue)\s+(?:create|edit|comment|review)\b/;
+
+// Matches --body-file <path> or -F <path> (quoted or unquoted, not stdin)
+const BODY_FILE_RE =
+  /(?:--body-file|-F)\s+(?:"([^"]+)"|'([^']+)'|(?!-)(\S+))/;
+
+/** Build the footer string from the current model name. */
+function buildFooter(modelName: string): string {
+  return `\n\n---\n*Co-authored with Pi${modelName ? ` (${modelName})` : ""}*`;
+}
 
 /**
- * Inject the Pi attribution footer into all --body "..." or --body '...'
- * occurrences in a shell command string that contain a gh content subcommand.
- * Returns null when no change was needed.
+ * Rewrite --body "..." / --body '...' occurrences in a shell command string.
+ * Returns null when nothing matched or was already attributed.
  */
-function injectAttribution(command: string, footer: string): string | null {
-  if (!GH_CONTENT_RE.test(command)) return null;
+function injectInlineBody(command: string, footer: string): string | null {
   if (!command.includes("--body")) return null;
-  if (command.includes("Co-authored with Pi")) return null; // idempotent
+  if (command.includes("Co-authored with Pi")) return null;
 
   let modified = false;
-
-  // Non-greedy prefix ensures each --body pairs with its nearest gh call.
-  // Handles compound commands (&&, ||, ;) and multi-line continuations (\\\n).
   const result = command.replace(
     /(\bgh\s+(?:pr|issue)\s+(?:create|edit|comment|review)\b[\s\S]*?)--body\s+("((?:[^"\\]|\\[\s\S])*)"|'((?:[^'\\]|\\.)*)')/g,
     (_match, prefix, _quoted, dqBody, sqBody) => {
       modified = true;
       const body = dqBody !== undefined ? dqBody : sqBody;
-      // Always emit double-quoted; escape any embedded double quotes in body.
       const safeBody = body.replace(/"/g, '\\"');
       return `${prefix}--body "${safeBody}${footer}"`;
     },
   );
-
   return modified ? result : null;
+}
+
+/**
+ * Append the footer to a --body-file target on disk.
+ * Resolves relative paths against `cwd`. Skips stdin ("-").
+ * Returns true if the file was modified.
+ */
+function injectBodyFile(command: string, footer: string, cwd: string): boolean {
+  if (!BODY_FILE_RE.test(command)) return false;
+
+  const m = command.match(BODY_FILE_RE);
+  if (!m) return false;
+
+  const rawPath = m[1] ?? m[2] ?? m[3];
+  if (!rawPath || rawPath === "-") return false; // stdin — uninterceptable
+
+  const filePath = resolve(cwd, rawPath);
+  let content: string;
+  try {
+    content = readFileSync(filePath, "utf8");
+  } catch {
+    return false; // file doesn't exist yet or unreadable — skip
+  }
+
+  if (content.includes("Co-authored with Pi")) return false; // idempotent
+
+  writeFileSync(filePath, content + footer, "utf8");
+  return true;
+}
+
+/** Apply both strategies to a command; returns what changed. */
+function applyAttribution(
+  command: string,
+  footer: string,
+  cwd: string,
+): { command: string; modified: boolean } {
+  if (!GH_CONTENT_RE.test(command)) return { command, modified: false };
+
+  const inlined = injectInlineBody(command, footer);
+  if (inlined !== null) return { command: inlined, modified: true };
+
+  const filePatched = injectBodyFile(command, footer, cwd);
+  return { command, modified: filePatched };
 }
 
 export default function (pi: ExtensionAPI) {
@@ -58,26 +109,30 @@ export default function (pi: ExtensionAPI) {
     const { command } = event.input;
     if (!command) return;
 
-    const modelName = ctx.model?.name ?? "";
-    const footer = `\n\n---\n*Co-authored with Pi${modelName ? ` (${modelName})` : ""}*`;
+    const footer = buildFooter(ctx.model?.name ?? "");
+    const { command: patched, modified } = applyAttribution(
+      command,
+      footer,
+      ctx.cwd,
+    );
 
-    const patched = injectAttribution(command, footer);
-    if (patched !== null) {
+    if (modified) {
       event.input.command = patched;
       ctx.ui.notify("Appended Pi attribution to gh --body", "info");
     }
   });
 
   // ── User-typed ! / !! commands inside the pi prompt ─────────────────────
-  pi.on("user_bash", (event, _ctx) => {
-    const modelName = _ctx.model?.name ?? "";
-    const footer = `\n\n---\n*Co-authored with Pi${modelName ? ` (${modelName})` : ""}*`;
+  pi.on("user_bash", (event, ctx) => {
+    const footer = buildFooter(ctx.model?.name ?? "");
+    const { command: patched, modified } = applyAttribution(
+      event.command,
+      footer,
+      ctx.cwd,
+    );
 
-    const patched = injectAttribution(event.command, footer);
-    if (patched === null) return;
+    if (!modified) return;
 
-    // Wrap pi's local bash backend with the patched command.
-    // createLocalBashOperations() is the built-in executor.
     const { createLocalBashOperations } =
       require("@earendil-works/pi-coding-agent") as typeof import("@earendil-works/pi-coding-agent");
     const local = createLocalBashOperations();
