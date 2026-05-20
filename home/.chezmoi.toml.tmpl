@@ -24,6 +24,39 @@
 {{- end -}}
 
 
+# ---------------------------------------------------------------------------
+# age post-quantum encryption
+# ---------------------------------------------------------------------------
+# useBuiltinAge = false forces use of the external age binary (v1.3+) which
+# has native ML-KEM-768 + X25519 hybrid (PQ) support.
+encryption    = "age"
+useBuiltinAge = false
+
+[age]
+  identity = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/identity.txt"
+{{- if $work }}
+  recipientsFile = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/work-recipient.txt"
+{{- else if $personal }}
+  recipientsFile = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/personal-recipient.txt"
+{{- end }}
+
+# Environment variables passed to all scripts and hooks.
+# The age-key fetch hook reads CHEZMOI_AGE_OP_URI and CHEZMOI_AGE_OP_ACCOUNT.
+[scriptEnv]
+{{- if $work }}
+  AGE_KEY_OP_URI     = "op://Private/age-key/private-key"
+  AGE_KEY_OP_ACCOUNT = "datadog.1password.com"
+{{- else if $personal }}
+  AGE_KEY_OP_URI     = "op://Private/age-key/private-key"
+  AGE_KEY_OP_ACCOUNT = "my.1password.com"
+{{- end }}
+
+# Fetch the age identity from 1Password before chezmoi reads (decrypts) source state.
+[hooks.read-source-state.pre]
+  command = "bash"
+  args    = ["{{ .chezmoi.workingTree }}/scripts/fetch-age-key.sh"]
+
+# ---------------------------------------------------------------------------
 [data]
 name = "Nick Lopez"
 email = "20211302+nlopez@users.noreply.github.com"

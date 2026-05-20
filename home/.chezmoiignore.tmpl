@@ -60,3 +60,16 @@ Documents
 {{ if not .personal }}
 .config/rclone/rclone.conf
 {{ end }}
+
+# ---------------------------------------------------------------------------
+# age encryption: exclude the other machine class's secrets directory so
+# chezmoi never attempts to decrypt files it doesn't have the key for.
+{{ if not .work -}}
+.config/work-secrets
+{{ end -}}
+{{ if not .personal -}}
+.config/personal-secrets
+{{ end -}}
+
+# Git bookkeeping files used to track empty source directories — never deployed.
+**/.gitkeep

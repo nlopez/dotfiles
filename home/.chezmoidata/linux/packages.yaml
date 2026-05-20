@@ -3,6 +3,7 @@ packages:
     apt:
       packages:
         base:
+        - age
         - bat
         - build-essential
         - curl
