@@ -1,0 +1,18 @@
+# age post-quantum public key for PERSONAL machines (my.1password.com)
+# This file is NOT secret — it contains only the public recipient key.
+#
+# To populate: run the following on any machine, then replace the placeholder below.
+#
+#   age-keygen -pq -o /tmp/personal-age-key.txt
+#   # The public key (age1pq1...) is printed to stderr during generation.
+#   # Store /tmp/personal-age-key.txt in 1Password:
+#   #   Account : my.1password.com
+#   #   Vault   : Private
+#   #   Item    : age-key
+#   #   Field   : private-key  (paste full file contents)
+#   # Then extract just the public key:
+#   age-keygen -y /tmp/personal-age-key.txt
+#   rm /tmp/personal-age-key.txt
+#
+# Paste the age1pq1... output from `age-keygen -y` on the line below (replacing the placeholder):
+age1pq1REPLACE_WITH_PERSONAL_PUBLIC_KEY
