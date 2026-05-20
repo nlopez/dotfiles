@@ -81,6 +81,11 @@ export PNPM_HOME="${XDG_DATA_HOME}/pnpm"
 path=($PNPM_HOME/bin $path)
 export TENV_AUTO_INSTALL=true
 export TFENV_AUTO_INSTALL=true
+{{- if eq .chezmoi.os "darwin" }}
+export TG_PARALLELISM={{ output "sysctl" "-n" "hw.logicalcpu" | trim }}
+{{- else }}
+export TG_PARALLELISM={{ output "nproc" | trim }}
+{{- end }}
 export GOPATH="${XDG_DATA_HOME}/go"
 export VISUAL="zed"
 export EDITOR="vi"
