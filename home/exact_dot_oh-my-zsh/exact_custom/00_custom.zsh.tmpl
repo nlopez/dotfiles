@@ -55,10 +55,8 @@ _aws_profile_fzf() {
     | sed -E 's/^\[profile ([^]]+)\]$/\1/; s/^\[default\]$/default/')
   [[ -z "$profiles" ]] && { zle expand-or-complete; return }
 
-  # Real aws binary (bypass the shim to avoid sts get-caller-identity).
   local aws_bin
   aws_bin=$(whence -p aws)
-  [[ "$aws_bin" == "$HOME/.local/bin/aws" ]] && aws_bin=/opt/homebrew/bin/aws
 
   local chosen
   chosen=$(printf '%s\n' "$profiles" | fzf \
