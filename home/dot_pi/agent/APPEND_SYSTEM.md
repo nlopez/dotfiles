@@ -7,6 +7,18 @@ Always prefer **`uv`** for Python and **`pnpm`** for Node.js.
 
 Never use `pip`, `python -m pip`, `npm`, or `yarn` directly. If `uv` or `pnpm` are not available on the system, note the limitation and fall back.
 
+## Cloud Profile Safety Rule
+
+**You must never use a cloud profile whose name does not end in `read-only`.** This applies universally to every tool and surface where a profile can be specified:
+
+- `AWS_PROFILE` / `AWS_DEFAULT_PROFILE` environment variables
+- `--profile` flag on `aws` commands
+- `AWS_PROFILE` set inside Terraform / OpenTofu provider blocks or via `-var`/`TF_VAR_*`
+- Terragrunt `iam_role`, `iam_assume_role_duration`, or any profile reference in `terragrunt.hcl`
+- Any other CLI tool (`awsume`, `awsv`, `awsx`, `yawsso`, etc.) that accepts an AWS or cloud profile name
+
+Before running any command or writing any config that references a profile, check that the profile name ends with `read-only`. If the desired profile does not end in `read-only`, **stop and tell the user** rather than proceeding.
+
 ## Research and Uncertainty Protocol
 
 When you are uncertain about something, or when official documentation and best practices would help you make a better decision, **you must search for authoritative sources before guessing**.
