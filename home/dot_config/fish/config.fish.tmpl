@@ -1,0 +1,89 @@
+{{- /* config.fish — managed by chezmoi; edit via source tree */ -}}
+{{- $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
+{{- $brew := "" -}}
+{{- range $p := $brewPrefixes -}}
+  {{- if and (not $brew) (stat (printf "%s/bin/brew" $p)) -}}{{- $brew = $p -}}{{- end -}}
+{{- end -}}
+
+### Homebrew ──────────────────────────────────────────────────────────────────
+{{- if $brew }}
+if test -d {{ $brew }}
+    set -gx HOMEBREW_PREFIX     {{ $brew }}
+    set -gx HOMEBREW_CELLAR     {{ $brew }}/Cellar
+    set -gx HOMEBREW_REPOSITORY {{ $brew }}
+    fish_add_path --path {{ $brew }}/sbin {{ $brew }}/bin
+end
+{{- end }}
+
+### XDG base directories ──────────────────────────────────────────────────────
+set -gx XDG_DATA_HOME   $HOME/.local/share
+set -gx XDG_CONFIG_HOME $HOME/.config
+set -gx XDG_STATE_HOME  $HOME/.local/state
+set -gx XDG_CACHE_HOME  $HOME/.cache
+
+### PATH ──────────────────────────────────────────────────────────────────────
+# Local bin first, then PNPM, then language runtimes.
+fish_add_path --path $HOME/.local/bin
+
+set -gx PNPM_HOME $HOME/.local/share/pnpm
+fish_add_path --path $PNPM_HOME/bin
+
+set -gx GOPATH $HOME/.local/share/go
+fish_add_path --path $HOME/go/bin
+fish_add_path --path $HOME/.cargo/bin
+{{- if .work }}
+
+if test -d /opt/dogbrew/bin
+    fish_add_path --path /opt/dogbrew/bin
+end
+{{- end }}
+
+{{- if and (eq .chezmoi.os "darwin") $brew }}
+# GNU coreutils — prefer over macOS builtins (mirrors .zprofile).
+{{- range $formula := .packages.darwin.gnu_tools }}
+  {{- $gnubin := printf "%s/opt/%s/libexec/gnubin" $brew $formula }}
+  {{- if stat $gnubin }}
+fish_add_path --path {{ $gnubin }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+### Homebrew settings ─────────────────────────────────────────────────────────
+set -gx HOMEBREW_NO_AUTO_UPDATE       1
+set -gx HOMEBREW_NO_ENV_HINTS         1
+set -gx HOMEBREW_AUTO_UPDATE_SECS     86400
+set -gx HOMEBREW_NO_ANALYTICS         1
+set -gx HOMEBREW_VERIFY_ATTESTATIONS  1
+set -gx HOMEBREW_NO_INSECURE_REDIRECT 1
+set -gx HOMEBREW_CASK_OPTS            --require-sha
+
+### Misc env ──────────────────────────────────────────────────────────────────
+set -gx LESS              -FRX
+set -gx AWS_PAGER         ""
+set -gx GH_TELEMETRY      false
+set -gx GH_NO_UPDATE_NOTIFIER 1
+set -gx PI_SKIP_VERSION_CHECK 1
+set -gx PI_OFFLINE        1
+set -gx VISUAL            zed
+set -gx EDITOR            vi
+set -gx TENV_AUTO_INSTALL true
+set -gx TFENV_AUTO_INSTALL true
+set -gx TG_PARALLELISM    16
+{{- if eq .chezmoi.os "darwin" }}
+set -gx SSH_AUTH_SOCK     "$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+{{- end }}
+{{- if .work }}
+set -gx AWS_VAULT_KEYCHAIN_NAME login
+{{- end }}
+{{- if .personal }}
+set -gx HF_TOKEN           {{ onepasswordRead "op://copxopw5gkuo2m3cv7acvkrfxy/naslt4c3idtxr67oj2ejjg5trq/credential" }}
+set -gx LITELLM_MASTER_KEY {{ onepasswordRead "op://copxopw5gkuo2m3cv7acvkrfxy/fmxon2rpst4fc6hbr2okoglcty/credential" }}
+set -gx EXA_API_KEY        {{ onepasswordRead "op://bamv726zv6zbcfke3cnbwjtnuu/23vesd2kmo74zwhyhphfj4vn3u/credential" }}
+set -gx FIRECRAWL_API_KEY  {{ onepasswordRead "op://bamv726zv6zbcfke3cnbwjtnuu/rdnnh2jlsmeith72vgjicop2oa/credential" }}
+set -gx KAGI_SESSION_TOKEN {{ onepasswordRead "op://bamv726zv6zbcfke3cnbwjtnuu/t7pwlyr4ca2m3vhnnzzjo6wqky/credential" }}
+{{- end }}
+
+### Tool init ────────────────────────────────────────────────────────────────
+atuin  init fish --disable-up-arrow | source
+zoxide init fish | source
+direnv hook fish | source

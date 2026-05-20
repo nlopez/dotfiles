@@ -1,4 +1,10 @@
 {{- if ne .chezmoi.os "windows" }}
+[".config/fish/functions/fisher.fish"]
+    type = "file"
+    # renovate: datasource=github-releases depName=jorgebucaran/fisher
+    url = "https://raw.githubusercontent.com/jorgebucaran/fisher/4.4.8/functions/fisher.fish"
+    refreshPeriod = "168h"
+
 [".oh-my-zsh"]
     type = "archive"
     url = "https://github.com/ohmyzsh/ohmyzsh/archive/master.tar.gz"

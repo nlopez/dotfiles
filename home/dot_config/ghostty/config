@@ -54,7 +54,7 @@ keybind = super+digit_8=unbind
 confirm-close-surface = false
 
 # https://github.com/ghostty-org/ghostty/discussions/3836#discussioncomment-11688264
-# cursor-style = block
-# cursor-style-blink = true
-shell-integration-features = no-cursor
+cursor-style = block
+cursor-style-blink = true
+# shell-integration-features = no-cursor
 command = /bin/zsh -lc "tmux new-session -A -s 0"
