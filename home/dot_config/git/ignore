@@ -55,5 +55,6 @@ Thumbs.db
 # Terraform ephemera
 *.tfstate
 tfplan*
+.terragrunt-cache/
 
 **/.claude/settings.local.json
