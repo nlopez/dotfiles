@@ -24,6 +24,8 @@
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { mkdir, writeFile, unlink } from "node:fs/promises";
+import { join } from "node:path";
 
 // Codepoints for the three emoji prefixes plus the variation-selector U+FE0F.
 const EMOJI_PREFIX_RE = /^[\u{1F916}\u{2733}\u{1F6CE}\uFE0F\s]+/u;
@@ -36,6 +38,33 @@ export default function (pi: ExtensionAPI) {
 	// Only activate inside tmux.
 	const tmuxPane = process.env.TMUX_PANE;
 	if (!process.env.TMUX || !tmuxPane) return;
+
+	// ── runtime model tracking ───────────────────────────────────────────────
+	// Write the live model name to a per-pane state file so that out-of-process
+	// tools (e.g. pi-model-name, called by the zsh gh() wrapper) can read the
+	// runtime model rather than the settings.json default — correctly reflecting
+	// mid-session /model or Ctrl+P changes.
+	const MODEL_STATE_DIR = join(process.env.HOME ?? "", ".local/state/pi/pane-models");
+	const modelFile = join(MODEL_STATE_DIR, tmuxPane.replace("%", ""));
+
+	async function writeModel(model: { name?: string; id: string }): Promise<void> {
+		try {
+			await mkdir(MODEL_STATE_DIR, { recursive: true });
+			await writeFile(modelFile, model.name ?? model.id, "utf8");
+		} catch { /* non-fatal */ }
+	}
+
+	pi.on("session_start", (_event, ctx) => {
+		if (ctx.model) void writeModel(ctx.model);
+	});
+
+	pi.on("model_select", (event) => {
+		void writeModel(event.model);
+	});
+
+	pi.on("session_shutdown", () => {
+		void unlink(modelFile).catch(() => {});
+	});
 
 	// ── serial title queue ───────────────────────────────────────────────────
 	// Serialise every rename through a promise chain so concurrent turn_start
