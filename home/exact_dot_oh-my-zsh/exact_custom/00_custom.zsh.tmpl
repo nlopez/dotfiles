@@ -84,10 +84,10 @@ bindkey '^I' _aws_profile_fzf  # ^I is Tab
 # gh wrapper — appends a Pi co-authorship footer to issue/PR comments
 ###############################################################################
 gh() {
-  # Intercept: gh {issue,pr} comment and gh pr review when --body is given.
+  # Intercept: gh {issue,pr} comment and gh pr {review,edit} when --body is given.
   if (( $# >= 2 )) && {
        [[ "$1" == "issue" && "$2" == "comment" ]] ||
-       [[ "$1" == "pr"    && ( "$2" == "comment" || "$2" == "review" ) ]]
+       [[ "$1" == "pr"    && ( "$2" == "comment" || "$2" == "review" || "$2" == "edit" ) ]]
      }; then
     local -a args=("$@")
     local -a newargs=()
