@@ -190,6 +190,12 @@ function claude() {
   _tmux_clear_status
 }
 
+function pi() {
+  unset AWS_PROFILE
+  command pi "$@"
+  _tmux_clear_status
+}
+
 # ── Helper: reload Pi in the *current* tmux pane safely ──────────────────────
 # Sends C-c + Enter first to clear any partial prompt, then /reload.
 pi-reload() {
