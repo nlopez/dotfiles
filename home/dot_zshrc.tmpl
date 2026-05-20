@@ -173,29 +173,6 @@ bindkey '^xe' _edit_command_line
 bindkey '^x^e' _edit_command_line
 
 ###############################################################################
-# Claude / pi — clear tmux status emoji on exit
-###############################################################################
-_tmux_clear_status() {
-  [[ -z "$TMUX" ]] && return
-  local pane="$TMUX_PANE"
-  local current base
-  current=$(tmux display-message -p -t "$pane" '#W')
-  base=$(echo "$current" | sed -E 's/^([🤖✳️🛎️ ])+//')
-  tmux rename-window -t "$pane" "$base"
-  tmux set-option -w -t "$pane" automatic-rename on
-}
-
-function claude() {
-  command claude "$@"
-  _tmux_clear_status
-}
-
-function pi() {
-  unset AWS_PROFILE
-  command pi "$@"
-  _tmux_clear_status
-}
-
 # ── Helper: reload Pi in the *current* tmux pane safely ──────────────────────
 # Sends C-c + Enter first to clear any partial prompt, then /reload.
 pi-reload() {

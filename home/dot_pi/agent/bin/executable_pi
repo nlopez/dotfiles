@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Shim: finds and runs the real `pi` binary, then cleans up on exit.
+
+# Strip this shim's directory from PATH so `command -v` finds the real binary.
+_shim_dir="$(cd "$(dirname "$0")" && pwd)"
+_clean_path="$(printf '%s' "$PATH" | tr ':' '\n' | grep -vxF "$_shim_dir" | tr '\n' ':' | sed 's/:$//')"
+_real="$(PATH="$_clean_path" command -v pi 2>/dev/null)"
+
+if [[ -z "$_real" ]]; then
+  echo "pi shim: could not locate real pi binary" >&2
+  exit 1
+fi
+
+unset AWS_PROFILE
+"$_real" "$@"
+_exit=$?
+
+# Restore tmux window name (strip leading emoji prefix set by pi/claude hooks).
+if [[ -n "${TMUX:-}" ]]; then
+  _pane="${TMUX_PANE}"
+  _current="$(tmux display-message -p -t "$_pane" '#W' 2>/dev/null)"
+  _base="$(printf '%s' "$_current" | sed -E 's/^([🤖✳️🛎️ ])+//')"
+  tmux rename-window -t "$_pane" "$_base"
+  tmux set-option -w -t "$_pane" automatic-rename on
+fi
+
+tput reset
+exit "$_exit"

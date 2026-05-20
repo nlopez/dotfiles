@@ -33,6 +33,12 @@ if "omlx" in str(current.get("defaultProvider", "")) or current.get("defaultProv
 # and dependency installs inside git packages).
 current["npmCommand"] = ["pnpm"]
 
+# Cursor is managed entirely at runtime by the cursor-manager extension.
+# It starts hidden and is revealed only when the terminal window gains focus.
+# Setting this to False here prevents a flash on startup if the user previously
+# toggled it to True via /settings.
+current["showHardwareCursor"] = False
+
 def base_name(spec):
     """Return the base package name (without version) from an npm:name@ver spec."""
     name = spec[4:] if spec.startswith("npm:") else spec
