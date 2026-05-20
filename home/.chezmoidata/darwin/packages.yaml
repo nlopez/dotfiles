@@ -25,6 +25,7 @@ packages:
         - ncdu
         - atuin
         - direnv
+        - fish
         - fd
         - fzf
         - git
