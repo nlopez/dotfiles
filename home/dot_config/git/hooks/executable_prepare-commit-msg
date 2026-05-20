@@ -15,10 +15,13 @@ COMMIT_SOURCE="$2"
 # Skip merge commits — the commit message is generated automatically.
 [ "$COMMIT_SOURCE" = "merge" ] && exit 0
 
+# Skip on machines where pi is not installed / configured.
+PI_SETTINGS="${HOME}/.pi/agent/settings.json"
+[ -f "$PI_SETTINGS" ] || exit 0
+
 # ---------------------------------------------------------------------------
 # Resolve the active Pi model from ~/.pi/agent/settings.json
 # ---------------------------------------------------------------------------
-PI_SETTINGS="${HOME}/.pi/agent/settings.json"
 PI_MODEL=""
 
 if [ -f "$PI_SETTINGS" ]; then
