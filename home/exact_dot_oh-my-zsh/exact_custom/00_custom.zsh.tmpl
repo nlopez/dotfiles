@@ -22,6 +22,8 @@ cd() {
 
 # Rebuild PATH from scratch on reload: hand .zprofile a clean slate so
 # added/removed paths are accurate rather than carried over from the old shell.
+clear() { stty sane; command clear }
+
 reload() {
   stty sane
 {{- if eq .chezmoi.os "darwin" }}
