@@ -1,0 +1,4 @@
+{{- /* Deploy .zshrc_local only on work machines */ -}}
+{{- if not .work }}
+.zshrc_local
+{{- end }}
