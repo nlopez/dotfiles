@@ -24,6 +24,11 @@ cd() {
 # added/removed paths are accurate rather than carried over from the old shell.
 clear() { stty sane; command clear }
 
+# Make Ctrl+L also run stty sane (clear-screen widget bypasses the function above)
+_clear_screen_sane() { stty sane; zle clear-screen }
+zle -N _clear_screen_sane
+bindkey '^L' _clear_screen_sane
+
 reload() {
   stty sane
 {{- if eq .chezmoi.os "darwin" }}
