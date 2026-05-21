@@ -1,6 +1,8 @@
 db_path = "${XDG_DATA_HOME}/atuin/history.db"
 key_path = "${XDG_DATA_HOME}/atuin/key"
 session_path = "${XDG_DATA_HOME}/atuin/session"
+sync_address = "https://atuin.macaroni-pirate.ts.net"
+
 {{- if .work }}
 auto_sync = false
 {{- else }}
@@ -14,14 +16,13 @@ keymap_mode = "emacs"
 prefers_reduced_motion = true
 show_numeric_shortcuts = false
 
-record_failed_commands = true
+store_failed = true
 
 history_filter = [
   "^(echo|printf)([^|><]|$)*$",
 ]
 
 [sync]
-endpoint = "https://atuin.macaroni-pirate.ts.net"
 records = true # enable sync v2
 
 [ai]
