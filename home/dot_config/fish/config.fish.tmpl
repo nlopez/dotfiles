@@ -68,7 +68,7 @@ set -gx VISUAL            zed
 set -gx EDITOR            vi
 set -gx TENV_AUTO_INSTALL true
 set -gx TFENV_AUTO_INSTALL true
-set -gx TG_PARALLELISM    16
+set -gx TG_PARALLELISM    10
 {{- if eq .chezmoi.os "darwin" }}
 set -gx SSH_AUTH_SOCK     "$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 {{- end }}
