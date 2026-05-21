@@ -13,40 +13,41 @@
 {{- if $foundBrewPrefix }}
 fpath+=("{{ $foundBrewPrefix }}/share/zsh/site-functions")
 eval "$({{ $foundBrewPrefix }}/bin/brew shellenv)"
-{{- end }}
-
+{{ end }}
 {{- $homeDir := .chezmoi.homeDir -}}
-{{- $paths := list -}}
-{{- range $_, $relPath := list "go/bin" ".cargo/bin" -}}
-  {{- $p := joinPath $homeDir $relPath -}}
-  {{- if stat $p -}}{{ $paths = mustAppend $paths $p }}{{- end -}}
-{{- end -}}
-{{- if .work -}}
-  {{- range $_, $workPath := list "/opt/dogbrew/bin" -}}
-    {{- if stat $workPath -}}{{ $paths = mustAppend $paths $workPath }}{{- end -}}
-  {{- end -}}
+# Dynamic PATH additions — checked at every login/reload, so new tool
+# installations (cargo, go, etc.) show up without needing chezmoi apply.
+for _d in \
+  "$HOME/go/bin" \
+  "$HOME/.cargo/bin" \
+{{- if .work }}
+  "/opt/dogbrew/bin" \
 {{- end }}
-{{- if $paths }}
-path=({{ toStrings $paths | join ":" }} $path)
-{{- end }}
+; do
+  [[ -d "$_d" ]] && path=("$_d" $path)
+done
+unset _d
 
 {{- if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
-  {{- $gPathAdds := list }}
-  {{- $gManpathAdds := list }}
-  {{- $gFormulas := .packages.darwin.gnu_tools }}
+{{- $gFormulas := .packages.darwin.gnu_tools }}
+
+# Prepend GNU gnubin/gnuman so they beat macOS /usr/bin and man paths.
+# Shell-level checks mean newly brew-installed GNU tools appear on next reload.
+for _d in \
   {{- range $formula := $gFormulas }}
-    {{- $gnubin := printf "%s/opt/%s/libexec/gnubin" $foundBrewPrefix $formula }}
-    {{- $gnuman := printf "%s/opt/%s/libexec/gnuman" $foundBrewPrefix $formula }}
-    {{- if stat $gnubin }}{{ $gPathAdds = mustAppend $gPathAdds $gnubin }}{{ end }}
-    {{- if stat $gnuman }}{{ $gManpathAdds = mustAppend $gManpathAdds $gnuman }}{{ end }}
+  "{{ $foundBrewPrefix }}/opt/{{ $formula }}/libexec/gnubin" \
   {{- end }}
-  {{- /* Prepend GNU *gnubin / *gnuman so they beat macOS /usr/bin and man paths */}}
-  {{- if $gPathAdds }}
-path=({{ toStrings $gPathAdds | join ":" }} $path)
+; do
+  [[ -d "$_d" ]] && path=("$_d" $path)
+done
+for _d in \
+  {{- range $formula := $gFormulas }}
+  "{{ $foundBrewPrefix }}/opt/{{ $formula }}/libexec/gnuman" \
   {{- end }}
-  {{- if $gManpathAdds }}
-manpath=({{ toStrings $gManpathAdds | join ":" }} $manpath)
-  {{- end }}
+; do
+  [[ -d "$_d" ]] && manpath=("$_d" $manpath)
+done
+unset _d
 {{- end }}
 
 export XDG_DATA_HOME=$HOME/.local/share
