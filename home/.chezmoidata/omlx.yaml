@@ -21,6 +21,8 @@ omlx:
     name: "Qwen3.6-35B-A3B-nvfp4"
     type: "llm"
     reasoning: true
+    contextWindow: 262144
+    maxTokens: 32768
     compat:
       thinkingFormat: "qwen-chat-template"
     input:
@@ -29,6 +31,8 @@ omlx:
     name: "Qwen3.6-35B-A3B-UD-MLX-4bit"
     type: "llm"
     reasoning: true
+    contextWindow: 262144
+    maxTokens: 32768
     compat:
       thinkingFormat: "qwen-chat-template"
     input:
@@ -38,8 +42,13 @@ omlx:
     port: 8000
     log_level: "info"
   sampling:
-    max_context_window: 131072
-    max_tokens: 131072
+    # 262144 = model's native max_position_embeddings (Qwen3.5 supports ~256K tokens).
+    # M5 Pro 64 GB: ~18 GB model weights + ~5.9 GB KV cache at 262K ≈ 24 GB total,
+    # leaving ~10 GB for OS / other processes. Safe and much more useful than 128K.
+    max_context_window: 262144
+    # 32K output tokens — most calls need 1K-8K; 32K covers deep reasoning / long
+    # code generation. Context window (input) and output budget are independent limits.
+    max_tokens: 32768
     temperature: 1.0
     top_p: 0.95
     top_k: 0

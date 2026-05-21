@@ -57,6 +57,27 @@ if [[ -z "$MODEL_LIST_JSON" ]]; then
 fi
 
 # ------------------------------------------------------------------
+# Read sampling config from chezmoi data (source of truth).
+# Used as default contextWindow/maxTokens for all models,
+# with per-model override support via the model entry.
+# ------------------------------------------------------------------
+SAMPLE_JSON=""
+if command -v chezmoi &>/dev/null; then
+  SAMPLE_JSON=$(cd "$CHEZMOI_ROOT" && chezmoi data 2>/dev/null | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+sampling = data.get('omlx', {}).get('sampling', {})
+if sampling:
+    print(json.dumps(sampling))
+else:
+    print('{}')
+" 2>/dev/null)
+fi
+if [[ -z "$SAMPLE_JSON" ]]; then
+  SAMPLE_JSON='{"max_context_window": 131072, "max_tokens": 131072}'
+fi
+
+# ------------------------------------------------------------------
 # Read API key from omlx settings (if available)
 # ------------------------------------------------------------------
 api_key="omlx"
@@ -75,15 +96,19 @@ fi
 # ------------------------------------------------------------------
 # Build the final models.json using Python for correctness.
 # ------------------------------------------------------------------
-python3 - "$OMLX_API_URL" "$OUTPUT" "$api_key" "$MODEL_LIST_JSON" <<'PYEOF'
+python3 - "$OMLX_API_URL" "$OUTPUT" "$api_key" "$MODEL_LIST_JSON" "$SAMPLE_JSON" <<'PYEOF'
 import json, os, sys
 
 api_url = sys.argv[1]
 output_path = sys.argv[2]
 api_key = sys.argv[3]
 model_list_raw = sys.argv[4]
+sampling_raw = sys.argv[5]
 
 models = json.loads(model_list_raw)
+
+# Read sampling config (applied as defaults, with per-model override support)
+sampling = json.loads(sampling_raw)
 
 # Ensure all models have the expected structure
 formatted_models = []
@@ -102,6 +127,11 @@ for m in models:
     # Copy modelType if present (e.g. "ocr")
     if "modelType" in m:
         entry["modelType"] = m["modelType"]
+
+    # Apply default contextWindow/maxTokens from sampling config
+    # (allow per-model overrides in the model entry)
+    entry["contextWindow"] = m.get("contextWindow", sampling.get("max_context_window", 131072))
+    entry["maxTokens"] = m.get("maxTokens", sampling.get("max_tokens", 131072))
 
     formatted_models.append(entry)
 
