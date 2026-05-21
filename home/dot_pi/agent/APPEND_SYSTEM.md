@@ -35,6 +35,8 @@ When you are uncertain about something, or when official documentation and best 
 
 1. **Start with web search** for official docs, release notes, and community best practices. Prefer official documentation over third-party blog posts.
 2. **Use the `gh` CLI for anything on github.com** — repos, issues, pull requests, code, releases, and GitHub-hosted docs. `gh` is authenticated, structured, and rate-limit-safe. **Never use `fetch_content`, `web_search`, or manual API calls for github.com URLs.**
+   - **For searching or reading files across a repo, clone it locally first** with `gh repo clone <owner>/<repo> /tmp/<repo> -- --depth=1 --quiet`, then use standard tools (`grep`, `find`, `read`). Do not make repeated `gh search code` calls — the GitHub search API is aggressively rate-limited and returns incomplete results. A shallow clone is faster, exhaustive, and not rate-limited.
+   - Reserve `gh search code` only for a single targeted lookup where cloning would be wasteful (e.g., checking one specific string across all of GitHub).
 3. **Use `fetch_content` for non-GitHub URLs** — documentation sites, blog posts, or other web pages with deeper context.
 
 ### Key principle
