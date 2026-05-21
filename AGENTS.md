@@ -35,41 +35,101 @@ chezmoi apply             # Reconcile destination with source
 chezmoi data              # Inspect the rendered data map
 ```
 
-### chezmoi root override — `.chezmoiroot`
+### Repository layout & `.chezmoiroot`
 
-This repo uses a `.chezmoiroot` file to set an alternative source root. The file's contents specify which subdirectory is the chezmoi source root:
+This repo is **not** a flat chezmoi source tree. A `.chezmoiroot` file (value: `home`) sets an alternative source root, meaning the chezmoi source tree lives under `home/` — the repo root contains non-chezmoi files alongside it.
 
 ```sh
-# Contents of .chezmoiroot
 cat .chezmoiroot
-home
+# Output: home
 ```
 
-**This is critical:** when `.chezmoiroot` is set (e.g. to `home`), all chezmoi special directories live **under that subdirectory**, not at the repo root. Specifically:
+**Repo root** (NOT part of the chezmoi source tree):
+
+| Path | Purpose |
+|------|--------|
+| `AGENTS.md` | Agent documentation for this repo |
+| `.chezmoiroot` | Specifies `home` as the chezmoi source root (tracked by git) |
+| `CLAUDE.md` | Claude code assistant documentation |
+| `README.md` | Repository readme |
+| `renovate.json` | Renovate dependency update config |
+| `scripts/` | Project scripts (linting, helper tools) — **not** chezmoi-managed |
+| `pyproject.toml` | Python project config (uv/pip) |
+| `uv.lock` | uv dependency lock file |
+
+**Under `home/`** (the chezmoi source tree):
+
+| Pattern | Destination | Notes |
+|---------|-------------|-------|
+| `home/dot_<name>` | `~/.<name>` | Dotfiles |
+| `home/dot_dirname/` | `~/.dirname/` | Directory source |
+| `home/config/<path>` | `~/.config/<path>` | XDG-style config |
+| `home/bin/<name>` | `~/.local/bin/<name>` | Executables (via bin/ prefix) |
+
+**Under `home/`** — chezmoi special directories:
+
+| Source path | Purpose |
+|-------------|--------|
+| `home/.chezmoiscripts/` | Install/init scripts (run after dotfiles are applied) |
+| `home/.chezmoidata/` | Data files for templates (YAML) |
+| `home/.chezmoiignore.tmpl` | Ignored paths (`.chezmoiignore` is at the **repo root**, not under the root override) |
+
+**This is critical:** when `.chezmoiroot` is `home`, all chezmoi special directories live **under `home/`**, not at the repo root. Specifically:
 
 - `.chezmoiscripts/` → `home/.chezmoiscripts/` (scripts run as part of `chezmoi apply`)
-- `.chezmoiignore` is at repo root (it is not subject to the root override)
 - `.chezmoidata/` → `home/.chezmoidata/`
 - All dotfile/config/bin sources live under `home/`
+- **`.chezmoiignore`** is at the **repo root** (not under the root override)
 
-**When modifying scripts, always check `.chezmoiroot` first** — the script directory may not be at `.chezmoiscripts/` at the repo root but nested under the configured root instead.
+**When modifying scripts, always check `.chezmoiroot` first** — the script directory is at `home/.chezmoiscripts/`, not `.chezmoiscripts/` at the repo root.
 
-### ⚠️ Do not edit live dotfiles directly
+**When locating files, use `chezmoi source-path`** — this resolves a destination path to its source file regardless of the `.chezmoiroot` override:
 
-**Never make changes directly to files in `~` or any destination path.** All configuration changes must go through the chezmoi source tree in this repo. Editing a live dotfile will:
+```sh
+chezmoi source-path ~/.config/tmux/tmux.conf
+# Output: home/dot_config/tmux/tmux.conf
+```
 
-1. **Get overwritten on the next `chezmoi apply`** — your changes will be silently reverted to the source-of-truth.
-2. **Not be version-controlled** — your edits will be lost forever on re-init or machine change.
-3. **Create drift** — `chezmoi status` and `chezmoi diff` will no longer accurately reflect what you've customized.
+### ⚠️ Never edit files in `~` directly — always go through chezmoi
 
-The correct workflow:
+**This is the single most important rule in this repo.** Every file that exists in `~` (or any destination path) is managed by chezmoi. **Never edit a file directly in `~`** — it will be overwritten the next time `chezmoi apply` runs.
 
-1. Locate the **source** file using `chezmoi source-path <destination-path>` (e.g., `chezmoi source-path ~/.gitconfig`)
-2. Edit the source file in the repo (or use `chezmoi edit <destination-path>`)
-3. Validate with `chezmoi diff` and `chezmoi apply --dry-run`
-4. Apply with `chezmoi apply` and commit your changes
+**Rule: Always edit the source tree.** Use one of these workflows:
 
-If a file is managed by an external tool (e.g., Pi's `settings.json` updated at runtime by `pi install`), update the chezmoi managed version (`modify_settings.json.tmpl` or equivalent) rather than the live file directly.
+1. **`chezmoi source-path <path>`** → Find the source file, edit it directly
+2. **`chezmoi edit <path>`** → Open the source file in `$EDITOR` (auto-resolves the source)
+3. **`chezmoi apply`** → Reconciles `~` with the source tree
+
+**Do NOT:**
+- `vim ~/.config/tmux/tmux.conf` — edit the live file directly
+- `echo 'foo' >> ~/.zshrc` — append to the live file
+- `pi install <package>` — writes directly to `~/.pi/agent/settings.json` (lost on next `chezmoi apply`)
+- Create files under `~/.config/`, `~/.local/`, `~/` that aren't in the source tree
+
+**Always:**
+- Edit `home/dot_config/tmux/tmux.conf` (the chezmoi source)
+- Edit `home/dot_zshrc.tmpl` (the chezmoi source template)
+- Edit `home/dot_pi/agent/modify_settings.json.tmpl` (the Pi settings template)
+- Run `chezmoi apply` to push changes to `~`
+
+The only exception is files completely outside this repo's purview (e.g., `/tmp/`, unrelated projects). But if a file lives in `~` and this repo manages it, **always edit through chezmoi**.
+
+#### How this works in practice
+
+When you edit a chezmoi-managed file:
+
+```sh
+# WRONG: editing the live file (will be overwritten)
+vim ~/.zshrc
+echo 'alias foo=bar' >> ~/.zshrc  # LOST on next chezmoi apply
+
+# RIGHT: editing the source tree (persists across apply)
+chezmoi edit ~/.zshrc              # opens home/dot_zshrc.tmpl
+edit home/dot_zshrc.tmpl          # same thing, just more explicit
+chezmoi apply                     # renders template → ~/.zshrc
+```
+
+When `~/.zshrc` or `~/.pi/agent/settings.json` or `~/.config/...` are shown as modified in `chezmoi status`, it means the source tree and live file are in sync — **don't touch the live file**. Any drift (source changed but `~` hasn't) is fixed by `chezmoi apply`.
 
 ### Idempotency and reproducibility
 
@@ -187,6 +247,31 @@ uv run scripts/shellcheck.py
 # Run all pre-commit hooks (gitleaks, yamlfmt, jsonlint, shellcheck)
 pre-commit run --all-files
 ```
+
+## Navigating the repo (quick reference)
+
+When working in this repo, keep these mental models in mind:
+
+**The repo root is NOT the chezmoi source root.**
+- Files at the repo root (`AGENTS.md`, `scripts/`, `pyproject.toml`) are plain Git files.
+- The chezmoi source tree is under `home/` (the value in `.chezmoiroot`).
+- Use `ls .local/share/chezmoi/home/` or `chezmoi source-path` to find sources.
+
+**`home/` is the chezmoi source root.**
+- All dotfile/config/bin sources live under `home/`.
+- Chezmoi special dirs (`.chezmoiscripts/`, `.chezmoidata/`) are under `home/`.
+- `chezmoi source-path` resolves destination → source under `home/`.
+
+**Important path disambiguation:**
+
+| What you want | Where it lives |
+|---------------|---------------|
+| This file (`AGENTS.md`) | Repo root: `AGENTS.md` |
+| chezmoi scripts | `home/.chezmoiscripts/` (NOT repo root `scripts/`) |
+| Lint scripts | Repo root: `scripts/` (NOT chezmoi-managed) |
+| The `.chezmoiroot` file | Repo root: `.chezmoiroot` |
+| Source for `~/.gitconfig` | `home/dot_gitconfig` |
+| Source for `~/.config/tmux/` | `home/dot_config/tmux/` |
 
 ## Adding a new dotfile
 

@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 {{/* chezmoi:modify-template */}}
-# Managed by chezmoi.
-# Sets pi theme based on current OS appearance (solarized-dark / solarized-light),
-# defaults provider to omlx,
-# ensures required packages are present at pinned versions, and
-# configures pnpm for package installs/updates, while preserving
-# runtime-written keys such as lastChangelogVersion.
+# Managed by chezmoi — source: home/dot_pi/agent/modify_settings.json.tmpl
+# ⚠️  DO NOT EDIT ~/.pi/agent/settings.json directly. It is overwritten
+#     by chezmoi on every `chezmoi apply`. Always edit the .tmpl source tree.
+#
+# This Python template reads the current settings.json (from stdin), applies
+# declarative defaults, and writes back — preserving runtime keys like
+# lastChangelogVersion and any per-user overrides.
+#
+# Configures: theme, defaultProvider, npmCommand, showHardwareCursor,
+#             and required pnpm packages (managed via renovate).
 import json
 import sys
 
@@ -35,9 +39,8 @@ current["npmCommand"] = ["pnpm"]
 
 # Cursor is managed entirely at runtime by the cursor-manager extension.
 # It starts hidden and is revealed only when the terminal window gains focus.
-# Setting this to False here prevents a flash on startup if the user previously
-# toggled it to True via /settings.
-current["showHardwareCursor"] = False
+# Setting this to True here enables a blinking hardware cursor on startup.
+current["showHardwareCursor"] = True
 
 def base_name(spec):
     """Return the base package name (without version) from an npm:name@ver spec."""
@@ -76,5 +79,15 @@ filtered = [
 
 # Add all required packages at their pinned versions.
 current["packages"] = filtered + required_packages
+
+# Compaction reserveTokens should be large enough to avoid context overflow.
+# With a 256K (262144 token) context window, we use 32K reserve so that
+# compaction triggers at ~230K tokens — leaving 32K tokens of headroom.
+# This accounts for Pi's conservative chars/4 token overestimate in the
+# shouldCompact() check (contextTokens > contextWindow - reserveTokens).
+current.setdefault("compaction", {
+    "enabled": True,
+    "reserveTokens": 32768,  # 32K tokens of safety margin (256K - 32K = 224K trigger)
+})
 
 print(json.dumps(current, indent=2))
