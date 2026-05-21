@@ -120,8 +120,14 @@ export default function (pi: ExtensionAPI) {
 			if (code === 0) { bundle = id; break; }
 		}
 
+		// terminal-notifier runs -execute via /bin/sh with a minimal PATH that
+		// won't include /opt/homebrew/bin. Resolve tmux's absolute path now so
+		// the click command works regardless of the shell's PATH.
+		const { stdout: tmuxWhich } = await pi.exec("which", ["tmux"]).catch(() => ({ stdout: "", stderr: "", code: 1 }));
+		const tmuxBin = tmuxWhich.trim() || "tmux";
+
 		const clickCmd =
-			`tmux switch-client -t '${sessionName}:${windowIndex}' 2>/dev/null; open -b '${bundle}'`;
+			`'${tmuxBin}' switch-client -t '${sessionName}:${windowIndex}' 2>/dev/null; open -b '${bundle}'`;
 
 		await pi.exec("terminal-notifier", [
 			"-title",    "pi",
