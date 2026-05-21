@@ -10,7 +10,11 @@ OVERLAY=$(cat << 'EOF'
   },
   "mcpServers": {
     "datadog": {
-      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp",
+      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp{{ if .work }}?toolsets=core,ddsql{{ end }}",
+      "auth": "oauth"
+    },
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v1/mcp/authv2",
       "auth": "oauth"
     }
   }
