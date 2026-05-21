@@ -21,7 +21,8 @@
   {{- $_ := set $marketplaces "datadog-claude-plugins" (dict "source" (dict "source" "git" "url" "https://github.com/DataDog/claude-marketplace.git")) -}}
   {{- $_ := set $managed "extraKnownMarketplaces" $marketplaces -}}
   {{- $mcpServers := get $managed "mcpServers" | default dict -}}
-  {{- $_ := set $mcpServers "datadog" (dict "type" "http" "url" "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp") -}}
+  {{- $_ := set $mcpServers "datadog" (dict "type" "http" "url" "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp?toolsets=core,ddsql") -}}
+  {{- $_ := set $mcpServers "atlassian" (dict "type" "http" "url" "https://mcp.atlassian.com/v1/mcp/authv2") -}}
   {{- $_ := set $managed "mcpServers" $mcpServers -}}
 {{- end -}}
 {{- $managed | toPrettyJson -}}
