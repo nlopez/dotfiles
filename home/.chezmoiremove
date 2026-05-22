@@ -2,6 +2,7 @@
 .local/bin/git
 .local/bin/gitcache
 .local/bin/git-use-gitcache
+.local/bin/terragrunt
 .local/share/gitcache
 .npmrc
 .config/uv/uv.toml
