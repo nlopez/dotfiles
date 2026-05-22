@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Shim: pins --working-dir to the repo's terraform/ directory so
+# --json-out-dir paths are always relative to terraform/ regardless of CWD.
+#
+# For `run --all` invocations: injects --working-dir (via TG_WORKING_DIR).
+# For any other command (plan, init, etc.) when CWD is inside terraform/:
+#   converts to `run --all --working-dir <tf> --filter <unit> -- <cmd>`
+#   so the working-dir is used consistently.
+#
+# Falls through unchanged when outside the repo or when --working-dir /
+# TG_WORKING_DIR is already set by the caller.
+
+set -euo pipefail
+
+_real=/opt/homebrew/bin/terragrunt
+
+# Locate the repo's terraform/ directory.
+if ! _repo=$(git rev-parse --show-toplevel 2>/dev/null) || \
+   [[ ! -f "$_repo/terraform/root.hcl" ]]; then
+  exec "$_real" "$@"
+fi
+_tf="$_repo/terraform"
+
+# Don't double-inject.
+if [[ -n "${TG_WORKING_DIR:-}" ]] || printf '%s\n' "$@" | grep -qx -- '--working-dir'; then
+  exec "$_real" "$@"
+fi
+
+export TG_WORKING_DIR="$_tf"
+
+# `run --all`: TG_WORKING_DIR is sufficient, pass through.
+_has_run=false _has_all=false
+for _a in "$@"; do
+  [[ "$_a" == "run" ]]   && _has_run=true
+  [[ "$_a" == "--all" ]] && _has_all=true
+done
+[[ "$_has_run" == true && "$_has_all" == true ]] && exec "$_real" "$@"
+
+# Any other command inside the terraform tree: convert to a filtered run --all.
+_cwd=$(pwd)
+if [[ "$_cwd" == "$_tf/"* || "$_cwd" == "$_tf" ]]; then
+  _unit="${_cwd#"$_tf/"}"
+  exec "$_real" run --all --working-dir "$_tf" --filter "$_unit" -- "$@"
+fi
+
+exec "$_real" "$@"
