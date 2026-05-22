@@ -21,7 +21,10 @@ try:
 except Exception:
     pass
 
-current["theme"] = "atom-one-dark"
+# Theme is managed at runtime by the auto-theme extension (extensions/auto-theme.ts)
+# which syncs with macOS appearance. Don't override it here — just ensure a
+# sensible default exists so a fresh install isn't theme-less.
+current.setdefault("theme", "solarized-light")
 
 # Default omlx as the primary provider.
 if "omlx" in str(current.get("defaultProvider", "")) or current.get("defaultProvider") is None:
