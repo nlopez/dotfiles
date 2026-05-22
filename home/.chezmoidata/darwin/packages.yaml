@@ -57,6 +57,7 @@ packages:
         - grep
         - gh
         - neovim
+        - terminal-notifier
         - testssl
         - cilium-cli
         - watchman

@@ -311,6 +311,59 @@ if [[ -n "$TMUX" ]]; then
   fi
 fi
 
+{{- if eq .chezmoi.os "darwin" }}
+###############################################################################
+# ── Long-running command notifications (terminal-notifier) ────────────────────
+# Fires a macOS notification whenever a tmux command runs for longer than 5 s.
+# Skips the notification when the tmux window is currently active (the user is
+# already looking at the output).
+###############################################################################
+if command -v terminal-notifier &>/dev/null; then
+  _notif_cmd_start=0
+  _notif_cmd_name=""
+
+  function _notif_preexec() {
+    _notif_cmd_start=$EPOCHSECONDS
+    _notif_cmd_name="${${1## }%% *}"   # first word of command, strip leading spaces
+  }
+
+  function _notif_precmd() {
+    local _exit=$?
+    [[ $_notif_cmd_start -eq 0 ]] && return
+    local _elapsed=$(( EPOCHSECONDS - _notif_cmd_start ))
+    _notif_cmd_start=0
+    # Only care about tmux windows and commands that actually took a while.
+    [[ -z "$TMUX" || $_elapsed -lt 5 ]] && return
+    # Skip when the user is still looking at this window.
+    local _active
+    _active=$(tmux display-message -p '#{window_active}' 2>/dev/null) || return
+    [[ "$_active" == "1" ]] && return
+
+    local _win
+    _win=$(tmux display-message -p '#W' 2>/dev/null) || _win="tmux"
+
+    if [[ $_exit -eq 0 ]]; then
+      terminal-notifier \
+        -title "✅ ${_notif_cmd_name} (${_elapsed}s)" \
+        -subtitle "$_win" \
+        -message "Finished successfully" \
+        -sound "default" \
+        &>/dev/null &!
+    else
+      terminal-notifier \
+        -title "❌ ${_notif_cmd_name} (${_elapsed}s)" \
+        -subtitle "$_win" \
+        -message "Exited ${_exit}" \
+        -sound "Basso" \
+        &>/dev/null &!
+    fi
+  }
+
+  add-zsh-hook preexec _notif_preexec
+  add-zsh-hook precmd _notif_precmd
+fi
+{{- end }}
+
 # Inject psvar[21] into PROMPT before pure's exec-time segment (%(19V.)).
 # Runs once after OMZ/pure have initialized PROMPT.
 function _aws_prompt_setup() {
