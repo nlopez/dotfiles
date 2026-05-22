@@ -21,13 +21,7 @@ try:
 except Exception:
     pass
 
-import subprocess
-if sys.platform == "darwin":
-    r = subprocess.run(["defaults", "read", "-g", "AppleInterfaceStyle"],
-                      capture_output=True, text=True)
-    current["theme"] = "solarized-dark" if r.stdout.strip() == "Dark" else "solarized-light"
-else:
-    current.setdefault("theme", "solarized-light")
+current["theme"] = "atom-one-dark"
 
 # Default omlx as the primary provider.
 if "omlx" in str(current.get("defaultProvider", "")) or current.get("defaultProvider") is None:

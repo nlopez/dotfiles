@@ -294,21 +294,6 @@ if [[ -n "$TMUX" ]]; then
   }
   add-zsh-hook precmd _chezmoi_reload_precmd
 
-  # ── Start the tmux auto-theme background watcher (idempotent) ─────────────
-  _TMUX_WATCHER_PIDFILE="$HOME/.config/tmux/theme-watcher.pid"
-  _TMUX_WATCHER_SCRIPT="$HOME/.config/tmux/scripts/tmux-auto-theme-watcher.sh"
-  if [[ -f "$_TMUX_WATCHER_PIDFILE" ]]; then
-    _pw_pid=$(cat "$_TMUX_WATCHER_PIDFILE" 2>/dev/null) || _pw_pid=""
-    if [[ -n "$_pw_pid" ]] && kill -0 "$_pw_pid" 2>/dev/null; then
-      : # watcher already running
-    else
-      # Dead PID file — restart
-      nohup "$_TMUX_WATCHER_SCRIPT" >/dev/null 2>&1 &
-    fi
-  elif [[ -f "$_TMUX_WATCHER_SCRIPT" ]]; then
-    # First run — start the watcher
-    nohup "$_TMUX_WATCHER_SCRIPT" >/dev/null 2>&1 &
-  fi
 fi
 
 {{- if eq .chezmoi.os "darwin" }}
