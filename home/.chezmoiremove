@@ -14,8 +14,7 @@
 .config/tmux/scripts/tmux-auto-theme-watcher.sh
 .config/tmux/theme-lock
 .config/tmux/theme-watcher.pid
-.pi/agent/themes/solarized-dark.json
-.pi/agent/themes/solarized-light.json
+
 .local/share/gitcache
 .npmrc
 .config/uv/uv.toml

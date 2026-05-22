@@ -74,7 +74,7 @@ export default function (pi: ExtensionAPI) {
 
 	function enqueueTitle(emoji: string): void {
 		titleQueue = titleQueue
-			.then(() => setWindowTitle(emoji))
+			.then(() => setWindowStatus(emoji))
 			.catch(() => {}); // not fatal
 	}
 
@@ -87,14 +87,11 @@ export default function (pi: ExtensionAPI) {
 		return stripWindowEmoji(stdout.trim());
 	}
 
-	async function setWindowTitle(emoji: string): Promise<void> {
-		const base = await getWindowBase();
-		// Disable auto-rename so our prefix sticks, then rename.
+	async function setWindowStatus(emoji: string): Promise<void> {
+		// Set a user option on the window so the status-bar format can
+		// display it — the window *name* (title) is never touched.
 		await pi.exec("tmux", [
-			"set-option", "-w", "-t", tmuxPane, "automatic-rename", "off",
-		]);
-		await pi.exec("tmux", [
-			"rename-window", "-t", tmuxPane, `${emoji} ${base}`,
+			"set-option", "-w", "-t", tmuxPane, "@pi-status", `${emoji} `,
 		]);
 	}
 
