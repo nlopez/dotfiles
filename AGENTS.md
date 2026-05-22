@@ -148,11 +148,19 @@ and end up with an identical, working configuration. This means:
 
 #### Removing configurations
 
-When removing a dotfile or config, don't just delete it from the repo. You must also clean up:
+Chezmoi only looks at the **current** state of the source tree — it has no history, so deleting a source file does **not** remove the file from `~` on machines where it was previously applied ([discussion #1446](https://github.com/twpayne/chezmoi/discussions/1446)). You must explicitly tell chezmoi to remove the destination path.
 
-1. **The source file** — remove the `dot_<name>`, `config/...`, or `bin/...` entry from the repo.
-2. **Any leftover artifacts** — if the config created ancillary files (e.g., data dirs, symlinks, child configs), add a cleanup script in `.chezmoiscripts/` (e.g., `darwin/01_cleanup_old_config.sh`) that removes them.
-3. **The `empty_`/`dir_` markers** — if you created `empty_` or `dir_` entries just to prevent chezmoi from recreating a path, remove those too once cleanup is done.
+When removing a dotfile or config:
+
+1. **Remove the source entry** — delete the `dot_<name>`, `config/...`, or `bin/...` source file/dir from the repo.
+2. **Declare the destination removal** — pick the most idiomatic mechanism:
+   - **`home/.chezmoiremove` (preferred)** — a [template](https://chezmoi.io/user-guide/manage-different-types-of-file/#ensure-that-a-target-is-removed) listing destination paths (relative to `~`, no leading `~/`) that chezmoi must ensure do not exist. Runs on every `chezmoi apply`, idempotent, supports glob patterns and template conditionals. Use this for any path chezmoi previously managed. Leave the entry in place until every machine has applied at least once; then it can be pruned.
+   - **`remove_<name>` source attribute** — declares a single source entry that should not exist at the destination. Useful when you also want to keep a placeholder in the source tree, but for plain "this path must be gone" cleanup, `.chezmoiremove` is simpler and centralised.
+   - **`run_once_after_remove-*.sh` cleanup script** — only when removal needs imperative logic that `.chezmoiremove` cannot express (e.g., rewriting another tool's state file, unsetting a fish universal variable, calling a package manager). Not for plain file deletion.
+3. **Clean up ancillary artifacts** — if the config created data dirs, symlinks, or registered itself with another tool, list them in `.chezmoiremove` too, or add a `run_once_after_remove-*.sh` script for non-file cleanup.
+4. **Drop `empty_`/`dir_` markers** — if you created them only to suppress chezmoi recreating a path, remove them once cleanup has landed everywhere.
+
+Verify with `chezmoi apply --dry-run --verbose` before committing, and `chezmoi apply` to clear the local machine.
 
 This ensures that re-applying chezmoi on a machine that previously had the old config ends up in a clean state rather than leaving stale artifacts.
 
