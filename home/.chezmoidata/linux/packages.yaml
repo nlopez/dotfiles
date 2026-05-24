@@ -73,6 +73,8 @@ packages:
       work: []
   linux-aurora:
     dnf:
+      1password_cli:
+      - 1password-cli
       packages:
         base:
         - gcc
