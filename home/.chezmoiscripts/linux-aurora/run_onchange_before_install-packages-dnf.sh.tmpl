@@ -19,16 +19,6 @@
 
 set -eufo pipefail
 
-# Separate 1password-cli (requires --enablerepo=1password) from other packages
-{{- $has1ppackage := has "1password-cli" $packages -}}
-{{- $otherPackages := without $packages "1password-cli" -}}
-
-# Install 1password-cli with --enablerepo=1password
-{{- if $has1ppackage -}}
-dnf install -y --enablerepo=1password 1password-cli
-{{- end -}}
-
-# Install other packages without --enablerepo flag
-{{- if $otherPackages -}}
-dnf install -y {{ $otherPackages | sortAlpha | uniq | join " " }}
-{{- end -}}
+# 1password-cli is installed via the 1password repo configured in 00-install-packages-dnf.sh
+# so it can be installed along with all other packages
+dnf install -y {{ $packages | sortAlpha | uniq | join " " }}
