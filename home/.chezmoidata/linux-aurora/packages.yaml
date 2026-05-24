@@ -4,8 +4,6 @@ packages:
     brew:
       brews:
         base:
-        - 1password
-        - 1password-cli
         - gcc
         - gcc-c++
         - make
@@ -30,7 +28,6 @@ packages:
         - zoxide
         - hyperfine
         - postgresql
-        - bind-utils
         - ffmpeg
         - fzf
         - google-noto-color-emoji-fonts
