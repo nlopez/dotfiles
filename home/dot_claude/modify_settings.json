@@ -1,5 +1,5 @@
 {{- /* chezmoi:modify-template */ -}}
-{{- $existing := .chezmoi.stdin | fromJson -}}
+{{- $existing := .chezmoi.stdin | default "{}" | fromJson -}}
 {{- $managed := include ".chezmoitemplates/claude_settings.json" | fromJson -}}
 {{- /* Preserve runtime-configurable fields that /config may update */ -}}
 {{- range list "model" "effortLevel" "theme" -}}
