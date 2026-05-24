@@ -1,17 +1,14 @@
 #!/bin/bash
 
-{{ $brewConfig := .packages.linux.brew -}}
+{{ $brewConfig := .packages.linux-aurora.brew -}}
 {{ $brews := $brewConfig.brews.base -}}
-{{ $casks := $brewConfig.casks.base -}}
 
 {{ if .personal -}}
 {{   $brews = concat $brews $brewConfig.brews.personal -}}
-{{   $casks = concat $casks $brewConfig.casks.personal -}}
 {{ end -}}
 
 {{ if .work -}}
 {{   $brews = concat $brews $brewConfig.brews.work -}}
-{{   $casks = concat $casks $brewConfig.casks.work -}}
 {{ end -}}
 
 set -eufo pipefail
@@ -19,8 +16,5 @@ set -eufo pipefail
 brew bundle --file=/dev/stdin --cleanup <<EOF
 {{ range ($brews | sortAlpha | uniq ) -}}
 brew {{ . | quote }}
-{{ end -}}
-{{ range ($casks | sortAlpha | uniq ) -}}
-cask {{ . | quote }}
 {{ end -}}
 EOF

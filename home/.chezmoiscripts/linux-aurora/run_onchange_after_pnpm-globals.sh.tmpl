@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Checksum to trigger when pnpm global packages change
-# {{ .packages.linux.pnpm | toJson | sha256sum }}
+# {{ .packages.linux-aurora.pnpm | toJson | sha256sum }}
 
 set -eufo pipefail
 
@@ -67,18 +67,18 @@ install_if_healthy() {
     date +%s > "$INSTALLED_PKG_STATE_DIR/$pkg_id"
 }
 
-{{- range .packages.linux.pnpm.base }}
+{{- range .packages.linux-aurora.pnpm.base }}
 install_if_healthy "{{ . }}"
 {{- end }}
 
 {{- if .personal }}
-{{- range .packages.linux.pnpm.personal }}
+{{- range .packages.linux-aurora.pnpm.personal }}
 install_if_healthy "{{ . }}"
 {{- end }}
 {{- end }}
 
 {{- if .work }}
-{{- range .packages.linux.pnpm.work }}
+{{- range .packages.linux-aurora.pnpm.work }}
 install_if_healthy "{{ . }}"
 {{- end }}
 {{- end }}
