@@ -14,11 +14,6 @@
 {{   $casks = concat $casks $brewConfig.casks.work -}}
 {{ end -}}
 
-{{ if .wsl -}}
-{{   $brews = concat $brews $brewConfig.brews.wsl -}}
-{{   $casks = concat $casks $brewConfig.casks.wsl -}}
-{{ end -}}
-
 set -eufo pipefail
 
 brew bundle --file=/dev/stdin --cleanup <<EOF

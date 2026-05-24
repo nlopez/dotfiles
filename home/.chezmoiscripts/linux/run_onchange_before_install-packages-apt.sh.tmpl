@@ -11,10 +11,6 @@
 {{   $packages = concat $packages $aptConfig.packages.work -}}
 {{ end -}}
 
-{{ if .wsl -}}
-{{   $packages = concat $packages $aptConfig.packages.wsl -}}
-{{ end -}}
-
 {{ $sudo := "sudo " -}}
 {{ if eq .chezmoi.username "root" -}}
 {{   $sudo = "" -}}
