@@ -15,6 +15,7 @@
 .config/tmux/theme-lock
 .config/tmux/theme-watcher.pid
 
+.local/bin/zed
 .local/share/gitcache
 .npmrc
 .config/uv/uv.toml
