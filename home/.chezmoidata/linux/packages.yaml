@@ -32,7 +32,6 @@ packages:
         - fonts-noto-color-emoji
         personal: []
         work: []
-        wsl: []
     brew:
       brews:
         base:
@@ -54,12 +53,10 @@ packages:
         - rustup
         personal: []
         work: []
-        wsl: []
       casks:
         base: []
         personal: []
         work: []
-        wsl: []
     pnpm:
       base:
       - mmd@4.7.1
@@ -74,7 +71,6 @@ packages:
       - "@mjakl/pi-kagi-search@1.0.2"
       personal: []
       work: []
-      wsl: []
   linux-aurora:
     dnf:
       packages:
@@ -130,12 +126,10 @@ packages:
         - rustup
         personal: []
         work: []
-        wsl: []
       casks:
         base: []
         personal: []
         work: []
-        wsl: []
     pnpm:
       base:
       - mmd@4.7.1
@@ -150,4 +144,3 @@ packages:
       - "@mjakl/pi-kagi-search@1.0.2"
       personal: []
       work: []
-      wsl: []

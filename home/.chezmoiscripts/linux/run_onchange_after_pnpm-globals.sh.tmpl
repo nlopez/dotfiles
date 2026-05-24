@@ -83,12 +83,6 @@ install_if_healthy "{{ . }}"
 {{- end }}
 {{- end }}
 
-{{- if .wsl }}
-{{- range .packages.linux.pnpm.wsl }}
-install_if_healthy "{{ . }}"
-{{- end }}
-{{- end }}
-
 # Ensure pnpm global packages hoist their dependencies so TypeScript runtimes
 # (like pi's extension loader) can resolve modules via standard Node.js paths.
 GLOBAL_WS="$PNPM_HOME/global/v11/pnpm-workspace.yaml"

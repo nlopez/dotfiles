@@ -182,7 +182,6 @@ packages:
       - timonwong.shellcheck
       - tailscale.vscode-tailscale
       personal:
-      - ms-vscode-remote.remote-wsl
       - ms-vscode.powershell
       work:
       - datadog.datadog-vscode
