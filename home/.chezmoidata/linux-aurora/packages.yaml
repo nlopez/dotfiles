@@ -5,12 +5,11 @@ packages:
       brews:
         base:
         - gcc
-        - gcc-c++
         - make
         - bat
         - curl
         - direnv
-        - fd-find
+        - fd
         - git
         - jq
         - mkcert
@@ -27,10 +26,10 @@ packages:
         - tree
         - zoxide
         - hyperfine
-        - postgresql
+        - bind
+        - postgresql@14
         - ffmpeg
         - fzf
-        - google-noto-color-emoji-fonts
         - skopeo
         - yamlfmt
         - sql-formatter
