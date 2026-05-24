@@ -25,10 +25,10 @@ set -eufo pipefail
 
 # Install 1password-cli with --enablerepo=1password
 {{- if $has1ppackage -}}
-sudo dnf install -y --enablerepo=1password 1password-cli
+dnf install -y --enablerepo=1password 1password-cli
 {{- end -}}
 
 # Install other packages without --enablerepo flag
 {{- if $otherPackages -}}
-sudo dnf install -y {{ $otherPackages | sortAlpha | uniq | join " " }}
+dnf install -y {{ $otherPackages | sortAlpha | uniq | join " " }}
 {{- end -}}
