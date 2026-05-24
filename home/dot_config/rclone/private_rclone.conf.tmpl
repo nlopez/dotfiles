@@ -59,3 +59,17 @@ client_secret = {{ onepasswordRead "op://rclone/gdrive_alt/client_secret" }}
 scope = drive
 shared_with_me = false
 token = {{ onepasswordRead "op://rclone/gdrive_alt/token" }}
+
+# VFS cache - global settings for all remotes.
+# Ref: https://rclone.org/vfs/
+# Cache mode: full = cache metadata + file content (recommended)
+# max-size:   cap on total cached file size
+# max-age:    files older than this become eligible for cleanup
+# poll-interval: how often the cache checks for changes
+[rclone]
+vfs-cache-mode = full
+vfs-cache-max-size = 50G
+vfs-cache-max-age = 168h
+vfs-cache-poll-interval = 15m
+vfs-read-ahead = 128K
+vfs-read-chunk-size = 64K
