@@ -20,8 +20,12 @@
 Library/Application Support/espanso/**
 {{ end }}
 
-{{ if ne .chezmoi.os "linux" }}
+{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "aurora") }}
 .chezmoiscripts/linux/**
+{{ end }}
+
+{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") }}
+.chezmoiscripts/aurora/**
 {{ end }}
 
 
