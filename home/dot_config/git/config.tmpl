@@ -95,7 +95,11 @@
 
 [gpg "ssh"]
   allowedSignersFile = ~/.config/git/allowed_signers
+  {{- if eq .chezmoi.os "linux" }}
+  program = /opt/1Password/op-ssh-sign
+  {{- else }}
   program = ssh
+  {{- end }}
 
 [alias]
   # Current branch name (git 2.22+)
