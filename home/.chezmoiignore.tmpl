@@ -24,29 +24,6 @@ Library/Application Support/espanso/**
 .chezmoiscripts/linux/**
 {{ end }}
 
-{{ if ne .chezmoi.os "windows" }}
-.chezmoiscripts/windows/**
-AppData/**
-Documents
-{{ else }}
-# For Windows, explicitly include the dotfiles we want.
-*
-!.chezmoiscripts/windows/**
-!Documents/**
-!AppData/**
-!.chezmoidata/windows/**
-!.config/
-!.config/git/**
-!.config/rclone/**
-!.ssh/config
-!.local/bin/**
-!scoop/
-!scoop/persist/
-!scoop/persist/espanso/
-!scoop/persist/espanso/.espanso/
-!scoop/persist/espanso/.espanso/**
-{{ end }}
-
 
 {{ if .headless }}
 .config/zed

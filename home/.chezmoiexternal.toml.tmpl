@@ -1,4 +1,3 @@
-{{- if ne .chezmoi.os "windows" }}
 [".config/fish/functions/fisher.fish"]
     type = "file"
     # renovate: datasource=github-releases depName=jorgebucaran/fisher
@@ -37,7 +36,6 @@
     url = "https://github.com/Aloxaf/fzf-tab/archive/v1.3.0.tar.gz"
     exact = true
     stripComponents = 1
-{{- end }}
 
 # HashiCorp Terraform agent skills - https://github.com/hashicorp/agent-skills
 {{- range list
@@ -92,8 +90,7 @@
     "security-engineer"
     "sre-engineer"
     "terraform-engineer"
-    "terragrunt-expert"
-    "windows-infra-admin" }}
+    "terragrunt-expert" }}
 [".claude/agents/{{ . }}.md"]
     type = "file"
     url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/{{ . }}.md"

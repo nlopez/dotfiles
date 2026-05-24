@@ -1,0 +1,22 @@
+#!/bin/bash
+
+{{- $dnfConfig := index .packages "linux-aurora" "dnf" -}}
+{{- $packages := index $dnfConfig "packages" "base" -}}
+
+{{- if .personal -}}
+{{-   $personal := index .packages "linux-aurora" "personal" -}}
+{{-   if $personal -}}
+{{-     $packages = concat $packages $personal -}}
+{{-   end -}}
+{{- end -}}
+
+{{- if .work -}}
+{{-   $work := index .packages "linux-aurora" "work" -}}
+{{-   if $work -}}
+{{-     $packages = concat $packages $work -}}
+{{-   end -}}
+{{- end -}}
+
+set -eufo pipefail
+
+sudo dnf install -y {{ $packages | sortAlpha | uniq | join " " }}

@@ -4,8 +4,6 @@ espanso:
     toggle_key: OFF
     darwin:
       search_shortcut: off
-    windows:
-      search_shortcut: off
   matches:
     base: []
     # Home/personal machine snippets.
@@ -51,4 +49,3 @@ espanso:
     - {replace: "join aws.iam_account a on a.account_id = ", triggers: [":account"]}
     # OS-specific snippets.
     darwin: []
-    windows: []
