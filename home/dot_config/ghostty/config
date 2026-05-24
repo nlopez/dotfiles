@@ -27,6 +27,9 @@ keybind = super+ctrl+arrow_left=unbind
 keybind = super+ctrl+arrow_right=unbind
 keybind = super+ctrl+equal=unbind
 
+# Disable new window
+keybind = super+n=unbind
+
 # Disable tab management entirely
 keybind = super+t=unbind
 keybind = super+alt+w=unbind

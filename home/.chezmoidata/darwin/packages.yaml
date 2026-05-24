@@ -37,7 +37,6 @@ packages:
         - rustup
         - ryooooooga/tap/zabrze
         - tmux
-        - cormacrelf/tap/dark-notify
         - yq
         - jq
         - shellcheck

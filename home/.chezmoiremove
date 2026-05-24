@@ -18,4 +18,5 @@
 .local/share/gitcache
 .npmrc
 .config/uv/uv.toml
+Library/LaunchAgents/com.user.dark-notify-tmux.plist
 .config/pnpm/rc
