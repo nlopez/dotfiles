@@ -1,6 +1,8 @@
 #!/bin/bash
-# Configure the 1Password CLI YUM/DNF repository.
-# Based on: https://developer.1password.com/docs/cli/get-started#yum
+# Configure the 1Password YUM/DNF repository.
+# Based on: https://leopoldluley.de/posts/install-1password-with-rpm-ostree/
+# Both 1password (GUI) and 1password-cli are installed via rpm-ostree in
+# run_onchange_before_install-packages-dnf.sh.tmpl.
 
 set -eufo pipefail
 
