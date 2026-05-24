@@ -2,7 +2,6 @@
 #
 # These drive two targets:
 #   - Linux/Darwin: zabrze config (~/.config/zabrze/config.toml)
-#   - Windows:      PowerShell profile (Microsoft.PowerShell_profile.ps1)
 #
 # Complex snippets that use shell expansion (gcd, groot, tfplan) are NOT listed
 # here because they only work in zsh/bash; they remain as static TOML in the

@@ -15,9 +15,7 @@
   editor = vim
   fsmonitor = true
   hooksPath = ~/.config/git/hooks
-{{- if or .wsl (eq .chezmoi.os "windows") }}
-  sshCommand = ssh.exe
-{{- end }}
+
 
 [feature]
   manyFiles = true
@@ -27,11 +25,7 @@
   version = 4
 
 [credential]
-{{- if or .wsl (eq .chezmoi.os "windows") }}
-  helper = manager.exe
-{{- else }}
   helper = manager
-{{- end }}
 
 [pull]
   rebase = true
@@ -101,11 +95,7 @@
 
 [gpg "ssh"]
   allowedSignersFile = ~/.config/git/allowed_signers
-{{- if .wsl }}
-  program = op-ssh-sign-wsl.exe
-{{- else if eq .chezmoi.os "windows" }}
-  program = op-ssh-sign.exe
-{{- end }}
+  program = ssh
 
 [alias]
   # Current branch name (git 2.22+)
@@ -152,10 +142,7 @@
     ssh -T git@$host 2>&1 | head -1 \
   "
 
-{{- if eq .chezmoi.os "windows" }}
-[safe]
-  directory = %(prefix)///wsl.localhost/Ubuntu/home/localuser/.local/share/chezmoi
-{{- end -}}
+
 
 {{/* Last values win -- keep identity related includes last so they override defaults set earlier */}}
 

@@ -2,7 +2,7 @@
 {{- $personal  := promptBoolOnce . "personal"  "Is this a personal machine?" -}}
 {{- $work      := promptBoolOnce . "work"      "Is this a work machine?"     -}}
 {{- $headless  := promptBoolOnce . "headless"  "Is this a headless machine?" -}}
-{{- $wsl       := false -}}{{/* auto-detected from kernel; never prompted */}}
+
 {{- $ephemeral := false -}}{{/* true if this machine is ephemeral, e.g.: a cloud or VM instance */}}
 
 {{- $osID := .chezmoi.os -}}
@@ -17,11 +17,7 @@
 {{-   $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
 {{- end -}}
 
-{{/* detect windows subsystem for linux */}}
-{{- if and (eq .chezmoi.os "linux") (contains "microsoft" (.chezmoi.kernel.osrelease | lower)) -}}
-{{-   $wsl = true -}}
-{{-   $headless = true -}}
-{{- end -}}
+
 
 
 # ---------------------------------------------------------------------------
@@ -64,7 +60,7 @@ signingkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEvDNgTluafxfN++WnyRNqyVO7Lfbv
 hostname = {{ $hostname | quote }}
 personal = {{ $personal }}
 work = {{ $work }}
-wsl = {{ $wsl }}
+
 ephemeral = {{ $ephemeral }}
 headless = {{ $headless }}
 
@@ -79,10 +75,4 @@ zshPlugins = [
   "pure",
 ]
 
-{{- if eq .chezmoi.os "windows" }}
-[cd]
-command = "powershell.exe"
 
-[interpreters.json]
-command = "python"
-{{- end }}
