@@ -20,12 +20,14 @@
 Library/Application Support/espanso/**
 {{ end }}
 
-{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "aurora") }}
-.chezmoiscripts/linux/**
+# linux-debian: apt packages (Debian/Ubuntu only)
+{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.osRelease.id "aurora") }}
+.chezmoiscripts/linux-debian/**
 {{ end }}
 
-{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") }}
-.chezmoiscripts/aurora/**
+# linux-aurora: dnf packages (Fedora/aurora only)
+{{ if or (eq .chezmoi.os "darwin") (ne .chezmoi.osRelease.id "aurora") }}
+.chezmoiscripts/linux-aurora/**
 {{ end }}
 
 
