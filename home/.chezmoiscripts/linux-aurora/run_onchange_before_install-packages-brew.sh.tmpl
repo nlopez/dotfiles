@@ -1,6 +1,6 @@
 #!/bin/bash
 
-{{ $brewConfig := .packages.linux-aurora.brew -}}
+{{ $brewConfig := index .packages "linux-aurora" "brew" -}}
 {{ $brews := $brewConfig.brews.base -}}
 
 {{ if .personal -}}
