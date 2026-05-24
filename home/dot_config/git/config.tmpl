@@ -42,9 +42,9 @@
 [worktree]
 	guessRemote = true
 
-; Default github.com is anonymous (no key). All org clones must be routed
-; through a per-org SSH alias below. Longest-match wins for insteadOf, so the
-; per-org rules override any generic https→ssh rewrite.
+; Default github.com is anonymous (no key). Hobby org HTTPS URLs are rewritten
+; to https://SilentShout@github.com/ for credential auth. SSH aliases remain
+; available for direct git@github.com-hobby usage.
 
 [url "git@github.com-nlopez:DataDog/"]
   insteadOf = git@github.com:DataDog/
@@ -68,15 +68,16 @@
 {{- end }}
 
 {{- if .personal }}
-[url "git@github.com-hobby:silentshout42/"]
+; All hobby org HTTPS/git URLs get rewritten to authenticated HTTPS URL
+; for credential helper auth. Longer patterns match first.
+[url "https://SilentShout@github.com/"]
   insteadOf = git@github.com:silentshout42/
   insteadOf = git@github.com:SilentShout42/
   insteadOf = https://github.com/silentshout42/
   insteadOf = https://github.com/SilentShout42/
-
-[url "git@github.com-hobby:kamotimestamps/"]
   insteadOf = git@github.com:kamotimestamps/
   insteadOf = https://github.com/kamotimestamps/
+  insteadOf = https://github.com/KamoTimestamps/
 {{- end }}
 
 [init]
@@ -225,6 +226,8 @@
 [includeIf "hasconfig:remote.*.url:https://github.com/kamotimestamps/**"]
   path = config_hobby
 [includeIf "hasconfig:remote.*.url:git@github.com-hobby:kamotimestamps/**"]
+  path = config_hobby
+[includeIf "hasconfig:remote.*.url:https://github.com/KamoTimestamps/**"]
   path = config_hobby
 [includeIf "gitdir/i:~/src/github.com/kamotimestamps/**"]
   path = config_hobby
