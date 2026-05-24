@@ -4,14 +4,14 @@
 {{- $packages := index $dnfConfig "packages" "base" -}}
 
 {{- if .personal -}}
-{{-   $personal := index .packages "linux-aurora" "personal" -}}
+{{-   $personal := index .packages "linux-aurora" "dnf" "packages" "personal" -}}
 {{-   if $personal -}}
 {{-     $packages = concat $packages $personal -}}
 {{-   end -}}
 {{- end -}}
 
 {{- if .work -}}
-{{-   $work := index .packages "linux-aurora" "work" -}}
+{{-   $work := index .packages "linux-aurora" "dnf" "packages" "work" -}}
 {{-   if $work -}}
 {{-     $packages = concat $packages $work -}}
 {{-   end -}}
@@ -19,4 +19,16 @@
 
 set -eufo pipefail
 
-sudo dnf install -y {{ $packages | sortAlpha | uniq | join " " }}
+# Separate 1password-cli (requires --enablerepo=1password) from other packages
+{{- $has1ppackage := has "1password-cli" $packages -}}
+{{- $otherPackages := without $packages "1password-cli" -}}
+
+# Install 1password-cli with --enablerepo=1password
+{{- if $has1ppackage -}}
+sudo dnf install -y --enablerepo=1password 1password-cli
+{{- end -}}
+
+# Install other packages without --enablerepo flag
+{{- if $otherPackages -}}
+sudo dnf install -y {{ $otherPackages | sortAlpha | uniq | join " " }}
+{{- end -}}
