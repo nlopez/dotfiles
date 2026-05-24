@@ -19,10 +19,8 @@
 
 set -eufo pipefail
 
-# 1password-cli is installed via the 1password repo configured in 00-install-packages-dnf.sh
-# so it can be installed along with all other packages
-# On OSTree (Aurora), use rpm-ostree which layers packages into a deployment
-# On non-OSTree, fall back to dnf
+# On OSTree (Aurora/Fedora Silverblue), use rpm-ostree which layers packages into a deployment.
+# On non-OSTree, fall back to dnf.
 if command -v rpm-ostree >/dev/null 2>&1; then
     rpm-ostree install {{ $packages | sortAlpha | uniq | join " " }}
 else

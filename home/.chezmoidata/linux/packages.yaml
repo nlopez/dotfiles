@@ -75,6 +75,7 @@ packages:
     dnf:
       packages:
         base:
+        - 1password
         - 1password-cli
         - gcc
         - gcc-c++
