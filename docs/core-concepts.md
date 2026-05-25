@@ -158,7 +158,11 @@ This is the recommended place to externalize values that vary by OS, host, or us
 
 ### Scripts
 
-`.chezmoiscripts/` contains installation/initialization scripts that run after dotfiles are applied. Organize by OS:
+`.chezmoiscripts/` contains installation/initialization scripts that run after dotfiles are applied. Scripts run in order by name. Use them for package managers, browser extensions, or one-time setup steps that dotfiles alone cannot handle. See [scripts docs](https://chezmoi.io/docs/reference/scripts/).
+
+#### OS subdirectory convention
+
+A common pattern is to organize scripts under OS-specific subdirectories:
 
 ```
 .chezmoiscripts/
@@ -167,7 +171,24 @@ This is the recommended place to externalize values that vary by OS, host, or us
   windows/  # scripts for Windows
 ```
 
-Scripts run in order by name. Use them for package managers, browser extensions, or one-time setup steps that dotfiles alone cannot handle. See [scripts docs](https://chezmoi.io/docs/reference/scripts/).
+This is a **convention**, not a requirement. Chezmoi does not require OS-specific directories. You can also:
+
+- **Place a script directly under `.chezmoiscripts/`** — it runs on all platforms. Use `.chezmoi.os` conditionals inside a `.tmpl` script to handle platform differences:
+
+```gotemplate
+#!/bin/bash
+{{- if eq .chezmoi.os "darwin" }}
+FONT_DIR="{{ .chezmoi.homeDir }}/Library/Fonts"
+{{- else if eq .chezmoi.os "linux" }}
+FONT_DIR="{{ .chezmoi.homeDir }}/.local/share/fonts"
+{{- end }}
+```
+
+- **Use OS-specific directories** when scripts are entirely platform-specific with no shared logic, keeping them simpler and easier to read.
+
+**Rule of thumb:** if the script has platform-specific logic *and* shared logic, use one script with `.chezmoi.os` conditionals. If the scripts are completely different per platform, use OS-specific directories to avoid template complexity.
+
+In this repo, we use OS-specific directories for scripts that are entirely platform-specific (e.g., macOS-only Brewfile updates, Linux-only font cache rebuilds), and we consider placing shared scripts (like font merge scripts) directly under `.chezmoiscripts/` with conditionals when the logic overlaps substantially across platforms.
 
 ### External dependencies
 
