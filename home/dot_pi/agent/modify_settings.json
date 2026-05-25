@@ -86,4 +86,16 @@ current.setdefault("compaction", {
     "reserveTokens": 32768,  # 32K tokens of safety margin (256K - 32K = 224K trigger)
 })
 
+# Auto-discover local model servers (Ollama, LM Studio, vLLM, etc.).
+# The local-models extension probes common endpoints on startup and
+# registers any running server as a Pi provider.
+current.setdefault("localModels", {
+    "enabledServers": [],  # empty = probe all built-in servers
+    "skipEmbeddingModels": True,
+    "defaultContextWindow": 128000,
+    "defaultMaxTokens": 16384,
+    "autoEnable": True,
+    "probeTimeout": 3000,
+})
+
 print(json.dumps(current, indent=2))
