@@ -1,8 +1,8 @@
-font-size = 16
+font-size = 12
 font-family = ""
 font-family = IosevkaTerm NFM
 quit-after-last-window-closed = true
-theme = light:Atom One Light,dark:Atom One Dark
+theme = light:iTerm2 Solarized Light,dark:Atom One Dark
 window-padding-x = 0
 window-padding-y = 0
 window-padding-color = extend
@@ -59,5 +59,4 @@ confirm-close-surface = false
 # https://github.com/ghostty-org/ghostty/discussions/3836#discussioncomment-11688264
 cursor-style = block
 cursor-style-blink = true
-# shell-integration-features = no-cursor
-command = /bin/zsh -lc "tmux new-session -A -s 0"
+shell-integration-features = no-cursor
