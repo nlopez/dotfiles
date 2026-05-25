@@ -33,7 +33,6 @@ packages:
         - yazi
         - htop
         - kubectl
-        - rclone
         - ripgrep
         - rustup
         - ryooooooga/tap/zabrze
