@@ -98,15 +98,28 @@
 {{-   $fontDir = ".local/share/fonts" }}
 {{- end }}
 
-{{/*
-{{- range (list
-        "MesloLGS NF Regular.ttf"
-        "MesloLGS NF Bold.ttf"
-        "MesloLGS NF Italic.ttf"
-        "MesloLGS NF Bold Italic.ttf") }}
-["{{ $fontDir }}/{{ . }}"]
-    type = "file"
-    url = "https://github.com/romkatv/powerlevel10k-media/raw/master/{{ . }}"
+{{- if $fontDir }}
+# Iosevka Nerd Font (Normal + Mono + Propo variants)
+# Iosevka Term Nerd Font (Term + Mono + Propo variants)
+# Both extracted to subdirectories then merged via script
+
+# Iosevka Nerd Font — https://github.com/ryanoasis/nerd-fonts
+{{-   $iosevkaUrl := "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Iosevka.zip" }}
+["{{ $fontDir }}/iosevka-nf"]
+    type = "archive"
+    url = {{ printf "%q" $iosevkaUrl }}
+    include = ["IosevkaNerdFont*"]
+    exact = false
+    stripComponents = 0
+    refreshPeriod = "168h"
+
+# Iosevka Term Nerd Font
+{{-   $iosevkaTermUrl := "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/IosevkaTerm.zip" }}
+["{{ $fontDir }}/iosevka-term-nf"]
+    type = "archive"
+    url = {{ printf "%q" $iosevkaTermUrl }}
+    include = ["IosevkaTermNerdFont*"]
+    exact = false
+    stripComponents = 0
     refreshPeriod = "168h"
 {{- end }}
-*/}}
