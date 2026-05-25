@@ -1,9 +1,9 @@
 [".local/bin/rclone"]
-    type = "archive"
+    type = "archive-file"
     url = "https://github.com/rclone/rclone/releases/download/v1.74.2/rclone-v1.74.2-osx-arm64.zip"
-    include = ["rclone"]
-    stripComponents = 2
-    exact = true
+    path = "rclone"
+    stripComponents = 1
+    executable = true
     refreshPeriod = "168h"
 
 [".oh-my-zsh"]
