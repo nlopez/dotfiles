@@ -49,6 +49,7 @@ packages:
         personal: []
         work: []
       casks:
-        base: []
+        base:
+        - font-microsoft-office
         personal: []
         work: []

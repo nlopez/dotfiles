@@ -102,6 +102,7 @@ packages:
         - font-iosevka-nerd-font
         - font-iosevka-term-nerd-font
         - font-monocraft
+        - font-microsoft-office
         - tailscale-app
         - 1password
         - 1password-cli
