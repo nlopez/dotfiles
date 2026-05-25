@@ -8,6 +8,7 @@ packages:
         - make
         - bat
         - curl
+        - chezmoi
         - direnv
         - fd
         - git
@@ -24,6 +25,7 @@ packages:
         - ncdu
         - eza
         - tree
+        - uutils-coreutils
         - zoxide
         - hyperfine
         - bind
@@ -53,3 +55,5 @@ packages:
         - font-microsoft-office
         personal: []
         work: []
+      gnu_tools:
+        - uutils-coreutils

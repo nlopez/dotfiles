@@ -28,27 +28,10 @@ for _d in \
 done
 unset _d
 
-{{- if and (eq .chezmoi.os "darwin") $foundBrewPrefix }}
-{{- $gFormulas := .packages.darwin.gnu_tools }}
-
-# Prepend GNU gnubin/gnuman so they beat macOS /usr/bin and man paths.
-# Shell-level checks mean newly brew-installed GNU tools appear on next reload.
-for _d in \
-  {{- range $formula := $gFormulas }}
-  "{{ $foundBrewPrefix }}/opt/{{ $formula }}/libexec/gnubin" \
-  {{- end }}
-; do
-  [[ -d "$_d" ]] && path=("$_d" $path)
-done
-for _d in \
-  {{- range $formula := $gFormulas }}
-  "{{ $foundBrewPrefix }}/opt/{{ $formula }}/libexec/gnuman" \
-  {{- end }}
-; do
-  [[ -d "$_d" ]] && manpath=("$_d" $manpath)
-done
-unset _d
-{{- end }}
+# GNU tool gnubin directories are no longer injected into PATH.
+# They remain installed in their prefixed paths and can be called
+# with the g- prefix (e.g. gls, gcp, gmv). See the reload alias
+# in .zshrc for picking up PATH changes after a chezmoi apply.
 
 export XDG_DATA_HOME=$HOME/.local/share
 export XDG_CONFIG_HOME=$HOME/.config
