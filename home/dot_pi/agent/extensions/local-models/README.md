@@ -2,18 +2,23 @@
 
 Auto-discovers local model servers and registers them as Pi providers.
 
-## What it does
+## How it works
 
-Probes common local model server endpoints (Ollama, LM Studio, vLLM, SGLang, TGI, KoboldCpp, llamafile) and automatically registers any running server as a Pi provider with all its models.
+Each known server has a pre-configured API based on its documentation.
+The extension probes only for reachability (GET to the models endpoint)
+and uses the documented API for chat completions.
 
-## Features
+## Known servers
 
-- **Auto-discovery** — probes 7 common local servers on startup
-- **Reasoning detection** — probes each model with lightweight test requests to determine if extended thinking is supported
-- **Auto-detect API type** — distinguishes Ollama (`/api/tags`) from OpenAI-compatible (`/v1/models`) servers
-- **Embedding filter** — skips embedding/reranker models automatically
-- **Manual refresh** — `/refresh-local-models` to re-discover after servers start/stop
-- **Configurable** — all settings via `~/.pi/agent/settings.json` → `localModels` key
+| Name | Port | API | Models endpoint |
+|------|------|-----|-----------------|
+| ollama | 11434 | openai-completions | `/api/tags` |
+| lm-studio | 1234 | **anthropic-messages** | `/v1/messages` |
+| vllm | 8000 | openai-completions | `/v1/models` |
+| sglang | 30000 | openai-completions | `/v1/models` |
+| tgi | 8080 | openai-completions | `/v1/models` |
+| koboldcpp | 5000 | openai-completions | `/v1/models` |
+| llamafile | 8081 | openai-completions | `/v1/models` |
 
 ## Configuration
 
@@ -22,19 +27,20 @@ Add a `localModels` key to `~/.pi/agent/settings.json`:
 ```json
 {
   "localModels": {
-    "enabledServers": ["Ollama", "LM Studio"],
-    "customServers": [
-      {
-        "name": "My Server",
-        "baseUrl": "http://localhost:9000",
-        "api": "openai-completions"
-      }
-    ],
+    "enabledServers": ["ollama", "lm-studio"],
     "skipEmbeddingModels": true,
     "defaultContextWindow": 128000,
     "defaultMaxTokens": 16384,
     "autoEnable": true,
-    "probeTimeout": 3000
+    "probeTimeout": 3000,
+    "customServers": [
+      {
+        "name": "my-server",
+        "baseUrl": "http://localhost:9000",
+        "api": "anthropic-messages",
+        "modelsEndpoint": "/v1/messages"
+      }
+    ]
   }
 }
 ```
@@ -43,52 +49,31 @@ Add a `localModels` key to `~/.pi/agent/settings.json`:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `enabledServers` | `string[]` | `[]` (all) | Which built-in servers to probe. Empty = probe all. |
-| `customServers` | `Server[]` | `[]` | Additional servers to probe. |
-| `customServers[].name` | `string` | — | Display name. |
-| `customServers[].baseUrl` | `string` | — | Base URL (e.g., `http://localhost:8000`). |
-| `customServers[].api` | `string` | `openai-completions` | API type (`openai-completions`, `anthropic-messages`, `openai-responses`, `google-generative-ai`). |
-| `skipEmbeddingModels` | `boolean` | `true` | Skip models that look like embeddings/rerankers. |
-| `defaultContextWindow` | `number` | `128000` | Fallback context window in tokens. |
-| `defaultMaxTokens` | `number` | `16384` | Fallback max output tokens. |
-| `autoEnable` | `boolean` | `true` | Auto-register discovered providers without prompting. |
-| `probeTimeout` | `number` | `3000` | Timeout per server probe in milliseconds. |
-
-## Built-in servers
-
-| Name | Port | Endpoint |
-|------|------|----------|
-| Ollama | 11434 | `/api/tags` |
-| LM Studio | 1234 | `/v1/models` |
-| vLLM | 8000 | `/v1/models` |
-| SGLang | 30000 | `/v1/models` |
-| TGI | 8080 | `/v1/models` |
-| KoboldCpp | 5000 | `/v1/models` |
-| llamafile | 8081 | `/v1/models` |
+| `enabledServers` | `string[]` | `[]` (all) | Which known servers to enable |
+| `customServers` | `Server[]` | `[]` | Additional servers to probe |
+| `skipEmbeddingModels` | `boolean` | `true` | Skip embedding/reranker models |
+| `defaultContextWindow` | `number` | `128000` | Fallback context window |
+| `defaultMaxTokens` | `number` | `16384` | Fallback max output tokens |
+| `autoEnable` | `boolean` | `true` | Auto-register without prompting |
+| `probeTimeout` | `number` | `3000` | Per-server probe timeout (ms) |
 
 ## Commands
 
-- `/refresh-local-models` — Re-probe all servers and update registered providers.
+- `/refresh-local-models` — Re-probe all servers and update providers
 
-## How reasoning detection works
+## Reasoning detection
 
-For each discovered model, the extension sends lightweight test requests with different reasoning/thinking formats:
-
-1. `{ thinking: { type: "enabled" } }` — Ollama / generic
-2. `{ reasoning: { effort: "minimal" } }` — OpenRouter / some providers
-3. `{ enable_thinking: true }` — Qwen format
-4. `{ chat_template_kwargs: { enable_thinking: true } }` — Qwen chat template
-
-A model is marked as reasoning-capable if the server accepts the request (2xx) or returns a 400/422 error indicating it recognized the field.
+Reasoning support is inferred from model ID heuristics (contains "thinking", "reason", "qwen", etc.).
+No network probing is needed.
 
 ## Files
 
 ```
 local-models/
 ├── index.ts        # Extension entry point (async factory)
-├── discover.ts     # Server probing and model discovery
-├── providers.ts    # Provider config builders
-├── config.ts       # Config loading, defaults, shared types
+├── discover.ts     # Reachability probe + model list parsing
+├── providers.ts    # ProviderConfig builders
+├── config.ts       # Known servers, defaults, shared types
 ├── package.json    # Pi package metadata
 └── README.md
 ```
