@@ -17,8 +17,7 @@ const REQUIRED_SUFFIX = "read-only";
 // ── regex patterns ──────────────────────────────────────────────────────────
 
 // AWS_PROFILE=value  or  export AWS_PROFILE=value  (quoted or bare)
-const ENV_PROFILE_RE =
-  /\bAWS_(?:DEFAULT_)?PROFILE=["']?([^"'\s;|&)]+)["']?/g;
+const ENV_PROFILE_RE = /\bAWS_(?:DEFAULT_)?PROFILE=["']?([^"'\s;|&)]+)["']?/g;
 
 // --profile value  or  --profile=value  (any cloud CLI)
 const FLAG_PROFILE_RE = /--profile[= ]["']?([^"'\s;|&)]+)["']?/g;
@@ -49,9 +48,7 @@ function isReadOnly(profile: string): boolean {
 
 function violation(profiles: string[]): string {
   const bad = profiles.filter((p) => !isReadOnly(p));
-  return bad.length > 0
-    ? `non-read-only profile(s): ${bad.map((p) => JSON.stringify(p)).join(", ")}`
-    : "";
+  return bad.length > 0 ? `non-read-only profile(s): ${bad.map((p) => JSON.stringify(p)).join(", ")}` : "";
 }
 
 // ── extension ───────────────────────────────────────────────────────────────

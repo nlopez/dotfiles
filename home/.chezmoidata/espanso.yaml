@@ -8,44 +8,44 @@ espanso:
     base: []
     # Home/personal machine snippets.
     personal:
-    - {replace: "·", triggers: [":dot"]}
-    - {replace: "╞════╡", triggers: [":hr"]}
-    - {replace: ":_KannaShiny:", triggers: [":kshiny"]}
-    - {replace: ":_KannaLove:", triggers: [":klove"]}
-    - {replace: ":_KannaNoU:", triggers: [":knou"]}
-    - {replace: ":_KannaLMAO:", triggers: [":klol", ":klmao", ":klaugh"]}
-    - {replace: ":_KannaHiHi:", triggers: [":khi"]}
-    - {replace: ":_KannaHiHi: :_KannaHiHi: KonKannana! :_KannaQua:", triggers: [":khello"]}
-    - {replace: ":_KannaQua:", triggers: [":kqua"]}
-    - {replace: ":_KannaHeadpat:", triggers: [":khp", ":kpat"]}
-    - {replace: ":_KannaBuffering:", triggers: [":kbuff", ":kload"]}
-    - {replace: ":_KannaHumu:", triggers: [":khumu"]}
-    - {replace: ":_KannaScared:", triggers: [":kscare"]}
-    - {replace: ":_KannaKamoLove:", triggers: [":kklove"]}
-    - {replace: ":_KannaNoted:", triggers: [":knote"]}
-    - {replace: ":_KannaKamoShy:", triggers: [":kkshy", ":kkblush"]}
-    - {replace: ":_KannaCheer:", triggers: [":kcheer"]}
-    - {replace: ":_KannaKamoNope:", triggers: [":knope"]}
-    - {replace: ":_KannaKamoHug:", triggers: [":kkhug"]}
-    - {replace: ":_KannaCry:", triggers: [":kcry", ":ksob"]}
-    - {replace: ":_KannaWater:", triggers: [":kwater"]}
-    - {replace: ":_KannaBurn:", triggers: [":kburn", ":kfire"]}
-    - {replace: ":_KannaBonk:", triggers: [":kbonk"]}
-    - {replace: ":_KannaDed:", triggers: [":kdead", ":kded", ":krip"]}
-    - {replace: ":_KannaRage:", triggers: [":krage"]}
-    - {replace: ":_KannaKamo:", triggers: [":kamo"]}
-    - {replace: ":_KannaGremlin:", triggers: [":kgrem"]}
-    - {replace: ":_KannaMILK:", triggers: [":kmilk"]}
-    - {replace: ":_KannaEyebrow:", triggers: [":keye", ":ksus"]}
-    - {replace: ":_KannaTSKR:", triggers: [":ktskr"]}
-    - {replace: ":_KannaDotDotDot:", triggers: [":kdot"]}
-    - {replace: ":_KannaComfy:", triggers: [":kcomfy"]}
-    - {replace: ":_KannaLimina:", triggers: [":klim"]}
-    - {replace: ":_KannaHiyori:", triggers: [":khiyo"]}
-    - {replace: ":_KannaAmaya:", triggers: [":kamaya"]}
-    - {replace: ":_KannaLucky:", triggers: [":kluck"]}
+      - { replace: "·", triggers: [":dot"] }
+      - { replace: "╞════╡", triggers: [":hr"] }
+      - { replace: ":_KannaShiny:", triggers: [":kshiny"] }
+      - { replace: ":_KannaLove:", triggers: [":klove"] }
+      - { replace: ":_KannaNoU:", triggers: [":knou"] }
+      - { replace: ":_KannaLMAO:", triggers: [":klol", ":klmao", ":klaugh"] }
+      - { replace: ":_KannaHiHi:", triggers: [":khi"] }
+      - { replace: ":_KannaHiHi: :_KannaHiHi: KonKannana! :_KannaQua:", triggers: [":khello"] }
+      - { replace: ":_KannaQua:", triggers: [":kqua"] }
+      - { replace: ":_KannaHeadpat:", triggers: [":khp", ":kpat"] }
+      - { replace: ":_KannaBuffering:", triggers: [":kbuff", ":kload"] }
+      - { replace: ":_KannaHumu:", triggers: [":khumu"] }
+      - { replace: ":_KannaScared:", triggers: [":kscare"] }
+      - { replace: ":_KannaKamoLove:", triggers: [":kklove"] }
+      - { replace: ":_KannaNoted:", triggers: [":knote"] }
+      - { replace: ":_KannaKamoShy:", triggers: [":kkshy", ":kkblush"] }
+      - { replace: ":_KannaCheer:", triggers: [":kcheer"] }
+      - { replace: ":_KannaKamoNope:", triggers: [":knope"] }
+      - { replace: ":_KannaKamoHug:", triggers: [":kkhug"] }
+      - { replace: ":_KannaCry:", triggers: [":kcry", ":ksob"] }
+      - { replace: ":_KannaWater:", triggers: [":kwater"] }
+      - { replace: ":_KannaBurn:", triggers: [":kburn", ":kfire"] }
+      - { replace: ":_KannaBonk:", triggers: [":kbonk"] }
+      - { replace: ":_KannaDed:", triggers: [":kdead", ":kded", ":krip"] }
+      - { replace: ":_KannaRage:", triggers: [":krage"] }
+      - { replace: ":_KannaKamo:", triggers: [":kamo"] }
+      - { replace: ":_KannaGremlin:", triggers: [":kgrem"] }
+      - { replace: ":_KannaMILK:", triggers: [":kmilk"] }
+      - { replace: ":_KannaEyebrow:", triggers: [":keye", ":ksus"] }
+      - { replace: ":_KannaTSKR:", triggers: [":ktskr"] }
+      - { replace: ":_KannaDotDotDot:", triggers: [":kdot"] }
+      - { replace: ":_KannaComfy:", triggers: [":kcomfy"] }
+      - { replace: ":_KannaLimina:", triggers: [":klim"] }
+      - { replace: ":_KannaHiyori:", triggers: [":khiyo"] }
+      - { replace: ":_KannaAmaya:", triggers: [":kamaya"] }
+      - { replace: ":_KannaLucky:", triggers: [":kluck"] }
     # Work machine snippets.
     work:
-    - {replace: "join aws.iam_account a on a.account_id = ", triggers: [":account"]}
+      - { replace: "join aws.iam_account a on a.account_id = ", triggers: [":account"] }
     # OS-specific snippets.
     darwin: []

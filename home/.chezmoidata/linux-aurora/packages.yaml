@@ -4,58 +4,58 @@ packages:
     brew:
       brews:
         base:
-        - gcc
-        - make
-        - bat
-        - curl
-        - chezmoi
-        - direnv
-        - fd
-        - git
-        - jq
-        - mkcert
-        - ripgrep
-        - shellcheck
-        - tmux
-        - trash-cli
-        - wget
-        - yq
-        - zsh
-        - fdupes
-        - ncdu
-        - eza
-        - tree
-        - uutils-coreutils
-        - zoxide
-        - hyperfine
-        - bind
-        - postgresql@14
-        - ffmpeg
-        - fzf
-        - skopeo
-        - yamlfmt
-        - sql-formatter
-        - fx
-        - zsh-autosuggestions
-        - zsh-fast-syntax-highlighting
-        - argocd
-        - atuin
-        - ryooooooga/tap/zabrze
-        - rclone
-        - go
-        - uv
-        - yazi
-        - helm
-        - oxipng
-        - rustup
-        - node
-        - pnpm
+          - gcc
+          - make
+          - bat
+          - curl
+          - chezmoi
+          - direnv
+          - fd
+          - git
+          - jq
+          - mkcert
+          - ripgrep
+          - shellcheck
+          - tmux
+          - trash-cli
+          - wget
+          - yq
+          - zsh
+          - fdupes
+          - ncdu
+          - eza
+          - tree
+          - uutils-coreutils
+          - zoxide
+          - hyperfine
+          - bind
+          - postgresql@14
+          - ffmpeg
+          - fzf
+          - skopeo
+          - yamlfmt
+          - sql-formatter
+          - fx
+          - zsh-autosuggestions
+          - zsh-fast-syntax-highlighting
+          - argocd
+          - atuin
+          - ryooooooga/tap/zabrze
+          - rclone
+          - go
+          - uv
+          - yazi
+          - helm
+          - oxipng
+          - rustup
+          - node
+          - pnpm
         personal: []
         work: []
       casks:
         base:
-        - font-microsoft-office
+          - font-microsoft-office
         personal: []
         work: []
       gnu_tools:
-      - uutils-coreutils
+        - uutils-coreutils

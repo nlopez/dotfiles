@@ -33,9 +33,6 @@ export default function (pi: ExtensionAPI) {
 
     // Inject --trailer after every `git commit` in the command.
     // Handles compound commands: cd /path && git commit -m "msg"
-    event.input.command = command.replace(
-      /\bgit(\s+commit\b)/g,
-      `git$1 --trailer "${trailer}"`,
-    );
+    event.input.command = command.replace(/\bgit(\s+commit\b)/g, `git$1 --trailer "${trailer}"`);
   });
 }

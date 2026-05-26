@@ -11,40 +11,45 @@
 # the start). PowerShell functions work anywhere regardless, so the field is
 # ignored there.
 aliases:
-- {name: g, cmd: "git"}
-- {name: ga, cmd: "git add"}
-- {name: gc, cmd: "git commit"}
-- {name: gcane, cmd: "git commit --amend --no-edit"}
-- {name: gconf, cmd: "git config --list --show-origin --show-scope --includes"}
-- {name: gd, cmd: "git diff"}
-- {name: gdc, cmd: "git diff --cached"}
-- {name: gp, cmd: "git push"}
-- {name: grc, cmd: "git rebase --continue"}
-- {name: grhh, cmd: "git reset --hard HEAD"}
-- {name: gst, cmd: "git status"}
-- {name: gup, cmd: "git pull --rebase"}
-# gwa/gwl/gwr/gwm are zsh functions in oh-my-zsh/custom/git-worktree.zsh;
-# they need repo-root awareness and cannot be plain text snippet expansions.
-- {name: k, cmd: "kubectl"}
-- {name: kd, cmd: "kubectl describe"}
-- {name: kdp, cmd: "kubectl describe pod"}
-- {name: ke, cmd: "kubectl exec -it"}
-- {name: kg, cmd: "kubectl get"}
-- {name: kgp, cmd: "kubectl get pod"}
-- {name: kns, cmd: "kubens"}
-- {name: kctx, cmd: "kubectx"}
-- {name: tf, cmd: "terraform"}
-- {name: tfinit, cmd: "terraform init", global: true}
-- {name: tfapply, cmd: "terraform apply tfplan.bin", global: true}
-- {name: tfshow, cmd: "terraform show tfplan", global: true}
-- {name: tfsl, cmd: "terraform state list", global: true}
-- {name: tfss, cmd: "terraform state show", global: true}
-- {name: tfu, cmd: "terraform force-unlock -force", global: true}
-- {name: tg, cmd: "terragrunt"}
-- {name: tginit, cmd: "terragrunt init", global: true}
-- {name: tgplan, cmd: "terragrunt plan --lock=false", global: true}
-- {name: tgapply, cmd: "terragrunt apply", global: true}
-- {name: tga, cmd: "terragrunt run --all"}
-- {name: tgainit, cmd: "terragrunt run --all {} -- init", global: true, cursor: "{}"}
-- {name: tgaplan, cmd: "terragrunt run --all --out-dir /tmp/tfplan --json-out-dir /tmp/tfplan {} -- plan --lock=false", global: true, cursor: "{}"}
-- {name: tgaapply, cmd: "terragrunt run --all --out-dir /tmp/tfplan {} -- apply", global: true, cursor: "{}"}
+  - { name: g, cmd: "git" }
+  - { name: ga, cmd: "git add" }
+  - { name: gc, cmd: "git commit" }
+  - { name: gcane, cmd: "git commit --amend --no-edit" }
+  - { name: gconf, cmd: "git config --list --show-origin --show-scope --includes" }
+  - { name: gd, cmd: "git diff" }
+  - { name: gdc, cmd: "git diff --cached" }
+  - { name: gp, cmd: "git push" }
+  - { name: grc, cmd: "git rebase --continue" }
+  - { name: grhh, cmd: "git reset --hard HEAD" }
+  - { name: gst, cmd: "git status" }
+  - { name: gup, cmd: "git pull --rebase" }
+  # gwa/gwl/gwr/gwm are zsh functions in oh-my-zsh/custom/git-worktree.zsh;
+  # they need repo-root awareness and cannot be plain text snippet expansions.
+  - { name: k, cmd: "kubectl" }
+  - { name: kd, cmd: "kubectl describe" }
+  - { name: kdp, cmd: "kubectl describe pod" }
+  - { name: ke, cmd: "kubectl exec -it" }
+  - { name: kg, cmd: "kubectl get" }
+  - { name: kgp, cmd: "kubectl get pod" }
+  - { name: kns, cmd: "kubens" }
+  - { name: kctx, cmd: "kubectx" }
+  - { name: tf, cmd: "terraform" }
+  - { name: tfinit, cmd: "terraform init", global: true }
+  - { name: tfapply, cmd: "terraform apply tfplan.bin", global: true }
+  - { name: tfshow, cmd: "terraform show tfplan", global: true }
+  - { name: tfsl, cmd: "terraform state list", global: true }
+  - { name: tfss, cmd: "terraform state show", global: true }
+  - { name: tfu, cmd: "terraform force-unlock -force", global: true }
+  - { name: tg, cmd: "terragrunt" }
+  - { name: tginit, cmd: "terragrunt init", global: true }
+  - { name: tgplan, cmd: "terragrunt plan --lock=false", global: true }
+  - { name: tgapply, cmd: "terragrunt apply", global: true }
+  - { name: tga, cmd: "terragrunt run --all" }
+  - { name: tgainit, cmd: "terragrunt run --all {} -- init", global: true, cursor: "{}" }
+  - {
+      name: tgaplan,
+      cmd: "terragrunt run --all --out-dir /tmp/tfplan --json-out-dir /tmp/tfplan {} -- plan --lock=false",
+      global: true,
+      cursor: "{}",
+    }
+  - { name: tgaapply, cmd: "terragrunt run --all --out-dir /tmp/tfplan {} -- apply", global: true, cursor: "{}" }
