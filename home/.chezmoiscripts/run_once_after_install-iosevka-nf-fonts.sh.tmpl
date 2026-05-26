@@ -4,12 +4,12 @@
 
 set -eufo pipefail
 
-{{- if eq .chezmoi.os "darwin" }}
-FONT_DIR="{{ .chezmoi.homeDir }}/Library/Fonts"
-{{- else if eq .chezmoi.os "linux" }}
-FONT_DIR="{{ .chezmoi.homeDir }}/.local/share/fonts"
-mkdir -p "$FONT_DIR"
+{{- $home := .chezmoi.homeDir }}
+{{- $fd := .platform.font_dir }}
+{{- if eq .chezmoi.os "linux" }}
+mkdir -p "{{ $home }}/{{ $fd }}"
 {{- end }}
+FONT_DIR="{{ $home }}/{{ $fd }}"
 
 # Merge Iosevka Nerd Font files
 if [ -d "$FONT_DIR/iosevka-nf" ]; then

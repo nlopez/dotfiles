@@ -31,11 +31,7 @@ bindkey '^L' _clear_screen_sane
 
 reload() {
   stty sane
-{{- if eq .chezmoi.os "darwin" }}
-  exec env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX TMUX_PANE=$TMUX_PANE zsh --login
-{{- else }}
-  exec env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX TMUX_PANE=$TMUX_PANE zsh --login
-{{- end }}
+  exec env -i PATH={{ .platform.reload_path }} TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX TMUX_PANE=$TMUX_PANE zsh --login
 }
 
 ###############################################################################
