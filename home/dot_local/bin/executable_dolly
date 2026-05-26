@@ -334,6 +334,85 @@ def _check_default_symlink(root: Path, fix: bool, r: _LintResult) -> None:
         r.errors += 1
 
 
+def _check_worktree_branch_paths(root: Path, fix: bool, r: _LintResult) -> None:
+    """Ensure each worktree's dir relative to root matches its branch name."""
+    try:
+        raw = git_out(root, "worktree", "list", "--porcelain")
+    except CalledProcessError:
+        _warn("could not list worktrees")
+        r.warnings += 1
+        return
+
+    # Parse porcelain output into (abs_path, branch) pairs.
+    worktrees: list[tuple[Path, str]] = []
+    cur_path: Path | None = None
+    prunable = False
+    for line in raw.splitlines():
+        if line.startswith("worktree "):
+            cur_path = Path(line.removeprefix("worktree "))
+            prunable = False
+        elif line in ("", "bare") or line.startswith("detached"):
+            cur_path = None
+            prunable = False
+        elif line.startswith("prunable"):
+            prunable = True
+        elif line.startswith("branch refs/heads/"):
+            if cur_path is not None and not prunable:
+                worktrees.append(
+                    (cur_path, line.removeprefix("branch refs/heads/"))
+                )
+            cur_path = None
+
+    if not worktrees:
+        return
+
+    root_resolved = root.resolve()
+    entries: list[tuple[str, str]] = []
+    for wt_path, branch in worktrees:
+        try:
+            rel = str(wt_path.resolve().relative_to(root_resolved))
+        except ValueError:
+            continue
+        entries.append((rel, branch))
+
+    # Set of all worktree relative paths — used for nesting detection.
+    wt_set = {rel for rel, _ in entries}
+
+    mismatches: list[tuple[str, str]] = []
+    for rel, branch in entries:
+        # Skip worktrees nested inside another worktree
+        # (e.g. main/foo where main is itself a worktree).
+        parts = Path(rel).parts
+        nested = any(
+            str(Path(*parts[:i])) in wt_set for i in range(1, len(parts))
+        )
+        if nested:
+            continue
+
+        if rel != branch:
+            mismatches.append((rel, branch))
+
+    if not mismatches:
+        _ok("worktree paths match branch names")
+        return
+
+    for rel, branch in mismatches:
+        if fix:
+            try:
+                git(root, "worktree", "move", rel, branch)
+                _fixed(f"worktree moved {rel!r} → {branch!r}")
+                r.fixes += 1
+            except CalledProcessError:
+                _fail(
+                    f"worktree dir {rel!r} tracks branch {branch!r}"
+                    f" (move failed — target may exist)"
+                )
+                r.errors += 1
+        else:
+            _fail(f"worktree dir {rel!r} tracks branch {branch!r}")
+            r.errors += 1
+
+
 def _check_canonical_casing(root: Path, fix: bool, r: _LintResult) -> None:
     try:
         remote = git_out(root, "config", "--get", "remote.origin.url")
@@ -389,6 +468,7 @@ def _lint_one(root: Path, fix: bool) -> _LintResult:
     _check_gitfile(root, fix, r)
     _check_fetch_refspec(root, fix, r)
     _check_default_symlink(root, fix, r)
+    _check_worktree_branch_paths(root, fix, r)
     _check_canonical_casing(root, fix, r)
     return r
 
