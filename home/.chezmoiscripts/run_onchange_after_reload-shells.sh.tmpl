@@ -38,17 +38,5 @@ done < <(tmux list-panes -a -F '#{pane_id} #{pane_pid}')
 
 echo "shells: ${queued} queued for next prompt, ${skipped} non-zsh skipped."
 
-# ── 3. Queue Pi session reloads via sentinel file ─────────────────────────────
-# If any Pi config files changed in the last 2 minutes, write a sentinel file.
-# The chezmoi-reload Pi extension watches this file and triggers ctx.reload()
-# via its /chezmoi-reload command once the agent is idle — no keystrokes sent.
-if [[ -d "$HOME/.pi/agent" ]]; then
-  RECENT=$(find "$HOME/.pi" -mmin -2 -type f 2>/dev/null | head -1)
-  if [[ -n "$RECENT" ]]; then
-    mkdir -p "$HOME/.local/state"
-    printf '1' > "$HOME/.local/state/chezmoi-pi-reload"
-    echo "pi: sentinel written — running Pi sessions will reload at next idle."
-  fi
-fi
 
 exit 0
