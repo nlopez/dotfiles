@@ -28,7 +28,14 @@ _gw_root() {
 gwa() {
   local root
   root=$(_gw_root) || return 1
-  git -C "$root" worktree add "$@"
+  # When called with a single bare path, force the branch name to the full
+  # path so that remote-tracking (--guess-remote / worktree.guessRemote)
+  # resolves origin/name/like/this instead of just origin/this.
+  if [[ $# -eq 1 && "$1" != -* ]]; then
+    git -C "$root" worktree add -b "$1" "$1"
+  else
+    git -C "$root" worktree add "$@"
+  fi
 }
 
 # gwl [options]  — list worktrees relative to repo root
