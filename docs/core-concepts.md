@@ -115,7 +115,7 @@ and end up with an identical, working configuration.
 
 ### Best practices
 
-- **Never rely on side-effects from other tools.** If a package install script installs something, ensure it doesn't leave orphaned config files in `~` that won't be recreated on a fresh apply. Use `empty_` or `dir_` prefixes to handle files/dirs that should exist but aren't managed by templates.
+- **Never rely on side-effects from other tools.** If a package install script installs something, ensure it doesn't leave orphaned config files in `~` that won't be recreated on a fresh apply. Use `empty_` prefix for empty files that should exist; for directories, create a directory in the source tree (e.g. `home/dot_mydir/`) — there is no `dir_` prefix in chezmoi.
 - **Use templates for conditional logic.** Host-specific or OS-specific config should use `.chezmoi.os`, `.chezmoi.arch`, `.chezmoi.sourcePath`, and data files — not branch the repo or rely on manual post-install steps.
 - **Use scripts for one-time setup.** Package managers, browser extensions, and init steps that can't be expressed as static files belong in `.chezmoiscripts/`. Keep them idempotent — they must succeed even if already run.
 
@@ -130,7 +130,22 @@ Files in the repo root are deployed based on naming:
 | `config/dirname/file`   | `~/.config/dirname/file` | XDG-style config                             |
 | `bin/script`            | `~/.local/bin/script`    | Executable (marked executable)               |
 
-Use prefixes like `empty_`, `secure_`, `exact_`, `sym_`, `dir_` to control behavior ([source format docs](https://chezmoi.io/reference/source-formats/verbatim/)).
+Use prefixes to control behavior ([source state attributes](https://chezmoi.io/reference/source-state-attributes/)):
+
+| Prefix | Effect | Example | Notes |
+|--------|--------|---------|-------|
+| `dot_` | Leading dot in destination | `dot_zshrc` → `~/.zshrc` | Used for dotfiles and dot-directories |
+| `empty_` | File exists even if empty | `empty_dot_hushlogin` → `~/.hushlogin` (empty) | |
+| `executable_` | Executable bit set | `executable_script.sh` → `~/.local/bin/script.sh` | Combined with `dot_` → `dot_local/bin/executable_script.sh` |
+| `symlink_` | Symlink (not regular file) | `symlink_target` → `~/.target` (link) | Content is the symlink target |
+| `exact_` | Remove unmanaged entries in directory | `exact_dot_config/` → `~/.config/` | |
+| `private_` | Mode 600 (owner only) | `private_config` → `~/.config` (mode 600) | |
+| `create_` | Create only if missing | `create_lockfile` → `~/.lockfile` | |
+| `readonly_` | Remove write permission | `readonly_file` → `~/.file` (read-only) | |
+
+**Directory targets** are represented as directories in the source tree (no `dir_` prefix). To ensure a directory exists but is not managed, create it in the source tree with a `.keep` file (git sees `.keep`, chezmoi ignores it).
+
+**Symlinks** use `symlink_` prefix (not `sym_`). Template source: `symlink_agent.sock.tmpl` renders the target path at apply time.
 
 ### Templates
 

@@ -19,7 +19,7 @@ Chezmoi only looks at the **current** state of the source tree — it has no his
    - **`remove_<name>` source attribute** — declares a single source entry that should not exist at the destination. Useful when you also want to keep a placeholder in the source tree, but for plain "this path must be gone" cleanup, `.chezmoiremove` is simpler and centralised.
    - **`run_once_after_remove-*.sh` cleanup script** — only when removal needs imperative logic that `.chezmoiremove` cannot express (e.g., rewriting another tool's state file, unsetting a fish universal variable, calling a package manager). Not for plain file deletion.
 3. **Clean up ancillary artifacts** — if the config created data dirs, symlinks, or registered itself with another tool, list them in `.chezmoiremove` too, or add a `run_once_after_remove-*.sh` script for non-file cleanup.
-4. **Drop `empty_`/`dir_` markers** — if you created them only to suppress chezmoi recreating a path, remove them once cleanup has landed everywhere.
+4. **Drop `empty_` markers** — if you created them only to suppress chezmoi recreating a path, remove them once cleanup has landed everywhere. (Note: there is no `dir_` prefix in chezmoi; directory sources are created by adding an empty directory to the source tree.)
 
 Verify with `chezmoi apply --dry-run --verbose` before committing, and `chezmoi apply` to clear the local machine.
 
