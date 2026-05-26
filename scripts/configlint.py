@@ -180,15 +180,15 @@ def check_ssh(root: Path, data: dict, label: str, verbose: bool) -> int:
 
 def check_allowed_signers(root: Path, verbose: bool) -> int:
     """
-    Validate allowed_signers syntax.  Each non-blank, non-comment line must be:
-      principals  namespaces="git"  keytype  base64-key  [comment...]
-    That is, at least 4 whitespace-separated fields.
+    Validate allowed_signers by extracting each key line and passing it to
+    `ssh-keygen -lf /dev/stdin`.  This verifies both file structure and that
+    each key is cryptographically well-formed, rather than just counting fields.
     """
     path = root / "dot_config" / "git" / "allowed_signers"
     label = "git/allowed_signers"
 
     if verbose:
-        print(f"configlint: {label} [syntax check]")
+        print(f"configlint: {label} [ssh-keygen -lf]")
     else:
         print(f"configlint: {label}")
 
@@ -201,13 +201,42 @@ def check_allowed_signers(root: Path, verbose: bool) -> int:
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
+
+        # allowed_signers format:
+        #   principals [option=value ...] keytype base64key [comment]
+        # Strip the principals field and any option tokens (contain '='),
+        # leaving: keytype base64key [comment] — standard pubkey format.
         fields = line.split()
-        if len(fields) < 4:
+        keyline_fields = []
+        for f in fields[1:]:          # skip principals
+            if "=" not in f:
+                keyline_fields = fields[fields.index(f):]
+                break
+
+        if len(keyline_fields) < 2:
             print(
                 f"  ALLOWED_SIGNERS ERROR at line {lineno}: "
-                f"expected ≥4 fields, got {len(fields)}: {raw!r}",
+                f"could not extract key fields: {raw!r}",
                 file=sys.stderr,
             )
+            errors += 1
+            continue
+
+        key_text = " ".join(keyline_fields) + "\n"
+        result = subprocess.run(
+            ["ssh-keygen", "-lf", "/dev/stdin"],
+            input=key_text,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            print(
+                f"  ALLOWED_SIGNERS ERROR at line {lineno}: "
+                f"ssh-keygen rejected key: {raw!r}",
+                file=sys.stderr,
+            )
+            for msg in result.stderr.strip().splitlines():
+                print(f"    {msg}", file=sys.stderr)
             errors += 1
 
     return errors
