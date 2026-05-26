@@ -1,6 +1,12 @@
 typeset -U path
 
 export COLORTERM=truecolor
+{{- if .work }}
+
+# Pi MCP adapter: Slack's pre-registered OAuth app expects callbacks on port
+# 3118 (matching the Claude Code Slack app redirect URI).
+export MCP_OAUTH_CALLBACK_PORT=3118
+{{- end }}
 
 export HOMEBREW_PREFIX={{ .packages.brew_prefix }}
 
