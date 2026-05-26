@@ -106,19 +106,15 @@
   signoff = true
 
 {{/* Per-identity includes go last so they override defaults above.       */}}
-{{/* Primary: gitdir-based (covers all URL variants for a given clone). */}}
+{{/* Primary: gitdir-based (covers all URL variants for a given clone).   */}}
+
+; --- nlopez identity: DataDog + nlopez personal repos + chezmoi ---
 
 [includeIf "gitdir/i:~/src/github.com/datadog/**"]
   path = config_nlopez
 
-[includeIf "gitdir/i:~/src/github.com/ddoghq/**"]
-  path = config_nick-lopez_ddog
-
-[includeIf "gitdir/i:~/src/github.com/silentshout42/**"]
-  path = config_silentshout42
-
-[includeIf "gitdir/i:~/src/github.com/kamotimestamps/**"]
-  path = config_silentshout42
+[includeIf "gitdir/i:~/src/github.com/nlopez/**"]
+  path = config_nlopez
 
 [includeIf "gitdir/i:~/.local/share/chezmoi/.git"]
   path = config_nlopez
@@ -126,14 +122,74 @@
 [includeIf "gitdir/i:~/.local/share/chezmoi/.git/worktrees/**"]
   path = config_nlopez
 
-{{/* Fallback: hasconfig catches repos cloned with unusual URL formats.  */}}
-
+; --- nick-lopez_ddog identity: ddoghq + ddoghq-sandbox org repos ---
 {{- if .work }}
-[includeIf "hasconfig:remote.*.url:https://github.com/ddoghq/**"]
+
+[includeIf "gitdir/i:~/src/github.com/ddoghq/**"]
+  path = config_nick-lopez_ddog
+
+[includeIf "gitdir/i:~/src/github.com/ddoghq-sandbox/**"]
   path = config_nick-lopez_ddog
 {{- end }}
 
+; --- silentshout42 identity: silentshout42 + kamotimestamps org repos ---
 {{- if .personal }}
-[includeIf "hasconfig:remote.*.url:https://github.com/silentshout42/**"]
+
+[includeIf "gitdir/i:~/src/github.com/silentshout42/**"]
+  path = config_silentshout42
+
+[includeIf "gitdir/i:~/src/github.com/kamotimestamps/**"]
+  path = config_silentshout42
+{{- end }}
+
+{{/* Fallback: hasconfig catches repos cloned outside the canonical      */}}
+{{/* directory tree. Case-insensitive via [Xx] character classes because  */}}
+{{/* hasconfig globs are case-sensitive (unlike gitdir/i). Both HTTPS     */}}
+{{/* and SSH SCP-style (git@host:path) URL formats are covered so that   */}}
+{{/* credential.username and core.sshCommand resolve for either transport.*/}}
+
+; --- nlopez identity fallbacks ---
+
+[includeIf "hasconfig:remote.*.url:https://github.com/[Dd]ata[Dd]og/**"]
+  path = config_nlopez
+
+[includeIf "hasconfig:remote.*.url:git@github.com:[Dd]ata[Dd]og/**"]
+  path = config_nlopez
+
+[includeIf "hasconfig:remote.*.url:https://github.com/[Nn][Ll]opez/**"]
+  path = config_nlopez
+
+[includeIf "hasconfig:remote.*.url:git@github.com:[Nn][Ll]opez/**"]
+  path = config_nlopez
+
+; --- nick-lopez_ddog identity fallbacks ---
+{{- if .work }}
+
+[includeIf "hasconfig:remote.*.url:https://github.com/[Dd][Dd]oghq/**"]
+  path = config_nick-lopez_ddog
+
+[includeIf "hasconfig:remote.*.url:git@github.com:[Dd][Dd]oghq/**"]
+  path = config_nick-lopez_ddog
+
+[includeIf "hasconfig:remote.*.url:https://github.com/[Dd][Dd]oghq-[Ss]andbox/**"]
+  path = config_nick-lopez_ddog
+
+[includeIf "hasconfig:remote.*.url:git@github.com:[Dd][Dd]oghq-[Ss]andbox/**"]
+  path = config_nick-lopez_ddog
+{{- end }}
+
+; --- silentshout42 identity fallbacks ---
+{{- if .personal }}
+
+[includeIf "hasconfig:remote.*.url:https://github.com/[Ss]ilent[Ss]hout42/**"]
+  path = config_silentshout42
+
+[includeIf "hasconfig:remote.*.url:git@github.com:[Ss]ilent[Ss]hout42/**"]
+  path = config_silentshout42
+
+[includeIf "hasconfig:remote.*.url:https://github.com/[Kk]amo[Tt]imestamps/**"]
+  path = config_silentshout42
+
+[includeIf "hasconfig:remote.*.url:git@github.com:[Kk]amo[Tt]imestamps/**"]
   path = config_silentshout42
 {{- end }}
