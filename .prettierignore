@@ -1,2 +1,2 @@
-# chezmoi modify templates and modify_settings files
-**/modify_settings.json
+# Ignore all chezmoi modify_ files (scripts and modify-templates)
+**/modify_*
