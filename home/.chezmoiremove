@@ -22,3 +22,10 @@
 .config/uv/uv.toml
 Library/LaunchAgents/com.user.dark-notify-tmux.plist
 .config/pnpm/rc
+
+; id_ddog.pub was the old name for id_nick-lopez_ddog.pub — ensure it is gone
+.ssh/id_ddog.pub
+
+; Renamed identity config files (old names from identity rename)
+.config/git/config_datadog
+.config/git/config_hobby

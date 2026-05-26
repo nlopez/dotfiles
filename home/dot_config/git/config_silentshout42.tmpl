@@ -1,0 +1,18 @@
+{{- if .personal }}
+; SilentShout42 GitHub identity: silentshout42 + kamotimestamps org repos.
+; Uses the GitHub account 161982876+SilentShout42@users.noreply.github.com.
+
+[user]
+  name = Silent Shout
+  email = 161982876+SilentShout42@users.noreply.github.com
+  signingkey = key::ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGdsuL9gfvu+aqCFhs12VeEv+uUkbtUskZ1Ny8T7ZkxZ
+
+[commit]
+  gpgsign = true
+
+[tag]
+  gpgsign = true
+
+[core]
+  sshCommand = ssh -o IdentityFile=~/.ssh/id_silentshout42.pub -o IdentitiesOnly=yes
+{{- end }}

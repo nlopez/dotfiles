@@ -14,33 +14,38 @@ Host *
   IdentityAgent "~/.1password/agent.sock"
   {{- end }}
 
-# Default github.com is anonymous — no key offered. All org access must go
-# through one of the org-specific aliases below (driven by git insteadOf rules).
+# Direct github.com connections are anonymous — git uses core.sshCommand
+# (set per-repo by the identity includes) to authenticate instead.
 Host github.com
   User git
   IdentitiesOnly yes
 
-# Aliased host for personal/nlopez orgs (DataDog, nlopez). Routed via git insteadOf.
+# SSH aliases below are not used by git (core.sshCommand handles that), but
+# are kept as named shortcuts for testing: ssh -T git@github.com-nlopez
+# Each alias pins exactly one public key so the 1Password agent offers the
+# right identity without attempting others.
+
+# nlopez GitHub identity: nlopez + DataDog org repos.
 Host github.com-nlopez
   HostName github.com
   User git
+  IdentityFile ~/.ssh/id_nlopez.pub
   IdentitiesOnly yes
-  IdentityFile ~/.ssh/id_nlopez
-{{- if .personal }}
 
-# Aliased host for hobby orgs (silentshout42, kamotimestamps). Routed via git insteadOf.
-Host github.com-hobby
-  HostName github.com
-  User git
-  IdentitiesOnly yes
-  IdentityFile ~/.ssh/id_silentshout42
-{{- end }}
 {{- if .work }}
-
-# Aliased host for ddoghq + ddoghq-sandbox orgs. Routed via git insteadOf.
-Host github.com-ddog
+# nick-lopez_ddog GitHub identity: ddoghq + ddoghq-sandbox org repos.
+Host github.com-nick-lopez_ddog
   HostName github.com
   User git
+  IdentityFile ~/.ssh/id_nick-lopez_ddog.pub
   IdentitiesOnly yes
-  IdentityFile ~/.ssh/id_ddog
+{{- end }}
+
+{{- if .personal }}
+# SilentShout42 GitHub identity: silentshout42 + kamotimestamps org repos.
+Host github.com-silentshout42
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_silentshout42.pub
+  IdentitiesOnly yes
 {{- end }}
