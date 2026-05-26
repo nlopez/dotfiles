@@ -14,15 +14,13 @@ from chezmoi_lib import OSES, build_data, chezmoi_root, print_verbose, render_te
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Render chezmoi templates and lint .json files"
-     )
+    parser = argparse.ArgumentParser(description="Render chezmoi templates and lint .json files")
     parser.add_argument(
-         "-v",
-         "--verbose",
+        "-v",
+        "--verbose",
         action="store_true",
         help="Print filename and variable inputs for each check",
-     )
+    )
     args = parser.parse_args()
 
     root = chezmoi_root()
@@ -39,7 +37,7 @@ def main() -> None:
             content,
             str(json_file.relative_to(root)),
             args.verbose,
-         )
+        )
 
     # Render and lint .json.tmpl files for each OS.
     # Exclude modify_*.json.tmpl files too: they are templated chezmoi

@@ -16,15 +16,13 @@ from chezmoi_lib import OSES, build_data, chezmoi_root, print_verbose, render_te
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Render chezmoi templates and shellcheck .sh files"
-     )
+    parser = argparse.ArgumentParser(description="Render chezmoi templates and shellcheck .sh files")
     parser.add_argument(
-         "-v",
-         "--verbose",
+        "-v",
+        "--verbose",
         action="store_true",
         help="Print filename and variable inputs for each check",
-     )
+    )
     args = parser.parse_args()
 
     root = chezmoi_root()
@@ -50,7 +48,7 @@ def main() -> None:
 
 
 def render_and_check(tmpl: Path, data: dict, os_name: str, verbose: bool) -> int:
-    label = f"{os_name}/{tmpl.stem}"   # strip .tmpl
+    label = f"{os_name}/{tmpl.stem}"  # strip .tmpl
 
     output, error = render_template(tmpl, data)
     if error is not None or output is None:
