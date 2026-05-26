@@ -11,6 +11,59 @@ if [[ -z "$_real" ]]; then
   exit 1
 fi
 
+_is_interactive_pi() {
+  # Only reset the terminal after Pi's full-screen TUI exits.
+  # Non-interactive invocations like `pi update`, `pi -p`, `pi --mode json`,
+  # `pi --export`, `pi --help`, etc. should leave terminal output intact.
+  [[ -t 0 && -t 1 ]] || return 1
+
+  local arg
+  local first_nonflag=""
+  local expect_value_for=""
+
+  for arg in "$@"; do
+    if [[ -n "$expect_value_for" ]]; then
+      expect_value_for=""
+      continue
+    fi
+
+    case "$arg" in
+      --mode|--export|--session|--fork|--provider|--model|--api-key|--thinking|--models|--session-dir)
+        expect_value_for="$arg"
+        ;;
+      -p|--print|--mode=*|--export|--export=*|--list-models|--list-models=*|-h|--help|-v|--version)
+        return 1
+        ;;
+      install|remove|uninstall|update|list|config)
+        return 1
+        ;;
+      --)
+        break
+        ;;
+      -*)
+        ;;
+      *)
+        if [[ -z "$first_nonflag" ]]; then
+          first_nonflag="$arg"
+        fi
+        ;;
+    esac
+  done
+
+  case "$first_nonflag" in
+    install|remove|uninstall|update|list|config)
+      return 1
+      ;;
+  esac
+
+  return 0
+}
+
+_should_reset_terminal=0
+if _is_interactive_pi "$@"; then
+  _should_reset_terminal=1
+fi
+
 unset AWS_PROFILE
 "$_real" "$@"
 _exit=$?
@@ -24,5 +77,8 @@ if [[ -n "${TMUX:-}" ]]; then
   tmux set-option -w -t "$_pane" automatic-rename on
 fi
 
-tput reset
+if [[ "$_should_reset_terminal" -eq 1 ]]; then
+  tput reset
+fi
+
 exit "$_exit"

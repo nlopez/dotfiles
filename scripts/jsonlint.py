@@ -41,12 +41,13 @@ def main() -> None:
             args.verbose,
          )
 
-    # Render and lint .json.tmpl files for each OS
+    # Render and lint .json.tmpl files for each OS.
+    # Exclude modify_*.json.tmpl files too: they are templated chezmoi
+    # modify-scripts, not JSON templates whose rendered output should parse as JSON.
     for os_name in OSES:
         data = build_data(root, os_name)
 
         for tmpl in sorted(root.rglob("*.json.tmpl")):
-             # modify_*.json.tmpl files are chezmoi modify-scripts (shell), not JSON.
             if tmpl.name.startswith("modify_"):
                 continue
             label = f"{os_name}/{tmpl.relative_to(root)}"

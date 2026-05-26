@@ -63,6 +63,9 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 - Verify with `chezmoi apply --dry-run` before committing
 - Use templates for conditional logic (`.chezmoi.os`, `.chezmoi.arch`, etc.)
 - Keep scripts idempotent — they must succeed even if already run
+- For chezmoi `modify_` files, follow target-type semantics: plain `modify_*` files are
+  scripts; only use `chezmoi:modify-template` when rendered template output should become
+  the final file contents; modify templates must not have a `.tmpl` suffix
 - Add Pi plugins via `modify_settings.json` and `pi install`, not as pnpm globals
 
 ### ⚠️ Ask first
