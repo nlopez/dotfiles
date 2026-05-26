@@ -1,0 +1,6 @@
+# linux overrides for platform values
+platform:
+  ssh_auth_sock: ~/.1password/agent.sock
+  gpg_op_path: /opt/1Password/op-ssh-sign
+  font_dir: .local/share/fonts
+  reload_path: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
