@@ -333,6 +333,11 @@ def main() -> int:
         return 1
 
     failed = 0
+    shell_count = 0
+    plist_count = 0
+    git_count = 0
+    ssh_count = 0
+    signers_count = 0
 
     # ── Shellcheck (shell scripts — not covered by prettier) ───────────────
 
@@ -344,6 +349,7 @@ def main() -> int:
                 shell_paths.extend(full.rglob(pattern))
     shell_paths = sorted(set(x for x in shell_paths if x.is_file()))
     for path in shell_paths:
+        shell_count += 1
         if not lint_shellcheck(path):
             print(f"  FAIL: shellcheck {rel(path)}", file=sys.stderr)
             failed += 1
@@ -354,6 +360,7 @@ def main() -> int:
     for path in plist_paths:
         if not path.is_file():
             continue
+        plist_count += 1
         if not lint_xmllint(path):
             print(f"  FAIL: xmllint {rel(path)}", file=sys.stderr)
             failed += 1
@@ -361,9 +368,12 @@ def main() -> int:
     # ── Git config + SSH config + allowed_signers (current machine) ────────
 
     if p.joinpath("dot_config", "git").exists():
+        git_count += 1
         failed += render_and_check_git(p / "dot_config" / "git", p, "current")
     if p.joinpath("dot_ssh").exists():
+        ssh_count += 1
         failed += render_and_check_ssh(p / "dot_ssh", p, "current")
+    signers_count += 1
     failed += check_allowed_signers(Path(SOURCE_ROOT))
 
     # ── Extra renders for other OS × machine-type combos ───────────────────
@@ -387,16 +397,25 @@ def main() -> int:
                 extra_path = Path(tmp_extra)
                 if extra_path.is_dir() and any(extra_path.iterdir()):
                     if extra_path.joinpath("dot_config", "git").exists():
+                        git_count += 1
                         failed += render_and_check_git(
                             extra_path / "dot_config" / "git",
                             extra_path,
                             label,
                         )
                     if extra_path.joinpath("dot_ssh").exists():
+                        ssh_count += 1
                         failed += render_and_check_ssh(extra_path / "dot_ssh", extra_path, label)
         finally:
             os.environ.clear()
             os.environ.update(old_env)
+
+    total = shell_count + plist_count + git_count + ssh_count + signers_count
+    print(
+        f"templates: checked {total} files "
+        f"(shellcheck={shell_count}, xmllint={plist_count}, "
+        f"git={git_count}, ssh={ssh_count}, allowed_signers={signers_count})"
+    )
 
     if failed:
         print(f"templates: {failed} failed", file=sys.stderr)
