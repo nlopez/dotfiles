@@ -28,8 +28,10 @@ current.setdefault("theme", "solarized-light")
 if "omlx" in str(current.get("defaultProvider", "")) or current.get("defaultProvider") is None:
     current["defaultProvider"] = "omlx"
 
-# Use pnpm for all npm package-manager operations.
-current["npmCommand"] = ["pnpm"]
+# Use npm for package operations. pnpm's strict linking breaks Pi's
+# extension loader which resolves modules from the literal symlink path,
+# not the realpath inside .pnpm/. npm hoists by default.
+current["npmCommand"] = ["npm"]
 
 # Hardware cursor — enabled on startup; cursor-manager extension handles focus.
 current["showHardwareCursor"] = True
