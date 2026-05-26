@@ -2,7 +2,14 @@
 
 ## What this repo is
 
-A [chezmoi](https://chezmoi.io/) dotfile management repository for synchronizing dotfiles, configurations, and scripts across multiple machines. Chezmoi treats your home directory as immutable infrastructure version-controlled in Git.
+A [chezmoi](https://chezmoi.io/) dotfile management repository for synchronizing dotfiles, configurations, and scripts across multiple machines. **The goal of this repo is to maintain a fully declarative configuration that works identically on any machine.**
+
+Chezmoi treats your home directory as immutable infrastructure version-controlled in Git — every file in `~` should be reproducible from the source tree alone. This means:
+
+- **No manual edits** — never edit files directly in `~`; always go through the chezmoi source tree.
+- **Idempotent & portable** — any machine can run `chezmoi apply` and end up with an identical, working configuration.
+- **Declarative over imperative** — prefer static templates (`.tmpl`) with `.chezmoi.os`/`.chezmoi.arch` conditionals over shell scripts. Scripts belong in `.chezmoiscripts/` only for one-time setup that can't be expressed as config files.
+- **Source of truth lives in Git** — the source tree under `home/` is the single source of truth. The destination (`~`) is ephemeral and always derived from it.
 
 ## Quick setup
 

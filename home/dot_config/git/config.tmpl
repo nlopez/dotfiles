@@ -93,9 +93,15 @@
 [gpg]
   format = ssh
 
+{{- if eq .chezmoi.os "darwin" }}
 [gpg "ssh"]
   allowedSignersFile = ~/.config/git/allowed_signers
-  program = ~/.local/bin/op-ssh-sign
+  program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+{{- else }}
+[gpg "ssh"]
+  allowedSignersFile = ~/.config/git/allowed_signers
+  program = gpgconf --homedir {{ .chezmoi.homeDir }}/.gnupg --list-dirs agent-ssh-socket | xargs -I{} gpg-connect-agent --homedir {{ .chezmoi.homeDir }}/.gnupg --standard --use-std-io /keyformat/ssh2/sign {} /bye
+{{- end }}
 
 [alias]
   # Current branch name (git 2.22+)
