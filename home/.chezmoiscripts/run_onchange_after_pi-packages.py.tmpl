@@ -68,6 +68,15 @@ ensure_file(
     "node_modules\n",
 )
 
+# --- Clean up pnpm virtual store ---
+# npm's arborist crashes when node_modules was previously managed by pnpm
+# (the .pnpm/ virtual store uses symlinks that confuse Link.matches).
+pnpm_store = os.path.join(NPM_DIR, "node_modules", ".pnpm")
+if os.path.isdir(pnpm_store):
+    import shutil
+    print("Pi packages: removing stale pnpm virtual store", file=sys.stderr)
+    shutil.rmtree(os.path.join(NPM_DIR, "node_modules"))
+
 # --- Read current state and diff ---
 
 pkg_path = os.path.join(NPM_DIR, "package.json")
@@ -79,7 +88,8 @@ if os.path.isfile(pkg_path):
     except Exception:
         pass
 
-deps_changed = current_deps != target_deps
+node_modules_dir = os.path.join(NPM_DIR, "node_modules")
+deps_changed = current_deps != target_deps or not os.path.isdir(node_modules_dir)
 if not deps_changed:
     print("Pi packages: already in sync ✓")
     sys.exit(0)
