@@ -67,8 +67,6 @@ def print_verbose(label: str, os_name: str, user_data: dict) -> None:
     """Print verbose output with OS and user configuration."""
     vars_str = " ".join(
         f"{k}={json.dumps(v)}"
-        for k, v in {**{"chezmoi.os": os_name}, **{
-            k: v for k, v in user_data.items() if k != "packages"
-        }.items()}
+        for k, v in {**{"chezmoi.os": os_name}, **{k: v for k, v in user_data.items() if k != "packages"}.items()}
     )
     print(f"{label} [{vars_str}]")

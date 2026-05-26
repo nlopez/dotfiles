@@ -27,10 +27,10 @@ from chezmoi_lib import build_data, chezmoi_root, print_verbose, render_template
 
 # OS × machine-type matrix to validate.
 MATRIX = [
-    ("darwin", {"work": True,  "personal": False}),
+    ("darwin", {"work": True, "personal": False}),
     ("darwin", {"work": False, "personal": True}),
-    ("linux",  {"work": True,  "personal": False}),
-    ("linux",  {"work": False, "personal": True}),
+    ("linux", {"work": True, "personal": False}),
+    ("linux", {"work": False, "personal": True}),
 ]
 
 # git include files alongside the main config.
@@ -75,6 +75,7 @@ def main() -> None:
 
 
 # ── git config ────────────────────────────────────────────────────────────────
+
 
 def check_git(root: Path, data: dict, label: str, verbose: bool) -> int:
     errors = 0
@@ -139,6 +140,7 @@ def _git_validate(config_file: Path, label: str) -> int:
 
 # ── SSH config ────────────────────────────────────────────────────────────────
 
+
 def check_ssh(root: Path, data: dict, label: str, verbose: bool) -> int:
     tmpl = root / "dot_ssh" / "config.tmpl"
     file_label = f"ssh/{label}/config"
@@ -178,6 +180,7 @@ def check_ssh(root: Path, data: dict, label: str, verbose: bool) -> int:
 
 # ── allowed_signers ───────────────────────────────────────────────────────────
 
+
 def check_allowed_signers(root: Path, verbose: bool) -> int:
     """
     Validate allowed_signers by extracting each key line and passing it to
@@ -208,15 +211,14 @@ def check_allowed_signers(root: Path, verbose: bool) -> int:
         # leaving: keytype base64key [comment] — standard pubkey format.
         fields = line.split()
         keyline_fields = []
-        for f in fields[1:]:          # skip principals
+        for f in fields[1:]:  # skip principals
             if "=" not in f:
-                keyline_fields = fields[fields.index(f):]
+                keyline_fields = fields[fields.index(f) :]
                 break
 
         if len(keyline_fields) < 2:
             print(
-                f"  ALLOWED_SIGNERS ERROR at line {lineno}: "
-                f"could not extract key fields: {raw!r}",
+                f"  ALLOWED_SIGNERS ERROR at line {lineno}: could not extract key fields: {raw!r}",
                 file=sys.stderr,
             )
             errors += 1
@@ -231,8 +233,7 @@ def check_allowed_signers(root: Path, verbose: bool) -> int:
         )
         if result.returncode != 0:
             print(
-                f"  ALLOWED_SIGNERS ERROR at line {lineno}: "
-                f"ssh-keygen rejected key: {raw!r}",
+                f"  ALLOWED_SIGNERS ERROR at line {lineno}: ssh-keygen rejected key: {raw!r}",
                 file=sys.stderr,
             )
             for msg in result.stderr.strip().splitlines():
