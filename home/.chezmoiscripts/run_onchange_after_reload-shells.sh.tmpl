@@ -1,0 +1,54 @@
+#!/bin/bash
+# Reloads tmux config and queues zsh/Pi session reloads after chezmoi apply.
+#
+# Re-runs when any of these source files change (hashes embedded so chezmoi
+# detects the change and re-executes this script):
+#   tmux.conf:            {{ include "dot_config/tmux/tmux.conf" | sha256sum }}
+#   dot_zshrc.tmpl:       {{ include "dot_zshrc.tmpl" | sha256sum }}
+#   dot_zprofile.tmpl:    {{ include "dot_zprofile.tmpl" | sha256sum }}
+#   00_custom.zsh.tmpl:   {{ include "exact_dot_oh-my-zsh/exact_custom/00_custom.zsh.tmpl" | sha256sum }}
+
+set -eo pipefail
+
+command -v tmux >/dev/null 2>&1 || { echo "tmux: not installed, skipping."; exit 0; }
+tmux ls >/dev/null 2>&1 || { echo "tmux: no server running, skipping."; exit 0; }
+
+# ── 1. Reload tmux config ─────────────────────────────────────────────────────
+tmux source-file ~/.config/tmux/tmux.conf
+echo "tmux: config reloaded."
+
+# ── 2. Queue zsh pane reloads via sentinel ────────────────────────────────────
+# Set @chezmoi_reload 1 on every tmux pane whose root process is zsh.
+# The _chezmoi_reload_precmd hook (registered in .zshrc) fires before every
+# prompt and exec-restarts the shell when the option is set — guaranteeing the
+# reload happens before the next command runs, whether the pane is currently
+# idle or busy running a command.  No keystrokes are injected.
+queued=0
+skipped=0
+
+while IFS=' ' read -r pane_id pane_pid; do
+  root_cmd=$(ps -p "$pane_pid" -o comm= 2>/dev/null | sed 's/^-//' | tr -d ' ' || echo "")
+  if [[ "$root_cmd" == "zsh" ]]; then
+    tmux set-option -p -t "$pane_id" @chezmoi_reload 1
+    queued=$((queued + 1))
+  else
+    skipped=$((skipped + 1))
+  fi
+done < <(tmux list-panes -a -F '#{pane_id} #{pane_pid}')
+
+echo "shells: ${queued} queued for next prompt, ${skipped} non-zsh skipped."
+
+# ── 3. Queue Pi session reloads via sentinel file ─────────────────────────────
+# If any Pi config files changed in the last 2 minutes, write a sentinel file.
+# The chezmoi-reload Pi extension watches this file and triggers ctx.reload()
+# via its /chezmoi-reload command once the agent is idle — no keystrokes sent.
+if [[ -d "$HOME/.pi/agent" ]]; then
+  RECENT=$(find "$HOME/.pi" -mmin -2 -type f 2>/dev/null | head -1)
+  if [[ -n "$RECENT" ]]; then
+    mkdir -p "$HOME/.local/state"
+    printf '1' > "$HOME/.local/state/chezmoi-pi-reload"
+    echo "pi: sentinel written — running Pi sessions will reload at next idle."
+  fi
+fi
+
+exit 0

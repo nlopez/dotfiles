@@ -388,16 +388,59 @@ def _check_worktree_branch_paths(root: Path, fix: bool, r: _LintResult) -> None:
         return
 
     root_resolved = root.resolve()
-    entries: list[tuple[str, str]] = []
+
+    # The repo's default branch (main/master/…) — used to detect
+    # misconfigured upstreams that blindly point at the default branch.
+    try:
+        default_branch = git_out(root, "symbolic-ref", "--short", "HEAD")
+    except CalledProcessError:
+        default_branch = None
+
+    @dataclass
+    class _WtEntry:
+        rel: str
+        local: str
+        remote: str | None
+
+        @property
+        def canonical(self) -> str:
+            """The name the directory *should* have (remote wins).
+
+            Exception: when the upstream points at the repo's default
+            branch but the local branch doesn't, the upstream is
+            almost certainly misconfigured (common after a rebase or
+            when the tracking was never set up).  Fall back to the
+            local name in that case.
+            """
+            if (
+                self.remote
+                and self.remote == default_branch
+                and self.local != default_branch
+            ):
+                return self.local
+            return self.remote if self.remote else self.local
+
+    entries: list[_WtEntry] = []
     for wt_path, branch in worktrees:
         try:
             rel = str(wt_path.resolve().relative_to(root_resolved))
         except ValueError:
             continue
-        entries.append((rel, branch))
+        # Resolve the remote tracking branch (if any).
+        try:
+            upstream = git_out(
+                root,
+                "for-each-ref",
+                "--format=%(upstream:short)",
+                f"refs/heads/{branch}",
+            )
+        except CalledProcessError:
+            upstream = ""
+        remote = upstream.removeprefix("origin/") if upstream else None
+        entries.append(_WtEntry(rel=rel, local=branch, remote=remote))
 
     # Set of all worktree relative paths — used for nesting detection.
-    wt_set = {rel for rel, _ in entries}
+    wt_set = {e.rel for e in entries}
 
     def _parent_wt(rel: str) -> str | None:
         """Return the enclosing worktree's relative path, or None."""
@@ -408,51 +451,46 @@ def _check_worktree_branch_paths(root: Path, fix: bool, r: _LintResult) -> None:
                 return candidate
         return None
 
+    def _move(e: _WtEntry, reason: str) -> None:
+        target = e.canonical
+        if fix:
+            try:
+                git(root, "worktree", "move", e.rel, target)
+                _fixed(f"worktree moved {e.rel!r} → {target!r} ({reason})")
+                r.fixes += 1
+            except CalledProcessError:
+                _fail(
+                    f"worktree {e.rel!r} should be {target!r} ({reason};"
+                    f" move failed — target may exist)"
+                )
+                r.errors += 1
+        else:
+            _fail(f"worktree {e.rel!r} should be {target!r} ({reason})")
+            r.errors += 1
+
     problems = False
-    for rel, branch in entries:
-        parent = _parent_wt(rel)
+    for e in entries:
+        parent = _parent_wt(e.rel)
 
         if parent is not None:
             # Nested inside another worktree — always wrong.
             problems = True
             if fix:
-                try:
-                    git(root, "worktree", "move", rel, branch)
-                    _fixed(
-                        f"nested worktree {rel!r} relocated to"
-                        f" {branch!r} (was inside {parent!r})"
-                    )
-                    r.fixes += 1
-                except CalledProcessError:
-                    _fail(
-                        f"nested worktree {rel!r} inside {parent!r}"
-                        f" (tracks branch {branch!r}; move failed"
-                        f" — target may exist)"
-                    )
-                    r.errors += 1
+                _move(e, f"nested inside {parent!r}")
             else:
                 _warn(
-                    f"nested worktree {rel!r} inside {parent!r}"
-                    f" (tracks branch {branch!r})"
+                    f"nested worktree {e.rel!r} inside {parent!r}"
+                    f" (tracks branch {e.canonical!r})"
                 )
                 r.warnings += 1
-        elif rel != branch:
-            # Not nested, but dir doesn't match branch.
+        elif e.rel != e.canonical:
             problems = True
-            if fix:
-                try:
-                    git(root, "worktree", "move", rel, branch)
-                    _fixed(f"worktree moved {rel!r} → {branch!r}")
-                    r.fixes += 1
-                except CalledProcessError:
-                    _fail(
-                        f"worktree dir {rel!r} tracks branch {branch!r}"
-                        f" (move failed — target may exist)"
-                    )
-                    r.errors += 1
+            if e.remote and e.remote != e.local:
+                _move(e, f"remote is {e.remote!r}, local is {e.local!r}")
+            elif e.remote:
+                _move(e, f"tracks remote {e.remote!r}")
             else:
-                _fail(f"worktree dir {rel!r} tracks branch {branch!r}")
-                r.errors += 1
+                _move(e, f"tracks local branch {e.local!r}")
 
     if not problems:
         _ok("worktree paths match branch names")

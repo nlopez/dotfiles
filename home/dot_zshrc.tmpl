@@ -280,9 +280,11 @@ _smart_path_precmd  # prime before first prompt
 
 ###############################################################################
 if [[ -n "$TMUX" ]]; then
-  # chezmoi apply queued-reload: if this pane was busy when chezmoi applied,
-  # exec a fresh login shell at the next prompt. TMUX_PANE must be set (it is
-  # absent after a bare `exec env -i … zsh` that doesn't forward it).
+  # chezmoi apply queued-reload: the run_onchange_after_reload-shells script sets
+  # @chezmoi_reload 1 on every zsh pane (idle or busy) without injecting keystrokes.
+  # This precmd hook fires before every prompt — i.e. before any command executes —
+  # and exec-restarts the shell when the sentinel option is set.  TMUX_PANE must be
+  # set (it is absent after a bare `exec env -i … zsh` that doesn't forward it).
   function _chezmoi_reload_precmd() {
     [[ -n "$TMUX_PANE" ]] || return 0
     local _pending
