@@ -414,7 +414,8 @@ def main() -> int:
     print(
         f"templates: checked {total} files "
         f"(shellcheck={shell_count}, xmllint={plist_count}, "
-        f"git={git_count}, ssh={ssh_count}, allowed_signers={signers_count})"
+        f"git={git_count}, ssh={ssh_count}, allowed_signers={signers_count})",
+        file=sys.stderr,
     )
 
     if failed:

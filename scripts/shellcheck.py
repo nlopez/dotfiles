@@ -44,7 +44,7 @@ def main() -> None:
             errors += run_shellcheck(sh, f"{os_name}/{sh.name}", data, args.verbose)
             checked += 1
 
-    print(f"shellcheck: checked {checked} files")
+    print(f"shellcheck: checked {checked} files", file=sys.stderr)
 
     if errors:
         print(f"\n{errors} error(s)", file=sys.stderr)

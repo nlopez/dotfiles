@@ -56,7 +56,7 @@ def main() -> None:
             tmpl_count += 1
 
     total = plain_count + tmpl_count
-    print(f"jsonlint: checked {total} files ({plain_count} plain, {tmpl_count} rendered)")
+    print(f"jsonlint: checked {total} files ({plain_count} plain, {tmpl_count} rendered)", file=sys.stderr)
 
     if errors:
         print(f"\n{errors} error(s)", file=sys.stderr)
