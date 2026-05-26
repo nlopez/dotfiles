@@ -21,3 +21,9 @@ repos:
     entry: scripts/shellcheck.py
     pass_filenames: false
     always_run: true
+  - id: configlint
+    name: configlint
+    language: system
+    entry: scripts/configlint.py
+    pass_filenames: false
+    always_run: true
