@@ -27,7 +27,7 @@ When working in this repo, keep these mental models in mind:
 
 **`home/` is the chezmoi source root.**
 - All dotfile/config/bin sources live under `home/`.
-- Chezmoi special dirs (`.chezmoiscripts/`, `.chezmoidata/`) are under `home/`.
+- All chezmoi special dirs are under `home/`: `.chezmoiignore`, `.chezmoiscripts/`, `.chezmoidata/`, `.chezmoiexternal.*`, `.chezmoitemplates/`.
 - `chezmoi source-path` resolves destination → source under `home/`.
 
 ## Path disambiguation
@@ -38,5 +38,7 @@ When working in this repo, keep these mental models in mind:
 | chezmoi scripts | `home/.chezmoiscripts/` (NOT repo root `scripts/`) |
 | Lint scripts | Repo root: `scripts/` (NOT chezmoi-managed) |
 | The `.chezmoiroot` file | Repo root: `.chezmoiroot` |
+| chezmoi ignore patterns | `home/.chezmoiignore` |
 | Source for `~/.gitconfig` | `home/dot_gitconfig` |
 | Source for `~/.config/tmux/` | `home/dot_config/tmux/` |
+| pnpm global data | `home/.chezmoidata/pnpm.yaml` + `home/.chezmoidata/darwin/pnpm.yaml` |

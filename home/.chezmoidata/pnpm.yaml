@@ -1,7 +1,20 @@
-# Shared pnpm packages (same across all platforms)
+# Shared pnpm packages (same across all platforms).
+# Per-platform personal and work packages live in darwin/pnpm.yaml and
+# linux-aurora/pnpm.yaml (merged by chezmoi at render time).
 pnpm:
   base:
   - mmd@4.7.1
   - "@earendil-works/pi-coding-agent@0.75.4"
   personal: []
   work: []
+# Packages moved from pnpm globals to pi-managed packages (pi install npm:).
+# The stale-removal script reads this list and uninstalls them.
+stalePackages:
+- pi-web-access
+- pi-subagents
+- context-mode
+- pi-intercom
+- pi-powerline
+- pi-mcp-adapter
+- pi-firecrawl
+- pi-kagi-api
