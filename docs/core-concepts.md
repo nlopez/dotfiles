@@ -30,37 +30,37 @@ cat .chezmoiroot
 
 The repo root contains non-chezmoi-managed Git files **and** one chezmoi control file:
 
-| Path | Purpose |
-|------|--------|
-| `AGENTS.md` | Agent documentation for this repo |
-| `.chezmoiroot` | Specifies `home` as the chezmoi source root (tracked by git) |
-| `CLAUDE.md` | Claude code assistant documentation |
-| `README.md` | Repository readme |
-| `renovate.json` | Renovate dependency update config |
-| `scripts/` | Project scripts (linting, helper tools) — **not** chezmoi-managed |
-| `pyproject.toml` | Python project config (uv/pip) |
-| `uv.lock` | uv dependency lock file |
+| Path             | Purpose                                                           |
+| ---------------- | ----------------------------------------------------------------- |
+| `AGENTS.md`      | Agent documentation for this repo                                 |
+| `.chezmoiroot`   | Specifies `home` as the chezmoi source root (tracked by git)      |
+| `CLAUDE.md`      | Claude code assistant documentation                               |
+| `README.md`      | Repository readme                                                 |
+| `renovate.json`  | Renovate dependency update config                                 |
+| `scripts/`       | Project scripts (linting, helper tools) — **not** chezmoi-managed |
+| `pyproject.toml` | Python project config (uv/pip)                                    |
+| `uv.lock`        | uv dependency lock file                                           |
 
 ### Under `home/` (the chezmoi source tree)
 
-| Pattern | Destination | Notes |
-|---------|-------------|-------|
-| `home/dot_<name>` | `~/.<name>` | Dotfiles |
-| `home/dot_dirname/` | `~/.dirname/` | Directory source |
-| `home/config/<path>` | `~/.config/<path>` | XDG-style config |
-| `home/bin/<name>` | `~/.local/bin/<name>` | Executables (via bin/ prefix) |
+| Pattern              | Destination           | Notes                         |
+| -------------------- | --------------------- | ----------------------------- |
+| `home/dot_<name>`    | `~/.<name>`           | Dotfiles                      |
+| `home/dot_dirname/`  | `~/.dirname/`         | Directory source              |
+| `home/config/<path>` | `~/.config/<path>`    | XDG-style config              |
+| `home/bin/<name>`    | `~/.local/bin/<name>` | Executables (via bin/ prefix) |
 
 ### Chezmoi special directories (all under `home/`)
 
 Per the official [chezmoi docs](https://chezmoi.io/reference/special-files/), when you use `.chezmoiroot`, all other "source root" files must be moved into the new root. This repo follows that rule:
 
-| Source path | Purpose |
-|-------------|--------|
-| `home/.chezmoiignore` | Ignore patterns for the source tree |
-| `home/.chezmoiscripts/` | Install/init scripts (run after dotfiles are applied) |
-| `home/.chezmoidata/` | Data files for templates (YAML) — merged across files and OS subdirs |
-| `home/.chezmoiexternal.*` | External dependencies (Git repos, tarballs) |
-| `home/.chezmoitemplates/` | Reusable include templates |
+| Source path               | Purpose                                                              |
+| ------------------------- | -------------------------------------------------------------------- |
+| `home/.chezmoiignore`     | Ignore patterns for the source tree                                  |
+| `home/.chezmoiscripts/`   | Install/init scripts (run after dotfiles are applied)                |
+| `home/.chezmoidata/`      | Data files for templates (YAML) — merged across files and OS subdirs |
+| `home/.chezmoiexternal.*` | External dependencies (Git repos, tarballs)                          |
+| `home/.chezmoitemplates/` | Reusable include templates                                           |
 
 **This is critical:** when `.chezmoiroot` is `home`, all chezmoi special directories live **under `home/`**, not at the repo root.
 
@@ -124,25 +124,25 @@ and end up with an identical, working configuration.
 
 Files in the repo root are deployed based on naming:
 
-| Source file name        | Destination              | Notes                                      |
-|-------------------------|--------------------------|---------------------------------------------|
-| `dot_<filename>`        | `~/.<filename>`          | Dotfiles                                     |
-| `dot_dirname/`          | `~/.dirname/`            | Directory (contents deployed inside)         |
-| `config/dirname/file`   | `~/.config/dirname/file` | XDG-style config                             |
-| `bin/script`            | `~/.local/bin/script`    | Executable (marked executable)               |
+| Source file name      | Destination              | Notes                                |
+| --------------------- | ------------------------ | ------------------------------------ |
+| `dot_<filename>`      | `~/.<filename>`          | Dotfiles                             |
+| `dot_dirname/`        | `~/.dirname/`            | Directory (contents deployed inside) |
+| `config/dirname/file` | `~/.config/dirname/file` | XDG-style config                     |
+| `bin/script`          | `~/.local/bin/script`    | Executable (marked executable)       |
 
 Use prefixes to control behavior ([source state attributes](https://chezmoi.io/reference/source-state-attributes/)):
 
-| Prefix | Effect | Example | Notes |
-|--------|--------|---------|-------|
-| `dot_` | Leading dot in destination | `dot_zshrc` → `~/.zshrc` | Used for dotfiles and dot-directories |
-| `empty_` | File exists even if empty | `empty_dot_hushlogin` → `~/.hushlogin` (empty) | |
-| `executable_` | Executable bit set | `executable_script.sh` → `~/.local/bin/script.sh` | Combined with `dot_` → `dot_local/bin/executable_script.sh` |
-| `symlink_` | Symlink (not regular file) | `symlink_target` → `~/.target` (link) | Content is the symlink target |
-| `exact_` | Remove unmanaged entries in directory | `exact_dot_config/` → `~/.config/` | |
-| `private_` | Mode 600 (owner only) | `private_config` → `~/.config` (mode 600) | |
-| `create_` | Create only if missing | `create_lockfile` → `~/.lockfile` | |
-| `readonly_` | Remove write permission | `readonly_file` → `~/.file` (read-only) | |
+| Prefix        | Effect                                | Example                                           | Notes                                                       |
+| ------------- | ------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------- |
+| `dot_`        | Leading dot in destination            | `dot_zshrc` → `~/.zshrc`                          | Used for dotfiles and dot-directories                       |
+| `empty_`      | File exists even if empty             | `empty_dot_hushlogin` → `~/.hushlogin` (empty)    |                                                             |
+| `executable_` | Executable bit set                    | `executable_script.sh` → `~/.local/bin/script.sh` | Combined with `dot_` → `dot_local/bin/executable_script.sh` |
+| `symlink_`    | Symlink (not regular file)            | `symlink_target` → `~/.target` (link)             | Content is the symlink target                               |
+| `exact_`      | Remove unmanaged entries in directory | `exact_dot_config/` → `~/.config/`                |                                                             |
+| `private_`    | Mode 600 (owner only)                 | `private_config` → `~/.config` (mode 600)         |                                                             |
+| `create_`     | Create only if missing                | `create_lockfile` → `~/.lockfile`                 |                                                             |
+| `readonly_`   | Remove write permission               | `readonly_file` → `~/.file` (read-only)           |                                                             |
 
 **Directory targets** are represented as directories in the source tree (no `dir_` prefix). To ensure a directory exists but is not managed, create it in the source tree with a `.keep` file (git sees `.keep`, chezmoi ignores it).
 
@@ -150,7 +150,9 @@ Use prefixes to control behavior ([source state attributes](https://chezmoi.io/r
 
 ### Templates
 
-Files ending in `.tmpl` are processed as [Go templates](https://pkg.go.dev/text/template). Chezmoi provides built-in variables like `.chezmoi.os`, `.chezmoi.arch`, `.chezmoi.environ`, and `.chezmoi.sourcePath` for conditional logic:
+Files ending in `.tmpl` are processed as [Go templates](https://pkg.go.dev/text/template) by chezmoi. This suffix can be applied to any source file type: regular files, `create_` files, `modify_` files, `run_` scripts, and `symlink_` targets. (Directories cannot have a `.tmpl` suffix.)
+
+Chezmoi provides built-in variables like `.chezmoi.os`, `.chezmoi.arch`, `.chezmoi.environ`, and `.chezmoi.sourcePath` for conditional logic:
 
 ```gotemplate
 {{- if eq .chezmoi.os "darwin" -}}
@@ -160,15 +162,33 @@ Files ending in `.tmpl` are processed as [Go templates](https://pkg.go.dev/text/
 {{- end -}}
 ```
 
-Templates are rendered with `chezmoi execute-template` during `apply`. Use `.chezmoi.toml.tmpl` for global template configuration.
+Templates are rendered with `chezmoi execute-template` during `apply`.
 
-`modify_` files are a separate target type for managing part, but not all, of a file: a plain
-`modify_<name>` file is executed as a script that receives the current target contents on stdin
-and must write the full replacement contents to stdout. Only use the special
-`chezmoi:modify-template` marker when the file should be treated as a template whose rendered
-output becomes the final target contents. Per chezmoi's docs, modify templates must **not**
-have a `.tmpl` suffix. A `modify_*.tmpl` file is instead a templated script whose rendered
-script still reads stdin and writes stdout.
+#### Modify files
+
+`modify_` files are a separate target type for managing part, but not all, of a file. There are **three** distinct patterns:
+
+| Source file                                           | Behavior                                                                                                                                                                                       |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `modify_<name>` (no suffix)                           | Executed directly as a script. Receives the current target contents on stdin and must write the full replacement contents to stdout.                                                           |
+| `modify_<name>.tmpl`                                  | First processed as a Go template; the rendered output is then executed as a script (reads stdin, writes stdout). Useful when the script itself needs conditional logic.                        |
+| `modify_<name>` with `chezmoi:modify-template` marker | Treated as a modify-template. The rendered output **becomes the file contents** directly — it is not executed as a script. Requires `{{- /* chezmoi:modify-template */ -}}` as the first line. |
+
+**Key distinction:** `modify_*.tmpl` (without the marker) is a templated script. `chezmoi:modify-template` is a template that renders to file contents. Do **not** put a `.tmpl` suffix on files that use the `chezmoi:modify-template` marker — the marker itself signals template mode. A `modify_*.tmpl` file with the marker would have double meaning and is confusing.
+
+#### Special config template: `.chezmoi.$FORMAT.tmpl`
+
+A file named `.chezmoi.$FORMAT.tmpl` (e.g., `.chezmoi.yaml.tmpl`) at the source root is used by `chezmoi init` to create or update the chezmoi config file. This template is executed **before** the source state is read, so it cannot use data from `.chezmoidata/`, `.chezmoitemplates/`, or template functions that require the source state. It can use [init functions](https://chezmoi.io/reference/templates/init-functions/) like `promptStringOnce`.
+
+```title="~/.local/share/chezmoi/.chezmoi.yaml.tmpl"
+{{ $email := promptStringOnce . "email" "What is your email address" -}}
+data:
+    email: {{ $email | quote }}
+```
+
+#### Reusable templates: `.chezmoitemplates/`
+
+Templates placed in `.chezmoitemplates/` (at `home/.chezmoitemplates/`) are included via the `include` function inside other templates. See [.chezmoitemplates docs](https://chezmoi.io/reference/special-directories/chezmoitemplates/).
 
 ### Data files
 
@@ -209,7 +229,7 @@ FONT_DIR="{{ .chezmoi.homeDir }}/.local/share/fonts"
 
 - **Use OS-specific directories** when scripts are entirely platform-specific with no shared logic, keeping them simpler and easier to read.
 
-**Rule of thumb:** if the script has platform-specific logic *and* shared logic, use one script with `.chezmoi.os` conditionals. If the scripts are completely different per platform, use OS-specific directories to avoid template complexity.
+**Rule of thumb:** if the script has platform-specific logic _and_ shared logic, use one script with `.chezmoi.os` conditionals. If the scripts are completely different per platform, use OS-specific directories to avoid template complexity.
 
 In this repo, we use OS-specific directories for scripts that are entirely platform-specific (e.g., macOS-only Brewfile updates, Linux-only font cache rebuilds), and we consider placing shared scripts (like font merge scripts) directly under `.chezmoiscripts/` with conditionals when the logic overlaps substantially across platforms.
 
