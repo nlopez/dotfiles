@@ -13,6 +13,14 @@ repos:
   - id: ruff-check
     args: [--fix]
   - id: ruff-format
+- repo: https://github.com/ComPWA/taplo-pre-commit
+  rev: v0.9.3
+  hooks:
+  - id: taplo-format
+- repo: https://github.com/DavidAnson/markdownlint-cli2
+  rev: v0.22.1
+  hooks:
+  - id: markdownlint-cli2
 - repo: local
   hooks:
   - id: jsonlint
