@@ -335,19 +335,20 @@ def _check_default_symlink(root: Path, fix: bool, r: _LintResult) -> None:
         r.errors += 1
 
 
-def _check_worktree_branch_paths(root: Path, fix: bool, r: _LintResult) -> None:
-    """Ensure each worktree's dir relative to root matches its branch name."""
+def _iter_worktree_branches(
+    root: Path,
+) -> list[tuple[Path, str, str | None]]:
+    """Return ``(path, local_branch, remote_short)`` for each live worktree.
+
+    ``remote_short`` is the upstream branch with the ``origin/`` prefix
+    stripped, or ``None`` if the branch has no upstream.  Bare,
+    detached, and prunable worktrees are skipped.
+    """
     try:
         raw = git_out(root, "worktree", "list", "--porcelain")
     except CalledProcessError:
-        _warn("could not list worktrees")
-        r.warnings += 1
-        return
+        return []
 
-    # Parse porcelain output into complete records, then filter.
-    # Each stanza is separated by a blank line.  The ``prunable`` line
-    # can appear *after* ``branch``, so we must collect the whole
-    # stanza before deciding whether to keep it.
     @dataclass
     class _WtRecord:
         path: Path | None = None
@@ -372,20 +373,84 @@ def _check_worktree_branch_paths(root: Path, fix: bool, r: _LintResult) -> None:
             cur.prunable = True
         elif line.startswith("branch refs/heads/"):
             cur.branch = line.removeprefix("branch refs/heads/")
-    records.append(cur)  # last stanza (no trailing blank line)
+    records.append(cur)
 
-    worktrees: list[tuple[Path, str]] = [
-        (rec.path, rec.branch)
-        for rec in records
-        if rec.path is not None
-        and rec.branch is not None
-        and not rec.bare
-        and not rec.detached
-        and not rec.prunable
-    ]
+    out: list[tuple[Path, str, str | None]] = []
+    for rec in records:
+        if (
+            rec.path is None
+            or rec.branch is None
+            or rec.bare
+            or rec.detached
+            or rec.prunable
+        ):
+            continue
+        try:
+            upstream = git_out(
+                root,
+                "for-each-ref",
+                "--format=%(upstream:short)",
+                f"refs/heads/{rec.branch}",
+            )
+        except CalledProcessError:
+            upstream = ""
+        remote = upstream.removeprefix("origin/") if upstream else None
+        out.append((rec.path, rec.branch, remote))
+    return out
 
-    if not worktrees:
+
+def _check_branch_tracks_remote_name(root: Path, fix: bool, r: _LintResult) -> None:
+    """Ensure each local branch name matches its remote tracking branch name.
+
+    When they differ, rename the local branch to match the remote.  The
+    follow-on ``_check_worktree_branch_paths`` will then move the worktree
+    directory to match the new branch name.
+
+    Exception: if the upstream points at the repo's default branch but the
+    local branch doesn't, the upstream is almost certainly misconfigured
+    (common after a rebase) — leave the local name alone.
+    """
+    try:
+        default_branch = git_out(root, "symbolic-ref", "--short", "HEAD")
+    except CalledProcessError:
+        default_branch = None
+
+    problems = False
+    for _wt_path, local, remote in _iter_worktree_branches(root):
+        if not remote or remote == local:
+            continue
+        # Don't rename to the default branch when only the upstream
+        # mistakenly points at it.
+        if remote == default_branch and local != default_branch:
+            continue
+        problems = True
+        if fix:
+            try:
+                git(root, "branch", "-m", local, remote)
+                _fixed(f"branch renamed {local!r} → {remote!r} (matches remote)")
+                r.fixes += 1
+            except CalledProcessError:
+                _fail(
+                    f"branch {local!r} should be {remote!r}"
+                    f" (rename failed — target may exist)"
+                )
+                r.errors += 1
+        else:
+            _fail(f"branch {local!r} should be {remote!r} (tracks origin/{remote})")
+            r.errors += 1
+
+    if not problems:
+        _ok("local branch names match remote tracking branches")
+
+
+def _check_worktree_branch_paths(root: Path, fix: bool, r: _LintResult) -> None:
+    """Ensure each worktree's dir relative to root matches its branch name."""
+    worktrees_full = _iter_worktree_branches(root)
+    if not worktrees_full:
         return
+    worktrees: list[tuple[Path, str]] = [(p, b) for p, b, _ in worktrees_full]
+    # Pre-resolved upstreams (avoid re-querying per branch below).
+    upstream_map: dict[str, str | None] = {b: r for _, b, r in worktrees_full}
 
     root_resolved = root.resolve()
 
@@ -426,18 +491,7 @@ def _check_worktree_branch_paths(root: Path, fix: bool, r: _LintResult) -> None:
             rel = str(wt_path.resolve().relative_to(root_resolved))
         except ValueError:
             continue
-        # Resolve the remote tracking branch (if any).
-        try:
-            upstream = git_out(
-                root,
-                "for-each-ref",
-                "--format=%(upstream:short)",
-                f"refs/heads/{branch}",
-            )
-        except CalledProcessError:
-            upstream = ""
-        remote = upstream.removeprefix("origin/") if upstream else None
-        entries.append(_WtEntry(rel=rel, local=branch, remote=remote))
+        entries.append(_WtEntry(rel=rel, local=branch, remote=upstream_map.get(branch)))
 
     # Set of all worktree relative paths — used for nesting detection.
     wt_set = {e.rel for e in entries}
@@ -551,6 +605,7 @@ def _lint_one(root: Path, fix: bool) -> _LintResult:
     _check_gitfile(root, fix, r)
     _check_fetch_refspec(root, fix, r)
     _check_default_symlink(root, fix, r)
+    _check_branch_tracks_remote_name(root, fix, r)
     _check_worktree_branch_paths(root, fix, r)
     _check_canonical_casing(root, fix, r)
     return r
