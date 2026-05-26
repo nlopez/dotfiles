@@ -25,6 +25,8 @@ def main() -> None:
 
     root = chezmoi_root()
     errors = 0
+    plain_count = 0
+    tmpl_count = 0
 
     # Lint plain .json files (no templating needed).
     # Exclude modify_* scripts — they are Python/shell scripts processed
@@ -38,6 +40,7 @@ def main() -> None:
             str(json_file.relative_to(root)),
             args.verbose,
         )
+        plain_count += 1
 
     # Render and lint .json.tmpl files for each OS.
     # Exclude modify_*.json.tmpl files too: they are templated chezmoi
@@ -50,6 +53,10 @@ def main() -> None:
                 continue
             label = f"{os_name}/{tmpl.relative_to(root)}"
             errors += render_and_lint(tmpl, data, label, args.verbose)
+            tmpl_count += 1
+
+    total = plain_count + tmpl_count
+    print(f"jsonlint: checked {total} files ({plain_count} plain, {tmpl_count} rendered)")
 
     if errors:
         print(f"\n{errors} error(s)", file=sys.stderr)

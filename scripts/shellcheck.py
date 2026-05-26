@@ -27,6 +27,7 @@ def main() -> None:
 
     root = chezmoi_root()
     errors = 0
+    checked = 0
 
     for os_name in OSES:
         scripts_dir = root / ".chezmoiscripts" / os_name
@@ -37,9 +38,13 @@ def main() -> None:
 
         for tmpl in sorted(scripts_dir.glob("*.sh.tmpl")):
             errors += render_and_check(tmpl, data, os_name, args.verbose)
+            checked += 1
 
         for sh in sorted(scripts_dir.glob("*.sh")):
             errors += run_shellcheck(sh, f"{os_name}/{sh.name}", data, args.verbose)
+            checked += 1
+
+    print(f"shellcheck: checked {checked} files")
 
     if errors:
         print(f"\n{errors} error(s)", file=sys.stderr)
