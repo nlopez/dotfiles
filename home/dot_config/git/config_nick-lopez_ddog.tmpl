@@ -1,3 +1,7 @@
+{{- if .work }}
+; nick-lopez_ddog GitHub identity: ddoghq + ddoghq-sandbox org repos.
+; Uses the corporate email and the nick-lopez_ddog SSH signing key.
+
 [user]
   name = Nick Lopez
   email = nick.lopez@datadoghq.com
@@ -10,4 +14,6 @@
   gpgsign = true
 
 [core]
+  sshCommand = ssh -o IdentityFile=~/.ssh/id_nick-lopez_ddog.pub -o IdentitiesOnly=yes
   hooksPath = /usr/local/dd/global_hooks
+{{- end }}
