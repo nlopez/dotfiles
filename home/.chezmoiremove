@@ -17,6 +17,7 @@
 
 .local/bin/zed
 .local/share/gitcache
+.pi/agent/extensions/auto-theme.ts
 .npmrc
 .config/uv/uv.toml
 Library/LaunchAgents/com.user.dark-notify-tmux.plist
