@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+"""Reconcile Pi user packages with the declarative package list.
+
+Ensures ~/.pi/agent/npm/ contains exactly the declared packages by writing
+the correct package.json and running `pnpm install` to reconcile.
+
+Hash trigger (chezmoi run_onchange):
+{{ .pi.packages | toJson | sha256sum }}
+"""
+import json
+import os
+import subprocess
+import sys
+
+# Declared packages (injected by chezmoi template from .chezmoidata/pi.yaml).
+DECLARED = [
+{{- range .pi.packages }}
+    "{{ . }}",
+{{- end }}
+]
+
+NPM_DIR = os.path.expanduser("~/.pi/agent/npm")
+
+
+def parse_npm_spec(spec: str) -> tuple[str, str]:
+    """Parse 'npm:[@scope/]name@version' → (name, version)."""
+    s = spec[4:] if spec.startswith("npm:") else spec
+    if s.startswith("@"):
+        at = s.rfind("@")
+        if at > 0:
+            return s[:at], s[at + 1 :]
+        return s, "*"
+    parts = s.split("@", 1)
+    return parts[0], parts[1] if len(parts) > 1 else "*"
+
+
+# --- Pre-flight checks ---
+
+if subprocess.run(["pnpm", "--version"], capture_output=True).returncode != 0:
+    print("pnpm not found, skipping Pi package reconciliation", file=sys.stderr)
+    sys.exit(0)
+
+# --- Build target state ---
+
+target_deps: dict[str, str] = {}
+for spec in DECLARED:
+    name, version = parse_npm_spec(spec)
+    target_deps[name] = version
+
+# --- Read current state ---
+
+pkg_path = os.path.join(NPM_DIR, "package.json")
+current_deps: dict[str, str] = {}
+if os.path.isfile(pkg_path):
+    try:
+        with open(pkg_path) as f:
+            current_deps = json.load(f).get("dependencies", {})
+    except Exception:
+        pass
+
+if current_deps == target_deps:
+    print("Pi packages: already in sync ✓")
+    sys.exit(0)
+
+# --- Diff ---
+
+added = sorted(set(target_deps) - set(current_deps))
+removed = sorted(set(current_deps) - set(target_deps))
+changed = sorted(
+    k
+    for k in set(target_deps) & set(current_deps)
+    if target_deps[k] != current_deps[k]
+)
+
+for name in added:
+    print(f"  + {name}@{target_deps[name]}")
+for name in removed:
+    print(f"  - {name}@{current_deps[name]}")
+for name in changed:
+    print(f"  ↑ {name} {current_deps[name]} → {target_deps[name]}")
+
+# --- Write target package.json ---
+
+os.makedirs(NPM_DIR, exist_ok=True)
+
+with open(pkg_path, "w") as f:
+    json.dump(
+        {"name": "pi-extensions", "private": True, "dependencies": target_deps},
+        f,
+        indent=2,
+    )
+    f.write("\n")
+
+gitignore = os.path.join(NPM_DIR, ".gitignore")
+if not os.path.isfile(gitignore):
+    with open(gitignore, "w") as f:
+        f.write("node_modules\n")
+
+# --- Reconcile with pnpm install ---
+
+result = subprocess.run(["pnpm", "install"], cwd=NPM_DIR)
+if result.returncode != 0:
+    print("Pi packages: pnpm install failed", file=sys.stderr)
+    sys.exit(1)
+
+print(
+    f"Pi packages: {len(added)} added, {len(removed)} removed, {len(changed)} updated ✓"
+)

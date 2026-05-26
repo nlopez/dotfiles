@@ -19,7 +19,7 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["/(^|/)home/dot_pi/agent/modify_settings\\.json$/"],
+      "managerFilePatterns": ["/(^|/)home/\\.chezmoidata/pi\\.yaml$/"],
       "matchStrings": ["npm:(?<packageName>(?:@[^/]+/)?[^@\\s\"]+)@(?<currentValue>[0-9][^\\s\",]+)"],
       "datasourceTemplate": "npm"
     },
@@ -41,7 +41,7 @@
     },
     {
       "matchManagers": ["custom.regex"],
-      "matchFileNames": ["home/dot_pi/agent/modify_settings.json"],
+      "matchFileNames": ["home/.chezmoidata/pi.yaml"],
       "groupName": "pi packages"
     },
     {
