@@ -2,10 +2,9 @@
 # /// script
 # requires-python = ">=3.11"
 # ///
-"""Smart linting for rendered chezmoi templates.
+"""Lint rendered chezmoi templates.
 
-Quick-path: if no `.tmpl` file under home/ has changed, skip entirely.
-When templates change, render the full tree once and run all checks.
+Renders the full source tree and runs all checks.
 
 Checks performed on the current-machine render:
   - Shell scripts (.zshrc, .zshenv, .zprofile, etc.)             → shellcheck
@@ -47,37 +46,6 @@ SSH_HOSTS = [
     "github.com-nick-lopez_ddog",
     "github.com-silentshout42",
 ]
-
-
-# ── Changed-file detection ──────────────────────────────────────────────────
-
-
-def get_changed_files() -> list[Path]:
-    """Return list of changed files in the working tree (since HEAD)."""
-    try:
-        result = subprocess.run(
-            ["git", "diff", "--name-only", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if result.returncode != 0:
-            return []
-        return [Path(f) for f in result.stdout.strip().splitlines() if f]
-    except FileNotFoundError:
-        return []
-
-
-def has_changed_templates(home: Path) -> bool:
-    """True if any .tmpl file under home/ has changed."""
-    home_str = str(home)
-    for f in get_changed_files():
-        try:
-            if str(f).startswith(home_str) and f.suffix == ".tmpl":
-                return True
-        except ValueError:
-            pass
-    return False
 
 
 # ── Chezmoi helpers ──────────────────────────────────────────────────────────
@@ -300,36 +268,30 @@ def main() -> int:
     global SOURCE_ROOT, TMPDIR
 
     parser = argparse.ArgumentParser(
-        description="Smart linting for rendered chezmoi templates",
+        description="Lint rendered chezmoi templates",
     )
-    parser.add_argument("--verbose", "-v", action="store_true")
-    args = parser.parse_args()
+    parser.parse_args()
 
     script_dir = Path(__file__).resolve().parent
     repo_root = script_dir.parent
     SOURCE_ROOT = str(repo_root / "home")
-    home = Path(SOURCE_ROOT)
-
-    # Quick-path: skip if no .tmpl files changed
-    if not has_changed_templates(home):
-        if args.verbose:
-            print("templates: no .tmpl files changed, skipping", file=sys.stderr)
-        return 0
-
-    if args.verbose:
-        print("templates: templates changed, rendering and checking", file=sys.stderr)
 
     # ── Render the full source tree (template dependencies require it) ──────
 
     TMPDIR = tempfile.mkdtemp(prefix="chezmoi-lint-")
 
-    result = chezmoi("apply", "--force", "--no-tty")
-    if result.returncode != 0 and "not found" not in result.stderr:
-        sys.stderr.write(f"  chezmoi apply failed:\n{result.stderr.strip()}\n")
-        return 1
+    result = chezmoi("apply", "--force", "--no-tty", "--keep-going")
+    # Tolerate partial failures (e.g. 1Password timeout, missing external
+    # tool) as long as some files were rendered.
+    if result.returncode != 0 and result.stderr.strip():
+        print(
+            f"configlint: chezmoi apply had errors (continuing with partial render):\n"
+            f"  {result.stderr.strip().splitlines()[0]}",
+            file=sys.stderr,
+        )
 
     if not TMPDIR or not (p := Path(TMPDIR)).is_dir() or not any(p.iterdir()):
-        print("templates: chezmoi render produced no output", file=sys.stderr)
+        print("configlint: chezmoi render produced no output", file=sys.stderr)
         return 1
 
     failed = 0
@@ -350,6 +312,7 @@ def main() -> int:
     shell_paths = sorted(set(x for x in shell_paths if x.is_file()))
     for path in shell_paths:
         shell_count += 1
+        print(f"configlint: shellcheck {rel(path)}")
         if not lint_shellcheck(path):
             print(f"  FAIL: shellcheck {rel(path)}", file=sys.stderr)
             failed += 1
@@ -361,6 +324,7 @@ def main() -> int:
         if not path.is_file():
             continue
         plist_count += 1
+        print(f"configlint: xmllint {rel(path)}")
         if not lint_xmllint(path):
             print(f"  FAIL: xmllint {rel(path)}", file=sys.stderr)
             failed += 1
@@ -369,11 +333,14 @@ def main() -> int:
 
     if p.joinpath("dot_config", "git").exists():
         git_count += 1
+        print("configlint: git config current")
         failed += render_and_check_git(p / "dot_config" / "git", p, "current")
     if p.joinpath("dot_ssh").exists():
         ssh_count += 1
+        print("configlint: ssh config current")
         failed += render_and_check_ssh(p / "dot_ssh", p, "current")
     signers_count += 1
+    print("configlint: allowed_signers")
     failed += check_allowed_signers(Path(SOURCE_ROOT))
 
     # ── Extra renders for other OS × machine-type combos ───────────────────
@@ -398,6 +365,7 @@ def main() -> int:
                 if extra_path.is_dir() and any(extra_path.iterdir()):
                     if extra_path.joinpath("dot_config", "git").exists():
                         git_count += 1
+                        print(f"configlint: git config {label}")
                         failed += render_and_check_git(
                             extra_path / "dot_config" / "git",
                             extra_path,
@@ -405,6 +373,7 @@ def main() -> int:
                         )
                     if extra_path.joinpath("dot_ssh").exists():
                         ssh_count += 1
+                        print(f"configlint: ssh config {label}")
                         failed += render_and_check_ssh(extra_path / "dot_ssh", extra_path, label)
         finally:
             os.environ.clear()
