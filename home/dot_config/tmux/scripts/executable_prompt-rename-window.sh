@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Opens the rename prompt with the emoji-stripped window name prefilled.
-# The rename-window.sh script re-attaches any emoji prefix on confirm.
+# Opens the rename prompt prefilled with the current window name.
+# Emoji status lives in @pi-status (not the window name), so no stripping needed.
 CURRENT=$(tmux display-message -p '#W')
-BASE=$(printf '%s' "$CURRENT" | sed -E 's/^([🤖✳️🛎️ ])+//')
-tmux command-prompt -I "$BASE" -p "window name:" "run-shell \"~/.config/tmux/scripts/rename-window.sh '%%'\""
+tmux command-prompt -I "$CURRENT" -p "window name:" "run-shell \"~/.config/tmux/scripts/rename-window.sh '%%'\""

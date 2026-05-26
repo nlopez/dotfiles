@@ -68,13 +68,10 @@ unset AWS_PROFILE
 "$_real" "$@"
 _exit=$?
 
-# Restore tmux window name (strip leading emoji prefix set by pi/claude hooks).
-if [[ -n "${TMUX:-}" ]]; then
-  _pane="${TMUX_PANE}"
-  _current="$(tmux display-message -p -t "$_pane" '#W' 2>/dev/null)"
-  _base="$(printf '%s' "$_current" | sed -E 's/^([🤖✳️🛎️ ])+//')"
-  tmux rename-window -t "$_pane" "$_base"
-  tmux set-option -w -t "$_pane" automatic-rename off
+# Clear @pi-status on the tmux window after pi exits.
+# session_shutdown fires inside the extension, but the shim handles crashes/SIGKILL.
+if [[ -n "${TMUX:-}" && -n "${TMUX_PANE:-}" ]]; then
+  tmux set-option -wu -t "${TMUX_PANE}" @pi-status 2>/dev/null || true
 fi
 
 if [[ "$_should_reset_terminal" -eq 1 ]]; then

@@ -46,24 +46,6 @@
             "command": "bash ~/.claude/hooks/gh-pr-draft.sh"
           }
         ]
-      },
-      {
-        "matcher": "AskFollowupQuestion",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/post-tool-use.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "AskUserQuestion",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/post-tool-use.sh"
-          }
-        ]
       }
     ],
     "PostToolUse": [
@@ -72,17 +54,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
+            "command": "python3 ~/.claude/hooks/user-prompt-submit.py"
           }
         ]
       }
     ],
-    "PermissionRequest": [
+    "Notification": [
       {
+        "matcher": "idle_prompt|permission_prompt",
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/post-tool-use.sh"
+            "command": "python3 ~/.claude/hooks/attention.py"
           }
         ]
       }
@@ -92,7 +75,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/stop.sh"
+            "command": "python3 ~/.claude/hooks/stop.py"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/session-end.py"
           }
         ]
       }
@@ -102,7 +95,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/user-prompt-submit.sh"
+            "command": "python3 ~/.claude/hooks/user-prompt-submit.py"
           }
         ]
       }

@@ -27,13 +27,6 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { mkdir, writeFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
 
-// Codepoints for the three emoji prefixes plus the variation-selector U+FE0F.
-const EMOJI_PREFIX_RE = /^[\u{1F916}\u{2733}\u{1F6CE}\uFE0F\s]+/u;
-
-function stripWindowEmoji(name: string): string {
-  return name.replace(EMOJI_PREFIX_RE, "");
-}
-
 export default function (pi: ExtensionAPI) {
   // Only activate inside tmux.
   const tmuxPane = process.env.TMUX_PANE;
@@ -80,11 +73,6 @@ export default function (pi: ExtensionAPI) {
 
   // ── helpers ──────────────────────────────────────────────────────────────
 
-  async function getWindowBase(): Promise<string> {
-    const { stdout } = await pi.exec("tmux", ["display-message", "-p", "-t", tmuxPane, "#W"]);
-    return stripWindowEmoji(stdout.trim());
-  }
-
   async function setWindowStatus(emoji: string): Promise<void> {
     // Set a user option on the window so the status-bar format can
     // display it — the window *name* (title) is never touched.
@@ -102,7 +90,7 @@ export default function (pi: ExtensionAPI) {
     const parts = info.trim().split(" ");
     const sessionName = parts[0] ?? "";
     const windowIndex = parts[1] ?? "";
-    const baseName = stripWindowEmoji(parts.slice(2).join(" "));
+    const baseName = parts.slice(2).join(" ");
 
     const terminals: Array<[string, string]> = [
       ["iTerm2", "com.googlecode.iterm2"],

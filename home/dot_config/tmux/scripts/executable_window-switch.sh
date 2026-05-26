@@ -10,12 +10,11 @@ ENTRY_TIME=$(tmux show-option -gvq @last_window_entry_time 2>/dev/null)
 NOW=$(date +%s)
 
 if [[ -n "$LAST" && "$LAST" != "$CURRENT" ]]; then
-  LAST_NAME=$(tmux display-message -p -t "$LAST" '#W' 2>/dev/null) || true
-  if [[ "$LAST_NAME" == ✳️* ]]; then
+  LAST_STATUS=$(tmux show-option -wvq -t "$LAST" @pi-status 2>/dev/null || true)
+  if [[ "$LAST_STATUS" == ✳️* ]]; then
     DWELL=$(( NOW - ${ENTRY_TIME:-$NOW} ))
     if [[ $DWELL -ge 3 ]]; then
-      BASE=$(printf '%s' "$LAST_NAME" | sed -E 's/^([🤖✳️🛎️ ])+//')
-      tmux rename-window -t "$LAST" "$BASE"
+      tmux set-option -wu -t "$LAST" @pi-status 2>/dev/null || true
     fi
   fi
 fi
