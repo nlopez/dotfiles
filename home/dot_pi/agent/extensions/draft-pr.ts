@@ -24,10 +24,7 @@ export default function (pi: ExtensionAPI) {
     if (/--draft\b|-d\b/.test(command)) return;
 
     // Inject --draft right after `gh pr create`.
-    event.input.command = command.replace(
-      /(gh\s+pr\s+create)/,
-      "$1 --draft",
-    );
+    event.input.command = command.replace(/(gh\s+pr\s+create)/, "$1 --draft");
 
     ctx.ui.notify("Injected --draft into gh pr create", "info");
   });

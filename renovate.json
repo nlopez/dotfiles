@@ -8,9 +8,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": [
-        "/(^|/)home/\\.chezmoiexternal\\.toml\\.tmpl$/"
-      ],
+      "managerFilePatterns": ["/(^|/)home/\\.chezmoiexternal\\.toml\\.tmpl$/"],
       "matchStrings": [
         "url = \"https://github\\.com/(?<packageName>[^/]+/[^/]+)/archive/(?<currentValue>v?\\d[^/]+)\\.tar\\.gz\"",
         "url = \"https://raw\\.githubusercontent\\.com/(?<packageName>[^/]+/[^/]+)/(?<currentValue>v?\\d[^/]+)/[^\"]+\"",
@@ -21,22 +19,14 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": [
-        "/(^|/)home/dot_pi/agent/modify_settings\\.json$/"
-      ],
-      "matchStrings": [
-        "npm:(?<packageName>(?:@[^/]+/)?[^@\\s\"]+)@(?<currentValue>[0-9][^\\s\",]+)"
-      ],
+      "managerFilePatterns": ["/(^|/)home/dot_pi/agent/modify_settings\\.json$/"],
+      "matchStrings": ["npm:(?<packageName>(?:@[^/]+/)?[^@\\s\"]+)@(?<currentValue>[0-9][^\\s\",]+)"],
       "datasourceTemplate": "npm"
     },
     {
       "customType": "regex",
-      "managerFilePatterns": [
-        "/(^|/)home/\\.chezmoidata/(darwin|linux)/packages\\.yaml$/"
-      ],
-      "matchStrings": [
-        "- \"?(?<packageName>(?:@[^/\\s\"]+/)?[^@\\s\"]+)@(?<currentValue>[0-9][^\\s\",\\n]+)\"?"
-      ],
+      "managerFilePatterns": ["/(^|/)home/\\.chezmoidata/(darwin|linux)/packages\\.yaml$/"],
+      "matchStrings": ["- \"?(?<packageName>(?:@[^/\\s\"]+/)?[^@\\s\"]+)@(?<currentValue>[0-9][^\\s\",\\n]+)\"?"],
       "datasourceTemplate": "npm"
     }
   ],
@@ -56,10 +46,7 @@
     },
     {
       "matchManagers": ["custom.regex"],
-      "matchFileNames": [
-        "home/.chezmoidata/darwin/packages.yaml",
-        "home/.chezmoidata/linux/packages.yaml"
-      ],
+      "matchFileNames": ["home/.chezmoidata/darwin/packages.yaml", "home/.chezmoidata/linux/packages.yaml"],
       "groupName": "pnpm global packages",
       "automerge": true,
       "automergeType": "pr",

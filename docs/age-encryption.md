@@ -100,24 +100,27 @@ scripts/
 
 ## Files that are never in the repo
 
-| Path | What it is |
-|------|------------|
-| `~/.local/share/chezmoi-age/identity.txt` | age private key — written by hook, never committed |
-| 1Password item `Private/age-key/private-key` | Source of truth for the private key |
+| Path                                         | What it is                                         |
+| -------------------------------------------- | -------------------------------------------------- |
+| `~/.local/share/chezmoi-age/identity.txt`    | age private key — written by hook, never committed |
+| 1Password item `Private/age-key/private-key` | Source of truth for the private key                |
 
 ## ⚠️ Boundaries
 
 ### ✅ Always do
+
 - Edit encrypted files via `chezmoi edit` (chezmoi handles decrypt/re-encrypt)
 - Store age private keys in 1Password
 - Use `age-inspect` to verify encryption recipients
 
 ### ⚠️ Ask first
+
 - Add a new machine class (e.g., "staging")
 - Change the encryption algorithm
 - Revoke and regenerate machine keys
 
 ### 🚫 Never do
+
 - Commit age identity files or private keys
 - Hardcode secrets in templates (use `onepasswordRead` or age encryption)
 - Share private keys across machine classes

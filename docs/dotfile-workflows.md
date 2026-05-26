@@ -39,18 +39,21 @@ Before committing any change, ask: "If I wiped my home directory and ran `chezmo
 ## ⚠️ Boundaries
 
 ### ✅ Always do
+
 - Edit via `chezmoi source-path <path>` or `chezmoi edit <path>`
 - Verify with `chezmoi apply --dry-run` before committing
 - Use templates for conditional logic (`.chezmoi.os`, `.chezmoi.arch`, etc.)
 - Keep scripts idempotent — they must succeed even if already run
 
 ### ⚠️ Ask first
+
 - Change the `.chezmoiroot` file
 - Modify the `.chezmoiignore` rules
 - Change age encryption recipients or keys
 - Remove a configuration that's deployed to multiple machines
 
 ### 🚫 Never do
+
 - Edit files directly in `~` — they will be overwritten on next `chezmoi apply`
 - Append to live config files (e.g., `echo 'foo' >> ~/.zshrc`)
 - Use `pi install <package>` — writes to destination, not source

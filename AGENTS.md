@@ -47,18 +47,19 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 
 ## Full documentation
 
-| File | Contents |
-|------|----------|
-| [docs/getting-started.md](docs/getting-started.md) | What this repo is, setup, quick commands |
-| [docs/core-concepts.md](docs/core-concepts.md) | Source state, `.chezmoiroot`, naming, templates, data, scripts |
-| [docs/dotfile-workflows.md](docs/dotfile-workflows.md) | Adding/removing dotfiles, re-apply guarantee, boundaries |
-| [docs/age-encryption.md](docs/age-encryption.md) | Age post-quantum encryption, key setup, secrets workflows |
-| [docs/tools-and-validation.md](docs/tools-and-validation.md) | Linting, Pi plugin management, validation rules |
-| [docs/quick-reference.md](docs/quick-reference.md) | Commands, repo navigation, path disambiguation |
+| File                                                         | Contents                                                       |
+| ------------------------------------------------------------ | -------------------------------------------------------------- |
+| [docs/getting-started.md](docs/getting-started.md)           | What this repo is, setup, quick commands                       |
+| [docs/core-concepts.md](docs/core-concepts.md)               | Source state, `.chezmoiroot`, naming, templates, data, scripts |
+| [docs/dotfile-workflows.md](docs/dotfile-workflows.md)       | Adding/removing dotfiles, re-apply guarantee, boundaries       |
+| [docs/age-encryption.md](docs/age-encryption.md)             | Age post-quantum encryption, key setup, secrets workflows      |
+| [docs/tools-and-validation.md](docs/tools-and-validation.md) | Linting, Pi plugin management, validation rules                |
+| [docs/quick-reference.md](docs/quick-reference.md)           | Commands, repo navigation, path disambiguation                 |
 
 ## ⚠️ Boundaries
 
 ### ✅ Always do
+
 - Edit via `chezmoi source-path <path>` or `chezmoi edit <path>`
 - Verify with `chezmoi apply --dry-run` before committing
 - Use templates for conditional logic (`.chezmoi.os`, `.chezmoi.arch`, etc.)
@@ -69,6 +70,7 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 - Add Pi plugins via `modify_settings.json` and `pi install`, not as pnpm globals
 
 ### ⚠️ Ask first
+
 - Change the `.chezmoiroot` file
 - Modify the `.chezmoiignore` rules
 - Change age encryption recipients or keys
@@ -76,6 +78,7 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 - Add a new external dependency via `.chezmoiexternal.toml`
 
 ### 🚫 Never do
+
 - Edit files directly in `~` — they will be overwritten on next `chezmoi apply`
 - Append to live config files (e.g., `echo 'foo' >> ~/.zshrc`)
 - Use `pi install` as the declaration mechanism for Pi plugins. First declare them in `modify_settings.json`, then run `chezmoi apply` and `pi install`.

@@ -10,7 +10,7 @@
 
 "use strict";
 
-const fs   = require("fs");
+const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
@@ -21,23 +21,29 @@ const { execSync } = require("child_process");
 // ---------------------------------------------------------------------------
 const tmuxPane = process.env.TMUX_PANE;
 if (tmuxPane) {
-  const paneId   = tmuxPane.replace("%", "");
+  const paneId = tmuxPane.replace("%", "");
   const statePath = path.join(process.env.HOME, ".local/state/pi/pane-models", paneId);
   try {
     const name = fs.readFileSync(statePath, "utf8").trim();
-    if (name) { process.stdout.write(name); process.exit(0); }
-  } catch { /* file absent — fall through to settings.json */ }
+    if (name) {
+      process.stdout.write(name);
+      process.exit(0);
+    }
+  } catch {
+    /* file absent — fall through to settings.json */
+  }
 }
 
 // ---------------------------------------------------------------------------
 // 2. Read active provider + model from Pi settings
 // ---------------------------------------------------------------------------
 const settingsPath = path.join(process.env.HOME, ".pi", "agent", "settings.json");
-let provider = "", modelId = "";
+let provider = "",
+  modelId = "";
 try {
   const s = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
   provider = s.defaultProvider || "";
-  modelId  = s.defaultModel   || "";
+  modelId = s.defaultModel || "";
 } catch {}
 
 if (!modelId) process.exit(0);
@@ -47,13 +53,11 @@ if (!modelId) process.exit(0);
 // ---------------------------------------------------------------------------
 function findModelsFile() {
   try {
-    const piBin  = execSync("which pi", { encoding: "utf8", stdio: ["pipe","pipe","ignore"] }).trim();
+    const piBin = execSync("which pi", { encoding: "utf8", stdio: ["pipe", "pipe", "ignore"] }).trim();
     const realPi = fs.realpathSync(piBin);
-    let   dir    = path.dirname(realPi);
+    let dir = path.dirname(realPi);
     for (let i = 0; i < 12; i++) {
-      const candidate = path.join(
-        dir, "node_modules", "@earendil-works", "pi-ai", "dist", "models.generated.js"
-      );
+      const candidate = path.join(dir, "node_modules", "@earendil-works", "pi-ai", "dist", "models.generated.js");
       if (fs.existsSync(candidate)) return candidate;
       const up = path.dirname(dir);
       if (up === dir) break;
@@ -82,7 +86,7 @@ if (!friendlyName) {
   const parts = modelId.split("-");
   const out = [];
   for (let i = 0; i < parts.length; i++) {
-    const cur  = parts[i];
+    const cur = parts[i];
     const next = parts[i + 1];
     if (/^\d+$/.test(cur) && next !== undefined && /^\d+$/.test(next)) {
       out.push(`${cur}.${next}`);

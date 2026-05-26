@@ -2,6 +2,7 @@
 description: Thoroughly research a question and present findings without implementing anything
 argument-hint: "[your question]"
 ---
+
 Research the following question thoroughly and present your findings:
 
 $ARGUMENTS

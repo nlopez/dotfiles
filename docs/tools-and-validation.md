@@ -45,6 +45,7 @@ The `run_onchange_after_pnpm-globals.sh.tmpl` script reads `pnpm.yaml` and runs
 ## ⚠️ Boundaries
 
 ### ✅ Always do
+
 - Use `uv run scripts/jsonlint.py` before committing
 - Run `pre-commit run --all-files` locally
 - Declare Pi npm packages in `modify_settings.json`, not `pnpm.yaml`
@@ -54,13 +55,15 @@ The `run_onchange_after_pnpm-globals.sh.tmpl` script reads `pnpm.yaml` and runs
   modify templates must not have a `.tmpl` suffix
 
 ### ⚠️ Ask first
+
 - Add a new linting step or tool
 - Change pre-commit hook configuration
 - Add a new external dependency via `.chezmoiexternal.toml`
 
 ### 🚫 Never do
+
 - Commit files that fail linting
 - Bypass pre-commit hooks
 - Install packages directly to `~/.local/bin/` outside chezmoi
-- Use `pi install` to declare new packages — it writes to destination only. First add to `modify_settings.json` (Pi plugins) or `pnpm.yaml` (pnpm globals), then `chezmoi apply` and `pi install`. 
+- Use `pi install` to declare new packages — it writes to destination only. First add to `modify_settings.json` (Pi plugins) or `pnpm.yaml` (pnpm globals), then `chezmoi apply` and `pi install`.
 - Add Pi npm packages to `pnpm.yaml` — they must go in `modify_settings.json`.

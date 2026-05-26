@@ -29,8 +29,7 @@ import { resolve } from "node:path";
 const GH_CONTENT_RE = /\bgh\s+(?:pr|issue)\s+(?:create|edit|comment|review)\b/;
 
 // Matches --body-file <path> or -F <path> (quoted or unquoted, not stdin)
-const BODY_FILE_RE =
-  /(?:--body-file|-F)\s+(?:"([^"]+)"|'([^']+)'|(?!-)(\S+))/;
+const BODY_FILE_RE = /(?:--body-file|-F)\s+(?:"([^"]+)"|'([^']+)'|(?!-)(\S+))/;
 
 /** Build the footer string from the current model name. */
 function buildFooter(modelName: string): string {
@@ -87,11 +86,7 @@ function injectBodyFile(command: string, footer: string, cwd: string): boolean {
 }
 
 /** Apply both strategies to a command; returns what changed. */
-function applyAttribution(
-  command: string,
-  footer: string,
-  cwd: string,
-): { command: string; modified: boolean } {
+function applyAttribution(command: string, footer: string, cwd: string): { command: string; modified: boolean } {
   if (!GH_CONTENT_RE.test(command)) return { command, modified: false };
 
   const inlined = injectInlineBody(command, footer);
@@ -110,11 +105,7 @@ export default function (pi: ExtensionAPI) {
     if (!command) return;
 
     const footer = buildFooter(ctx.model?.name ?? "");
-    const { command: patched, modified } = applyAttribution(
-      command,
-      footer,
-      ctx.cwd,
-    );
+    const { command: patched, modified } = applyAttribution(command, footer, ctx.cwd);
 
     if (modified) {
       event.input.command = patched;
@@ -125,11 +116,7 @@ export default function (pi: ExtensionAPI) {
   // ── User-typed ! / !! commands inside the pi prompt ─────────────────────
   pi.on("user_bash", (event, ctx) => {
     const footer = buildFooter(ctx.model?.name ?? "");
-    const { command: patched, modified } = applyAttribution(
-      event.command,
-      footer,
-      ctx.cwd,
-    );
+    const { command: patched, modified } = applyAttribution(event.command, footer, ctx.cwd);
 
     if (!modified) return;
 
@@ -138,11 +125,7 @@ export default function (pi: ExtensionAPI) {
     const local = createLocalBashOperations();
     return {
       operations: {
-        exec(
-          _command: string,
-          cwd: string,
-          options: Parameters<typeof local.exec>[2],
-        ) {
+        exec(_command: string, cwd: string, options: Parameters<typeof local.exec>[2]) {
           return local.exec(patched, cwd, options);
         },
       },

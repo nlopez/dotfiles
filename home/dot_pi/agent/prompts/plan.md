@@ -2,6 +2,7 @@
 description: Think through a task and produce a step-by-step plan before coding
 argument-hint: "[task description]"
 ---
+
 Before writing any code, produce a clear, structured plan for the following task:
 
 $ARGUMENTS
