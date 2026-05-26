@@ -28,11 +28,13 @@ def main() -> None:
     root = chezmoi_root()
     errors = 0
 
-    # Lint plain .json files (no templating needed)
+    # Lint plain .json files (no templating needed).
+    # Exclude modify_* scripts — they are Python/shell scripts processed
+    # by chezmoi during `apply`, not plain JSON files.
     for json_file in sorted(root.rglob("*.json")):
-        content = json_file.read_text()
-        if "chezmoi:modify-template" in content:
+        if json_file.name.startswith("modify_"):
             continue
+        content = json_file.read_text()
         errors += lint_json(
             content,
             str(json_file.relative_to(root)),
