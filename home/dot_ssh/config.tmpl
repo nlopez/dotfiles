@@ -8,7 +8,13 @@ Host *
   LogLevel ERROR
   StrictHostKeyChecking accept-new
   User nlopez
+{{- if eq .chezmoi.os "darwin" }}
   IdentityAgent "~/.1password/agent.sock"
+{{- else }}
+  IdentityAgent "~/.gnupg/S.gpg-agent.ssh"
+{{- end }}
+
+{{- /* SSH agent socket set in dot_zprofile.tmpl via .chezmoi.os conditional */ -}}
 
 # Default github.com is anonymous — no key offered. All org access must go
 # through one of the org-specific aliases below (driven by git insteadOf rules).

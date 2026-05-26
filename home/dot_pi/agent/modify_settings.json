@@ -54,6 +54,7 @@ def base_name(spec):
 # Required packages pinned to specific versions.
 # Renovate will open PRs when newer versions are available.
 required_packages = [
+    "npm:pi-auto-theme@1.1.1",
     "npm:pi-mcp-adapter@2.6.1",
     "npm:pi-subagents@0.24.4",
     "npm:context-mode@1.0.151",

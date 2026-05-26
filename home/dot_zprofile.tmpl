@@ -54,7 +54,11 @@ export PI_OFFLINE=1
 export LESS="-FRX"
 export AWS_PAGER=""
 
+{{- if eq .chezmoi.os "darwin" }}
 export SSH_AUTH_SOCK="${HOME}/.1password/agent.sock"
+{{- else }}
+export SSH_AUTH_SOCK="${HOME}/.gnupg/S.gpg-agent.ssh"
+{{- end }}
 
 export PNPM_HOME="${XDG_DATA_HOME}/pnpm"
 path=($PNPM_HOME/bin $path)
