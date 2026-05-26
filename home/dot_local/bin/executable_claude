@@ -20,7 +20,7 @@ if [[ -n "${TMUX:-}" ]]; then
   _current="$(tmux display-message -p -t "$_pane" '#W' 2>/dev/null)"
   _base="$(printf '%s' "$_current" | sed -E 's/^([🤖✳️🛎️ ])+//')"
   tmux rename-window -t "$_pane" "$_base"
-  tmux set-option -w -t "$_pane" automatic-rename on
+  tmux set-option -w -t "$_pane" automatic-rename off
 fi
 
 tput reset
