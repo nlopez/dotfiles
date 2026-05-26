@@ -29,7 +29,7 @@ _clear_screen_sane() { stty sane; zle clear-screen }
 zle -N _clear_screen_sane
 bindkey '^L' _clear_screen_sane
 
-reload() {
+function reload {
   stty sane
   exec env -i PATH={{ .platform.reload_path }} TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX TMUX_PANE=$TMUX_PANE zsh --login
 }
