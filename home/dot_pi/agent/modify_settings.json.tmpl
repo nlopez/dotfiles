@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+# Managed by chezmoi — source: home/dot_pi/agent/modify_settings.json.tmpl
+# ⚠️  DO NOT EDIT ~/.pi/agent/settings.json directly. It is overwritten
+#     by chezmoi on every `chezmoi apply`. Always edit the source tree.
+#
+# This is a chezmoi templated modify_ script. Chezmoi first renders the Go
+# template (injecting the package list from .chezmoidata/pi.yaml), then
+# executes the resulting Python script. The script receives the current
+# settings.json contents on stdin and writes the replacement JSON to stdout.
+#
+# Configures: theme, defaultProvider, npmCommand, showHardwareCursor,
+#             compaction, and the declarative package list.
+import json
+import sys
+
+current_raw = sys.stdin.read()
+current = {}
+try:
+    if current_raw.strip():
+        current = json.loads(current_raw)
+except Exception:
+    pass
+
+# Theme: sensible default; auto-theme extension syncs with macOS appearance.
+current.setdefault("theme", "solarized-light")
+
+# Default omlx as the primary provider.
+if "omlx" in str(current.get("defaultProvider", "")) or current.get("defaultProvider") is None:
+    current["defaultProvider"] = "omlx"
+
+# Use pnpm for all npm package-manager operations.
+current["npmCommand"] = ["pnpm"]
+
+# Hardware cursor — enabled on startup; cursor-manager extension handles focus.
+current["showHardwareCursor"] = True
+
+# Declarative package list — exactly and only these packages.
+# Source of truth: home/.chezmoidata/pi.yaml
+current["packages"] = [
+{{- range .pi.packages }}
+    "{{ . }}",
+{{- end }}
+]
+
+# Compaction settings.
+current.setdefault("compaction", {
+    "enabled": True,
+    "reserveTokens": 32768,
+})
+
+print(json.dumps(current, indent=2))
