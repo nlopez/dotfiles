@@ -169,7 +169,7 @@ Structured configuration data lives in `.chezmoidata/` (YAML by default). Data i
 {{ .mydata.key }}
 ```
 
-This is the recommended place to externalize values that vary by OS, host, or user — keeping templates clean and data declarative. Per-platform overrides follow the pattern `.chezmoidata/{darwin,linux,windows}/`. See [external data docs](https://chezmoi.io/reference/data/).
+This is the recommended place to externalize values that vary by OS, host, or user — keeping templates clean and data declarative. Per-platform overrides follow the pattern `.chezmoidata/{darwin,linux}/`. See [external data docs](https://chezmoi.io/reference/data/).
 
 ### Scripts
 
@@ -183,7 +183,6 @@ A common pattern is to organize scripts under OS-specific subdirectories:
 .chezmoiscripts/
   darwin/   # scripts for macOS
   linux/    # scripts for Linux
-  windows/  # scripts for Windows
 ```
 
 This is a **convention**, not a requirement. Chezmoi does not require OS-specific directories. You can also:

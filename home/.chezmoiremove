@@ -29,3 +29,6 @@ Library/LaunchAgents/com.user.dark-notify-tmux.plist
 ; Renamed identity config files (old names from identity rename)
 .config/git/config_datadog
 .config/git/config_hobby
+
+; WindowsPowerShell — Windows-only, removed
+Documents/WindowsPowerShell
