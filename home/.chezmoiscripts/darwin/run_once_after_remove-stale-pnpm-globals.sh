@@ -19,7 +19,7 @@ STALE_PACKAGES=(
     "pi-powerline"
     "pi-mcp-adapter"
     "pi-firecrawl"
-    "pi-kagi-search"
+    "pi-kagi-api"
 )
 
 removed=0
@@ -42,7 +42,7 @@ if [[ $removed -gt 0 ]]; then
     echo "   pi install npm:pi-powerline"
     echo "   pi install npm:pi-mcp-adapter"
     echo "   pi install npm:@benvargas/pi-firecrawl"
-    echo "   pi install npm:@mjakl/pi-kagi-search"
+    echo "   pi install npm:@mjakl/pi-kagi-api"
 else
     echo "✅ No stale pnpm globals found."
 fi

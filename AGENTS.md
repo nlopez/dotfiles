@@ -63,7 +63,7 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 - Verify with `chezmoi apply --dry-run` before committing
 - Use templates for conditional logic (`.chezmoi.os`, `.chezmoi.arch`, etc.)
 - Keep scripts idempotent — they must succeed even if already run
-- Add Pi plugins through pnpm, never via `pi install`
+- Add Pi plugins via `modify_settings.json` and `pi install`, not as pnpm globals
 
 ### ⚠️ Ask first
 - Change the `.chezmoiroot` file
@@ -75,7 +75,7 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 ### 🚫 Never do
 - Edit files directly in `~` — they will be overwritten on next `chezmoi apply`
 - Append to live config files (e.g., `echo 'foo' >> ~/.zshrc`)
-- Use `pi install <package>` — writes to destination, not source
+- Use `pi install npm:<package>@<version>` for Pi plugins (declared in `modify_settings.json`)
 - Commit secrets or credentials to the repo
 - Bypass pre-commit hooks
 
