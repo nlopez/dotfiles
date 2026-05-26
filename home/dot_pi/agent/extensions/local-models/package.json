@@ -1,8 +1,0 @@
-{
-  "name": "pi-local-models",
-  "version": "0.1.0",
-  "description": "Auto-discover local model servers (Ollama, LM Studio, vLLM, etc.) and register them as Pi providers",
-  "pi": {
-    "extensions": ["./index.ts"]
-  }
-}

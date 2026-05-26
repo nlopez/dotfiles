@@ -63,6 +63,7 @@ required_packages = [
     "npm:@benvargas/pi-firecrawl@1.0.0",
     "npm:@mjakl/pi-kagi-search@1.0.2",
     "npm:pi-web-access@0.10.7",
+    "npm:pi-lmstudio@1.3.0",
 ]
 
 existing_packages = current.get("packages", [])
@@ -88,16 +89,8 @@ current.setdefault("compaction", {
     "reserveTokens": 32768,  # 32K tokens of safety margin (256K - 32K = 224K trigger)
 })
 
-# Auto-discover local model servers (Ollama, LM Studio, vLLM, etc.).
-# The local-models extension probes common endpoints on startup and
-# registers any running server as a Pi provider.
-current.setdefault("localModels", {
-    "enabledServers": [],  # empty = probe all built-in servers
-    "skipEmbeddingModels": True,
-    "defaultContextWindow": 128000,
-    "defaultMaxTokens": 16384,
-    "autoEnable": True,
-    "probeTimeout": 3000,
-})
+# LM Studio and llama-server model provider extensions.
+# Installs pi-lmstudio which auto-discovers LM Studio and llama-server
+# and registers them as Pi providers.
 
 print(json.dumps(current, indent=2))
