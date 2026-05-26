@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from shlex import quote
 from subprocess import CalledProcessError, run
@@ -343,25 +344,45 @@ def _check_worktree_branch_paths(root: Path, fix: bool, r: _LintResult) -> None:
         r.warnings += 1
         return
 
-    # Parse porcelain output into (abs_path, branch) pairs.
-    worktrees: list[tuple[Path, str]] = []
-    cur_path: Path | None = None
-    prunable = False
+    # Parse porcelain output into complete records, then filter.
+    # Each stanza is separated by a blank line.  The ``prunable`` line
+    # can appear *after* ``branch``, so we must collect the whole
+    # stanza before deciding whether to keep it.
+    @dataclass
+    class _WtRecord:
+        path: Path | None = None
+        branch: str | None = None
+        bare: bool = False
+        detached: bool = False
+        prunable: bool = False
+
+    records: list[_WtRecord] = []
+    cur = _WtRecord()
     for line in raw.splitlines():
         if line.startswith("worktree "):
-            cur_path = Path(line.removeprefix("worktree "))
-            prunable = False
-        elif line in ("", "bare") or line.startswith("detached"):
-            cur_path = None
-            prunable = False
+            cur = _WtRecord(path=Path(line.removeprefix("worktree ")))
+        elif line == "":
+            records.append(cur)
+            cur = _WtRecord()
+        elif line == "bare":
+            cur.bare = True
+        elif line.startswith("detached"):
+            cur.detached = True
         elif line.startswith("prunable"):
-            prunable = True
+            cur.prunable = True
         elif line.startswith("branch refs/heads/"):
-            if cur_path is not None and not prunable:
-                worktrees.append(
-                    (cur_path, line.removeprefix("branch refs/heads/"))
-                )
-            cur_path = None
+            cur.branch = line.removeprefix("branch refs/heads/")
+    records.append(cur)  # last stanza (no trailing blank line)
+
+    worktrees: list[tuple[Path, str]] = [
+        (rec.path, rec.branch)
+        for rec in records
+        if rec.path is not None
+        and rec.branch is not None
+        and not rec.bare
+        and not rec.detached
+        and not rec.prunable
+    ]
 
     if not worktrees:
         return
@@ -378,39 +399,63 @@ def _check_worktree_branch_paths(root: Path, fix: bool, r: _LintResult) -> None:
     # Set of all worktree relative paths — used for nesting detection.
     wt_set = {rel for rel, _ in entries}
 
-    mismatches: list[tuple[str, str]] = []
-    for rel, branch in entries:
-        # Skip worktrees nested inside another worktree
-        # (e.g. main/foo where main is itself a worktree).
+    def _parent_wt(rel: str) -> str | None:
+        """Return the enclosing worktree's relative path, or None."""
         parts = Path(rel).parts
-        nested = any(
-            str(Path(*parts[:i])) in wt_set for i in range(1, len(parts))
-        )
-        if nested:
-            continue
+        for i in range(1, len(parts)):
+            candidate = str(Path(*parts[:i]))
+            if candidate in wt_set:
+                return candidate
+        return None
 
-        if rel != branch:
-            mismatches.append((rel, branch))
+    problems = False
+    for rel, branch in entries:
+        parent = _parent_wt(rel)
 
-    if not mismatches:
-        _ok("worktree paths match branch names")
-        return
-
-    for rel, branch in mismatches:
-        if fix:
-            try:
-                git(root, "worktree", "move", rel, branch)
-                _fixed(f"worktree moved {rel!r} → {branch!r}")
-                r.fixes += 1
-            except CalledProcessError:
-                _fail(
-                    f"worktree dir {rel!r} tracks branch {branch!r}"
-                    f" (move failed — target may exist)"
+        if parent is not None:
+            # Nested inside another worktree — always wrong.
+            problems = True
+            if fix:
+                try:
+                    git(root, "worktree", "move", rel, branch)
+                    _fixed(
+                        f"nested worktree {rel!r} relocated to"
+                        f" {branch!r} (was inside {parent!r})"
+                    )
+                    r.fixes += 1
+                except CalledProcessError:
+                    _fail(
+                        f"nested worktree {rel!r} inside {parent!r}"
+                        f" (tracks branch {branch!r}; move failed"
+                        f" — target may exist)"
+                    )
+                    r.errors += 1
+            else:
+                _warn(
+                    f"nested worktree {rel!r} inside {parent!r}"
+                    f" (tracks branch {branch!r})"
                 )
+                r.warnings += 1
+        elif rel != branch:
+            # Not nested, but dir doesn't match branch.
+            problems = True
+            if fix:
+                try:
+                    git(root, "worktree", "move", rel, branch)
+                    _fixed(f"worktree moved {rel!r} → {branch!r}")
+                    r.fixes += 1
+                except CalledProcessError:
+                    _fail(
+                        f"worktree dir {rel!r} tracks branch {branch!r}"
+                        f" (move failed — target may exist)"
+                    )
+                    r.errors += 1
+            else:
+                _fail(f"worktree dir {rel!r} tracks branch {branch!r}")
                 r.errors += 1
-        else:
-            _fail(f"worktree dir {rel!r} tracks branch {branch!r}")
-            r.errors += 1
+
+    if not problems:
+        _ok("worktree paths match branch names")
 
 
 def _check_canonical_casing(root: Path, fix: bool, r: _LintResult) -> None:
