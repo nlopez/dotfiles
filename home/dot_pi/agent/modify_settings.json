@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-# // @chezmoi:modify-template
 # Managed by chezmoi — source: home/dot_pi/agent/modify_settings.json
 # ⚠️  DO NOT EDIT ~/.pi/agent/settings.json directly. It is overwritten
-#     by chezmoi on every `chezmoi apply`. Always edit the .tmpl source tree.
+#     by chezmoi on every `chezmoi apply`. Always edit the source tree.
 #
-# This Python template reads the current settings.json (from stdin), applies
-# declarative defaults, and writes back — preserving runtime keys like
-# lastChangelogVersion and any per-user overrides.
+# This is a chezmoi modify_ script, not a modify-template. Chezmoi passes the
+# current settings.json contents on stdin, and this script must write the full
+# replacement JSON to stdout.
 #
 # Configures: theme, defaultProvider, npmCommand, showHardwareCursor,
 #             and required pnpm packages (managed via renovate).

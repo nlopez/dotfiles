@@ -161,6 +161,14 @@ Files ending in `.tmpl` are processed as [Go templates](https://pkg.go.dev/text/
 
 Templates are rendered with `chezmoi execute-template` during `apply`. Use `.chezmoi.toml.tmpl` for global template configuration.
 
+`modify_` files are a separate target type for managing part, but not all, of a file: a plain
+`modify_<name>` file is executed as a script that receives the current target contents on stdin
+and must write the full replacement contents to stdout. Only use the special
+`chezmoi:modify-template` marker when the file should be treated as a template whose rendered
+output becomes the final target contents. Per chezmoi's docs, modify templates must **not**
+have a `.tmpl` suffix. A `modify_*.tmpl` file is instead a templated script whose rendered
+script still reads stdin and writes stdout.
+
 ### Data files
 
 Structured configuration data lives in `.chezmoidata/` (YAML by default). Data is merged across files and made available as a map in templates:

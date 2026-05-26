@@ -26,7 +26,7 @@
  * Requirements
  * ────────────
  * - `showHardwareCursor: false` in settings.json (enforced by
- *   modify_settings.json.tmpl) so the TUI starts with cursor hidden.
+ *   modify_settings.json) so the TUI starts with cursor hidden.
  * - All modern terminals: WezTerm, Ghostty, iTerm2, kitty, Alacritty.
  * - Under tmux: `set -g focus-events on` in .tmux.conf.
  *
