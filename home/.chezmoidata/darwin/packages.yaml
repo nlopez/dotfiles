@@ -165,8 +165,7 @@ packages:
       - tamasfe.even-better-toml
       - timonwong.shellcheck
       - tailscale.vscode-tailscale
-      personal:
-      - ms-vscode.powershell
+      personal: []
       work:
       - datadog.datadog-vscode
     gnu_tools:

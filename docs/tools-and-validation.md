@@ -5,7 +5,7 @@
 Project linting is automated via pre-commit hooks and custom scripts. Ensure all changes pass validation before committing:
 
 ```sh
-# Lint all JSON templates (renders for darwin/linux/windows)
+# Lint all JSON templates (renders for darwin/linux)
 uv run scripts/jsonlint.py
 
 # Shellcheck all .sh and .sh.tmpl files in .chezmoiscripts/
