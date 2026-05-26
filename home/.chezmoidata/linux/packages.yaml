@@ -1,6 +1,8 @@
 # Package configuration for Linux Aurora (Fedora Silverblue/Kinoite)
 packages:
-  linux-aurora:
+  brew_prefix: /home/linuxbrew/.linuxbrew
+  linux:
+    brew_prefix: /home/linuxbrew/.linuxbrew
     brew:
       brews:
         base:

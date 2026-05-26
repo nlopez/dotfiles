@@ -25,9 +25,9 @@ Library/Application Support/espanso/**
 .chezmoiscripts/linux-debian/**
 {{ end }}
 
-# linux-aurora: dnf packages (Fedora/aurora only)
+# linux: dnf packages (Fedora/aurora only)
 {{ if or (eq .chezmoi.os "darwin") (ne .chezmoi.osRelease.id "aurora") }}
-.chezmoiscripts/linux-aurora/**
+.chezmoiscripts/linux/**
 {{ end }}
 
 
