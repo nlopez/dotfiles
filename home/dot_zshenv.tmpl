@@ -1,3 +1,52 @@
 typeset -U path
 
 export COLORTERM=truecolor
+
+# Add uutils coreutils (unprefixed GNU coreutils) to PATH
+# Brew bottle path (stable), also check for symlinked opt path
+_uubin=$(brew --prefix 2>/dev/null)
+if [[ -d "$_uubin/opt/uutils-coreutils/libexec/uubin" ]]; then
+    path=($_uubin/opt/uutils-coreutils/libexec/uubin $path)
+elif [[ -d "$_uubin/Cellar/uutils-coreutils"/*/libexec/uubin ]]; then
+    path=(
+        "$(ls -d "$_uubin/Cellar/uutils-coreutils"/*/libexec/uubin 2>/dev/null | tail -n1)"
+        $path
+    )
+elif [[ -d /usr/lib/uutils/uubin ]]; then
+    path=(/usr/lib/uutils/uubin $path)
+elif [[ -d /usr/local/lib/uutils/uubin ]]; then
+    path=(/usr/local/lib/uutils/uubin $path)
+fi
+unset _uubin
+
+# Add uutils-diffutils (unprefixed GNU diffutils) to PATH
+_uubin=$(brew --prefix 2>/dev/null)
+if [[ -d "$_uubin/opt/uutils-diffutils/libexec/uubin" ]]; then
+    path=($_uubin/opt/uutils-diffutils/libexec/uubin $path)
+elif [[ -d "$_uubin/Cellar/uutils-diffutils"/*/libexec/uubin ]]; then
+    path=(
+        "$(ls -d "$_uubin/Cellar/uutils-diffutils"/*/libexec/uubin 2>/dev/null | tail -n1)"
+        $path
+    )
+elif [[ -d /usr/lib/uutils/diffutils/uubin ]]; then
+    path=(/usr/lib/uutils/diffutils/uubin $path)
+elif [[ -d /usr/local/lib/uutils/diffutils/uubin ]]; then
+    path=(/usr/local/lib/uutils/diffutils/uubin $path)
+fi
+unset _uubin
+
+# Add uutils-findutils (unprefixed GNU findutils) to PATH
+_uubin=$(brew --prefix 2>/dev/null)
+if [[ -d "$_uubin/opt/uutils-findutils/libexec/uubin" ]]; then
+    path=($_uubin/opt/uutils-findutils/libexec/uubin $path)
+elif [[ -d "$_uubin/Cellar/uutils-findutils"/*/libexec/uubin ]]; then
+    path=(
+        "$(ls -d "$_uubin/Cellar/uutils-findutils"/*/libexec/uubin 2>/dev/null | tail -n1)"
+        $path
+    )
+elif [[ -d /usr/lib/uutils/findutils/uubin ]]; then
+    path=(/usr/lib/uutils/findutils/uubin $path)
+elif [[ -d /usr/local/lib/uutils/findutils/uubin ]]; then
+    path=(/usr/local/lib/uutils/findutils/uubin $path)
+fi
+unset _uubin
