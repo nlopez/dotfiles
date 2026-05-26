@@ -48,6 +48,8 @@ packages:
         - helm
         - oxipng
         - rustup
+        - node
+        - pnpm
         personal: []
         work: []
       casks:
