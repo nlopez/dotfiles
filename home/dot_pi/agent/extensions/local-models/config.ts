@@ -87,9 +87,9 @@ export const KNOWN_SERVERS: Array<{
   {
     name: "lm-studio",
     baseUrl: "http://localhost:1234",
-    api: "anthropic-messages",
+    api: "openai-completions",
     modelsEndpoint: "/v1/models",
-    thinkingFormat: "anthropic",
+    thinkingFormat: "openai",
   },
   {
     name: "vllm",
