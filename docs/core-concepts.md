@@ -28,6 +28,8 @@ cat .chezmoiroot
 
 ### Repo root (NOT part of the chezmoi source tree)
 
+The repo root contains non-chezmoi-managed Git files **and** one chezmoi control file:
+
 | Path | Purpose |
 |------|--------|
 | `AGENTS.md` | Agent documentation for this repo |
@@ -48,20 +50,19 @@ cat .chezmoiroot
 | `home/config/<path>` | `~/.config/<path>` | XDG-style config |
 | `home/bin/<name>` | `~/.local/bin/<name>` | Executables (via bin/ prefix) |
 
-### Chezmoi special directories (under `home/`)
+### Chezmoi special directories (all under `home/`)
+
+Per the official [chezmoi docs](https://chezmoi.io/reference/special-files/), when you use `.chezmoiroot`, all other "source root" files must be moved into the new root. This repo follows that rule:
 
 | Source path | Purpose |
 |-------------|--------|
+| `home/.chezmoiignore` | Ignore patterns for the source tree |
 | `home/.chezmoiscripts/` | Install/init scripts (run after dotfiles are applied) |
-| `home/.chezmoidata/` | Data files for templates (YAML) |
-| `home/.chezmoiignore.tmpl` | Ignored paths (`.chezmoiignore` is at the **repo root**, not under the root override) |
+| `home/.chezmoidata/` | Data files for templates (YAML) — merged across files and OS subdirs |
+| `home/.chezmoiexternal.*` | External dependencies (Git repos, tarballs) |
+| `home/.chezmoitemplates/` | Reusable include templates |
 
-**This is critical:** when `.chezmoiroot` is `home`, all chezmoi special directories live **under `home/`**, not at the repo root. Specifically:
-
-- `.chezmoiscripts/` → `home/.chezmoiscripts/` (scripts run as part of `chezmoi apply`)
-- `.chezmoidata/` → `home/.chezmoidata/`
-- All dotfile/config/bin sources live under `home/`
-- **`.chezmoiignore`** is at the **repo root** (not under the root override)
+**This is critical:** when `.chezmoiroot` is `home`, all chezmoi special directories live **under `home/`**, not at the repo root.
 
 **When modifying scripts, always check `.chezmoiroot` first** — the script directory is at `home/.chezmoiscripts/`, not `.chezmoiscripts/` at the repo root.
 
@@ -181,7 +182,7 @@ This is the recommended place to externalize values that vary by OS, host, or us
 
 ### Scripts
 
-`.chezmoiscripts/` contains installation/initialization scripts that run after dotfiles are applied. Scripts run in order by name. Use them for package managers, browser extensions, or one-time setup steps that dotfiles alone cannot handle. See [scripts docs](https://chezmoi.io/docs/reference/scripts/).
+`.chezmoiscripts/` (at `home/.chezmoiscripts/`) contains installation/initialization scripts that run after dotfiles are applied. Scripts run in order by name prefix. Use them for package managers, browser extensions, or one-time setup steps that dotfiles alone cannot handle. See [scripts docs](https://chezmoi.io/reference/special-directories/chezmoiscripts/).
 
 #### OS subdirectory convention
 

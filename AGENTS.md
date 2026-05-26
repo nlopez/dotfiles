@@ -78,7 +78,7 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 ### 🚫 Never do
 - Edit files directly in `~` — they will be overwritten on next `chezmoi apply`
 - Append to live config files (e.g., `echo 'foo' >> ~/.zshrc`)
-- Use `pi install npm:<package>@<version>` for Pi plugins (declared in `modify_settings.json`)
+- Use `pi install` as the declaration mechanism for Pi plugins. First declare them in `modify_settings.json`, then run `chezmoi apply` and `pi install`.
 - Commit secrets or credentials to the repo
 - Bypass pre-commit hooks
 
