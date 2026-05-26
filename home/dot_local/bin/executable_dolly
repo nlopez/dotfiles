@@ -549,7 +549,7 @@ def cmd_lint(args: argparse.Namespace) -> int:
 
     # ---- recursive mode ----------------------------------------------------
     if args.recursive:
-        top = start or (Path.home() / "src")
+        top = start or Path.cwd()
         if not top.is_dir():
             print(f"error: {top} is not a directory", file=sys.stderr)
             return 1
@@ -626,7 +626,7 @@ def main() -> int:
         "-r",
         "--recursive",
         action="store_true",
-        help="find and lint every dolly repo under path (default: ~/src)",
+        help="find and lint every dolly repo under path (default: cwd)",
     )
 
     args = parser.parse_args()
