@@ -1,6 +1,6 @@
 # Shared pnpm packages (same across all platforms).
 # Per-platform personal and work packages live in darwin/pnpm.yaml and
-# linux-aurora/pnpm.yaml (merged by chezmoi at render time).
+# linux/pnpm.yaml (merged by chezmoi at render time).
 pnpm:
   base:
     - mmd@4.7.1

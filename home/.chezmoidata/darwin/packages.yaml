@@ -1,5 +1,7 @@
 packages:
+  brew_prefix: /opt/homebrew
   darwin:
+    brew_prefix: /opt/homebrew
     brew:
       taps:
         8ta4/plist: "https://github.com/8ta4/homebrew-plist"

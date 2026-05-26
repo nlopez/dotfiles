@@ -1,0 +1,15 @@
+typeset -U path
+
+export COLORTERM=truecolor
+
+export HOMEBREW_PREFIX={{ .packages.brew_prefix }}
+
+# Add uutils coreutils, diffutils, and findutils to PATH (unprefixed GNU
+# commands).  These are installed via Homebrew by this same chezmoi config,
+# so the paths are stable — no need for -d guards.
+path=(
+    "${HOMEBREW_PREFIX}/opt/uutils-coreutils/libexec/uubin"
+    "${HOMEBREW_PREFIX}/opt/uutils-diffutils/libexec/uubin"
+    "${HOMEBREW_PREFIX}/opt/uutils-findutils/libexec/uubin"
+    $path
+)
