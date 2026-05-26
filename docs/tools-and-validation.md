@@ -15,25 +15,40 @@ uv run scripts/shellcheck.py
 pre-commit run --all-files
 ```
 
-## Pi plugins — install via pnpm, not `pi install`
+## Pi packages (npm) — declare in `modify_settings.json`
 
-> ⚠️ **Pi does not self-update its own plugins.** The `pi install <package>` command writes directly to `~/.config/pi/settings.json` (the live destination file) and is **not** tracked by chezmoi. Packages installed this way will be lost on the next `chezmoi apply` and won't be reproduced on a fresh machine.
+Pi npm packages (extensions, skills, adapters) are managed via the `packages` key in
+`~/.pi/agent/settings.json`. The source of truth is the `required_packages` list in
+`home/dot_pi/agent/modify_settings.json` — a Python template that merges pinned versions
+into `settings.json` on every `chezmoi apply`.
 
-**Always add Pi plugins (extensions, skills, adapters) through pnpm** so they are version-controlled and automatically installed on every machine:
+**To add or update a Pi npm package:**
 
-1. Add the package name to the `pnpm.personal` (or `pnpm.base`) list in
-   `home/.chezmoidata/darwin/packages.yaml` (and the equivalent `linux/` file if needed).
-2. Run `chezmoi apply` — the `run_onchange_after_pnpm-globals.sh.tmpl` script picks up the change and installs it globally via `pnpm add -g`.
-3. Commit the data file change.
+1. Add `"npm:<package>@<version>"` to the `required_packages` list in
+   `home/dot_pi/agent/modify_settings.json`.
+2. Run `chezmoi apply` — the template writes the package into `settings.json`.
+3. Install the package at runtime: `pi install npm:<package>@<version>`.
+4. Commit the template change.
 
-The MCP adapter for Pi (`pi-mcp-adapter`) follows the same rule and is declared in `packages.yaml` under `pnpm.personal`.
+Pi npm packages are **not** pnpm globals. They live in `~/.pi/agent/npm/` and are
+managed by `pi install`, not `pnpm add -g`. Do not add them to `pnpm.yaml`.
+
+## pnpm globals — declare in `pnpm.yaml`
+
+Standalone CLI tools that need to be on `PATH` (e.g., `mmd`, `pi-coding-agent`,
+`pi-web-access`) are installed as pnpm globals. Add them to the `pnpm.base` list in
+`home/.chezmoidata/pnpm.yaml`.
+
+The `run_onchange_after_pnpm-globals.sh.tmpl` script reads `pnpm.yaml` and runs
+`pnpm add -g` for each entry on every `chezmoi apply`.
 
 ## ⚠️ Boundaries
 
 ### ✅ Always do
 - Use `uv run scripts/jsonlint.py` before committing
 - Run `pre-commit run --all-files` locally
-- Add Pi plugins through pnpm, never via `pi install`
+- Declare Pi npm packages in `modify_settings.json`, not `pnpm.yaml`
+- Declare pnpm globals in `pnpm.yaml`, not `modify_settings.json`
 
 ### ⚠️ Ask first
 - Add a new linting step or tool
