@@ -12,5 +12,4 @@ pi:
     - "npm:pi-powerline@0.6.1"
     - "npm:@benvargas/pi-firecrawl@1.0.0"
     - "npm:@mjakl/pi-kagi-api@0.1.0"
-    - "npm:pi-web-access@0.10.7"
     - "npm:pi-lmstudio@1.3.0"
