@@ -26,6 +26,6 @@ repos:
         name: configlint
         language: system
         entry: scripts/configlint.py
-        pass_filenames: false
-        always_run: true
+        files: ^home/
+        pass_filenames: true
         verbose: true
