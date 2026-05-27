@@ -21,7 +21,7 @@ aliases:
   - { name: gp, cmd: "git push" }
   - { name: grc, cmd: "git rebase --continue" }
   - { name: grhh, cmd: "git reset --hard HEAD" }
-  - { name: gst, cmd: "git status" }
+  - { name: gst, cmd: "git status -sb" }
   - { name: gup, cmd: "git pull --rebase" }
   # gwa/gwl/gwr/gwm are zsh functions in oh-my-zsh/custom/git-worktree.zsh;
   # they need repo-root awareness and cannot be plain text snippet expansions.
