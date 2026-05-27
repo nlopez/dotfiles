@@ -53,12 +53,28 @@ SSH_HOSTS = [
 
 SOURCE_ROOT: str = ""
 TMPDIR: str = ""
+# Per-run isolated persistent state + cache, so concurrent lint runs (or a
+# lint run racing an interactive `chezmoi apply`) don't collide on the
+# boltdb lock at ~/.local/share/chezmoi/chezmoistate.boltdb.
+PERSISTENT_STATE: str = ""
+CACHE_DIR: str = ""
 
 
 def chezmoi(*args: str) -> subprocess.CompletedProcess[str]:
     """Run chezmoi with the given args."""
     return subprocess.run(
-        [CHEZMOI, "--source", SOURCE_ROOT, "--destination", TMPDIR, *args],
+        [
+            CHEZMOI,
+            "--source",
+            SOURCE_ROOT,
+            "--destination",
+            TMPDIR,
+            "--persistent-state",
+            PERSISTENT_STATE,
+            "--cache",
+            CACHE_DIR,
+            *args,
+        ],
         capture_output=True,
         text=True,
         check=False,
@@ -265,7 +281,7 @@ def render_template(tmpl: Path) -> tuple[str | None, str | None]:
 
 
 def main() -> int:
-    global SOURCE_ROOT, TMPDIR
+    global SOURCE_ROOT, TMPDIR, PERSISTENT_STATE, CACHE_DIR
 
     parser = argparse.ArgumentParser(
         description="Lint rendered chezmoi templates",
@@ -279,6 +295,11 @@ def main() -> int:
     # ── Render the full source tree (template dependencies require it) ──────
 
     TMPDIR = tempfile.mkdtemp(prefix="chezmoi-lint-")
+    # Isolated state/cache for the whole lint run — see PERSISTENT_STATE note.
+    state_dir = tempfile.mkdtemp(prefix="chezmoi-lint-state-")
+    PERSISTENT_STATE = os.path.join(state_dir, "chezmoistate.boltdb")
+    CACHE_DIR = os.path.join(state_dir, "cache")
+    os.makedirs(CACHE_DIR, exist_ok=True)
 
     result = chezmoi("apply", "--force", "--no-tty", "--keep-going")
     # Tolerate partial failures (e.g. 1Password timeout, missing external
