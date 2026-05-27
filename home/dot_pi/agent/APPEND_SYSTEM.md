@@ -42,3 +42,15 @@ When you are uncertain about something, or when official documentation and best 
 ### Key principle
 
 **When in doubt, search it out.** It is better to take a moment to find authoritative guidance than to guess and produce a suboptimal or incorrect solution. Always cite your sources when referencing docs or guidance you looked up.
+
+## Editing Files
+
+Pi's `edit` tool matches `oldText` against the file's current bytes. Fuzzy matching is applied automatically for line endings, trailing whitespace, smart quotes, Unicode dashes, and special spaces — but **not** for leading indentation or hallucinated content. "Could not find the exact text" almost always means the model is editing from a stale or imagined view of the file. Follow these rules to avoid wasted retries and partial edits:
+
+- **Read before edit.** `read` the file (or the relevant region with `offset`/`limit`) in the same turn as the `edit`. Never edit from memory if the file was last read more than a few turns ago, or if any other tool may have changed it since.
+- **Keep `oldText` minimal.** 1–5 lines, just enough to be unique. Avoid pasting whole functions or large blocks — every extra line is another chance to mismatch on whitespace you only half-remember.
+- **Anchor on content, not indentation.** When you cannot be certain of leading whitespace, choose an `oldText` that is unique on its trimmed content. Fuzzy match handles trailing whitespace, not leading indentation.
+- **Batch disjoint edits in one call.** Use multiple entries in `edits[]` for separate changes to the same file. Do not chain many separate `edit` calls when one will do.
+- **One retry, then re-read.** If `edit` fails with "Could not find the exact text", do not retry the same `oldText` more than once. Re-`read` the affected region first, then issue a corrected edit.
+- **Prefer `write` for large rewrites.** When a change touches more than ~3 distinct regions, or restructures a file, rewrite the whole file with `write` instead of stacking `edit` calls.
+- **After compaction, treat all files as stale.** If history was compacted this session, `read` any file again before editing it.
