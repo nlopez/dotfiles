@@ -60,15 +60,19 @@ PERSISTENT_STATE: str = ""
 CACHE_DIR: str = ""
 
 
-def chezmoi(*args: str) -> subprocess.CompletedProcess[str]:
-    """Run chezmoi with the given args."""
+def chezmoi(*args: str, destination: str | None = None) -> subprocess.CompletedProcess[str]:
+    """Run chezmoi with the given args.
+
+    destination overrides TMPDIR for this call only (used by the matrix loop
+    so each OS × machine render goes to its own isolated directory).
+    """
     return subprocess.run(
         [
             CHEZMOI,
             "--source",
             SOURCE_ROOT,
             "--destination",
-            TMPDIR,
+            destination if destination is not None else TMPDIR,
             "--persistent-state",
             PERSISTENT_STATE,
             "--cache",
@@ -94,13 +98,17 @@ SHELL_FILES: set[str] = {
     "*.zprofile",
     "00_custom.zsh",
     "_chezmoi",
-    "executable_brew",
+    # chezmoi strips the executable_ prefix in the rendered tree, so the
+    # rendered filename is just "brew" (not "executable_brew").
+    "brew",
 }
+# Paths are relative to TMPDIR (the rendered destination), so they use
+# destination naming (.config, .local, .oh-my-zsh) not source naming.
 SHELLCHECK_PATHS = [
     "Library/Application Support",
-    "dot_config",
-    "dot_local",
-    "exact_dot_oh-my-zsh",
+    ".config",
+    ".local",
+    ".oh-my-zsh",
 ]
 
 
@@ -266,7 +274,10 @@ def check_allowed_signers(root: Path) -> int:
 
 
 def render_template(tmpl: Path) -> tuple[str | None, str | None]:
-    """Render a single template via chezmoi."""
+    """Render a single source template to a string via `chezmoi cat`.
+
+    tmpl must be an absolute path inside SOURCE_ROOT (not a rendered path).
+    """
     dest = chezmoi("target-path", str(tmpl))
     if dest.returncode != 0 or not dest.stdout.strip():
         return None, f"target-path failed for {tmpl}"
@@ -280,19 +291,117 @@ def render_template(tmpl: Path) -> tuple[str | None, str | None]:
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 
+def _source_to_targets(files: list[str]) -> list[str]:
+    """Resolve repo-relative source paths to their TMPDIR destination paths.
+
+    Each path is resolved via `chezmoi target-path`; files that cannot be
+    mapped (e.g. .chezmoidata entries) are silently skipped.
+    """
+    source_root = Path(SOURCE_ROOT)
+    targets: list[str] = []
+    for raw in files:
+        p = Path(raw)
+        try:
+            rel_to_source = p.relative_to("home")
+        except ValueError:
+            continue
+        abs_source = str(source_root / rel_to_source)
+        result = chezmoi("target-path", abs_source)
+        if result.returncode == 0 and result.stdout.strip():
+            targets.append(result.stdout.strip())
+    return targets
+
+
+# Segment names that force a full run because a change there can affect any
+# rendered output (shared data or template fragments).
+_FULL_RUN_SEGMENTS = frozenset({".chezmoidata", ".chezmoitemplates"})
+
+
+def categorize_changes(files: list[str]) -> set[str]:
+    """Map changed source files to the lint categories they affect.
+
+    Returns {"all"} when a full run is required (no files given, shared
+    data/templates changed, modify_* script changed, or the file's impact
+    cannot be determined statically).  Otherwise returns a subset of
+    {"shellcheck", "xmllint", "git", "ssh", "signers"}.
+    """
+    if not files:
+        return {"all"}
+
+    categories: set[str] = set()
+    for raw in files:
+        p = Path(raw)
+        s = "/".join(p.parts)
+        name = p.name
+        stem = name.removesuffix(".tmpl")
+
+        # Shared data / shared templates / modify scripts → must full-run.
+        if _FULL_RUN_SEGMENTS & set(p.parts):
+            return {"all"}
+        if any(part.startswith("modify_") for part in p.parts):
+            return {"all"}
+
+        # git config files (config.tmpl, include files, allowed_signers, ignore …)
+        if "dot_config/git" in s:
+            if "allowed_signers" in name:
+                categories.add("signers")
+            else:
+                categories.add("git")
+
+        # SSH config
+        elif "dot_ssh" in p.parts:
+            categories.add("ssh")
+
+        # Plist
+        elif stem.endswith(".plist"):
+            categories.add("xmllint")
+
+        # Shell files: zsh scripts, oh-my-zsh custom files, .sh executables,
+        # and the rendered `brew` wrapper (source: executable_brew.tmpl).
+        # Strip the chezmoi dot_ prefix from stem before matching so that
+        # top-level files like dot_zshrc.tmpl (stem=dot_zshrc) are recognised.
+        elif (
+            stem.removeprefix("dot_").endswith(("zsh", "zshrc", "zshenv", "zprofile"))
+            or "exact_dot_oh-my-zsh" in p.parts
+            or (name.startswith("executable_") and stem.endswith(".sh"))
+            or stem == "executable_brew"  # noqa: SIM114  (readable as-is)
+        ):
+            categories.add("shellcheck")
+
+        # Anything we can't classify statically → safest to do a full run.
+        else:
+            return {"all"}
+
+    return categories
+
+
 def main() -> int:
     global SOURCE_ROOT, TMPDIR, PERSISTENT_STATE, CACHE_DIR
 
     parser = argparse.ArgumentParser(
         description="Lint rendered chezmoi templates",
     )
-    parser.parse_args()
+    parser.add_argument(
+        "files",
+        nargs="*",
+        metavar="FILE",
+        help=(
+            "Source files to lint (repo-relative paths under home/). "
+            "When provided, only the affected lint categories are run. "
+            "Omit for a full run (default when called without arguments)."
+        ),
+    )
+    args = parser.parse_args()
 
     script_dir = Path(__file__).resolve().parent
     repo_root = script_dir.parent
     SOURCE_ROOT = str(repo_root / "home")
+    source_root = Path(SOURCE_ROOT)
 
-    # ── Render the full source tree (template dependencies require it) ──────
+    categories = categorize_changes(args.files)
+    selective = "all" not in categories
+
+    # ── Render the source tree (or a targeted subset) ──────────────────────
 
     TMPDIR = tempfile.mkdtemp(prefix="chezmoi-lint-")
     # Isolated state/cache for the whole lint run — see PERSISTENT_STATE note.
@@ -301,7 +410,15 @@ def main() -> int:
     CACHE_DIR = os.path.join(state_dir, "cache")
     os.makedirs(CACHE_DIR, exist_ok=True)
 
-    result = chezmoi("apply", "--force", "--no-tty", "--keep-going")
+    if selective:
+        targets = _source_to_targets(args.files)
+        if not targets:
+            print("configlint: could not resolve any changed files to targets", file=sys.stderr)
+            return 1
+        result = chezmoi("apply", "--force", "--no-tty", "--keep-going", *targets)
+    else:
+        result = chezmoi("apply", "--force", "--no-tty", "--keep-going")
+
     # Tolerate partial failures (e.g. 1Password timeout, missing external
     # tool) as long as some files were rendered.
     if result.returncode != 0 and result.stderr.strip():
@@ -324,87 +441,112 @@ def main() -> int:
 
     # ── Shellcheck (shell scripts — not covered by prettier) ───────────────
 
-    shell_paths: list[Path] = []
-    for base in SHELLCHECK_PATHS:
-        full = Path(TMPDIR) / base
-        if full.exists():
-            for pattern in SHELL_FILES:
-                shell_paths.extend(full.rglob(pattern))
-    shell_paths = sorted(set(x for x in shell_paths if x.is_file()))
-    for path in shell_paths:
-        shell_count += 1
-        print(f"configlint: shellcheck {rel(path)}")
-        if not lint_shellcheck(path):
-            print(f"  FAIL: shellcheck {rel(path)}", file=sys.stderr)
-            failed += 1
+    if "all" in categories or "shellcheck" in categories:
+        shell_paths: list[Path] = []
+        for base in SHELLCHECK_PATHS:
+            full = Path(TMPDIR) / base
+            if full.exists():
+                for pattern in SHELL_FILES:
+                    shell_paths.extend(full.rglob(pattern))
+        shell_paths = sorted(set(x for x in shell_paths if x.is_file()))
+        for path in shell_paths:
+            shell_count += 1
+            print(f"configlint: shellcheck {rel(path)}")
+            if not lint_shellcheck(path):
+                print(f"  FAIL: shellcheck {rel(path)}", file=sys.stderr)
+                failed += 1
 
     # ── xmllint (plist files — not covered by prettier) ────────────────────
 
-    plist_paths = p.rglob("*.plist")
-    for path in plist_paths:
-        if not path.is_file():
-            continue
-        plist_count += 1
-        print(f"configlint: xmllint {rel(path)}")
-        if not lint_xmllint(path):
-            print(f"  FAIL: xmllint {rel(path)}", file=sys.stderr)
-            failed += 1
+    if "all" in categories or "xmllint" in categories:
+        plist_paths = p.rglob("*.plist")
+        for path in plist_paths:
+            if not path.is_file():
+                continue
+            plist_count += 1
+            print(f"configlint: xmllint {rel(path)}")
+            if not lint_xmllint(path):
+                print(f"  FAIL: xmllint {rel(path)}", file=sys.stderr)
+                failed += 1
 
     # ── Git config + SSH config + allowed_signers (current machine) ────────
+    #
+    # render_and_check_git/ssh call render_template() which expects SOURCE_ROOT
+    # paths, not rendered-tree paths — pass source_root here, not p (TMPDIR).
 
-    if p.joinpath("dot_config", "git").exists():
-        git_count += 1
-        print("configlint: git config current")
-        failed += render_and_check_git(p / "dot_config" / "git", p, "current")
-    if p.joinpath("dot_ssh").exists():
-        ssh_count += 1
-        print("configlint: ssh config current")
-        failed += render_and_check_ssh(p / "dot_ssh", p, "current")
-    signers_count += 1
-    print("configlint: allowed_signers")
-    failed += check_allowed_signers(Path(SOURCE_ROOT))
+    if "all" in categories or "git" in categories:
+        git_source = source_root / "dot_config" / "git"
+        if git_source.exists():
+            git_count += 1
+            print("configlint: git config current")
+            failed += render_and_check_git(git_source, p, "current")
+
+    if "all" in categories or "ssh" in categories:
+        ssh_source = source_root / "dot_ssh"
+        if ssh_source.exists():
+            ssh_count += 1
+            print("configlint: ssh config current")
+            failed += render_and_check_ssh(ssh_source, p, "current")
+
+    if "all" in categories or "signers" in categories:
+        signers_count += 1
+        print("configlint: allowed_signers")
+        failed += check_allowed_signers(source_root)
 
     # ── Extra renders for other OS × machine-type combos ───────────────────
+    # Only run the matrix when git or ssh configs may have changed.
 
-    for os_name, machine in MATRIX:
-        tag = f"{os_name}_{1 if machine['work'] else 0}_{1 if machine['personal'] else 0}"
-        label = f"{os_name}/{'work' if machine['work'] else 'personal'}"
-        tmp_extra = tempfile.mkdtemp(prefix=f"chezmoi-lint-{tag}-")
+    if "all" in categories or categories & {"git", "ssh"}:
+        for os_name, machine in MATRIX:
+            tag = f"{os_name}_{1 if machine['work'] else 0}_{1 if machine['personal'] else 0}"
+            label = f"{os_name}/{'work' if machine['work'] else 'personal'}"
+            # Each matrix entry renders into its own directory so runs don't
+            # overwrite each other and the existence checks below are reliable.
+            tmp_extra = tempfile.mkdtemp(prefix=f"chezmoi-lint-{tag}-")
 
-        data_env = {
-            "CHEZMOI_OS": os_name,
-            "CHEZMOI_WORK": "1" if machine["work"] else "0",
-            "CHEZMOI_PERSONAL": "1" if machine["personal"] else "0",
-        }
+            data_env = {
+                "CHEZMOI_OS": os_name,
+                "CHEZMOI_WORK": "1" if machine["work"] else "0",
+                "CHEZMOI_PERSONAL": "1" if machine["personal"] else "0",
+            }
 
-        old_env = os.environ.copy()
-        try:
-            os.environ.update(data_env)
-            extra = chezmoi("apply", "--force", "--no-tty")
-            if extra.returncode == 0:
-                extra_path = Path(tmp_extra)
-                if extra_path.is_dir() and any(extra_path.iterdir()):
-                    if extra_path.joinpath("dot_config", "git").exists():
-                        git_count += 1
-                        print(f"configlint: git config {label}")
-                        failed += render_and_check_git(
-                            extra_path / "dot_config" / "git",
-                            extra_path,
-                            label,
-                        )
-                    if extra_path.joinpath("dot_ssh").exists():
-                        ssh_count += 1
-                        print(f"configlint: ssh config {label}")
-                        failed += render_and_check_ssh(extra_path / "dot_ssh", extra_path, label)
-        finally:
-            os.environ.clear()
-            os.environ.update(old_env)
+            old_env = os.environ.copy()
+            try:
+                os.environ.update(data_env)
+                # Pass destination=tmp_extra so this render goes to its own
+                # directory instead of overwriting the main TMPDIR render.
+                extra = chezmoi("apply", "--force", "--no-tty", destination=tmp_extra)
+                if extra.returncode == 0:
+                    extra_path = Path(tmp_extra)
+                    if extra_path.is_dir() and any(extra_path.iterdir()):
+                        # Check for rendered paths (.config/git, .ssh) — the
+                        # destination tree uses dot-prefixed names, not source names.
+                        if ("all" in categories or "git" in categories) and (extra_path / ".config" / "git").exists():
+                            git_count += 1
+                            print(f"configlint: git config {label}")
+                            failed += render_and_check_git(
+                                source_root / "dot_config" / "git",
+                                extra_path,
+                                label,
+                            )
+                        if ("all" in categories or "ssh" in categories) and (extra_path / ".ssh").exists():
+                            ssh_count += 1
+                            print(f"configlint: ssh config {label}")
+                            failed += render_and_check_ssh(
+                                source_root / "dot_ssh",
+                                extra_path,
+                                label,
+                            )
+            finally:
+                os.environ.clear()
+                os.environ.update(old_env)
 
     total = shell_count + plist_count + git_count + ssh_count + signers_count
+    mode = f", selective: {len(args.files)} file(s)" if selective else ""
     print(
         f"templates: checked {total} files "
         f"(shellcheck={shell_count}, xmllint={plist_count}, "
-        f"git={git_count}, ssh={ssh_count}, allowed_signers={signers_count})",
+        f"git={git_count}, ssh={ssh_count}, allowed_signers={signers_count}{mode})",
         file=sys.stderr,
     )
 
