@@ -25,14 +25,23 @@ _gw_root() {
 }
 
 # gwa <path> [<branch>]  — add a new worktree at <repo-root>/<path>
+#
+# Single-arg form: <path> is also the branch name.
+#   - If origin/<path> exists, create a local branch tracking it.
+#     (worktree.guessRemote only matches against the basename of <path>,
+#     so it can't be relied on for slash-bearing branch names like
+#     `user/feature/foo` — we resolve the full ref explicitly.)
+#   - Otherwise create a new branch from HEAD; future pushes will set the
+#     upstream automatically via push.autoSetupRemote.
 gwa() {
   local root
   root=$(_gw_root) || return 1
-  # When called with a single bare path, force the branch name to the full
-  # path so that remote-tracking (--guess-remote / worktree.guessRemote)
-  # resolves origin/name/like/this instead of just origin/this.
   if [[ $# -eq 1 && "$1" != -* ]]; then
-    git -C "$root" worktree add -b "$1" "$1"
+    if git -C "$root" show-ref --verify --quiet "refs/remotes/origin/$1"; then
+      git -C "$root" worktree add --track -b "$1" "$1" "origin/$1"
+    else
+      git -C "$root" worktree add -b "$1" "$1"
+    fi
   else
     git -C "$root" worktree add "$@"
   fi

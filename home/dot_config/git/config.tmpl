@@ -76,6 +76,8 @@
   # Switch to branch, creating if it doesn't exist (git 2.23+)
   cob = "!f(){ git switch \"$1\" 2>/dev/null || git switch -c \"$1\"; }; f"
   upstream = !git config --get branch.$(git branch --show-current).remote || echo origin
+  # Set the current branch to track origin/<same-name> (optional arg overrides the remote branch)
+  track = "!f(){ b=$(git branch --show-current); git fetch origin \"${1:-$b}\" && git branch --set-upstream-to=origin/\"${1:-$b}\" \"$b\"; }; f"
   hard-reset = !git reset --hard $(git upstream)/$(git branch --show-current)
   pprune = fetch --prune
   # Log/diff commits on current branch since diverging from default
