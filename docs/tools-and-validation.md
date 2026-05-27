@@ -35,8 +35,8 @@ managed by `pi install`, not `pnpm add -g`. Do not add them to `pnpm.yaml`.
 
 ## pnpm globals — declare in `pnpm.yaml`
 
-Standalone CLI tools that need to be on `PATH` (e.g., `mmd`, `pi-coding-agent`,
-`pi-web-access`) are installed as pnpm globals. Add them to the `pnpm.base` list in
+Standalone CLI tools that need to be on `PATH` (e.g., `mmd`, `pi-coding-agent`)
+are installed as pnpm globals. Add them to the `pnpm.base` list in
 `home/.chezmoidata/pnpm.yaml`.
 
 The `run_onchange_after_pnpm-globals.sh.tmpl` script reads `pnpm.yaml` and runs
