@@ -38,7 +38,13 @@ gwa() {
   root=$(_gw_root) || return 1
   if [[ $# -eq 1 && "$1" != -* ]]; then
     if git -C "$root" show-ref --verify --quiet "refs/remotes/origin/$1"; then
-      git -C "$root" worktree add --track -b "$1" "$1" "origin/$1"
+      if git -C "$root" show-ref --verify --quiet "refs/heads/$1"; then
+        # Local branch already exists — reuse it (tracking already set or will
+        # be picked up from the existing branch config).
+        git -C "$root" worktree add "$1" "$1"
+      else
+        git -C "$root" worktree add --track -b "$1" "$1" "origin/$1"
+      fi
     else
       git -C "$root" worktree add -b "$1" "$1"
     fi
