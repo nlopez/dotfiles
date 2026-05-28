@@ -28,7 +28,7 @@ redir_prefix="${out_dir:+${out_dir}/}tfplan"
 
 terraform "${chdir_arg[@]}" plan -lock=false -out="tfplan.bin" "${rest_args[@]}"
 
-terraform "${chdir_arg[@]}" show -no-color "${rest_args[@]}" "tfplan.bin" > "${redir_prefix}.txt"  & pid_txt=$!
-terraform "${chdir_arg[@]}" show -json    "${rest_args[@]}" "tfplan.bin" > "${redir_prefix}.json" & pid_json=$!
+terraform "${chdir_arg[@]}" show -no-color "tfplan.bin" > "${redir_prefix}.txt"  & pid_txt=$!
+terraform "${chdir_arg[@]}" show -json    "tfplan.bin" > "${redir_prefix}.json" & pid_json=$!
 
 wait $pid_txt $pid_json
