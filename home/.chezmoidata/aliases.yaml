@@ -25,6 +25,8 @@ aliases:
   - { name: gup, cmd: "git pull --rebase" }
   # gwa/gwl/gwr/gwm are zsh functions in oh-my-zsh/custom/git-worktree.zsh;
   # they need repo-root awareness and cannot be plain text snippet expansions.
+  - { name: fd, cmd: "fd --hidden" }
+  - { name: rg, cmd: "rg --hidden" }
   - { name: k, cmd: "kubectl" }
   - { name: kd, cmd: "kubectl describe" }
   - { name: kdp, cmd: "kubectl describe pod" }
