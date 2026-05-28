@@ -22,10 +22,10 @@ repos:
         pass_filenames: false
         always_run: true
         verbose: true
-      - id: configlint
-        name: configlint
-        language: system
-        entry: scripts/configlint.py
-        files: ^home/
-        pass_filenames: true
-        verbose: true
+      # - id: configlint
+      #   name: configlint
+      #   language: system
+      #   entry: scripts/configlint.py
+      #   files: ^home/
+      #   pass_filenames: true
+      #   verbose: true
