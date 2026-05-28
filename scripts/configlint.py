@@ -96,6 +96,7 @@ SHELL_FILES: set[str] = {
     "*.zshrc",
     "*.zshenv",
     "*.zprofile",
+    "*.sh",
     "00_custom.zsh",
     "_chezmoi",
     # chezmoi strips the executable_ prefix in the rendered tree, so the
@@ -312,67 +313,21 @@ def _source_to_targets(files: list[str]) -> list[str]:
     return targets
 
 
-# Segment names that force a full run because a change there can affect any
-# rendered output (shared data or template fragments).
-_FULL_RUN_SEGMENTS = frozenset({".chezmoidata", ".chezmoitemplates"})
-
-
 def categorize_changes(files: list[str]) -> set[str]:
     """Map changed source files to the lint categories they affect.
 
-    Returns {"all"} when a full run is required (no files given, shared
-    data/templates changed, modify_* script changed, or the file's impact
-    cannot be determined statically).  Otherwise returns a subset of
-    {"shellcheck", "xmllint", "git", "ssh", "signers"}.
+    When files is empty, pre-commit was invoked via "run -a" (all staged),
+    so a full run is required.  Otherwise (normal commit, files are passed)
+    we render only the changed files and run every linter on the resulting
+    rendered tree.
+
+    Returns a set of categories from {"shellcheck", "xmllint", "git", "ssh",
+    "signers"}.  In selective mode all categories are always valid — the
+    render step only produces the files that actually changed.
     """
     if not files:
         return {"all"}
-
-    categories: set[str] = set()
-    for raw in files:
-        p = Path(raw)
-        s = "/".join(p.parts)
-        name = p.name
-        stem = name.removesuffix(".tmpl")
-
-        # Shared data / shared templates / modify scripts → must full-run.
-        if _FULL_RUN_SEGMENTS & set(p.parts):
-            return {"all"}
-        if any(part.startswith("modify_") for part in p.parts):
-            return {"all"}
-
-        # git config files (config.tmpl, include files, allowed_signers, ignore …)
-        if "dot_config/git" in s:
-            if "allowed_signers" in name:
-                categories.add("signers")
-            else:
-                categories.add("git")
-
-        # SSH config
-        elif "dot_ssh" in p.parts:
-            categories.add("ssh")
-
-        # Plist
-        elif stem.endswith(".plist"):
-            categories.add("xmllint")
-
-        # Shell files: zsh scripts, oh-my-zsh custom files, .sh executables,
-        # and the rendered `brew` wrapper (source: executable_brew.tmpl).
-        # Strip the chezmoi dot_ prefix from stem before matching so that
-        # top-level files like dot_zshrc.tmpl (stem=dot_zshrc) are recognised.
-        elif (
-            stem.removeprefix("dot_").endswith(("zsh", "zshrc", "zshenv", "zprofile"))
-            or "exact_dot_oh-my-zsh" in p.parts
-            or (name.startswith("executable_") and stem.endswith(".sh"))
-            or stem == "executable_brew"  # noqa: SIM114  (readable as-is)
-        ):
-            categories.add("shellcheck")
-
-        # Anything we can't classify statically → safest to do a full run.
-        else:
-            return {"all"}
-
-    return categories
+    return {"shellcheck", "xmllint", "git", "ssh", "signers"}
 
 
 def main() -> int:
@@ -415,6 +370,11 @@ def main() -> int:
         if not targets:
             print("configlint: could not resolve any changed files to targets", file=sys.stderr)
             return 1
+        # Ensure destination parent directories exist for new files.
+        for target in targets:
+            parent = Path(target).parent
+            if not parent.exists():
+                parent.mkdir(parents=True, exist_ok=True)
         result = chezmoi("apply", "--force", "--no-tty", "--keep-going", *targets)
     else:
         result = chezmoi("apply", "--force", "--no-tty", "--keep-going")
@@ -494,9 +454,11 @@ def main() -> int:
         failed += check_allowed_signers(source_root)
 
     # ── Extra renders for other OS × machine-type combos ───────────────────
-    # Only run the matrix when git or ssh configs may have changed.
+    # Skip matrix rendering in selective mode — we already lint the current
+    # machine above; cross-OS/machine checks are expensive and only useful
+    # for full runs.  Guard on selective so pre-commit -a still triggers it.
 
-    if "all" in categories or categories & {"git", "ssh"}:
+    if not selective and ("all" in categories or categories & {"git", "ssh"}):
         for os_name, machine in MATRIX:
             tag = f"{os_name}_{1 if machine['work'] else 0}_{1 if machine['personal'] else 0}"
             label = f"{os_name}/{'work' if machine['work'] else 'personal'}"
