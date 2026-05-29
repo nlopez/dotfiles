@@ -1,3 +1,7 @@
+## GitHub Content
+
+Always use the `gh` CLI to fetch GitHub content — repos, files, issues, pull requests, releases, and GitHub-hosted docs. `gh` is authenticated, structured, and rate-limit-safe. Never use web fetch tools or manual API calls for github.com URLs.
+
 ## Package Management
 
 Always prefer **`uv`** for Python and **`pnpm`** for Node.js.
