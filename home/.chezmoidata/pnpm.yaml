@@ -16,5 +16,4 @@ stalePackages:
   - pi-intercom
   - pi-powerline
   - pi-mcp-adapter
-  - pi-firecrawl
   - pi-kagi-api
