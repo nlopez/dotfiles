@@ -1,8 +1,3 @@
-{{- if lookPath "tmux" }}
-case $- in *i*)
-  [[ "$TMUX" == "" ]] && tmux -u new-session -s 0 -A
-esac
-{{- end }}
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
@@ -182,37 +177,6 @@ zle -N _edit_command_line
 bindkey '^xe' _edit_command_line
 bindkey '^x^e' _edit_command_line
 
-###############################################################################
-# ── Helper: reload Pi in the *current* tmux pane safely ──────────────────────
-# Sends C-c + Enter first to clear any partial prompt, then /reload.
-pi-reload() {
-   [[ -n "$TMUX" ]] || { echo "pi-reload: not in tmux."; return 1; }
-  local pane="$TMUX_PANE"
-  echo "pi-reload: clearing buffer then reloading pane $pane."
-  tmux send-keys -t "$pane" C-c
-  tmux send-keys -t "$pane" Enter
-  tmux send-keys -t "$pane" "/reload" Enter
-  echo "pi-reload: done."
-}
-
-# ── Reloader: send /reload to *all* tmux panes running Pi ────────────────────
-#   Clears buffer before /reload to avoid corrupting partial prompts.
-pi-reload-all() {
-   [[ -n "${TMUX:-}" ]] || { echo "pi-reload-all: not in tmux."; return 1; }
-   local found=false
-   while IFS=' ' read -r pane_id pane_pid; do
-     if pgrep -P "$pane_pid" -f "^pi " >/dev/null 2>&1; then
-       found=true
-       echo "pi-reload-all: reloading pane $pane_id (pid $pane_pid)"
-       tmux send-keys -t "$pane_id" C-c
-       tmux send-keys -t "$pane_id" Enter
-       tmux send-keys -t "$pane_id" "/reload" Enter
-     fi
-   done < <(tmux list-panes -a -F '#{pane_id} #{pane_pid}')
-  $found || echo "pi-reload-all: no running pi sessions found."
-}
-
-
 alias e="${VISUAL} --add"
 compdef _files zed
 
@@ -283,30 +247,6 @@ function _smart_path_precmd() {
 }
 add-zsh-hook precmd _smart_path_precmd
 _smart_path_precmd  # prime before first prompt
-
-###############################################################################
-if [[ -n "$TMUX" ]]; then
-  # chezmoi apply queued-reload: the run_onchange_after_reload-shells script sets
-  # @chezmoi_reload 1 on every zsh pane (idle or busy) without injecting keystrokes.
-  # This precmd hook fires before every prompt — i.e. before any command executes —
-  # and exec-restarts the shell when the sentinel option is set.  TMUX_PANE must be
-  # set (it is absent after a bare `exec env -i … zsh` that doesn't forward it).
-  function _chezmoi_reload_precmd() {
-    [[ -n "$TMUX_PANE" ]] || return 0
-    local _pending
-    _pending=$(tmux display-message -p -t "$TMUX_PANE" '#{@chezmoi_reload}' 2>/dev/null) || return 0
-    [[ "$_pending" == "1" ]] || return 0
-    tmux set-option -pu -t "$TMUX_PANE" @chezmoi_reload 2>/dev/null || true
-    exec env -i \
-      PATH="{{ .platform.reload_path }}" \
-      TERMINFO="$TERMINFO" TERM="$TERM" \
-      USER="$USER" HOME="$HOME" SHELL="$SHELL" \
-      TMUX="$TMUX" TMUX_PANE="$TMUX_PANE" \
-      zsh --login
-  }
-  add-zsh-hook precmd _chezmoi_reload_precmd
-
-fi
 
 {{- if eq .chezmoi.os "darwin" }}
 ###############################################################################
