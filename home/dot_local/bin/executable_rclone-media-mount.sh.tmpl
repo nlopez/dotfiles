@@ -12,6 +12,7 @@ if [ ! -d "$MOUNT_DIR" ]; then
 fi
 
 exec {{ .chezmoi.homeDir }}/.local/bin/rclone mount media: "$MOUNT_DIR" \
+    --allow-non-empty \
     --allow-other \
     --log-level INFO \
     --log-file "{{ .chezmoi.homeDir }}/Library/Logs/rclone-media-mount.log" \
