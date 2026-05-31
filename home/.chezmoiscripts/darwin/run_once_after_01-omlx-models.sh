@@ -9,7 +9,7 @@ OUTPUT="$HOME/.pi/agent/models.json"
 # Ensure the output directory exists
 mkdir -p "$(dirname "$OUTPUT")"
 
-# Write empty config — the local-models extension will auto-discover models
-printf '{}\n' > "$OUTPUT"
+# Write minimal valid config — the local-models extension will auto-discover models
+printf '{"providers": {}}\n' > "$OUTPUT"
 
 echo "[omlx-models] models.json left empty for auto-discovery via local-models extension"
