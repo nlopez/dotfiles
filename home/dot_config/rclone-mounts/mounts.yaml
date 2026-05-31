@@ -17,8 +17,9 @@ mounts:
     mountpoint: ~/mnt/media-ro
     read_only: true
     vfs_cache_mode: off
-    dir_cache_time: 5m
-    poll_interval: 1m
+    # WebDAV does not support polling — poll_interval is a no-op for this backend.
+    # New files appear once dir_cache_time expires.
+    dir_cache_time: 30s
     attr_timeout: 1s
     allow_other: true
     allow_non_empty: false
@@ -40,8 +41,9 @@ mounts:
     vfs_cache_max_age: 72h
     vfs_cache_poll_interval: 10m
     vfs_write_back: 5s
-    dir_cache_time: 5m
-    poll_interval: 1m
+    # WebDAV does not support polling — poll_interval is a no-op for this backend.
+    # New files appear once dir_cache_time expires.
+    dir_cache_time: 30s
     attr_timeout: 1s
     allow_other: true
     allow_non_empty: false
