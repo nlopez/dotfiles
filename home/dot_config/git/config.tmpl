@@ -24,6 +24,9 @@
 
 [credential]
   helper = manager
+{{- if eq .chezmoi.os "darwin" }}
+  credentialStore = keychain
+{{- end }}
 
 [pull]
   rebase = true
