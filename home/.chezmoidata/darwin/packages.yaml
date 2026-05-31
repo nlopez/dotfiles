@@ -100,7 +100,6 @@ packages:
           - fsmonitor
           - wireshark-app
           - zed
-          - macfuse
           - linearmouse
           - standard-notes
           - git-credential-manager
