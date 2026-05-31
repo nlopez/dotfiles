@@ -1,35 +1,26 @@
 /**
- * Provider config builders.
- *
- * Converts DiscoveredServer results into Pi ProviderConfig objects.
+ * Builds Pi ProviderConfig from a DiscoveredServer.
  */
 
 import type { ProviderConfig, ProviderModelConfig } from "@earendil-works/pi-coding-agent";
 import type { DiscoveredServer } from "./config";
 
-/**
- * Build a Pi ProviderConfig from a discovered server.
- */
 export function buildProviderConfig(server: DiscoveredServer): ProviderConfig {
-  const providerName = server.providerName;
-
-  const base: ProviderConfig = {
-    name: `${server.name} (Auto-Discovered)`,
+  const config: ProviderConfig = {
+    name: `${server.name} (Local)`,
     baseUrl: server.baseUrl,
-    apiKey: providerName,
+    apiKey: server.apiKey,
     api: server.api,
+    models: server.models.map((m) => buildModelConfig(m, server.thinkingFormat)),
   };
 
-  // Add models with per-model thinking format
-  base.models = server.models.map((m) => buildModelConfig(m, server.thinkingFormat));
+  if (server.authHeader) {
+    config.authHeader = true;
+  }
 
-  return base;
+  return config;
 }
 
-/**
- * Build a Pi ModelConfig from a discovered model, applying the server's
- * default thinking format when the model supports reasoning.
- */
 function buildModelConfig(
   model: DiscoveredServer["models"][number],
   serverThinkingFormat: string | undefined,
@@ -44,27 +35,9 @@ function buildModelConfig(
     maxTokens: model.maxTokens,
   };
 
-  // Set up thinking support for reasoning models
-  if (model.reasoning) {
-    config.thinkingLevelMap = {
-      off: null,
-      minimal: "low",
-      low: "low",
-      medium: "medium",
-      high: "high",
-      xhigh: "max",
-    };
-
-    // Apply the server's default thinking format if supported
-    if (serverThinkingFormat) {
-      config.compat = {
-        ...model.compat,
-        thinkingFormat: serverThinkingFormat,
-      };
-    } else {
-      config.compat = model.compat;
-    }
-  } else {
+  if (model.reasoning && serverThinkingFormat) {
+    config.compat = { ...model.compat, thinkingFormat: serverThinkingFormat };
+  } else if (model.compat) {
     config.compat = model.compat;
   }
 
