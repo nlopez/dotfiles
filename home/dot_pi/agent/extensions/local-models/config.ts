@@ -1,8 +1,6 @@
 /**
  * Configuration for the local-models extension.
- *
- * Each known server has its documented API endpoint.
- * We probe only to check reachability, then use the configured API.
+ * Supports: omlx, lm-studio
  */
 
 import { readFileSync } from "node:fs";
@@ -17,10 +15,15 @@ export type ApiType = "anthropic-messages" | "openai-completions";
 export interface DiscoveredServer {
   name: string;
   providerName: string;
+  /** Full API base URL including /v1 — passed directly to pi.registerProvider */
   baseUrl: string;
   api: ApiType;
   models: DiscoveredModel[];
   thinkingFormat?: string;
+  /** API key for both probe requests and registered provider */
+  apiKey: string;
+  /** Whether to send Authorization: Bearer {apiKey} header */
+  authHeader?: boolean;
 }
 
 export interface DiscoveredModel {
@@ -35,30 +38,15 @@ export interface DiscoveredModel {
 }
 
 export interface LocalModelsConfig {
-  /** Which known servers to enable. Empty = enable all. */
   enabledServers?: string[];
-  /** Skip embedding/reranker models. */
   skipEmbeddingModels?: boolean;
-  /** Fallback context window. */
   defaultContextWindow?: number;
-  /** Fallback max output tokens. */
   defaultMaxTokens?: number;
-  /** Auto-register without prompting. */
   autoEnable?: boolean;
-  /** Per-server reachability probe timeout. */
   probeTimeout?: number;
-  /** Additional custom servers. */
-  customServers?: Array<{
-    name: string;
-    baseUrl: string;
-    api: ApiType;
-    modelsEndpoint: string;
-    /** Headers to include in the probe request (e.g., Authorization) */
-    headers?: Record<string, string>;
-  }>;
 }
 
-export const DEFAULT_CONFIG: LocalModelsConfig = {
+export const DEFAULT_CONFIG: Required<LocalModelsConfig> = {
   enabledServers: [],
   skipEmbeddingModels: true,
   defaultContextWindow: 128000,
@@ -67,83 +55,48 @@ export const DEFAULT_CONFIG: LocalModelsConfig = {
   probeTimeout: 3000,
 };
 
-/** Known local model servers with their documented APIs. */
+/**
+ * Known servers.
+ *
+ * baseUrl must include /v1 — Pi appends /chat/completions directly to it.
+ * modelsEndpoint is relative to baseUrl (e.g. "/models" → baseUrl + "/models").
+ */
 export const KNOWN_SERVERS: Array<{
   name: string;
+  /** Full API base URL including /v1 */
   baseUrl: string;
-  /** API to use for chat completions */
   api: ApiType;
-  /** Endpoint to list models (for reachability + model discovery) */
+  /** Path relative to baseUrl used to list models */
   modelsEndpoint: string;
-  /** Default thinking format for this server (e.g., "qwen-chat-template") */
   thinkingFormat: string | undefined;
-  /** Provider-level compat overrides */
   compat?: Record<string, unknown>;
-  /** Headers to include in the probe request (e.g., Authorization) */
-  probeHeaders?: Record<string, string>;
+  apiKey: string;
+  authHeader?: boolean;
 }> = [
   {
-    name: "ollama",
-    baseUrl: "http://localhost:11434",
+    name: "omlx",
+    baseUrl: "http://localhost:8000/v1",
     api: "openai-completions",
-    modelsEndpoint: "/api/tags",
-    thinkingFormat: "qwen",
+    modelsEndpoint: "/models",
+    thinkingFormat: "qwen-chat-template",
+    apiKey: "omlx-kdc8uke8vsvje15d",
+    authHeader: true,
   },
   {
     name: "lm-studio",
-    baseUrl: "http://localhost:1234",
+    baseUrl: "http://localhost:1234/v1",
     api: "openai-completions",
-    modelsEndpoint: "/v1/models",
+    modelsEndpoint: "/models",
     thinkingFormat: "openai",
-  },
-  {
-    name: "omlx",
-    baseUrl: "http://localhost:8000",
-    api: "openai-completions",
-    modelsEndpoint: "/v1/models",
-    thinkingFormat: "qwen-chat-template",
-    probeHeaders: {
-      Authorization: "Bearer omlx-kdc8uke8vsvje15d",
-    },
-  },
-  {
-    name: "vllm",
-    baseUrl: "http://localhost:8001",
-    api: "openai-completions",
-    modelsEndpoint: "/v1/models",
-    thinkingFormat: undefined,
-  },
-  {
-    name: "sglang",
-    baseUrl: "http://localhost:30000",
-    api: "openai-completions",
-    modelsEndpoint: "/v1/models",
-    thinkingFormat: undefined,
-  },
-  {
-    name: "tgi",
-    baseUrl: "http://localhost:8080",
-    api: "openai-completions",
-    modelsEndpoint: "/v1/models",
-    thinkingFormat: undefined,
-  },
-  {
-    name: "koboldcpp",
-    baseUrl: "http://localhost:5000",
-    api: "openai-completions",
-    modelsEndpoint: "/v1/models",
-    thinkingFormat: undefined,
-  },
-  {
-    name: "llamafile",
-    baseUrl: "http://localhost:8081",
-    api: "openai-completions",
-    modelsEndpoint: "/v1/models",
-    thinkingFormat: undefined,
+    apiKey: "lm-studio",
+    authHeader: false,
   },
 ];
 
-/** Embedding/reranker patterns to filter out */
+// ---------------------------------------------------------------------------
+// Model filtering
+// ---------------------------------------------------------------------------
+
 const EMBEDDING_PATTERNS = [/embedding/i, /rerank/i, /reranker/i, /text-embedding/i, /embed/i, /bge/i, /nomic.*embed/i];
 
 export function isLikelyChatModel(id: string): boolean {
@@ -152,7 +105,6 @@ export function isLikelyChatModel(id: string): boolean {
 
 export function inferReasoning(id: string, name?: string): boolean {
   const text = `${id} ${name ?? ""}`.toLowerCase();
-  // Known reasoning model families (Qwen 2.5+, Claude Sonnet/Opus, o1/o3, Gemini Pro/Flash)
   return (
     /thinking|reason|deep.*think|o1|o3|claude.*sonnet|claude.*opus|gemini.*pro|gemini.*flash|qwen/i.test(text) ||
     /thinking|reason/i.test(name ?? "")
