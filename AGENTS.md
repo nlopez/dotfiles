@@ -85,6 +85,59 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 - Commit secrets or credentials to the repo
 - Bypass pre-commit hooks
 
+## Platform-Specific Notes
+
+### Aurora Linux (Universal Blue — Fedora Kinoite-based)
+
+Aurora is an immutable, image-based distro with a **three-tier package management** strategy:
+
+1. **rpm-ostree** — Immutable base system. Layering packages (`rpm-ostree layer`) is **strongly discouraged** (last resort only) due to dependency breakage risks and slower updates.
+2. **Flatpak** — Primary method for GUI applications (via the Bazaar app from Flathub).
+3. **Homebrew (Linuxbrew)** — Command-line tools installed at `/home/linuxbrew/.linuxbrew`. Configure via `packages.yaml` → `linux.brews` section.
+4. **Distrobox** — Fallback for CLI tools not available via Flatpak or Homebrew. Creates containers with other distros' package managers (dnf, apt, etc.).
+5. **blue-build** — Build your own image template for adding multiple layered packages (advanced).
+
+**Key Aurora-specific rules:**
+
+- **Never** edit files directly in `/` (the root filesystem is read-only on the immutable base).
+- Use `rpm-ostree update` to pull base OS updates (atomic reboot required).
+- Prefer Homebrew CLI tools over `rpm-ostree layer` whenever possible.
+- For Neovim: install via Homebrew (`brew install neovim`), NOT via `rpm-ostree layer`.
+- The `/home/linuxbrew/.linuxbrew` prefix must be in `$PATH` — this is handled by the Linux brew prefix config.
+
+### macOS
+
+- Neovim installed via Homebrew (`brew install neovim`).
+- CLI tools configured via `packages.yaml` → `darwin.brews` section.
+- GUI apps via Homebrew Casks (or mas for Mac App Store apps).
+
+### Neovim Direct Management
+
+The Neovim configuration is **directly managed** in the chezmoi source tree — not via external git-repo:
+
+```
+home/dot_config/nvim/
+├── init.lua              # Bootstrap entry (sources config/lazy.lua)
+├── README.md             # Usage documentation
+├── stylua.toml           # Lua formatting config
+├── lua/
+│   ├── config/           # LazyVim config files
+│   │   ├── lazy.lua      # lazy.nvim bootstrap + LazyVim import
+│   │   ├── options.lua   # Neovim options
+│   │   ├── keymaps.lua   # Neovim keybindings
+│   │   ├── autocmds.lua  # Neovim autocommands
+│   │   └── overrides.lua # LazyVim opts overrides
+│   ├── mapping/          # Custom keybinding extensions
+│   │   └── custom.lua
+│   └── plugins/          # Custom plugin specs
+│       └── init.lua
+└── package.json          # Package metadata
+```
+
+- **Binary**: macOS and Aurora Linux use Homebrew (via `packages.yaml` → `brews.base`).
+- **Config**: Directly in `home/dot_config/nvim/` — full `chezmoi diff`/`status` visibility.
+- **Extensions**: Edit `lua/plugins/init.lua` for plugin specs, `lua/config/overrides.lua` for LazyVim opts.
+
 ## Further Reading
 
 - [chezmoi Documentation](https://chezmoi.io/docs/)
@@ -93,3 +146,5 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 - [Using External Data](https://chezmoi.io/reference/data/)
 - [State Management](https://chezmoi.io/docs/concepts/state/)
 - [Recipes](https://chezmoi.io/recipes/) — community-contributed patterns
+- [Aurora Linux Package Management](https://docs.getaurora.dev/guides/software/) — Flatpak, rpm-ostree, Distrobox
+- [Aurora Linux Architecture](https://deepwiki.com/ublue-os/aurora) — Three-tier package management
