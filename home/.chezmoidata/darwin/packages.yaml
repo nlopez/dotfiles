@@ -12,6 +12,8 @@ packages:
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
       brews:
         base:
+          - distrobox
+          - podman
           - age
           - git-lfs
           - jj
@@ -88,6 +90,7 @@ packages:
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:
         base:
+          - podman-desktop
           - copyq
           - cursor
           - docker/tap/sbx
@@ -106,7 +109,6 @@ packages:
           - tailscale-app
           - 1password
           - 1password-cli
-          - docker-desktop
           - visual-studio-code
           - jordanbaird-ice
           - rectangle
