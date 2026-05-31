@@ -53,6 +53,8 @@ export interface LocalModelsConfig {
     baseUrl: string;
     api: ApiType;
     modelsEndpoint: string;
+    /** Headers to include in the probe request (e.g., Authorization) */
+    headers?: Record<string, string>;
   }>;
 }
 
@@ -77,6 +79,8 @@ export const KNOWN_SERVERS: Array<{
   thinkingFormat: string | undefined;
   /** Provider-level compat overrides */
   compat?: Record<string, unknown>;
+  /** Headers to include in the probe request (e.g., Authorization) */
+  probeHeaders?: Record<string, string>;
 }> = [
   {
     name: "ollama",
@@ -98,6 +102,9 @@ export const KNOWN_SERVERS: Array<{
     api: "openai-completions",
     modelsEndpoint: "/v1/models",
     thinkingFormat: "qwen-chat-template",
+    probeHeaders: {
+      Authorization: "Bearer omlx-kdc8uke8vsvje15d",
+    },
   },
   {
     name: "vllm",
