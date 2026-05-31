@@ -4,7 +4,7 @@
  * No API detection — each server has a pre-configured API from its docs.
  */
 
-import type { DiscoveredModel, DiscoveredServer, LocalModelsConfig } from "./config";
+import type { DiscoveredModel, DiscoveredServer, LocalModelsConfig, ApiType } from "./config";
 import { KNOWN_SERVERS, DEFAULT_CONFIG, isLikelyChatModel, inferReasoning } from "./config";
 
 // ---------------------------------------------------------------------------
@@ -46,9 +46,15 @@ async function probeServer(
   const timer = setTimeout(() => controller.abort(), timeout);
 
   try {
+    // Merge probe-specific headers with the default Accept header
+    const probeHeaders: Record<string, string> = { Accept: "application/json" };
+    if (server.probeHeaders) {
+      Object.assign(probeHeaders, server.probeHeaders);
+    }
+
     const response = await fetch(url, {
       signal: controller.signal,
-      headers: { Accept: "application/json" },
+      headers: probeHeaders,
     });
 
     if (!response.ok) return null;
@@ -114,17 +120,67 @@ function markReasoning(models: DiscoveredModel[]): DiscoveredModel[] {
 // Main discovery
 // ---------------------------------------------------------------------------
 
-export async function discoverServers(config: LocalModelsConfig): Promise<DiscoveredServer[]> {
-  const results: DiscoveredServer[] = [];
+interface CustomServerEntry {
+  name: string;
+  baseUrl: string;
+  api: ApiType;
+  modelsEndpoint: string;
+  headers?: Record<string, string>;
+}
 
-  // Filter to enabled servers
-  const enabled = KNOWN_SERVERS.filter((s) => {
+/**
+ * Combine KNOWN_SERVERS with CUSTOM_SERVERS from config.
+ * CUSTOM_SERVERS entries take precedence if they share the same name.
+ */
+function getActiveServers(config: LocalModelsConfig): Array<{
+  name: string;
+  baseUrl: string;
+  api: ApiType;
+  modelsEndpoint: string;
+  thinkingFormat: string | undefined;
+  probeHeaders?: Record<string, string>;
+  compat?: Record<string, unknown>;
+}> {
+  const known = KNOWN_SERVERS.filter((s) => {
     if (config.enabledServers.length === 0) return true;
     return config.enabledServers.includes(s.name);
   });
 
+  const custom = (config.customServers ?? []) as CustomServerEntry[];
+
+  // Build a map of known servers
+  const knownMap = new Map(known.map((s) => [s.name, s]));
+
+  // Apply custom overrides / additions
+  for (const cs of custom) {
+    if (knownMap.has(cs.name)) {
+      // Override existing known server
+      const existing = knownMap.get(cs.name)!;
+      Object.assign(existing, cs);
+    } else {
+      // Add new custom server
+      knownMap.set(cs.name, {
+        name: cs.name,
+        baseUrl: cs.baseUrl,
+        api: cs.api,
+        modelsEndpoint: cs.modelsEndpoint,
+        thinkingFormat: undefined,
+        probeHeaders: cs.headers,
+      });
+    }
+  }
+
+  return Array.from(knownMap.values());
+}
+
+export async function discoverServers(config: LocalModelsConfig): Promise<DiscoveredServer[]> {
+  const results: DiscoveredServer[] = [];
+
+  // Get active servers (known + custom, with overrides)
+  const active = getActiveServers(config);
+
   // Probe all in parallel
-  const probes = await Promise.all(enabled.map((s) => probeServer(s, config)));
+  const probes = await Promise.all(active.map((s) => probeServer(s as (typeof KNOWN_SERVERS)[number], config)));
 
   for (const r of probes) {
     if (!r) continue;
