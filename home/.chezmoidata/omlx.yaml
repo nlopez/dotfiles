@@ -5,16 +5,14 @@ omlx:
   # Used to generate ~/.pi/agent/models.json.
   # Add/remove models here to stay in sync.
   models:
-    - id: "GLM-OCR-bf16"
-      name: "GLM-OCR-bf16"
-      type: "ocr"
-      reasoning: false
-      input:
-        - "text"
-    - id: "Mixtral-8x22B-4bit"
-      name: "Mixtral-8x22B-4bit"
+    - id: "Qwen3.6-27B-NVFP4"
+      name: "Qwen3.6-27B-NVFP4"
       type: "llm"
-      reasoning: false
+      reasoning: true
+      contextWindow: 262144
+      maxTokens: 32768
+      compat:
+        thinkingFormat: "qwen-chat-template"
       input:
         - "text"
     - id: "Qwen3.6-35B-A3B-nvfp4"
