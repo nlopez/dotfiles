@@ -12,6 +12,7 @@ packages:
           - curl
           - chezmoi
           - direnv
+          - neovim
           - fd
           - git
           - jq

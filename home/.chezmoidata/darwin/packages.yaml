@@ -59,11 +59,11 @@ packages:
           - gnu-which
           - grep
           - gh
-          - neovim
           - terminal-notifier
           - testssl
           - cilium-cli
           - chezmoi
+          - neovim
           - watchman
           - lazygit
           - pv

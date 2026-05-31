@@ -1,0 +1,8 @@
+{
+  "name": "my-lazyvim-config",
+  "version": "1.0.0",
+  "description": "Personal LazyVim configuration managed via chezmoi",
+  "main": "init.lua",
+  "author": "localuser",
+  "license": "MIT"
+}
