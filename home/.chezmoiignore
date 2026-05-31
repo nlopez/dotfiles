@@ -1,4 +1,74 @@
-{{- /* Deploy .zshrc_local only on work machines */ -}}
+{{- /* .chezmoiignore is always interpreted as a template — no .tmpl suffix needed. */ -}}
+
+# ── Work-only files ────────────────────────────────────────────────────────────
 {{- if not .work }}
 .zshrc_local
-{{- end }}
+{{ end -}}
+
+# ── oh-my-zsh: keep only tracked plugins; ignore caches and generated files ───
+!.oh-my-zsh/plugins
+{{ range .zshPlugins -}}
+!.oh-my-zsh/plugins/{{ . }}
+!.oh-my-zsh/plugins/{{ . }}/**
+{{ end -}}
+.oh-my-zsh/cache/**
+.oh-my-zsh/plugins/**
+.oh-my-zsh/templates/**
+.oh-my-zsh/custom/themes/powerlevel10k/**/*.zwc
+
+# ── OMLX: ignore runtime-generated files (keep settings.json) ─────────────────
+.omlx/cache/**
+.omlx/logs/**
+.omlx/models/**
+.omlx/stats.json
+
+# ── OS-specific scripts ────────────────────────────────────────────────────────
+{{ if ne .chezmoi.os "darwin" -}}
+.chezmoiscripts/darwin/**
+Library/Application Support/espanso/**
+{{ end -}}
+{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.osRelease.id "aurora") -}}
+.chezmoiscripts/linux-debian/**
+{{ end -}}
+{{ if or (eq .chezmoi.os "darwin") (ne .chezmoi.osRelease.id "aurora") -}}
+.chezmoiscripts/linux/**
+{{ end -}}
+
+# ── Headless machines: no GUI config ──────────────────────────────────────────
+{{ if .headless -}}
+.config/zed
+.config/ghostty
+{{ end -}}
+
+# ── Personal-only files ────────────────────────────────────────────────────────
+{{ if not .personal -}}
+.config/rclone/rclone.conf
+.config/rclone-mounts/**
+.local/bin/rclone-mounts
+.chezmoiscripts/darwin/run_onchange_after_rclone-mounts-generate.sh
+{{ end -}}
+
+# ── Work-only files ────────────────────────────────────────────────────────────
+{{ if not .work -}}
+.pi/agent/mcp.json
+{{ end -}}
+
+# ── Age encryption: exclude the other machine class's secrets directory ────────
+{{ if not .work -}}
+.config/work-secrets
+{{ end -}}
+{{ if not .personal -}}
+.config/personal-secrets
+{{ end -}}
+
+# ── ~/.local/bin: conditional scripts ─────────────────────────────────────────
+{{ if not .work -}}
+.local/bin/brew
+{{ end -}}
+{{ if ne .chezmoi.os "darwin" -}}
+.local/bin/gitcache
+{{ end -}}
+.local/bin/zed
+
+# ── Git bookkeeping: empty-dir markers — never deployed ───────────────────────
+**/.gitkeep
