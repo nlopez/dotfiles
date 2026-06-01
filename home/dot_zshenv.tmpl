@@ -10,12 +10,13 @@ export MCP_OAUTH_CALLBACK_PORT=3118
 
 export HOMEBREW_PREFIX={{ .packages.brew_prefix }}
 
-# Add uutils coreutils, diffutils, and findutils to PATH (unprefixed GNU
-# commands).  These are installed via Homebrew by this same chezmoi config,
-# so the paths are stable — no need for -d guards.
+{{- if eq .chezmoi.os "darwin" }}
+# Prepend GNU tool gnubin directories so GNU utils win over BSD/macOS system
+# tools. Driven by the gnu_tools list in .chezmoidata/darwin/packages.yaml.
 path=(
-    "${HOMEBREW_PREFIX}/opt/uutils-coreutils/libexec/uubin"
-    "${HOMEBREW_PREFIX}/opt/uutils-diffutils/libexec/uubin"
-    "${HOMEBREW_PREFIX}/opt/uutils-findutils/libexec/uubin"
+{{- range .packages.darwin.gnu_tools }}
+    "${HOMEBREW_PREFIX}/opt/{{ . }}/libexec/gnubin"
+{{- end }}
     $path
 )
+{{- end }}

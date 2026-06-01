@@ -28,11 +28,6 @@ for _d in \
 done
 unset _d
 
-# GNU tool gnubin directories are no longer injected into PATH.
-# They remain installed in their prefixed paths and can be called
-# with the g- prefix (e.g. gls, gcp, gmv). See the reload alias
-# in .zshrc for picking up PATH changes after a chezmoi apply.
-
 export XDG_DATA_HOME=$HOME/.local/share
 export XDG_CONFIG_HOME=$HOME/.config
 export XDG_STATE_HOME=$HOME/.local/state
