@@ -131,9 +131,9 @@ function _source() {
   [[ -f $1 ]] && source "$@"
 }
 
-# Reload: re-source .zprofile (PATH/env) then .zshrc so any
-# chezmoi apply changes take effect without restarting the terminal.
-alias reload='_source ~/.zshenv; _source ~/.zprofile; _source ~/.zshrc'
+# Reload: replace the current shell process with a fresh login shell so
+# .zprofile and .zshrc are re-read with no stale state.
+function reload { exec -l zsh }
 
 function _command() {
   command -v $1 >/dev/null 2>&1
