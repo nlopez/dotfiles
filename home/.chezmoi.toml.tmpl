@@ -1,7 +1,8 @@
 {{/* boolean feature tags — set once at chezmoi init, persisted in local config */}}
-{{- $personal  := promptBoolOnce . "personal"  "Is this a personal machine?" -}}
-{{- $work      := promptBoolOnce . "work"      "Is this a work machine?"     -}}
-{{- $headless  := promptBoolOnce . "headless"  "Is this a headless machine?" -}}
+{{- $personal        := promptBoolOnce   . "personal"        "Is this a personal machine?"    -}}
+{{- $work            := promptBoolOnce   . "work"            "Is this a work machine?"        -}}
+{{- $headless        := promptBoolOnce   . "headless"        "Is this a headless machine?"    -}}
+{{- $opConnectToken  := promptStringOnce . "opConnectToken"  "1Password Connect token"        -}}
 
 {{- $ephemeral := false -}}{{/* true if this machine is ephemeral, e.g.: a cloud or VM instance */}}
 
@@ -36,16 +37,21 @@ useBuiltinAge = false
   recipientsFile = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/personal-recipient.txt"
 {{- end }}
 
+[onepassword]
+  mode = "connect"
+
 # Environment variables passed to all scripts and hooks.
-# The age-key fetch hook reads CHEZMOI_AGE_OP_URI and CHEZMOI_AGE_OP_ACCOUNT.
+# OP_CONNECT_HOST/TOKEN are also read by chezmoi's own onepasswordRead template
+# function calls; export them in dot_zprofile so they are in the OS environment
+# for subsequent chezmoi runs.
 [scriptEnv]
-{{- if $work }}
-  AGE_KEY_OP_URI     = "op://ed52wahww5txzax6reg4me3bl4/fgtjfmintxb2nptvgsbspom7va/private-key"
-  AGE_KEY_OP_ACCOUNT = "datadog.1password.com"
-{{- else if $personal }}
-  AGE_KEY_OP_URI     = "op://Private/age-key/private-key"
-  AGE_KEY_OP_ACCOUNT = "my.1password.com"
+  OP_CONNECT_HOST  = "https://onepassword-connect.macaroni-pirate.ts.net"
+  OP_CONNECT_TOKEN = {{ $opConnectToken | quote }}
+{{- if $personal }}
+  # age-key — Automation vault copy of Private/age-key
+  AGE_KEY_OP_URI   = "op://evjh25ux2mnoufaut6qhvm2pdi/xrueqtieq2hj6qydr5m3urcoey/private-key"
 {{- end }}
+  # work: AGE_KEY_OP_URI intentionally unset — fetch-age-key.sh skips gracefully
 
 # Fetch the age identity from 1Password before chezmoi reads (decrypts) source state.
 [hooks.read-source-state.pre]
