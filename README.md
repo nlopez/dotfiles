@@ -15,11 +15,14 @@ chezmoi is configured with `onepassword.mode = "connect"`. The `OP_CONNECT_HOST`
 
 ### Bootstrap (first run on any machine)
 
-Obtain the Connect token from 1Password and export it before running chezmoi:
+The Connect token lives in the **Private** vault of the personal 1Password account.
+Because `OP_CONNECT_TOKEN` is exported by the generated shell profile, any shell that
+has already sourced it will use Connect mode — and Connect cannot reach the Private vault.
+Always fetch the token in a subshell with the Connect env vars explicitly cleared:
 
 ```bash
 export OP_CONNECT_HOST="https://onepassword-connect.macaroni-pirate.ts.net"
-export OP_CONNECT_TOKEN="$(op read op://Private/lshy7xejhopza2xq6qpjqlcw5y/credential --no-newline)"
+export OP_CONNECT_TOKEN="$(unset OP_CONNECT_HOST OP_CONNECT_TOKEN; op read op://bamv726zv6zbcfke3cnbwjtnuu/lshy7xejhopza2xq6qpjqlcw5y/credential --no-newline)"
 ```
 
 Then run chezmoi normally. On first run, `chezmoi init` will prompt for the Connect token
@@ -38,7 +41,7 @@ re-run `chezmoi init` to trigger the `promptStringOnce` prompt for the token:
 
 ```bash
 export OP_CONNECT_HOST="https://onepassword-connect.macaroni-pirate.ts.net"
-export OP_CONNECT_TOKEN="$(op read op://Private/lshy7xejhopza2xq6qpjqlcw5y/credential --no-newline)"
+export OP_CONNECT_TOKEN="$(unset OP_CONNECT_HOST OP_CONNECT_TOKEN; op read op://bamv726zv6zbcfke3cnbwjtnuu/lshy7xejhopza2xq6qpjqlcw5y/credential --no-newline)"
 chezmoi init nlopez   # prompts for opConnectToken — paste the token value
 chezmoi apply
 ```
@@ -50,6 +53,6 @@ chezmoi apply
 - **Work machines:** the age encryption key is not in the Automation vault. `fetch-age-key.sh`
   will warn and skip gracefully; encrypted source files will not be decryptable until the age
   identity is provisioned separately.
-- To rotate the Connect token: update `op://Private/lshy7xejhopza2xq6qpjqlcw5y/credential`
-  in 1Password, then re-run `chezmoi init` on each machine (or manually edit
+- To rotate the Connect token: update item `lshy7xejhopza2xq6qpjqlcw5y` in the Private vault,
+  then re-run `chezmoi init` on each machine (or manually edit
   `~/.config/chezmoi/chezmoi.toml` to update `opConnectToken`).
