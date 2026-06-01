@@ -25,7 +25,6 @@ packages:
           - fx # json tui
           - 8ta4/plist/plist
           - tree
-          - uutils-coreutils
           - hyperfine
           - ncdu
           - atuin
@@ -49,6 +48,7 @@ packages:
           - k9s
           - go
           - coreutils
+          - diffutils
           - bat
           - eza
           - gnu-tar
@@ -170,9 +170,11 @@ packages:
       work:
         - datadog.datadog-vscode
     gnu_tools:
-      - gnu-sed
+      - coreutils
+      - diffutils
       - findutils
       - gawk
+      - gnu-sed
       - gnu-tar
       - gnu-time
       - gnu-getopt
