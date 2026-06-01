@@ -4,8 +4,8 @@
 # available before chezmoi reads (and therefore needs to decrypt) any source files.
 #
 # Environment variables injected by chezmoi [scriptEnv] in chezmoi.toml:
-#   AGE_KEY_OP_URI      1Password secret reference, e.g. op://Private/age-key/private-key
-#   AGE_KEY_OP_ACCOUNT  1Password account URL, e.g. datadog.1password.com
+#   AGE_KEY_OP_URI      1Password Connect secret reference, e.g. op://evjh.../xrue.../private-key
+#                       Unset on work machines (age key not in Automation vault) — script skips.
 #
 # The identity file is left on disk between chezmoi runs (no post-hook cleanup).
 # The directory is created with mode 700; the identity file is created with mode 600.
@@ -19,10 +19,11 @@ if [[ -s "${IDENTITY_FILE}" ]]; then
     exit 0
 fi
 
-# If env vars are absent this machine has no age encryption configured (e.g. headless/ephemeral).
+# If AGE_KEY_OP_URI is absent this machine has no age key configured via Connect
+# (e.g. work machines where the key is not in the Automation vault, or headless/ephemeral).
 # Warn but do not fail so chezmoi continues normally.
-if [[ -z "${AGE_KEY_OP_URI:-}" ]] || [[ -z "${AGE_KEY_OP_ACCOUNT:-}" ]]; then
-    echo "fetch-age-key: AGE_KEY_OP_URI or AGE_KEY_OP_ACCOUNT not set — skipping age key fetch" >&2
+if [[ -z "${AGE_KEY_OP_URI:-}" ]]; then
+    echo "fetch-age-key: AGE_KEY_OP_URI not set — skipping age key fetch" >&2
     exit 0
 fi
 
@@ -34,10 +35,9 @@ TMPFILE="$(mktemp "${IDENTITY_DIR}/.identity.tmp.XXXXXX")"
 trap 'rm -f "${TMPFILE}"' EXIT
 
 if ! op read --no-newline \
-    --account "${AGE_KEY_OP_ACCOUNT}" \
     "${AGE_KEY_OP_URI}" > "${TMPFILE}" 2>&1; then
-    echo "fetch-age-key: WARNING — could not fetch age key from 1Password (${AGE_KEY_OP_URI})" >&2
-    echo "  Run: op read --account ${AGE_KEY_OP_ACCOUNT} '${AGE_KEY_OP_URI}'" >&2
+    echo "fetch-age-key: WARNING — could not fetch age key from 1Password Connect (${AGE_KEY_OP_URI})" >&2
+    echo "  Run: op read '${AGE_KEY_OP_URI}'" >&2
     echo "  chezmoi will fail if it encounters encrypted source files." >&2
     exit 0
 fi
