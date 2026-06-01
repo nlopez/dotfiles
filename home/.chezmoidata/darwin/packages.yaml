@@ -5,7 +5,6 @@ packages:
     brew:
       taps:
         8ta4/plist: "https://github.com/8ta4/homebrew-plist"
-        docker/tap: "https://github.com/docker/homebrew-tap"
         eugene1g/safehouse: "https://github.com/eugene1g/homebrew-safehouse"
         jundot/omlx: "https://github.com/jundot/omlx"
         ryooooooga/tap: "https://github.com/ryooooooga/homebrew-tap"
@@ -93,7 +92,6 @@ packages:
           - podman-desktop
           - copyq
           - cursor
-          - docker/tap/sbx
           - grandperspective
           - obsidian
           - claude-code
