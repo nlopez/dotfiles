@@ -28,7 +28,7 @@ mounts:
     log_file: rclone-media-ro-mount.log
     nfs_cache_handle_limit: 1000000
     rc: true
-    rc_addr: "localhost:5572"
+    rc_addr: "unix:/tmp/rclone-media-ro.sock"
 
   # ── Read-write: for uploads and library management ──────────────────────────
   # Full VFS cache enables random writes, seeking, and retry on failure.
@@ -52,4 +52,4 @@ mounts:
     log_file: rclone-media-rw-mount.log
     nfs_cache_handle_limit: 1000000
     rc: true
-    rc_addr: "localhost:5573"
+    rc_addr: "unix:/tmp/rclone-media-rw.sock"

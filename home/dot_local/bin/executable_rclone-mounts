@@ -232,6 +232,7 @@ _refresh_one() {
     local remote="$1"
     local rc_addr; rc_addr=$(get_opt "${remote}" rc_addr "localhost:5572")
 
+    # rclone rc --addr accepts unix:/path or host:port — pass through as-is
     if rclone rc --addr "${rc_addr}" refresh on=mounts &>/dev/null; then
         info "Refreshed '${remote}' at ${rc_addr}"
     else
