@@ -26,3 +26,10 @@ for remote in $(yq '.mounts | keys | .[]' "${CONFIG}" 2>/dev/null); do
         launchctl kickstart -k "gui/$(id -u)/${label}" 2>/dev/null || true
     fi
 done
+
+# Refresh directory listings on all RC-enabled mounts so they pick up remote
+# file changes without waiting for dir_cache_time to expire.
+if [[ -x "${RCLONE_MOUNTS}" ]]; then
+    echo "→ rclone-mounts: refreshing RC mount listings…"
+    "${RCLONE_MOUNTS}" refresh || true
+fi

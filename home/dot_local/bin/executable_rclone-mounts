@@ -11,6 +11,8 @@
 #   rclone-mounts unmount            # stop + unload all mounts
 #   rclone-mounts unmount <remote>   # stop + unload one mount
 #   rclone-mounts remount <remote>   # unmount then mount one remote
+#   rclone-mounts refresh            # rclone rc refresh on mounts (all RC-enabled)
+#   rclone-mounts refresh <remote>   # rclone rc refresh on mounts (one remote)
 #   rclone-mounts status             # show mount status
 #
 # Workflow for adding a new mount:
@@ -223,6 +225,42 @@ PLIST
     info "Generated: ${plist}"
 }
 
+# ── refresh ────────────────────────────────────────────────────────────────────
+
+# Run rclone rc refresh on mounts for one RC-enabled remote.
+_refresh_one() {
+    local remote="$1"
+    local rc_addr; rc_addr=$(get_opt "${remote}" rc_addr "localhost:5572")
+
+    if rclone rc --addr "${rc_addr}" refresh on=mounts &>/dev/null; then
+        info "Refreshed '${remote}' at ${rc_addr}"
+    else
+        warn "RC refresh failed for '${remote}' at ${rc_addr} (may not be running)"
+    fi
+}
+
+cmd_refresh() {
+    local target="${1:-}"
+    if [[ -n "${target}" ]]; then
+        local rc_enabled
+        rc_enabled=$(get_opt "${target}" rc "false")
+        if [[ "${rc_enabled}" != "true" ]]; then
+            err "'${target}' does not have rc enabled; skipping."
+            return 1
+        fi
+        _refresh_one "${target}"
+    else
+        local failed=0
+        for remote in $(remote_names); do
+            local rc_enabled; rc_enabled=$(get_opt "${remote}" rc "false")
+            if [[ "${rc_enabled}" = "true" ]]; then
+                _refresh_one "${remote}" || failed=1
+            fi
+        done
+        [[ "${failed}" -eq 0 ]] || { warn "One or more refreshes failed."; return 1; }
+    fi
+}
+
 # ── mount ──────────────────────────────────────────────────────────────────────
 
 cmd_mount() {
@@ -343,6 +381,7 @@ Commands:
   mount                 Load and start all configured mounts
   unmount [remote]      Stop all mounts, or a single named remote
   remount <remote>      Unmount, regenerate, and remount one remote
+  refresh [remote]      rclone rc refresh on mounts (all RC-enabled, or one)
   status                Show mount status for all configured remotes
 
 Config: ${MOUNTS_CONFIG}
@@ -360,6 +399,7 @@ main() {
         mount)              cmd_mount ;;
         unmount)            cmd_unmount "${2:-}" ;;
         remount)            cmd_remount "${2:-}" ;;
+        refresh)            cmd_refresh "${2:-}" ;;
         status)             cmd_status ;;
         help|--help|-h|"")  usage ;;
         *) err "Unknown command: ${cmd}"; usage; exit 1 ;;
