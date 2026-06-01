@@ -68,6 +68,14 @@ export GH_NO_UPDATE_NOTIFIER=1
 export PI_SKIP_VERSION_CHECK=1
 export PI_OFFLINE=1
 
+# Supply-chain security: every shell starts with a fresh "N days ago" cutoff.
+# npm/pnpm honor $npm_config_before; uv honors $UV_EXCLUDE_NEWER.
+zmodload zsh/datetime
+strftime -s _sc_cutoff '%Y-%m-%d' $(( EPOCHSECONDS - {{ .supplyChainDelayDays }} * 86400 ))
+export npm_config_before="$_sc_cutoff"
+export UV_EXCLUDE_NEWER="$_sc_cutoff"
+unset _sc_cutoff
+
 export LESS="-FRX"
 export AWS_PAGER=""
 
