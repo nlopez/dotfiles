@@ -1,7 +1,16 @@
-{{- /* zprofile runs once per login shell, before zshrc. PATH and shell-env
-       exports live here so non-interactive subshells (scripts, editor
-       subprocesses) inherit them too. Interactive-only setup (aliases, plugins,
+{{- /* zprofile runs once per login shell, before zshrc. PATH and env
+       exports live here. Interactive-only setup (aliases, plugins,
        prompts, zle bindings) stays in zshrc. */ -}}
+
+typeset -U path
+
+export COLORTERM=truecolor
+{{- if .work }}
+
+# Pi MCP adapter: Slack's pre-registered OAuth app expects callbacks on port
+# 3118 (matching the Claude Code Slack app redirect URI).
+export MCP_OAUTH_CALLBACK_PORT=3118
+{{- end }}
 
 {{- $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
 {{- $foundBrewPrefix := "" -}}
@@ -11,10 +20,23 @@
   {{- end -}}
 {{- end }}
 {{- if $foundBrewPrefix }}
+
 fpath+=("{{ $foundBrewPrefix }}/share/zsh/site-functions")
 eval "$({{ $foundBrewPrefix }}/bin/brew shellenv)"
 {{ end }}
-{{- $homeDir := .chezmoi.homeDir -}}
+{{- if eq .chezmoi.os "darwin" }}
+# Prepend GNU tool gnubin directories so GNU utils win over BSD/macOS system
+# tools. Driven by the gnu_tools list in .chezmoidata/darwin/packages.yaml.
+# HOMEBREW_PREFIX is set above by brew shellenv.
+path=(
+{{- range .packages.darwin.gnu_tools }}
+    "${HOMEBREW_PREFIX}/opt/{{ . }}/libexec/gnubin"
+{{- end }}
+    $path
+)
+{{- end }}
+{{- $homeDir := .chezmoi.homeDir }}
+
 # Dynamic PATH additions — checked at every login/reload, so new tool
 # installations (cargo, go, etc.) show up without needing chezmoi apply.
 for _d in \
