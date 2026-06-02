@@ -16,12 +16,13 @@
 #   --personal   Provision the 'personal' Connect token
 #   --work       Provision the 'work' Connect token
 #   --apply      Run 'chezmoi init --apply nlopez' after storing the token
-#   --headless   Export token as OP_CONNECT_TOKEN instead of writing to Keychain
+#   --headless   Skip Keychain; export OP_CONNECT_TOKEN for the current session only
 
 set -euo pipefail
 
 KEYCHAIN_SERVICE="chezmoi-op-connect"
 KEYCHAIN_ACCOUNT="token"
+CONNECT_HOST="https://onepassword-connect.macaroni-pirate.ts.net"
 CONNECT_SERVER="k8s_home"
 CONNECT_VAULT="evjh25ux2mnoufaut6qhvm2pdi"
 TOKEN_EXPIRY="7d"
@@ -104,7 +105,7 @@ print(active[0]['id'] if active else '', end='')
 fi
 
 # ── 4. Persist ────────────────────────────────────────────────────────────────
-if command -v security &>/dev/null; then
+if [[ "$HEADLESS" == false ]] && command -v security &>/dev/null; then
   security delete-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_ACCOUNT" 2>/dev/null || true
   security add-generic-password \
     -s "$KEYCHAIN_SERVICE" \
@@ -114,9 +115,11 @@ if command -v security &>/dev/null; then
   info "Token stored in macOS Keychain."
 fi
 
-if [[ "$HEADLESS" == true ]]; then
-  export OP_CONNECT_TOKEN="$TOKEN"
-fi
+# Always export for the current process tree — chezmoi init --apply runs as a
+# child of this script and needs OP_CONNECT_* in the OS env before ~/.zprofile
+# has been applied (Keychain alone is not enough on the first run).
+export OP_CONNECT_HOST="$CONNECT_HOST"
+export OP_CONNECT_TOKEN="$TOKEN"
 
 # ── 5. Run chezmoi ────────────────────────────────────────────────────────────
 if [[ "$APPLY" == true ]]; then
