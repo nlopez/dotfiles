@@ -36,6 +36,7 @@ packages:
           - htop
           - kubectl
           - ripgrep
+          - gawk
           - rustup
           - ryooooooga/tap/zabrze
           - tmux
