@@ -58,6 +58,24 @@ _source ~/.zshrc_local
 
 {{- if lookPath "zabrze" }}
 _cached_eval zabrze zabrze init --bind-keys
+# groot: after zabrze expands 'groot' → '"$(git rev-parse --show-toplevel)"',
+# this hook immediately evaluates it and replaces it with the actual path so
+# the buffer shows the resolved path, not the shell-expansion expression.
+function _groot_inline_expand() {
+  local pattern='"$(git rev-parse --show-toplevel)"'
+  [[ "$BUFFER" == *"$pattern"* ]] || return
+  local root
+  root=$(git rev-parse --show-toplevel 2>/dev/null) || return
+  local quoted=${(q)root}
+  local before="${BUFFER%%"$pattern"*}"
+  BUFFER="${BUFFER//"$pattern"/$quoted}"
+  CURSOR=$(( ${#before} + ${#quoted} ))
+  # zsh-syntax-highlighting registers its zle-line-pre-redraw hook before ours
+  # (OMZ loads at line 22, our hook at line ~62), so its highlights are already
+  # stale by the time we swap the buffer. Re-run it now with the new buffer.
+  (( ${+functions[_zsh_highlight]} )) && _zsh_highlight
+}
+add-zle-hook-widget zle-line-pre-redraw _groot_inline_expand
 {{- end }}
 _cached_eval atuin  atuin init zsh
 
