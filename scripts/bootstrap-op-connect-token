@@ -1,86 +1,127 @@
 #!/usr/bin/env bash
-# bootstrap-op-connect-token — fetch 1Password Connect token, store in Keychain, run chezmoi init.
+# bootstrap-op-connect-token — provision a 1Password Connect token for this machine,
+# store it in Keychain, and optionally run chezmoi init.
 #
-# macOS: token goes to Keychain, ~/.zprofile reads it at login (never on disk).
-# Headless: token passed directly via OP_CONNECT_TOKEN env var.
+# Token lifecycle (all via account-mode op, Connect env vars unset):
+#   Keychain hit                       → reuse (fast path)
+#   Active token in Connect + no Keychain → revoke old, create fresh 7-day token
+#   No active token                    → create fresh 7-day token
 #
-# Usage: bootstrap-op-connect-token [--apply] [--headless]
+# macOS:    token stored in Keychain; ~/.zprofile reads it at login (never on disk).
+# Headless: token exported as OP_CONNECT_TOKEN for the current session.
 #
-#   bootstrap-op-connect-token --apply           # macOS: store in Keychain then init
-#   bootstrap-op-connect-token --apply --headless # Linux/cloud: export token, then init
+# Usage:
+#   bootstrap-op-connect-token (--personal | --work) [--apply] [--headless]
+#
+#   --personal   Provision the 'personal' Connect token
+#   --work       Provision the 'work' Connect token
+#   --apply      Run 'chezmoi init --apply nlopez' after storing the token
+#   --headless   Export token as OP_CONNECT_TOKEN instead of writing to Keychain
 
 set -euo pipefail
 
-SERVICE="chezmoi-op-connect"
-ACCOUNT="token"
+KEYCHAIN_SERVICE="chezmoi-op-connect"
+KEYCHAIN_ACCOUNT="token"
+CONNECT_SERVER="k8s_home"
+CONNECT_VAULT="evjh25ux2mnoufaut6qhvm2pdi"
+TOKEN_EXPIRY="7d"
+OP_ACCOUNT_HOST="my.1password.com"
 
-info()  { printf "✓  %s\n" "$*"; }
-warn()  { printf "ℹ  %s\n" "$*" >&2; }
-err()   { printf "❌ %s\n" "$*" >&2; exit 1; }
+info() { printf "✓  %s\n" "$*"; }
+warn() { printf "ℹ  %s\n" "$*" >&2; }
+err()  { printf "❌ %s\n" "$*" >&2; exit 1; }
 
-# ── 1. Get the token ──────────────────────────────────────────────────────
-get_token() {
-  local token
+# ── Arg parsing ───────────────────────────────────────────────────────────────
+TOKEN_NAME=""
+HEADLESS=false
+APPLY=false
 
-  # Try Keychain first (macOS)
-  token="$(security find-generic-password -s "$SERVICE" -a "$ACCOUNT" -w 2>/dev/null)" || true
+for arg in "$@"; do
+  case "$arg" in
+    --personal) TOKEN_NAME="personal" ;;
+    --work)     TOKEN_NAME="work"     ;;
+    --headless) HEADLESS=true         ;;
+    --apply)    APPLY=true            ;;
+    *) err "Unknown argument: $arg"   ;;
+  esac
+done
 
-  if [[ -n "$token" ]]; then
-    info "Token loaded from macOS Keychain."
-    echo "$token"
-    return 0
-  fi
+[[ -n "$TOKEN_NAME" ]] || err "Must specify --personal or --work."
 
-  # Fallback: read from 1Password account mode
-  if ! command -v op &>/dev/null; then
-    err "1Password CLI (op) not found in PATH."
-  fi
+# ── Preflight ─────────────────────────────────────────────────────────────────
+command -v op &>/dev/null \
+  || err "1Password CLI (op) not found. Install it: https://1password.com/downloads/command-line/"
 
-  # Must unset OP_CONNECT_HOST/TOKEN so op uses account mode (not Connect mode).
-  # This is needed because the generated .zprofile exports OP_CONNECT_TOKEN,
-  # which would make 'op' switch to Connect mode and lose access to the Private vault.
-  token="$(unset OP_CONNECT_HOST OP_CONNECT_TOKEN; op read op://Private/OP_CONNECT_TOKEN/credential --no-newline 2>/dev/null)" || true
+# Always invoke op in account mode — never Connect mode.
+op_acct() { env -u OP_CONNECT_HOST -u OP_CONNECT_TOKEN OP_ACCOUNT="$OP_ACCOUNT_HOST" op "$@"; }
 
-  if [[ -z "$token" ]]; then
-    err "Could not read token from op://Private/OP_CONNECT_TOKEN/credential"
-  fi
+op_acct account get &>/dev/null \
+  || err "Not signed in to 1Password ($OP_ACCOUNT_HOST). Run: op signin --account $OP_ACCOUNT_HOST"
 
-  info "Token read from 1Password — will be saved to Keychain."
-  echo "$token"
-}
-
-TOKEN="$(get_token)"
-
-# ── 2. Save to Keychain (macOS) ───────────────────────────────────────────
-# Only run if 'security' is available (macOS).
+# ── 1. Keychain fast path ─────────────────────────────────────────────────────
+TOKEN=""
 if command -v security &>/dev/null; then
-  security delete-generic-password -s "$SERVICE" -a "$ACCOUNT" 2>/dev/null || true
+  TOKEN=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_ACCOUNT" -w 2>/dev/null) || true
+fi
 
+if [[ -n "$TOKEN" ]]; then
+  info "Token loaded from macOS Keychain."
+else
+  # ── 2. Check Connect for an existing active token ─────────────────────────
+  # The JWT is only available at creation time — if it is not in Keychain it is
+  # unrecoverable. Revoke any active stale entry so the list stays clean, then
+  # create a new one.
+  existing_id=$(
+    op_acct connect token list --format json \
+      | python3 -c "
+import json, sys
+tokens = json.load(sys.stdin)
+name = sys.argv[1]
+active = sorted(
+    [t for t in tokens if t['name'] == name and t['state'] == 'ACTIVE'],
+    key=lambda t: t.get('created_at', ''),
+    reverse=True,
+)
+print(active[0]['id'] if active else '', end='')
+" "$TOKEN_NAME"
+  ) || true
+
+  if [[ -n "$existing_id" ]]; then
+    warn "Active '$TOKEN_NAME' token (id: $existing_id) found but not in Keychain — revoking."
+    op_acct connect token delete "$existing_id"
+    info "Stale token revoked."
+  fi
+
+  # ── 3. Create a fresh token ───────────────────────────────────────────────
+  info "Creating '$TOKEN_NAME' Connect token (expires in ${TOKEN_EXPIRY})…"
+  TOKEN=$(op_acct connect token create "$TOKEN_NAME" \
+    --server     "$CONNECT_SERVER" \
+    --vault      "$CONNECT_VAULT"  \
+    --expires-in "$TOKEN_EXPIRY")
+
+  [[ -n "$TOKEN" ]] || err "op connect token create returned an empty value."
+  info "Token created."
+fi
+
+# ── 4. Persist ────────────────────────────────────────────────────────────────
+if command -v security &>/dev/null; then
+  security delete-generic-password -s "$KEYCHAIN_SERVICE" -a "$KEYCHAIN_ACCOUNT" 2>/dev/null || true
   security add-generic-password \
-    -s "$SERVICE" \
-    -a "$ACCOUNT" \
-    -w "$TOKEN" \
+    -s "$KEYCHAIN_SERVICE" \
+    -a "$KEYCHAIN_ACCOUNT" \
+    -w "$TOKEN"            \
     -l "Chezmoi – 1Password Connect Token"
-
   info "Token stored in macOS Keychain."
 fi
 
-# ── 3. Run chezmoi ────────────────────────────────────────────────────────
-HEADLESS=false
-APPLY=false
-for arg in "$@"; do
-  [[ "$arg" == "--headless" ]] && HEADLESS=true
-  [[ "$arg" == "--apply" ]] && APPLY=true
-done
-
 if [[ "$HEADLESS" == true ]]; then
-  # On headless systems there's no Keychain — export the token for this session.
   export OP_CONNECT_TOKEN="$TOKEN"
 fi
 
+# ── 5. Run chezmoi ────────────────────────────────────────────────────────────
 if [[ "$APPLY" == true ]]; then
   echo ""
-  info "Running chezmoi init --apply …"
+  info "Running chezmoi init --apply…"
   chezmoi init --apply nlopez
   info "Done! chezmoi is bootstrapped."
 else
