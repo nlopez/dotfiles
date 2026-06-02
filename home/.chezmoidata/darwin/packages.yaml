@@ -74,6 +74,7 @@ packages:
           - kubectx
           - kubernetes-cli
         personal:
+          - doctl
           - ffmpeg
           - yt-dlp
           - oxipng
@@ -89,6 +90,8 @@ packages:
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:
         base:
+          - sublime-text
+          - sublime-merge
           - podman-desktop
           - copyq
           - cursor
