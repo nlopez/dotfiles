@@ -13,6 +13,11 @@ export COLORTERM=truecolor
 export OP_CONNECT_HOST="https://onepassword-connect.macaroni-pirate.ts.net"
 export OP_CONNECT_TOKEN=$(security find-generic-password -s chezmoi-op-connect -a token -w 2>/dev/null)
 {{- if .work }}
+export OP_ACCOUNT=datadog.1password.com
+{{- else }}
+export OP_ACCOUNT=my1.password.com
+{{- end }}
+{{- if .work }}
 
 # Pi MCP adapter: Slack's pre-registered OAuth app expects callbacks on port
 # 3118 (matching the Claude Code Slack app redirect URI).
