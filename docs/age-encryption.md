@@ -11,18 +11,6 @@ This repo uses [age](https://age-encryption.org/) with hybrid ML-KEM-768 + X2551
 
 ## Initial setup on a new machine (one-time)
 
-Before working with age-encrypted secrets, bootstrap the 1Password Connect token:
-
-```sh
-# macOS
-scripts/bootstrap-op-connect-token --apply
-# Headless
-scripts/bootstrap-op-connect-token --apply --headless
-```
-
-This sets up `OP_CONNECT_TOKEN` so `chezmoi` can read secrets from 1Password Connect.
-See [README.md](../README.md#1password-connect) for details.
-
 ```sh
 # 1. Generate a post-quantum keypair (do this once per machine class, not per machine).
 age-keygen -pq -o /tmp/age-key.txt          # prints age1pq1... public key to stderr
