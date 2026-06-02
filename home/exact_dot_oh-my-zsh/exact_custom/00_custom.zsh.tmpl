@@ -39,7 +39,7 @@ function reload {
 ###############################################################################
 _aws_profile_fzf() {
   # Only activate when the command on the line starts with `aws`.
-  [[ "$BUFFER" != aws\ * ]] && { zle expand-or-complete; return }
+  [[ "$BUFFER" != aws\ * ]] && { zle fzf-tab-complete; return }
 
   # When Tab is pressed mid-word, zsh may have split the buffer so that the
   # partial word sits in RBUFFER. Reconstruct the full left context by appending
@@ -50,7 +50,7 @@ _aws_profile_fzf() {
 
   # Only activate when the cursor is directly after --profile or -p (with optional partial).
   if [[ ! "$full_left" =~ '(--profile[[:space:]]+|--profile=|-p[[:space:]]+)([-a-zA-Z0-9_.]*)$' ]]; then
-    zle expand-or-complete
+    zle fzf-tab-complete
     return
   fi
 
@@ -60,12 +60,12 @@ _aws_profile_fzf() {
   local lbuffer_base="${LBUFFER%${query}}"
 
   local config="${AWS_CONFIG_FILE:-$HOME/.aws/config}"
-  [[ -f "$config" ]] || { zle expand-or-complete; return }
+  [[ -f "$config" ]] || { zle fzf-tab-complete; return }
 
   local profiles
   profiles=$(grep -E '^\[(profile [^]]+|default)\]' "$config" \
     | sed -E 's/^\[profile ([^]]+)\]$/\1/; s/^\[default\]$/default/')
-  [[ -z "$profiles" ]] && { zle expand-or-complete; return }
+  [[ -z "$profiles" ]] && { zle fzf-tab-complete; return }
 
   local aws_bin
   aws_bin=$(whence -p aws)
