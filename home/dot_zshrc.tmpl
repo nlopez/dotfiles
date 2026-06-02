@@ -40,24 +40,11 @@ function _command() {
   command -v $1 >/dev/null 2>&1
 }
 
-# Cache the output of slow shell-init binaries; regenerate when the binary changes.
-function _cached_eval() {
-  local name="$1"; shift
-  local cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/${name}.zsh"
-  local bin
-  bin=$(command -v "$1" 2>/dev/null)
-  if [[ -n "$bin" && (! -f "$cache" || "$bin" -nt "$cache") ]]; then
-    mkdir -p "${cache:h}"
-    "$@" > "$cache" 2>/dev/null
-  fi
-  [[ -f "$cache" ]] && source "$cache"
-}
-
 # shellcheck source=~/.zshrc_local
 _source ~/.zshrc_local
 
 {{- if lookPath "zabrze" }}
-_cached_eval zabrze zabrze init --bind-keys
+eval "$(zabrze init --bind-keys)"
 # groot: after zabrze expands 'groot' → '"$(git rev-parse --show-toplevel)"',
 # this hook immediately evaluates it and replaces it with the actual path so
 # the buffer shows the resolved path, not the shell-expansion expression.
@@ -77,7 +64,7 @@ function _groot_inline_expand() {
 }
 add-zle-hook-widget zle-line-pre-redraw _groot_inline_expand
 {{- end }}
-_cached_eval atuin  atuin init zsh
+eval "$(atuin init zsh)"
 
 # Prevent pasted newlines from ever executing a command.
 # bracketed-paste-magic intercepts terminal paste events, converts embedded
@@ -244,4 +231,4 @@ function _aws_profile_prompt() {
 add-zle-hook-widget zle-line-pre-redraw _aws_profile_prompt
 
 ###############################################################################
-_cached_eval zoxide zoxide init zsh
+eval "$(zoxide init zsh)"
