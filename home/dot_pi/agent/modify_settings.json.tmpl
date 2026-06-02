@@ -38,14 +38,20 @@ current.pop("defaultProvider", None)
 # not the realpath inside .pnpm/. npm hoists by default.
 current["npmCommand"] = ["npm"]
 
-# Hardware cursor — enabled on startup; cursor-manager extension handles focus.
+# Hardware cursor — enabled on startup.
 current["showHardwareCursor"] = True
 
 # Declarative package list — exactly and only these packages.
 # Source of truth: home/.chezmoidata/pi.yaml
+# personal_only_packages are excluded on work machines.
 current["packages"] = [
 {{- range .pi.packages }}
     "{{ . }}",
+{{- end }}
+{{- if not .work }}
+{{- range .pi.personal_only_packages }}
+    "{{ . }}",
+{{- end }}
 {{- end }}
 ]
 

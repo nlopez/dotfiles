@@ -6,6 +6,7 @@ the correct package.json and running `npm install` to reconcile.
 
 Hash trigger (chezmoi run_onchange):
 {{ .pi.packages | toJson | sha256sum }}
+{{ .pi.personal_only_packages | toJson | sha256sum }}
 """
 import json
 import os
@@ -13,9 +14,15 @@ import subprocess
 import sys
 
 # Declared packages (injected by chezmoi template from .chezmoidata/pi.yaml).
+# personal_only_packages are excluded on work machines.
 DECLARED = [
 {{- range .pi.packages }}
     "{{ . }}",
+{{- end }}
+{{- if not .work }}
+{{- range .pi.personal_only_packages }}
+    "{{ . }}",
+{{- end }}
 {{- end }}
 ]
 
