@@ -105,10 +105,3 @@ export AWS_VAULT_KEYCHAIN_NAME=login
 # Set on all machines — Automation vault (Kagi API)
 export KAGI_API_KEY={{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/6neql3vd2izldv7jeosqaip7ci/credential" "my.1password.com" }}
 
-{{- if .personal }}
-# Automation vault copies of personal secrets
-export HF_TOKEN={{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/rngar3p7k7q7uki2wrhmx4eb3e/credential" "my.1password.com" }}         {{/* HF_TOKEN */}}
-export LITELLM_MASTER_KEY={{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/xoqaw73st2w4ex4mtsznjxvlmm/credential" "my.1password.com" }} {{/* LITELLM_MASTER_KEY */}}
-export EXA_API_KEY={{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ewodbmg4fwi5xinurtbqhlyppi/credential" "my.1password.com" }}         {{/* exa.ai */}}
-export FIRECRAWL_API_KEY={{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/p3anui7eugzdxy3w7lmwbpq2sm/credential" "my.1password.com" }}   {{/* Firecrawl API Token */}}
-{{- end }}
