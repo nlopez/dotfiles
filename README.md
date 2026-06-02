@@ -10,35 +10,45 @@ All secrets are read via a self-hosted [1Password Connect](https://developer.1pa
 server reachable over Tailscale at `onepassword-connect.macaroni-pirate.ts.net`. The Connect
 token is scoped to the `Automation` vault, where all chezmoi-managed secrets live.
 
-chezmoi is configured with `onepassword.mode = "connect"`. The `OP_CONNECT_HOST` and
-`OP_CONNECT_TOKEN` environment variables must be set before chezmoi can read any secrets.
+chezmoi is configured with `onepassword.mode = "connect"`.
+On macOS, `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` are set by `~/.zprofile` at login —
+`OP_CONNECT_TOKEN` is fetched from Keychain at runtime so it never appears in any
+chezmoi-managed file. On headless machines they are set via the bootstrap command.
 
 ### Bootstrap (first run on any machine)
 
 The Connect token lives in the **Private** vault and must be fetched using account-mode `op`
-(not Connect mode). Pass it directly to `chezmoi init` via `--promptString` so no interactive
-TTY prompt is needed:
+(not Connect mode). Use the included bootstrap script:
 
 ```bash
-export OP_CONNECT_HOST="https://onepassword-connect.macaroni-pirate.ts.net"
-chezmoi init --promptString opConnectToken="$(unset OP_CONNECT_HOST OP_CONNECT_TOKEN; op read op://bamv726zv6zbcfke3cnbwjtnuu/lshy7xejhopza2xq6qpjqlcw5y/credential --no-newline)" --apply nlopez
+~/.local/bin/bootstrap-op-connect-token --apply
 ```
 
-The `unset` subshell is required because `OP_CONNECT_TOKEN` is exported by the generated shell
-profile — without it, `op` switches to Connect mode and cannot reach the Private vault.
-After `chezmoi apply` completes, the shell profile exports both variables automatically on
-every login, so subsequent `chezmoi apply` runs need no manual setup.
+This fetches the token from `op://Private/OP_CONNECT_TOKEN/credential` (unsetting
+`OP_CONNECT_HOST`/`OP_CONNECT_TOKEN` so `op` uses account mode), stores it in macOS
+Keychain, then runs `chezmoi init --apply nlopez`.
 
-For **headless machines**, the same command works. Pre-set `OP_CONNECT_HOST` in the system
-environment if preferred (e.g. `/etc/environment`, cloud-init user-data, or a systemd drop-in).
+For headless machines:
+
+```bash
+~/.local/bin/bootstrap-op-connect-token --apply --headless
+```
+
+On subsequent logins `~/.zprofile` fetches the token from Keychain at runtime — the secret
+never appears in any chezmoi-managed file.
 
 ### Notes
 
+- On macOS, `~/.zprofile` contains a `security` command that reads the token from Keychain
+  at shell login time. The token is in the OS environment only while you're logged in — it
+  is never written to disk in any chezmoi file.
 - The Connect server is only reachable via Tailscale. Tailscale must be running before
   `chezmoi init` or `chezmoi apply` on any machine.
+- The `unset` subshell is required because `OP_CONNECT_TOKEN` is exported by the generated
+  shell profile — without it, `op` switches to Connect mode and cannot reach the Private vault.
 - **Work machines:** the age encryption key is not in the Automation vault. `fetch-age-key.sh`
   will warn and skip gracefully; encrypted source files will not be decryptable until the age
   identity is provisioned separately.
-- To rotate the Connect token: update item `lshy7xejhopza2xq6qpjqlcw5y` in the Private vault,
-  then re-run the bootstrap command on each machine (or manually update `opConnectToken` in
-  `~/.config/chezmoi/chezmoi.toml` and `[scriptEnv] OP_CONNECT_TOKEN`).
+- **Token rotation:** update the token in the Private vault, then re-run the bootstrap script
+  on each machine. On macOS the new token overwrites the Keychain entry; on Linux `--headless`
+  exports the new token directly.

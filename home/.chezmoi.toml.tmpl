@@ -2,7 +2,7 @@
 {{- $personal        := promptBoolOnce   . "personal"        "Is this a personal machine?"    -}}
 {{- $work            := promptBoolOnce   . "work"            "Is this a work machine?"        -}}
 {{- $headless        := promptBoolOnce   . "headless"        "Is this a headless machine?"    -}}
-{{- $opConnectToken  := promptStringOnce . "opConnectToken"  "1Password Connect token"        -}}
+
 
 {{- $ephemeral := false -}}{{/* true if this machine is ephemeral, e.g.: a cloud or VM instance */}}
 
@@ -41,14 +41,8 @@ useBuiltinAge = false
   mode = "connect"
 
 # Environment variables passed to all scripts and hooks.
-# OP_CONNECT_HOST/TOKEN are also read by chezmoi's own onepasswordRead template
-# function calls; export them in dot_zprofile so they are in the OS environment
-# for subsequent chezmoi runs.
-[scriptEnv]
-  OP_CONNECT_HOST  = "https://onepassword-connect.macaroni-pirate.ts.net"
-  OP_CONNECT_TOKEN = {{ $opConnectToken | quote }}
+# age-key — Automation vault copy of Private/age-key
 {{- if $personal }}
-  # age-key — Automation vault copy of Private/age-key
   AGE_KEY_OP_URI   = "op://evjh25ux2mnoufaut6qhvm2pdi/xrueqtieq2hj6qydr5m3urcoey/private-key"
 {{- end }}
   # work: AGE_KEY_OP_URI intentionally unset — fetch-age-key.sh skips gracefully
@@ -80,5 +74,3 @@ zshPlugins = [
   "zsh-syntax-highlighting",
   "pure",
 ]
-
-

@@ -6,10 +6,12 @@ typeset -U path
 
 export COLORTERM=truecolor
 
-# 1Password Connect — set here so chezmoi's own onepasswordRead calls work
-# on subsequent runs (scriptEnv covers hooks; the OS env covers template fns).
+# 1Password Connect — OP_CONNECT_HOST is a URL (not a secret).
+# OP_CONNECT_TOKEN is fetched from Keychain at login so it never appears
+# in any chezmoi-managed file. chezmoi's onepasswordRead reads it from the
+# OS env during apply.
 export OP_CONNECT_HOST="https://onepassword-connect.macaroni-pirate.ts.net"
-export OP_CONNECT_TOKEN="{{ .opConnectToken }}"
+export OP_CONNECT_TOKEN=$(security find-generic-password -s chezmoi-op-connect -a token -w 2>/dev/null)
 {{- if .work }}
 
 # Pi MCP adapter: Slack's pre-registered OAuth app expects callbacks on port
