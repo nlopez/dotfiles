@@ -52,7 +52,8 @@ packages:
           - rustup
           - node
           - pnpm
-        personal: []
+        personal:
+          - doctl
         work: []
       casks:
         base:
