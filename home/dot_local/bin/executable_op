@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Shim: unsets OP_CONNECT_HOST / OP_CONNECT_TOKEN before calling the real `op`.
+# Prevents the 1Password CLI from accidentally entering Connect mode.
+#
+# The 1Password CLI checks these env vars at startup.  If either is set it
+# switches to Connect mode and talks to the Connect server instead of the
+# local agent / account-mode token.  This shim ensures they are always
+# cleared so the real `op` binary always uses account-mode (Keychain).
+
+# Strip this shim's directory from PATH so `command -v` finds the real binary.
+_shim_dir="$(cd "$(dirname "$0")" && pwd)"
+_clean_path="$(printf '%s' "$PATH" | tr ':' '\n' | grep -vxF "$_shim_dir" | tr '\n' ':' | sed 's/:$//')"
+_real="$(PATH="$_clean_path" command -v op 2>/dev/null)"
+
+if [[ -z "$_real" ]]; then
+  echo "op shim: could not locate real op binary" >&2
+  exit 1
+fi
+
+# Unset Connect env vars so op always uses the local 1Password agent.
+unset OP_CONNECT_HOST
+unset OP_CONNECT_TOKEN
+
+exec "$_real" "$@"
