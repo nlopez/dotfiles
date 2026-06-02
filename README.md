@@ -18,21 +18,24 @@ chezmoi-managed file. On headless machines they are set via the bootstrap comman
 ### Bootstrap (first run on any machine)
 
 The Connect token lives in the **Private** vault and must be fetched using account-mode `op`
-(not Connect mode). Use the included bootstrap script:
+(not Connect mode). Use the bootstrap script at `scripts/bootstrap-op-connect-token`:
 
 ```bash
-~/.local/bin/bootstrap-op-connect-token --apply
+# macOS — fetches token from 1Password account mode, stores it in Keychain, then initializes chezmoi:
+scripts/bootstrap-op-connect-token --apply
+
+# Headless (Linux / cloud VM) — no Keychain available; token is exported for the session:
+scripts/bootstrap-op-connect-token --apply --headless
 ```
 
-This fetches the token from `op://Private/OP_CONNECT_TOKEN/credential` (unsetting
-`OP_CONNECT_HOST`/`OP_CONNECT_TOKEN` so `op` uses account mode), stores it in macOS
-Keychain, then runs `chezmoi init --apply nlopez`.
+The script:
 
-For headless machines:
-
-```bash
-~/.local/bin/bootstrap-op-connect-token --apply --headless
-```
+1. Checks Keychain first (macOS). If the token already exists, uses it.
+2. Otherwise falls back to `op read op://Private/OP_CONNECT_TOKEN/credential` (unsetting
+   `OP_CONNECT_HOST`/`OP_CONNECT_TOKEN` so `op` uses account mode).
+3. On macOS, stores the token in Keychain for runtime fetch by `~/.zprofile`.
+4. On headless systems, exports `OP_CONNECT_TOKEN` for the current session.
+5. With `--apply`, runs `chezmoi init --apply nlopez` automatically.
 
 On subsequent logins `~/.zprofile` fetches the token from Keychain at runtime — the secret
 never appears in any chezmoi-managed file.
@@ -49,6 +52,6 @@ never appears in any chezmoi-managed file.
 - **Work machines:** the age encryption key is not in the Automation vault. `fetch-age-key.sh`
   will warn and skip gracefully; encrypted source files will not be decryptable until the age
   identity is provisioned separately.
-- **Token rotation:** update the token in the Private vault, then re-run the bootstrap script
-  on each machine. On macOS the new token overwrites the Keychain entry; on Linux `--headless`
-  exports the new token directly.
+- **Token rotation:** update the token in the Private vault, then re-run
+  `scripts/bootstrap-op-connect-token --apply` on each machine. On macOS the new token
+  overwrites the Keychain entry; on Linux `--headless` exports the new token directly.
