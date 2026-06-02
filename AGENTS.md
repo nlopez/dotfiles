@@ -49,8 +49,7 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 │   ├── tools-and-validation.md    # Linting, Pi plugins, validation
 │   └── quick-reference.md         # Commands, repo navigation, path disambiguation
 ├── home/                          # Chezmoi source tree (see .chezmoiroot)
-│   ├── run_after_*.sh             # Post-apply scripts (run after all files updated)
-│   └── .chezmoiscripts/           # One-time / idempotent setup scripts (pkg install, etc.)
+│   └── .chezmoiscripts/           # Post-apply and setup scripts
 ├── scripts/                       # Project scripts (linting, not chezmoi-managed)
 └── .chezmoiroot                   # Value: home
 ```
@@ -59,17 +58,25 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 
 Chezmoi supports three script patterns — use the right one for your use case:
 
-### `run_after_` scripts — run after every `chezmoi apply`
+### `.chezmoiscripts/` — post-apply and setup scripts
 
-Files in the source tree (at the `home/` level when `.chezmoiroot = home`) with the `run_after_` prefix execute **after all dotfiles have been updated**. They are used for actions that must run post-apply: reloading daemons, sourcing configs, etc.
+Place scripts in `home/.chezmoiscripts/`. The top-level scripts (non-platform-specific) go directly in the directory; platform-specific ones go in `darwin/` or `linux/` subdirectories.
+
+| Prefix                 | When it runs                                                 |
+| ---------------------- | ------------------------------------------------------------ |
+| `run_after_*`          | After all dotfiles have been updated (every `chezmoi apply`) |
+| `run_onchange_after_*` | After all dotfiles updated, only if script content changed   |
+| `run_once_after_*`     | Only the first time (tracked by SHA256)                      |
 
 ```sh
-home/run_after_source-tmux.sh   # Reloads tmux after tmux.conf is updated
+home/.chezmoiscripts/run_after_reload-tmux.sh       # Reloads tmux every apply
+home/.chezmoiscripts/run_onchange_after_pnpm-globals.py.tmpl  # Platform-specific, only on change
+home/.chezmoiscripts/run_once_after_install-iosevka-nf-fonts.sh.tmpl  # One-time install
 ```
 
 - No executable bit needed — chezmoi handles this internally.
 - Must include a `#!` shebang (chezmoi executes them via `exec(3)`).
-- Must be idempotent (runs every `chezmoi apply`).
+- Must be idempotent.
 - Tracked by git, **not** added via `chezmoi add` (source tree is protected).
 
 ### `.chezmoiscripts/` — one-time setup and package installation
