@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# bootstrap-op-connect-token — fetch 1Password Connect token, store in Keychain, run chezmoi init.
+#
+# macOS: token goes to Keychain, ~/.zprofile reads it at login (never on disk).
+# Headless: token passed directly via OP_CONNECT_TOKEN env var.
+#
+# Usage: bootstrap-op-connect-token [--apply] [--headless]
+#
+#   bootstrap-op-connect-token --apply           # macOS: store in Keychain then init
+#   bootstrap-op-connect-token --apply --headless # Linux/cloud: export token, then init
+
+set -euo pipefail
+
+SERVICE="chezmoi-op-connect"
+ACCOUNT="token"
+
+info()  { printf "✓  %s\n" "$*"; }
+warn()  { printf "ℹ  %s\n" "$*" >&2; }
+err()   { printf "❌ %s\n" "$*" >&2; exit 1; }
+
+# ── 1. Get the token ──────────────────────────────────────────────────────
+get_token() {
+  local token
+
+  # Try Keychain first (macOS)
+  token="$(security find-generic-password -s "$SERVICE" -a "$ACCOUNT" -w 2>/dev/null)" || true
+
+  if [[ -n "$token" ]]; then
+    info "Token loaded from macOS Keychain."
+    echo "$token"
+    return 0
+  fi
+
+  # Fallback: read from 1Password account mode
+  if ! command -v op &>/dev/null; then
+    err "1Password CLI (op) not found in PATH."
+  fi
+
+  # Must unset OP_CONNECT_HOST/TOKEN so op uses account mode (not Connect mode).
+  # This is needed because the generated .zprofile exports OP_CONNECT_TOKEN,
+  # which would make 'op' switch to Connect mode and lose access to the Private vault.
+  token="$(unset OP_CONNECT_HOST OP_CONNECT_TOKEN; op read op://Private/OP_CONNECT_TOKEN/credential --no-newline 2>/dev/null)" || true
+
+  if [[ -z "$token" ]]; then
+    err "Could not read token from op://Private/OP_CONNECT_TOKEN/credential"
+  fi
+
+  info "Token read from 1Password — will be saved to Keychain."
+  echo "$token"
+}
+
+TOKEN="$(get_token)"
+
+# ── 2. Save to Keychain (macOS) ───────────────────────────────────────────
+# Only run if 'security' is available (macOS).
+if command -v security &>/dev/null; then
+  security delete-generic-password -s "$SERVICE" -a "$ACCOUNT" 2>/dev/null || true
+
+  security add-generic-password \
+    -s "$SERVICE" \
+    -a "$ACCOUNT" \
+    -w "$TOKEN" \
+    -l "Chezmoi – 1Password Connect Token"
+
+  info "Token stored in macOS Keychain."
+fi
+
+# ── 3. Run chezmoi ────────────────────────────────────────────────────────
+HEADLESS=false
+APPLY=false
+for arg in "$@"; do
+  [[ "$arg" == "--headless" ]] && HEADLESS=true
+  [[ "$arg" == "--apply" ]] && APPLY=true
+done
+
+if [[ "$HEADLESS" == true ]]; then
+  # On headless systems there's no Keychain — export the token for this session.
+  export OP_CONNECT_TOKEN="$TOKEN"
+fi
+
+if [[ "$APPLY" == true ]]; then
+  echo ""
+  info "Running chezmoi init --apply …"
+  chezmoi init --apply nlopez
+  info "Done! chezmoi is bootstrapped."
+else
+  printf "\nTo finish, run:\n    chezmoi init --apply nlopez\n"
+fi

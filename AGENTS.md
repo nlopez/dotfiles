@@ -18,6 +18,49 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -d -b ~/.local/bin -- init <owner>/<repo>
 chezmoi apply
 ```
 
+## 1Password Connect — token bootstrap
+
+All chezmoi secrets are read via 1Password Connect (`onepassword.mode = "connect"`).
+`OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` must be set in the OS environment before
+`chezmoi apply` — they are read by the `onepasswordRead` template function at render time.
+
+**Never write `OP_CONNECT_TOKEN` to disk.** It must never appear in any chezmoi-managed
+file, data file, or generated config.
+
+### First-run bootstrap
+
+Run `scripts/bootstrap-op-connect-token` from the repo root:
+
+```bash
+# macOS: fetches token from account-mode `op`, stores in Keychain, runs chezmoi init
+scripts/bootstrap-op-connect-token --apply
+
+# Headless (Linux / cloud VM): exports token for the session
+scripts/bootstrap-op-connect-token --apply --headless
+```
+
+The script:
+
+1. Checks macOS Keychain first; if absent, falls back to `op read op://Private/OP_CONNECT_TOKEN/credential`
+2. On macOS, saves to Keychain for runtime fetch by `~/.zprofile`
+3. On headless systems, exports `OP_CONNECT_TOKEN` directly
+4. With `--apply`, runs `chezmoi init --apply nlopez` automatically
+
+### Runtime token retrieval
+
+- **macOS**: `~/.zprofile` runs `security find-generic-password -s chezmoi-op-connect -a token -w` at login
+- **Headless**: export `OP_CONNECT_TOKEN` before running `chezmoi apply`
+
+The `unset OP_CONNECT_HOST OP_CONNECT_TOKEN` in the bootstrap script is essential — if `OP_CONNECT_TOKEN`
+is already exported (from a prior `.zprofile`), `op` switches to Connect mode and loses access
+to the `Private` vault where the token item lives.
+
+### Token rotation
+
+Update the token in 1Password, then re-run the bootstrap script on each machine.
+
+> See [README.md](README.md#1password-connect) for the complete Bootstrap section.
+
 ## Commands
 
 ```sh
