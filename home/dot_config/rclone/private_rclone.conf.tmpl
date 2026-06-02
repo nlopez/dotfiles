@@ -1,24 +1,24 @@
 [do]
 type = s3
 provider = DigitalOcean
-access_key_id = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/zzx46ycysvrilx6ikvxv2f6pym/access_key_id" }}     {{/* do */}}
-secret_access_key = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/zzx46ycysvrilx6ikvxv2f6pym/secret_access_key" }} {{/* do */}}
-endpoint = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/zzx46ycysvrilx6ikvxv2f6pym/endpoint" }}                 {{/* do */}}
+access_key_id = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/zzx46ycysvrilx6ikvxv2f6pym/access_key_id" "my.1password.com" }}     {{/* do */}}
+secret_access_key = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/zzx46ycysvrilx6ikvxv2f6pym/secret_access_key" "my.1password.com" }} {{/* do */}}
+endpoint = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/zzx46ycysvrilx6ikvxv2f6pym/endpoint" "my.1password.com" }}                 {{/* do */}}
 
 [media]
 type = webdav
-url = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/iqcpdvblhejariq36w6ka352l4/url" }}   {{/* media_webdav */}}
-user = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/iqcpdvblhejariq36w6ka352l4/user" }} {{/* media_webdav */}}
-pass = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/iqcpdvblhejariq36w6ka352l4/pass" }} {{/* media_webdav */}}
+url = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/iqcpdvblhejariq36w6ka352l4/url" "my.1password.com" }}   {{/* media_webdav */}}
+user = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/iqcpdvblhejariq36w6ka352l4/user" "my.1password.com" }} {{/* media_webdav */}}
+pass = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/iqcpdvblhejariq36w6ka352l4/pass" "my.1password.com" }} {{/* media_webdav */}}
 vendor = rclone
 
 [dropbox_personal]
 type = dropbox
-token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ebuheml64yropanzhaysuki33y/token" }} {{/* dropbox_personal */}}
+token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ebuheml64yropanzhaysuki33y/token" "my.1password.com" }} {{/* dropbox_personal */}}
 
 [dropbox_alt]
 type = dropbox
-token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/dqz54idqdhxf75fjhlxz6pvwcq/token" }} {{/* dropbox_alt */}}
+token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/dqz54idqdhxf75fjhlxz6pvwcq/token" "my.1password.com" }} {{/* dropbox_alt */}}
 
 [gdrive_personal]
 type = combine
@@ -26,17 +26,17 @@ upstreams = "My Drive=gdrive_personal_my_drive:" "Shared with me=gdrive_personal
 
 [gdrive_personal_shared_with_me]
 type = drive
-client_id = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/client_id" }}         {{/* gdrive_personal */}}
-client_secret = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/client_secret" }} {{/* gdrive_personal */}}
-token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/token" }}                 {{/* gdrive_personal */}}
+client_id = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/client_id" "my.1password.com" }}         {{/* gdrive_personal */}}
+client_secret = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/client_secret" "my.1password.com" }} {{/* gdrive_personal */}}
+token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/token" "my.1password.com" }}                 {{/* gdrive_personal */}}
 scope = drive
 shared_with_me = true
 
 [gdrive_personal_my_drive]
 type = drive
-client_id = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/client_id" }}         {{/* gdrive_personal */}}
-client_secret = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/client_secret" }} {{/* gdrive_personal */}}
-token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/token" }}                 {{/* gdrive_personal */}}
+client_id = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/client_id" "my.1password.com" }}         {{/* gdrive_personal */}}
+client_secret = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/client_secret" "my.1password.com" }} {{/* gdrive_personal */}}
+token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7c6um3cxafs4lc7lcdy2fq6iiy/token" "my.1password.com" }}                 {{/* gdrive_personal */}}
 scope = drive
 shared_with_me = false
 
@@ -46,19 +46,19 @@ upstreams = "My Drive=gdrive_alt_my_drive:" "Shared with me=gdrive_alt_shared_wi
 
 [gdrive_alt_shared_with_me]
 type = drive
-client_id = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/client_id" }}         {{/* gdrive_alt */}}
-client_secret = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/client_secret" }} {{/* gdrive_alt */}}
+client_id = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/client_id" "my.1password.com" }}         {{/* gdrive_alt */}}
+client_secret = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/client_secret" "my.1password.com" }} {{/* gdrive_alt */}}
 scope = drive
 shared_with_me = true
-token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/token" }}                 {{/* gdrive_alt */}}
+token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/token" "my.1password.com" }}                 {{/* gdrive_alt */}}
 
 [gdrive_alt_my_drive]
 type = drive
-client_id = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/client_id" }}         {{/* gdrive_alt */}}
-client_secret = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/client_secret" }} {{/* gdrive_alt */}}
+client_id = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/client_id" "my.1password.com" }}         {{/* gdrive_alt */}}
+client_secret = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/client_secret" "my.1password.com" }} {{/* gdrive_alt */}}
 scope = drive
 shared_with_me = false
-token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/token" }}               {{/* gdrive_alt */}}
+token = {{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/ncfvv76pe4ov36t3pzlhbph7pq/token" "my.1password.com" }}               {{/* gdrive_alt */}}
 
 # VFS cache - global settings for all remotes.
 # Ref: https://rclone.org/vfs/
