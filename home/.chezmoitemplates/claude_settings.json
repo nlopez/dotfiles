@@ -39,11 +39,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/bash-regex-permission.sh"
-          },
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/gh-pr-draft.sh"
+            "command": "python3 ~/.claude/hooks/hooks.py"
           }
         ]
       }
@@ -54,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/user-prompt-submit.py"
+            "command": "python3 ~/.claude/hooks/hooks.py"
           }
         ]
       }
@@ -65,7 +61,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/attention.py"
+            "command": "python3 ~/.claude/hooks/hooks.py"
           }
         ]
       }
@@ -75,7 +71,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/stop.py"
+            "command": "python3 ~/.claude/hooks/hooks.py"
           }
         ]
       }
@@ -85,7 +81,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/session-end.py"
+            "command": "python3 ~/.claude/hooks/hooks.py"
           }
         ]
       }
@@ -95,7 +91,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/user-prompt-submit.py"
+            "command": "python3 ~/.claude/hooks/hooks.py"
           }
         ]
       }

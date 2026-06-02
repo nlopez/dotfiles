@@ -6,6 +6,7 @@
  * via ! / !! (user_bash).
  *
  * Covered subcommands: gh {pr,issue} {create,edit,comment,review}
+ *                      gh api .../pulls/<n>/comments/<n>/replies
  *
  * Two body delivery mechanisms are handled:
  *   --body "..."      → footer appended to the inline string in the command
@@ -31,6 +32,10 @@ const GH_CONTENT_RE = /\bgh\s+(?:pr|issue)\s+(?:create|edit|comment|review)\b/;
 // Matches --body-file <path> or -F <path> (quoted or unquoted, not stdin)
 const BODY_FILE_RE = /(?:--body-file|-F)\s+(?:"([^"]+)"|'([^']+)'|(?!-)(\S+))/;
 
+// gh api calls to PR review-comment reply endpoints
+// e.g.: gh api repos/owner/repo/pulls/123/comments/456/replies -f body="..."
+const GH_API_REPLY_RE = /\bgh\s+api\b[\s\S]*?\/pulls\/\d+\/comments\/\d+\/replies\b/;
+
 /** Build the footer string from the current model name. */
 function buildFooter(modelName: string): string {
   return `\n\n---\n*Co-authored with Pi${modelName ? ` (${modelName})` : ""}*`;
@@ -52,6 +57,26 @@ function injectInlineBody(command: string, footer: string): string | null {
       const body = dqBody !== undefined ? dqBody : sqBody;
       const safeBody = body.replace(/"/g, '\\"');
       return `${prefix}--body "${safeBody}${footer}"`;
+    },
+  );
+  return modified ? result : null;
+}
+
+/**
+ * Rewrite -f body=... / -F body=... in a `gh api` reply call.
+ * Returns null if nothing matched or footer is already present.
+ */
+function injectApiReplyBody(command: string, footer: string): string | null {
+  if (command.includes("Co-authored with Pi")) return null;
+
+  let modified = false;
+  const result = command.replace(
+    /(-[fF]\s+body=|--(?:field|raw-field)\s+body=)("((?:[^"\\]|\\[\s\S])*)"|'((?:[^'\\]|\\[\s\S])*)'|(\S+))/g,
+    (_match, flagPrefix, _quoted, dqBody, sqBody, bareBody) => {
+      modified = true;
+      const body = dqBody !== undefined ? dqBody : sqBody !== undefined ? sqBody : bareBody ?? "";
+      const safeBody = body.replace(/"/g, '\\"');
+      return `${flagPrefix}"${safeBody}${footer}"`;
     },
   );
   return modified ? result : null;
@@ -85,15 +110,22 @@ function injectBodyFile(command: string, footer: string, cwd: string): boolean {
   return true;
 }
 
-/** Apply both strategies to a command; returns what changed. */
+/** Apply all strategies to a command; returns what changed. */
 function applyAttribution(command: string, footer: string, cwd: string): { command: string; modified: boolean } {
-  if (!GH_CONTENT_RE.test(command)) return { command, modified: false };
+  if (GH_CONTENT_RE.test(command)) {
+    const inlined = injectInlineBody(command, footer);
+    if (inlined !== null) return { command: inlined, modified: true };
 
-  const inlined = injectInlineBody(command, footer);
-  if (inlined !== null) return { command: inlined, modified: true };
+    const filePatched = injectBodyFile(command, footer, cwd);
+    return { command, modified: filePatched };
+  }
 
-  const filePatched = injectBodyFile(command, footer, cwd);
-  return { command, modified: filePatched };
+  if (GH_API_REPLY_RE.test(command)) {
+    const rewritten = injectApiReplyBody(command, footer);
+    if (rewritten !== null) return { command: rewritten, modified: true };
+  }
+
+  return { command, modified: false };
 }
 
 export default function (pi: ExtensionAPI) {
