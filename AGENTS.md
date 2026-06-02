@@ -49,9 +49,38 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 │   ├── tools-and-validation.md    # Linting, Pi plugins, validation
 │   └── quick-reference.md         # Commands, repo navigation, path disambiguation
 ├── home/                          # Chezmoi source tree (see .chezmoiroot)
+│   ├── run_after_*.sh             # Post-apply scripts (run after all files updated)
+│   └── .chezmoiscripts/           # One-time / idempotent setup scripts (pkg install, etc.)
 ├── scripts/                       # Project scripts (linting, not chezmoi-managed)
 └── .chezmoiroot                   # Value: home
 ```
+
+## Script patterns
+
+Chezmoi supports three script patterns — use the right one for your use case:
+
+### `run_after_` scripts — run after every `chezmoi apply`
+
+Files in the source tree (at the `home/` level when `.chezmoiroot = home`) with the `run_after_` prefix execute **after all dotfiles have been updated**. They are used for actions that must run post-apply: reloading daemons, sourcing configs, etc.
+
+```sh
+home/run_after_source-tmux.sh   # Reloads tmux after tmux.conf is updated
+```
+
+- No executable bit needed — chezmoi handles this internally.
+- Must include a `#!` shebang (chezmoi executes them via `exec(3)`).
+- Must be idempotent (runs every `chezmoi apply`).
+- Tracked by git, **not** added via `chezmoi add` (source tree is protected).
+
+### `.chezmoiscripts/` — one-time setup and package installation
+
+Place non-config scripts in `.chezmoiscripts/` with prefixes like `run_once_`, `run_onchange_`, `run_before_`, `run_after_` for platform-specific one-off setup (package installs, font installs, etc.). See [Use scripts to perform actions](https://chezmoi.io/user-guide/use-scripts-to-perform-actions/).
+
+### `run_` scripts — run on every apply
+
+Files with the `run_` prefix in the source directory execute every `chezmoi apply` (interleaved with file updates). Use `run_before_` or `run_after_` attributes to control ordering. See the official docs for details.
+
+> ⚠️ **Don't launch chezmoi from inside a `run_` or hook script** — a running `chezmoi apply` will fail if it tries to start another instance. If you need chezmoi-specific info, use templates instead.
 
 ## Full documentation
 
