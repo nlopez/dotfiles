@@ -8,8 +8,11 @@
 # executes the resulting Python script. The script receives the current
 # settings.json contents on stdin and writes the replacement JSON to stdout.
 #
-# Configures: theme, defaultProvider, npmCommand, showHardwareCursor,
-#             compaction, and the declarative package list.
+# Configures: theme, npmCommand, showHardwareCursor, compaction,
+#             and the declarative package list.
+# No defaultProvider or defaultModel — Pi selects the first available
+# scoped model at startup (previously used provider is kept in session).
+# 
 import json
 import sys
 
@@ -21,12 +24,14 @@ try:
 except Exception:
     pass
 
+
 # Theme: sensible default; auto-theme extension syncs with macOS appearance.
 current.setdefault("theme", "solarized-light")
 
-# Default omlx as the primary provider.
-if "omlx" in str(current.get("defaultProvider", "")) or current.get("defaultProvider") is None:
-    current["defaultProvider"] = "omlx"
+# Remove orphaned defaultModel and defaultProvider (no hardcoded default).
+# Pi will auto-select the first available scoped model.
+current.pop("defaultModel", None)
+current.pop("defaultProvider", None)
 
 # Use npm for package operations. pnpm's strict linking breaks Pi's
 # extension loader which resolves modules from the literal symlink path,
