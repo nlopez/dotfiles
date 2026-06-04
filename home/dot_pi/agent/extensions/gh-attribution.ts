@@ -29,6 +29,18 @@ import { resolve } from "node:path";
 // gh subcommands that post or edit content
 const GH_CONTENT_RE = /\bgh\s+(?:pr|issue)\s+(?:create|edit|comment|review)\b/;
 
+/**
+ * Matches a Pi footer at the end of a body (actual newlines, optional trailing whitespace).
+ * Used to strip any pre-existing footer before appending a fresh one, ensuring that
+ * multiple edits to the same PR/issue never accumulate duplicate footers.
+ */
+const FOOTER_RE = /\r?\n\r?\n---\r?\n\*Co-authored with Pi[^*]*\*\s*$/;
+
+/** Remove any existing Pi footer from a body string. */
+function stripFooter(body: string): string {
+  return body.replace(FOOTER_RE, "");
+}
+
 // Matches --body-file <path> or -F <path> (quoted or unquoted, not stdin)
 const BODY_FILE_RE = /(?:--body-file|-F)\s+(?:"([^"]+)"|'([^']+)'|(?!-)(\S+))/;
 
@@ -47,7 +59,6 @@ function buildFooter(modelName: string): string {
  */
 function injectInlineBody(command: string, footer: string): string | null {
   if (!command.includes("--body")) return null;
-  if (command.includes("Co-authored with Pi")) return null;
 
   let modified = false;
   const result = command.replace(
@@ -55,7 +66,8 @@ function injectInlineBody(command: string, footer: string): string | null {
     (_match, prefix, _quoted, dqBody, sqBody) => {
       modified = true;
       const body = dqBody !== undefined ? dqBody : sqBody;
-      const safeBody = body.replace(/"/g, '\\"');
+      // Strip any existing footer first so repeated edits never accumulate duplicates.
+      const safeBody = stripFooter(body).replace(/"/g, '\\"');
       return `${prefix}--body "${safeBody}${footer}"`;
     },
   );
@@ -67,15 +79,14 @@ function injectInlineBody(command: string, footer: string): string | null {
  * Returns null if nothing matched or footer is already present.
  */
 function injectApiReplyBody(command: string, footer: string): string | null {
-  if (command.includes("Co-authored with Pi")) return null;
-
   let modified = false;
   const result = command.replace(
     /(-[fF]\s+body=|--(?:field|raw-field)\s+body=)("((?:[^"\\]|\\[\s\S])*)"|'((?:[^'\\]|\\[\s\S])*)'|(\S+))/g,
     (_match, flagPrefix, _quoted, dqBody, sqBody, bareBody) => {
       modified = true;
       const body = dqBody !== undefined ? dqBody : sqBody !== undefined ? sqBody : bareBody ?? "";
-      const safeBody = body.replace(/"/g, '\\"');
+      // Strip any existing footer first so repeated edits never accumulate duplicates.
+      const safeBody = stripFooter(body).replace(/"/g, '\\"');
       return `${flagPrefix}"${safeBody}${footer}"`;
     },
   );
@@ -104,9 +115,11 @@ function injectBodyFile(command: string, footer: string, cwd: string): boolean {
     return false; // file doesn't exist yet or unreadable — skip
   }
 
-  if (content.includes("Co-authored with Pi")) return false; // idempotent
+  // Strip any existing footer first so repeated edits never accumulate duplicates.
+  const newContent = stripFooter(content) + footer;
+  if (newContent === content) return false; // already exactly correct, skip write
 
-  writeFileSync(filePath, content + footer, "utf8");
+  writeFileSync(filePath, newContent, "utf8");
   return true;
 }
 
