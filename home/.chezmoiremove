@@ -39,6 +39,9 @@ Documents/WindowsPowerShell
 
 ; ── XDG migrations: clean up old $HOME locations ─────────────────────────────
 
+; Oh My Zsh moved to ~/.local/share/oh-my-zsh (via export ZSH=)
+.oh-my-zsh
+
 ; Terraform CLI config moved to ~/.config/terraform/terraformrc (via TF_CLI_CONFIG_FILE)
 .terraformrc
 
