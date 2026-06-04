@@ -1,0 +1,9 @@
+{{- /* ~/.zshenv — runs for EVERY zsh session: login, interactive, non-interactive,
+   scripts, and agent subshells. Keep this minimal; interactive-only setup stays
+   in ~/.zshrc, login-only setup stays in ~/.zprofile.
+*/ -}}
+# Load shared POSIX env (gnubin PATH, etc.) for all shell types.
+. "${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
+
+# Deduplicate PATH entries (zsh-specific; harmless no-op if already unique).
+typeset -U path

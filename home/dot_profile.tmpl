@@ -1,0 +1,11 @@
+{{- /* ~/.profile — sourced by login bash and POSIX sh (when ~/.bash_profile
+   doesn't exist or delegates here). Sets up PATH and exports BASH_ENV / ENV
+   so every bash/sh subprocess also gets the same environment.
+*/ -}}
+# Load shared POSIX env (gnubin PATH, etc.).
+. "${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
+
+# Point every bash non-interactive subprocess (scripts, agents) and interactive
+# sh subshell at the same env file so they inherit the PATH additions above.
+export BASH_ENV="${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
+export ENV="${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
