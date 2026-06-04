@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Managed by chezmoi — re-runs whenever tmux.conf changes (including @plugin list).
+# {{ include "dot_config/tmux/tmux.conf" | sha256sum }}
+
+set -euo pipefail
+
+TPM_DIR="$HOME/.config/tmux/plugins/tpm"
+
+# Ensure TPM is installed
+if [[ ! -d "$TPM_DIR" ]]; then
+  echo "TPM not found at $TPM_DIR — cloning..."
+  mkdir -p "$(dirname "$TPM_DIR")"
+  git clone --depth=1 https://github.com/tmux-plugins/tpm "$TPM_DIR"
+fi
+
+# TPM reads TMUX_PLUGIN_MANAGER_PATH from the tmux environment.
+# start-server ensures the server is up and the env var is set even when
+# no session exists.
+tmux start-server
+
+echo "Installing tmux plugins..."
+"$TPM_DIR/bin/install_plugins"
+
+echo "Cleaning removed tmux plugins..."
+"$TPM_DIR/bin/clean_plugins"
+
+# Reload config in any running server so active sessions activate new plugins.
+if tmux info &>/dev/null; then
+  tmux source-file "$HOME/.config/tmux/tmux.conf"
+  echo "Reloaded tmux config."
+fi
+
+echo "Tmux plugins: done."
