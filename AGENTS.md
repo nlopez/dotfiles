@@ -6,7 +6,8 @@ A [chezmoi](https://chezmoi.io/) dotfile management repository for synchronizing
 
 Chezmoi treats your home directory as immutable infrastructure version-controlled in Git — every file in `~` should be reproducible from the source tree alone. This means:
 
-- **No manual edits** — never edit files directly in `~`; always go through the chezmoi source tree.
+- **No manual edits, ever** — never edit files directly in `~`, and never run one-off commands to install, configure, or change anything on the system. Every change must go through the chezmoi source tree so it is reproducible on every machine.
+- **No one-off commands** — don't run `brew install foo`, `pi install`, `npm install`, or any other imperative tool invocation as a standalone action. The correct workflow is always: declare the change in the source tree → `chezmoi apply`. The appropriate `.chezmoiscripts/` hook will execute the command as part of apply.
 - **Idempotent & portable** — any machine can run `chezmoi apply` and end up with an identical, working configuration.
 - **Declarative over imperative** — prefer static templates (`.tmpl`) with `.chezmoi.os`/`.chezmoi.arch` conditionals over shell scripts. Scripts belong in `.chezmoiscripts/` only for one-time setup that can't be expressed as config files.
 - **Source of truth lives in Git** — the source tree under `home/` is the single source of truth. The destination (`~`) is ephemeral and always derived from it.
@@ -160,6 +161,7 @@ These tools have no XDG support and no env-var workaround. Do not attempt to mov
 
 ### ✅ Always do
 
+- **Declare first, then apply** — every change (package, config, tool, plugin) must be declared in the source tree before anything touches `~`. Run `chezmoi apply` to materialize it; the relevant `.chezmoiscripts/` hook will execute any required commands automatically.
 - Edit via `chezmoi source-path <path>` or `chezmoi edit <path>`
 - Verify with `chezmoi apply --dry-run` before committing
 - Use templates for conditional logic (`.chezmoi.os`, `.chezmoi.arch`, etc.)
@@ -167,7 +169,7 @@ These tools have no XDG support and no env-var workaround. Do not attempt to mov
 - For chezmoi `modify_` files, follow target-type semantics: plain `modify_*` files are
   scripts; only use `chezmoi:modify-template` when rendered template output should become
   the final file contents; modify templates must not have a `.tmpl` suffix
-- Add Pi plugins via `modify_settings.json` and `pi install`, not as pnpm globals
+- Add Pi plugins by declaring them in `.chezmoidata/pi.yaml` → `pi.packages`, then running `chezmoi apply` (the `run_onchange_after_pi-packages.py.tmpl` script reconciles the install automatically)
 
 ### ⚠️ Ask first
 
@@ -179,9 +181,10 @@ These tools have no XDG support and no env-var workaround. Do not attempt to mov
 
 ### 🚫 Never do
 
+- **Make one-off changes** — never run an imperative command (e.g., `brew install`, `pi install`, `npm install`, `echo '…' >> ~/.zshrc`) as a standalone action. If a change is worth making, it belongs in the source tree.
 - Edit files directly in `~` — they will be overwritten on next `chezmoi apply`
 - Append to live config files (e.g., `echo 'foo' >> ~/.zshrc`)
-- Use `pi install` as the declaration mechanism for Pi plugins. First declare them in `modify_settings.json`, then run `chezmoi apply` and `pi install`.
+- Run `pi install` directly to add plugins — declare them in `.chezmoidata/pi.yaml` and let `chezmoi apply` handle installation
 - Commit secrets or credentials to the repo
 - Bypass pre-commit hooks
 
