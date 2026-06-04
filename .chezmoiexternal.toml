@@ -1,0 +1,12 @@
+# External sources managed by chezmoi
+# These will be automatically downloaded/updated when running `chezmoi apply`
+
+[".config/tmux/plugins/tpm"]
+    type = "git-repo"
+    url = "https://github.com/tmux-plugins/tpm.git"
+    refreshPeriod = "168h"  # Weekly updates
+
+[".config/tmux/plugins/tmux-theme"]
+    type = "git-repo"
+    url = "https://github.com/tmux-contrib/tmux-theme.git"
+    refreshPeriod = "168h"  # Weekly updates

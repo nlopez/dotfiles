@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Tmux plugin management wrapper for TPM
+# Usage: tmux-plugins [install|update|clean|list]
+
+set -euo pipefail
+
+TPM_DIR="$HOME/.config/tmux/plugins/tpm"
+
+usage() {
+    echo "Usage: tmux-plugins [install|update|clean|list]"
+    echo ""
+    echo "Commands:"
+    echo "  install    Install all plugins listed in tmux.conf"
+    echo "  update     Update all installed plugins"
+    echo "  clean      Remove plugins not listed in tmux.conf"
+    echo "  list       List installed plugins"
+    echo ""
+    echo "Note: TPM must be installed first (run 'chezmoi apply')"
+    exit 1
+}
+
+check_tpm() {
+    if [ ! -d "$TPM_DIR" ]; then
+        echo "Error: TPM not found at $TPM_DIR"
+        echo "Run 'chezmoi apply' to install TPM first."
+        exit 1
+    fi
+}
+
+case "${1:-}" in
+    "install")
+        check_tpm
+        echo "Installing tmux plugins..."
+        "$TPM_DIR/bin/install_plugins"
+        ;;
+    "update")
+        check_tpm
+        echo "Updating tmux plugins..."
+        "$TPM_DIR/bin/update_plugins" all
+        ;;
+    "clean")
+        check_tpm
+        echo "Cleaning unused tmux plugins..."
+        "$TPM_DIR/bin/clean_plugins"
+        ;;
+    "list")
+        check_tpm
+        echo "Installed tmux plugins:"
+        if [ -d "$HOME/.config/tmux/plugins" ]; then
+            ls -1 "$HOME/.config/tmux/plugins" | grep -v tpm || echo "No additional plugins installed"
+        else
+            echo "No plugins directory found"
+        fi
+        ;;
+    *)
+        usage
+        ;;
+esac

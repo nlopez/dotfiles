@@ -11,6 +11,8 @@ packages:
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
       brews:
         base:
+          - cormacrelf/tap/dark-notify
+          - tabiew
           - distrobox
           - podman
           - age
