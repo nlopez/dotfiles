@@ -100,6 +100,62 @@ Files with the `run_` prefix in the source directory execute every `chezmoi appl
 | [docs/tools-and-validation.md](docs/tools-and-validation.md) | Linting, Pi plugin management, validation rules                |
 | [docs/quick-reference.md](docs/quick-reference.md)           | Commands, repo navigation, path disambiguation                 |
 
+## XDG Base Directory Compliance
+
+All new tool configurations **must** follow the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir/latest/). The four env vars are exported in `dot_zprofile.tmpl`:
+
+| Variable          | Default          | Purpose                     |
+| ----------------- | ---------------- | --------------------------- |
+| `XDG_CONFIG_HOME` | `~/.config`      | Config files                |
+| `XDG_DATA_HOME`   | `~/.local/share` | Persistent data             |
+| `XDG_STATE_HOME`  | `~/.local/state` | Logs, history, state        |
+| `XDG_CACHE_HOME`  | `~/.cache`       | Non-essential / regenerable |
+
+### Rule for new tool additions
+
+1. Check if the tool reads `$XDG_CONFIG_HOME` natively → place source under `dot_config/<tool>/`.
+2. If the tool requires an env var to redirect its config (e.g. `TF_CLI_CONFIG_FILE`) → add the export to `dot_zprofile.tmpl` and place the source under the XDG path.
+3. If the tool has **no** XDG support → place it at the unavoidable location, add it to the **Intentionally non-XDG** table below, and do **not** add a `.chezmoiremove` entry for the XDG path.
+4. When relocating an existing tool, always add the old `~/.<name>` path to `.chezmoiremove` (with an OS guard when macOS-only) so machines that are already configured are cleaned up.
+
+### Migrated to XDG
+
+| Tool                   | Config / data location               | How                            |
+| ---------------------- | ------------------------------------ | ------------------------------ |
+| AeroSpace              | `~/.config/aerospace/aerospace.toml` | Native XDG support             |
+| Terraform CLI          | `~/.config/terraform/terraformrc`    | `TF_CLI_CONFIG_FILE` env var   |
+| Homebrew Brewfile      | `~/.config/brew/Brewfile`            | `HOMEBREW_BUNDLE_FILE` env var |
+| Oh My Zsh              | `~/.local/share/oh-my-zsh`           | `export ZSH=` in `.zshrc`      |
+| atuin config           | `~/.config/atuin/`                   | Native XDG support             |
+| atuin data             | `~/.local/share/atuin/`              | `db_path`/`key_path` in config |
+| atuin logs             | `~/.local/state/atuin/logs`          | `[logs] path =` in config      |
+| bat                    | `~/.config/bat/`                     | Native XDG support             |
+| ghostty                | `~/.config/ghostty/`                 | Native XDG support             |
+| git                    | `~/.config/git/`                     | Native XDG support             |
+| jj                     | `~/.config/jj/`                      | Native XDG support             |
+| k9s                    | `~/.config/k9s/`                     | Native XDG support             |
+| neovim                 | `~/.config/nvim/`                    | Native XDG support             |
+| pnpm data              | `~/.local/share/pnpm/`               | `PNPM_HOME` env var            |
+| Go data                | `~/.local/share/go/`                 | `GOPATH` env var               |
+| rclone                 | `~/.config/rclone/`                  | Native XDG support             |
+| terraform plugin cache | `~/.cache/terraform/`                | `plugin_cache_dir` in config   |
+| tmux                   | `~/.config/tmux/`                    | Native XDG support             |
+| zabrze                 | `~/.config/zabrze/`                  | Native XDG support             |
+| Zed                    | `~/.config/zed/`                     | Native XDG support             |
+
+### Intentionally non-XDG
+
+These tools have no XDG support and no env-var workaround. Do not attempt to move them.
+
+| Tool              | Location                  | Reason                                                                              |
+| ----------------- | ------------------------- | ----------------------------------------------------------------------------------- |
+| SSH               | `~/.ssh/`                 | OpenSSH does not support XDG                                                        |
+| Claude Code       | `~/.claude/`              | Hardcoded; not configurable                                                         |
+| Pi agent          | `~/.pi/`                  | Config location not user-configurable                                               |
+| omlx root         | `~/.omlx/`                | Root dir hardcoded; only `model_dirs` is redirected to `~/.local/share/omlx/models` |
+| Terraform data    | `~/.terraform.d/`         | `TF_DATA_DIR` is per-workspace only; not safe to set globally                       |
+| zsh startup files | `~/.zshrc`, `~/.zprofile` | `ZDOTDIR` bootstrap is fragile under SSH/sudo; `remove_dot_zshenv` is intentional   |
+
 ## ⚠️ Boundaries
 
 ### ✅ Always do
