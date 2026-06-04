@@ -101,8 +101,8 @@ path=({{ joinPath $homeDir ".local/bin" }} $path)
 export TENV_AUTO_INSTALL=true
 export TFENV_AUTO_INSTALL=true
 export GOPATH="${XDG_DATA_HOME}/go"
-export VISUAL="zed"
-export EDITOR="vi"
+export VISUAL="code"
+export EDITOR="vim"
 
 {{- if .work }}
 export AWS_VAULT_KEYCHAIN_NAME=login
