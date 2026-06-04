@@ -1,0 +1,5 @@
+{{- /* ~/.bash_profile — bash reads this instead of ~/.profile for login shells.
+   Delegate to ~/.profile so bash and sh login shells behave identically.
+*/ -}}
+# shellcheck source=~/.profile
+. "$HOME/.profile"

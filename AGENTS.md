@@ -148,14 +148,15 @@ All new tool configurations **must** follow the [XDG Base Directory Specificatio
 
 These tools have no XDG support and no env-var workaround. Do not attempt to move them.
 
-| Tool              | Location                  | Reason                                                                              |
-| ----------------- | ------------------------- | ----------------------------------------------------------------------------------- |
-| SSH               | `~/.ssh/`                 | OpenSSH does not support XDG                                                        |
-| Claude Code       | `~/.claude/`              | Hardcoded; not configurable                                                         |
-| Pi agent          | `~/.pi/`                  | Config location not user-configurable                                               |
-| omlx root         | `~/.omlx/`                | Root dir hardcoded; only `model_dirs` is redirected to `~/.local/share/omlx/models` |
-| Terraform data    | `~/.terraform.d/`         | `TF_DATA_DIR` is per-workspace only; not safe to set globally                       |
-| zsh startup files | `~/.zshrc`, `~/.zprofile` | `ZDOTDIR` bootstrap is fragile under SSH/sudo; `remove_dot_zshenv` is intentional   |
+| Tool              | Location                               | Reason                                                                                                     |
+| ----------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| SSH               | `~/.ssh/`                              | OpenSSH does not support XDG                                                                               |
+| bash/sh startup   | `~/.profile`, `~/.bash_profile`        | POSIX startup files; `.bash_profile` delegates to `.profile`; actual config in `~/.config/shell/env` (XDG) |
+| Claude Code       | `~/.claude/`                           | Hardcoded; not configurable                                                                                |
+| Pi agent          | `~/.pi/`                               | Config location not user-configurable                                                                      |
+| omlx root         | `~/.omlx/`                             | Root dir hardcoded; only `model_dirs` is redirected to `~/.local/share/omlx/models`                        |
+| Terraform data    | `~/.terraform.d/`                      | `TF_DATA_DIR` is per-workspace only; not safe to set globally                                              |
+| zsh startup files | `~/.zshrc`, `~/.zprofile`, `~/.zshenv` | `ZDOTDIR` bootstrap is fragile under SSH/sudo; `.zshenv` used only for minimal PATH sourcing               |
 
 ## ⚠️ Boundaries
 

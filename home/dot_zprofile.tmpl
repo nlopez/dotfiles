@@ -30,17 +30,6 @@ export MCP_OAUTH_CALLBACK_PORT=3118
 fpath+=("{{ $foundBrewPrefix }}/share/zsh/site-functions")
 eval "$({{ $foundBrewPrefix }}/bin/brew shellenv)"
 {{ end }}
-{{- if eq .chezmoi.os "darwin" }}
-# Prepend GNU tool gnubin directories so GNU utils win over BSD/macOS system
-# tools. Driven by the gnu_tools list in .chezmoidata/darwin/packages.yaml.
-# HOMEBREW_PREFIX is set above by brew shellenv.
-path=(
-{{- range .packages.darwin.gnu_tools }}
-    "${HOMEBREW_PREFIX}/opt/{{ . }}/libexec/gnubin"
-{{- end }}
-    $path
-)
-{{- end }}
 {{- $homeDir := .chezmoi.homeDir }}
 
 # Dynamic PATH additions — checked at every login/reload, so new tool
