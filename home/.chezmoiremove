@@ -36,3 +36,21 @@ Library/LaunchAgents/mount-media.plist
 
 ; WindowsPowerShell — Windows-only, removed
 Documents/WindowsPowerShell
+
+; ── XDG migrations: clean up old $HOME locations ─────────────────────────────
+
+; Terraform CLI config moved to ~/.config/terraform/terraformrc (via TF_CLI_CONFIG_FILE)
+.terraformrc
+
+; Atuin logs moved to ~/.local/state/atuin/logs (via [logs] path in config)
+; ~/.atuin/ contained only the logs/ subdirectory; data lives in ~/.local/share/atuin/
+.atuin
+
+{{ if eq .chezmoi.os "darwin" }}
+; AeroSpace config moved to ~/.config/aerospace/aerospace.toml (native XDG support)
+.aerospace.toml
+
+; Brewfile moved to ~/.config/brew/Brewfile (via HOMEBREW_BUNDLE_FILE)
+.Brewfile
+.Brewfile.lock.json
+{{ end }}

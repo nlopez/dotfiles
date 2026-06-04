@@ -19,9 +19,9 @@
   },
   "model": {
     "model_dirs": [
-      {{ printf "%s/.omlx/models" .chezmoi.homeDir | quote }}
+      {{ printf "%s/.local/share/omlx/models" .chezmoi.homeDir | quote }}
     ],
-    "model_dir": {{ printf "%s/.omlx/models" .chezmoi.homeDir | quote }},
+    "model_dir": {{ printf "%s/.local/share/omlx/models" .chezmoi.homeDir | quote }},
     "max_model_memory": "auto",
     "model_fallback": false
   },

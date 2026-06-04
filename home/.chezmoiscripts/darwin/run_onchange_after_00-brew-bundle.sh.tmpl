@@ -8,4 +8,5 @@
 
 set -eufo pipefail
 
-brew bundle --global
+# HOMEBREW_BUNDLE_FILE is exported in .zprofile → ~/.config/brew/Brewfile
+brew bundle --file="${HOMEBREW_BUNDLE_FILE}"
