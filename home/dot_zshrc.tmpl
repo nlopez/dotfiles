@@ -153,6 +153,23 @@ function _smart_path_precmd() {
 add-zsh-hook precmd _smart_path_precmd
 _smart_path_precmd  # prime before first prompt
 
+###############################################################################
+# ── Tmux pane border: push current command via @current_cmd ──────────────────
+# Sets the @current_cmd pane option on preexec (command running) and clears it
+# on precmd (back at prompt), feeding the pane-border-format in tmux.conf.
+# When cleared the border falls back to "---" via the format's else branch.
+###############################################################################
+if [[ -n "$TMUX" ]]; then
+  function _tmux_cmd_preexec() {
+    tmux set-option -p @current_cmd "$1" 2>/dev/null
+  }
+  function _tmux_cmd_precmd() {
+    tmux set-option -pu @current_cmd 2>/dev/null
+  }
+  add-zsh-hook preexec _tmux_cmd_preexec
+  add-zsh-hook precmd  _tmux_cmd_precmd
+fi
+
 {{- if eq .chezmoi.os "darwin" }}
 ###############################################################################
 # ── Long-running command notifications (terminal-notifier) ────────────────────
