@@ -28,6 +28,14 @@ OVERLAY=$(cat << 'EOF'
       "oauth": {
         "clientId": "1601185624273.8899143856786"
       }
+    },
+    "datadog-google-workspace": {
+      "type": "http",
+      "url": "https://google-workspace-mcp-server-834963730936.us-central1.run.app/mcp"
+    },
+    "supportdog-mcp-us1": {
+      "type": "http",
+      "url": "https://supportdog-mcp.mcp.us1.prod.dog:443/internal/mcp"
     }
     {{- end }}
   }
@@ -40,5 +48,5 @@ current=$(cat)
 if [ -z "$current" ]; then
   printf '%s\n' "$OVERLAY"
 else
-  printf '%s\n' "$current" | jq --argjson overlay "$OVERLAY" '. * $overlay | del(.mcpServers.figma)'
+  printf '%s\n' "$current" | jq --argjson overlay "$OVERLAY" '. * $overlay | del(.mcpServers.figma, .mcpServers["supportdog-mcp-staging"], .mcpServers["supportdog-mcp-us3"], .mcpServers["supportdog-mcp-us5"], .mcpServers["supportdog-mcp-eu1"], .mcpServers["supportdog-mcp-ap1"], .mcpServers["supportdog-mcp-ap2"])'
 fi
