@@ -44,14 +44,14 @@ aliases:
   - { name: tfu, cmd: "terraform force-unlock -force", global: true }
   - { name: tg, cmd: "terragrunt" }
   - { name: tginit, cmd: "terragrunt init", global: true }
-  - { name: tgplan, cmd: "terragrunt plan --lock=false", global: true }
+  - { name: tgplan, cmd: "terragrunt plan --lock=false -detailed-exitcode -concise", global: true }
   - { name: tgapply, cmd: "terragrunt apply", global: true }
   - { name: tga, cmd: "terragrunt run --all" }
   - { name: tgainit, cmd: "terragrunt run --all {} -- init", global: true, cursor: "{}" }
   - {
       name: tgaplan,
-      cmd: "terragrunt run --all --out-dir /tmp/tfplan --json-out-dir /tmp/tfplan {} -- plan --lock=false",
+      cmd: "terragrunt run --all {} -- plan --lock=false -detailed-exitcode -concise",
       global: true,
       cursor: "{}",
     }
-  - { name: tgaapply, cmd: "terragrunt run --all --out-dir /tmp/tfplan {} -- apply", global: true, cursor: "{}" }
+  - { name: tgaapply, cmd: "terragrunt run --all {} -- apply", global: true, cursor: "{}" }
