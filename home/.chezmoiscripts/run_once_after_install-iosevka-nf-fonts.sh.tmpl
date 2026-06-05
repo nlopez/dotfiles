@@ -4,6 +4,10 @@
 
 set -eufo pipefail
 
+{{- if .headless }}
+exit 0  # headless: no display server; fonts not needed
+{{- end }}
+
 {{- $home := .chezmoi.homeDir }}
 {{- $fd := .platform.font_dir }}
 {{- if eq .chezmoi.os "linux" }}

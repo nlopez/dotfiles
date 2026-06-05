@@ -2,16 +2,25 @@
 
 {{ $brewConfig := index .packages "linux" "brew" -}}
 {{ $brews := $brewConfig.brews.base -}}
-{{ $casks := $brewConfig.casks.base -}}
 
 {{ if .personal -}}
 {{   $brews = concat $brews $brewConfig.brews.personal -}}
-{{   $casks = concat $casks $brewConfig.casks.personal -}}
 {{ end -}}
 
 {{ if .work -}}
 {{   $brews = concat $brews $brewConfig.brews.work -}}
-{{   $casks = concat $casks $brewConfig.casks.work -}}
+{{ end -}}
+
+{{/* headless: skip all casks (fonts, GUI apps) */}}
+{{ $casks := list -}}
+{{ if not .headless -}}
+{{   $casks = $brewConfig.casks.base -}}
+{{   if .personal -}}
+{{     $casks = concat $casks $brewConfig.casks.personal -}}
+{{   end -}}
+{{   if .work -}}
+{{     $casks = concat $casks $brewConfig.casks.work -}}
+{{   end -}}
 {{ end -}}
 
 set -eufo pipefail

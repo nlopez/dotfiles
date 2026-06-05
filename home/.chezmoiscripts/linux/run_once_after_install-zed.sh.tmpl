@@ -7,6 +7,10 @@
 
 set -eufo pipefail
 
+{{- if .headless }}
+exit 0  # headless: Zed is a GUI application; not needed without a display server
+{{- end }}
+
 ZED_VERSION="{{ .ZED_VERSION | default "latest" }}"
 ZED_CHANNEL="{{ .ZED_CHANNEL | default "stable" }}"
 ZED_ARCH="$(uname -m)"
