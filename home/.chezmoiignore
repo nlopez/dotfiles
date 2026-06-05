@@ -16,10 +16,14 @@
 .local/share/oh-my-zsh/templates/**
 .local/share/oh-my-zsh/custom/themes/powerlevel10k/**/*.zwc
 
-# ── OMLX: ignore runtime-generated files (keep settings.json) ─────────────────
+# ── OMLX: darwin-only; ignore runtime-generated files (keep settings.json) ─────
+{{ if ne .chezmoi.os "darwin" -}}
+.omlx/**
+{{ else -}}
 .omlx/cache/**
 .omlx/logs/**
 .omlx/stats.json
+{{ end -}}
 # models are now in ~/.local/share/omlx/models (redirected via settings.json)
 .local/share/omlx/models/**
 .local/share/omlx/**
