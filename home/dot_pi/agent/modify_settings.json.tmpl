@@ -28,10 +28,10 @@ except Exception:
 # Theme: sensible default; auto-theme extension syncs with macOS appearance.
 current.setdefault("theme", "solarized-light")
 
-# Remove orphaned defaultModel and defaultProvider (no hardcoded default).
-# Pi will auto-select the first available scoped model.
-current.pop("defaultModel", None)
-current.pop("defaultProvider", None)
+# Preserve defaultModel and defaultProvider if set interactively.
+# These are NOT managed by chezmoi — whatever you set via Pi stays put.
+# (If absent, Pi auto-selects the first available scoped model.)
+pass  # No-op: keep existing defaultModel/defaultProvider as-is
 
 # Use npm for package operations. pnpm's strict linking breaks Pi's
 # extension loader which resolves modules from the literal symlink path,

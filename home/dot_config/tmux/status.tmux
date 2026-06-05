@@ -29,10 +29,15 @@ set-option -g message-command-style "fg=#{@thm_base},bg=#{@thm_cyan}"
 # Copy mode styling  
 set-window-option -g mode-style "fg=#{@thm_base},bg=#{@thm_yellow}"
 
-# Status left and right (empty to match existing config)
-set-option -g status-left ""
-set-option -g status-right ""
+# Status left: UTC time (uses `date -u`; %% is escaped so tmux passes the
+# strftime directives through to date instead of expanding them as local time)
+set-option -g status-left "#[fg=#{@thm_cyan},bold] UTC #[fg=#{@thm_text},nobold]#(date -u +'%%H:%%M') "
+
+# Status right: local time + timezone (tmux native strftime = local time)
+set-option -g status-right "#[fg=#{@thm_text}]%H:%M #[fg=#{@thm_cyan},bold]%Z "
+
 set-option -g status-left-length 48
+set-option -g status-right-length 48
 
 # Window status separator (keep existing spacing)
 set-option -g window-status-separator "  "
