@@ -4,6 +4,10 @@
 
 set -eufo pipefail
 
+{{- if .headless }}
+exit 0  # headless: fonts not needed
+{{- end }}
+
 if command -v fc-cache &>/dev/null; then
   fc-cache -fv ~/.local/share/fonts 2>&1 || true
 fi

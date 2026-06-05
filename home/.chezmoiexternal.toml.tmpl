@@ -102,7 +102,7 @@
 
 {{- $fontDir := .platform.font_dir }}
 
-{{- if $fontDir }}
+{{- if and $fontDir (not .headless) }}
 # Iosevka Nerd Font (Normal + Mono + Propo variants)
 # Iosevka Term Nerd Font (Term + Mono + Propo variants)
 # Both extracted to subdirectories then merged via script
