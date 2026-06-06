@@ -11,6 +11,7 @@ packages:
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
       brews:
         base:
+        - worktrunk
         - cormacrelf/tap/dark-notify
         - tabiew
         - distrobox
