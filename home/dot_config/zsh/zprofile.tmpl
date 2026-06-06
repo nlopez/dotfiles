@@ -85,9 +85,9 @@ export AWS_VAULT_KEYCHAIN_NAME=login
 {{- end }}
 
 # Set on all machines — Automation vault (Kagi API)
-export KAGI_API_KEY={{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/6neql3vd2izldv7jeosqaip7ci/credential" "my.1password.com" }}
+export KAGI_API_KEY={{ onepasswordRead "op://Automation/Kagi API/credential" "my.1password.com" }}
 
 {{- if .personal }}
 # Automation vault — personal machine secrets
-export HF_TOKEN={{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/rngar3p7k7uki2wrhmx4eb3e/credential" "my.1password.com" }}
+export HF_TOKEN={{ onepasswordRead "op://Automation/HF_TOKEN/credential" "my.1password.com" }}
 {{- end }}
