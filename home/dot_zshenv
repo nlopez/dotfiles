@@ -1,0 +1,5 @@
+# Minimal ZDOTDIR bootstrap — sets ZDOTDIR so zsh finds ~/.config/zsh/{zshenv,zprofile,zshrc}
+# on every subsequent startup. The first zsh invocation reads this file at $HOME/.zshenv
+# (because ZDOTDIR is not yet set), which sets ZDOTDIR and then sources the real zshenv.
+: "${ZDOTDIR:="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"}"
+[ -f "$ZDOTDIR/zshenv" ] && . "$ZDOTDIR/zshenv"

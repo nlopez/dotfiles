@@ -61,3 +61,33 @@ Documents/WindowsPowerShell
 .Brewfile
 .Brewfile.lock.json
 {{ end }}
+
+; ── ZDOTDIR migration: zsh config moved to ~/.config/zsh/ ────────────────────
+; ZDOTDIR=~/.config/zsh in the plain ~/.zshenv bootstrap file.
+; Old template versions are ignored by .chezmoiignore.
+; Remove old standalone zsh files that zsh no longer reads.
+.zshrc
+.zshrc.pre-oh-my-zsh
+.zshrc.pre-oh-my-zsh-*/
+.zshrc_pre-oh-my-zsh
+.zprofile
+
+; macOS Terminal.app session files — disabled via SHELL_SESSIONS_DISABLE=1
+.zsh_sessions/
+
+; Completion cache and dump files — managed via zstyle/compinit in zshenv
+.zcompcache/
+.zcompdump-*
+.zcompdump-local-*
+
+; ── Cleanup untracked runtime files ──────────────────────────────────────────
+
+; Oh My Zsh backup copies (left over from OMZ upgrades)
+.p10k.zsh
+
+; Vanilla Vim files — user migrated to Neovim (~/.config/nvim/)
+.vim/
+.viminfo
+
+; Codex config (redirected via CODEX_HOME to ~/.config/codex)
+.codex

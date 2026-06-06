@@ -1,0 +1,23 @@
+{{- /* ~/.config/zsh/zshenv — runs for EVERY zsh session: login, interactive, non-interactive,
+   scripts, and agent subshells. Keep this minimal; interactive-only setup stays
+   in zshrc, login-only setup stays in zprofile.
+*/ -}}
+# Load shared POSIX env (gnubin PATH, etc.) for all shell types.
+. "${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
+
+# Deduplicate PATH entries (zsh-specific; harmless no-op if already unique).
+typeset -U path
+
+# Disable macOS Terminal.app session saving — writes to ~/.zsh_sessions/
+# which is not XDG-compliant. We use in-memory history instead.
+export SHELL_SESSIONS_DISABLE=1
+
+# Zsh history (XDG_STATE_HOME/zsh/history)
+export HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
+
+# Zsh completion cache (XDG_CACHE_HOME/zsh/zcompcache)
+zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompcache"
+
+# Zsh completion dump file (XDG_CACHE_HOME/zsh/zcompdump)
+autoload -Uz compinit
+compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-${ZSH_VERSION}"

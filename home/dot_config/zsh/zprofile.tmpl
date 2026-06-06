@@ -1,6 +1,7 @@
-{{- /* zprofile runs once per login shell, before zshrc. PATH and env
-       exports live here. Interactive-only setup (aliases, plugins,
-       prompts, zle bindings) stays in zshrc. */ -}}
+{{- /* ~/.config/zsh/zprofile — runs once per login shell, before zshrc.
+   PATH and env exports live here. Interactive-only setup (aliases, plugins,
+   prompts, zle bindings) stays in zshrc.
+*/ -}}
 
 typeset -U path
 
@@ -67,43 +68,6 @@ for _d in \
 done
 unset _d
 
-export XDG_DATA_HOME=$HOME/.local/share
-export XDG_CONFIG_HOME=$HOME/.config
-export XDG_STATE_HOME=$HOME/.local/state
-export XDG_CACHE_HOME=$HOME/.cache
-
-# Terraform CLI config — keeps ~/.terraformrc out of $HOME
-export TF_CLI_CONFIG_FILE="${XDG_CONFIG_HOME}/terraform/terraformrc"
-
-# Homebrew bundle file — keeps ~/.Brewfile out of $HOME
-export HOMEBREW_BUNDLE_FILE="${XDG_CONFIG_HOME}/brew/Brewfile"
-
-export HOMEBREW_NO_AUTO_UPDATE=1
-export HOMEBREW_NO_ENV_HINTS=1
-export HOMEBREW_AUTO_UPDATE_SECS=86400
-export HOMEBREW_NO_ANALYTICS=1
-export HOMEBREW_VERIFY_ATTESTATIONS=1
-export HOMEBREW_NO_INSECURE_REDIRECT=1
-export HOMEBREW_CASK_OPTS="--require-sha"
-
-export GH_TELEMETRY=false
-export GH_NO_UPDATE_NOTIFIER=1
-export PI_SKIP_VERSION_CHECK=1
-export PI_OFFLINE=1
-
-# Supply-chain security: every shell starts with a fresh "N days ago" cutoff.
-# npm/pnpm honor $npm_config_before; uv honors $UV_EXCLUDE_NEWER.
-zmodload zsh/datetime
-strftime -s _sc_cutoff '%Y-%m-%d' $(( EPOCHSECONDS - {{ .supplyChainDelayDays }} * 86400 ))
-export npm_config_before="$_sc_cutoff"
-export UV_EXCLUDE_NEWER="$_sc_cutoff"
-unset _sc_cutoff
-
-export LESS="-FRX"
-export AWS_PAGER=""
-
-export SSH_AUTH_SOCK="{{ .platform.ssh_auth_sock }}"
-
 export PNPM_HOME="${XDG_DATA_HOME}/pnpm"
 path=($PNPM_HOME/bin $path)
 
@@ -124,6 +88,5 @@ export KAGI_API_KEY={{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/6neql3vd
 
 {{- if .personal }}
 # Automation vault — personal machine secrets
-export HF_TOKEN={{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/rngar3p7k7q7uki2wrhmx4eb3e/credential" "my.1password.com" }}
+export HF_TOKEN={{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/rngar3p7k7uki2wrhmx4eb3e/credential" "my.1password.com" }}
 {{- end }}
-
