@@ -49,8 +49,9 @@ Documents/WindowsPowerShell
 ; ~/.atuin/ contained only the logs/ subdirectory; data lives in ~/.local/share/atuin/
 .atuin
 
+; AeroSpace removed — clean up both the XDG config path and old ~/.aerospace.toml
 {{ if eq .chezmoi.os "darwin" }}
-; AeroSpace config moved to ~/.config/aerospace/aerospace.toml (native XDG support)
+.config/aerospace
 .aerospace.toml
 
 ; Brewfile moved to ~/.config/brew/Brewfile (via HOMEBREW_BUNDLE_FILE)
