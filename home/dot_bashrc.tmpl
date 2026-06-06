@@ -1,15 +1,32 @@
-{{- /* ~/.bashrc — sourced by interactive non-login bash shells.
-   Also sourced by ~/.bash_profile so login+interactive shells get the
-   same aliases, completions, and PATH setup.
+{{- /* ~/.bashrc — interactive bash config.
+   Sources the shared env for XDG vars and sets up gnubin PATH.
 */ -}}
 # Guard: skip if already loaded in this shell session.
 [ -n "$_BASHRC_LOADED" ] && return
 _BASHRC_LOADED=1
 
-# Load shared POSIX env (gnubin PATH, etc.) — needed for non-login
-# interactive bash (bash -i) which otherwise has no startup file.
-{{- if eq .chezmoi.os "darwin" }}
+# Load shared POSIX env (XDG vars) for all shell types.
 . "${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
+
+# GNU tool gnubin paths — prepend so GNU utils win over BSD/macOS system tools.
+{{- if eq .chezmoi.os "darwin" }}
+{{- $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
+{{- $brewPrefix := "" -}}
+{{- range $brewPrefixes -}}
+  {{- if and (not $brewPrefix) (stat (printf "%s/bin/brew" .)) -}}
+    {{- $brewPrefix = . -}}
+  {{- end -}}
+{{- end }}
+{{- if $brewPrefix }}
+for _gnubin in \
+{{- range .packages.darwin.gnu_tools }}
+  "{{ $brewPrefix }}/opt/{{ . }}/libexec/gnubin" \
+{{- end }}
+; do
+  [ -d "$_gnubin" ] && PATH="$_gnubin:$PATH"
+done
+unset _gnubin
+{{- end }}
 {{- end }}
 
 # Prompt should show exit status of last command.
@@ -17,7 +34,7 @@ PROMPT_COMMAND='if [ "$?" -ne 0 ]; then echo "Exit status: $? >&1"; fi'
 
 # History: append mode, larger history, ignore duplicates and commands
 # starting with space.
-export HISTFILE="$XDG_STATE_HOME/bash/history"
+export HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/bash/history"
 export HISTSIZE=10000
 export HISTFILESIZE=20000
 export HISTCONTROL=ignoredups:ignorespace
