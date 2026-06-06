@@ -1,0 +1,38 @@
+{{- /* ~/.bashrc — sourced by interactive non-login bash shells.
+   Also sourced by ~/.bash_profile so login+interactive shells get the
+   same aliases, completions, and PATH setup.
+*/ -}}
+# Guard: skip if already loaded in this shell session.
+[ -n "$_BASHRC_LOADED" ] && return
+_BASHRC_LOADED=1
+
+# Load shared POSIX env (gnubin PATH, etc.) — needed for non-login
+# interactive bash (bash -i) which otherwise has no startup file.
+{{- if eq .chezmoi.os "darwin" }}
+. "${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
+{{- end }}
+
+# Prompt should show exit status of last command.
+PROMPT_COMMAND='if [ "$?" -ne 0 ]; then echo "Exit status: $? >&1"; fi'
+
+# History: append mode, larger history, ignore duplicates and commands
+# starting with space.
+export HISTFILE="$XDG_STATE_HOME/bash/history"
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+export HISTCONTROL=ignoredups:ignorespace
+shopt -s histappend
+shopt -s checkhash
+shopt -s promptvars
+
+# Interactive-only aliases.
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
+alias diff='diff --color=auto'
+alias grep='grep --color=auto'
+alias ls='ls --color=auto'
+
+# Default editor.
+export VISUAL="vim"
+export EDITOR="vim"
