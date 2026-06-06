@@ -115,7 +115,7 @@ All new tool configurations **must** follow the [XDG Base Directory Specificatio
 ### Rule for new tool additions
 
 1. Check if the tool reads `$XDG_CONFIG_HOME` natively → place source under `dot_config/<tool>/`.
-2. If the tool requires an env var to redirect its config (e.g. `TF_CLI_CONFIG_FILE`) → add the export to `dot_zprofile.tmpl` and place the source under the XDG path.
+2. If the tool requires an env var to redirect its config (e.g. `TF_CLI_CONFIG_FILE`) → add the export to `env.tmpl` and place the source under the XDG path.
 3. If the tool has **no** XDG support → place it at the unavoidable location, add it to the **Intentionally non-XDG** table below, and do **not** add a `.chezmoiremove` entry for the XDG path.
 4. When relocating an existing tool, always add the old `~/.<name>` path to `.chezmoiremove` (with an OS guard when macOS-only) so machines that are already configured are cleaned up.
 
@@ -143,6 +143,8 @@ All new tool configurations **must** follow the [XDG Base Directory Specificatio
 | zabrze                 | `~/.config/zabrze/`                     | Native XDG support                 |
 | Zed                    | `~/.config/zed/`                        | Native XDG support                 |
 | zsh startup files      | `~/.config/zsh/{zshenv,zprofile,zshrc}` | `ZDOTDIR` in bootstrap `~/.zshenv` |
+| Claude Code            | `~/.config/claude/`                     | `CLAUDE_CONFIG_DIR` env var        |
+| Pi agent               | `~/.config/pi/agent/`                   | `PI_CODING_AGENT_DIR` env var      |
 
 ### Intentionally non-XDG
 
@@ -152,9 +154,7 @@ These tools have no XDG support and no env-var workaround. Do not attempt to mov
 | --------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | SSH             | `~/.ssh/`                       | OpenSSH does not support XDG                                                                               |
 | bash/sh startup | `~/.profile`, `~/.bash_profile` | POSIX startup files; `.bash_profile` delegates to `.profile`; actual config in `~/.config/shell/env` (XDG) |
-| Claude Code     | `~/.claude/`                    | Hardcoded; use `CLAUDE_CONFIG_DIR` to move to `$XDG_CONFIG_HOME/claude`                                    |
 | omlx root       | `~/.omlx/`                      | Root dir hardcoded; only `model_dirs` is redirected to `~/.local/share/omlx/models`                        |
-| Pi agent        | `~/.pi/`                        | Config location not user-configurable (use `PI_CODING_AGENT_DIR` for `$XDG_CONFIG_HOME/pi/agent`)          |
 | Terraform data  | `~/.terraform.d/`               | `TF_DATA_DIR` is per-workspace only; not safe to set globally                                              |
 
 ## ⚠️ Boundaries
