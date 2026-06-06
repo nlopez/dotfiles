@@ -1,5 +1,12 @@
 {{- /* ~/.bash_profile — bash reads this instead of ~/.profile for login shells.
-   Delegate to ~/.profile so bash and sh login shells behave identically.
+   Delegate to ~/.profile for login-only setup (PATH, exports).
+   Also source ~/.bashrc so interactive login shells get aliases,
+   completions, and other interactive config.
 */ -}}
 # shellcheck source=~/.profile
 . "$HOME/.profile"
+
+# shellcheck source=~/.bashrc
+if [[ $- == *i* ]]; then
+  [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bashrc" ]] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/bashrc"
+fi
