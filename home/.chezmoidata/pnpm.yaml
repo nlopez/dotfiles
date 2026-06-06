@@ -3,17 +3,17 @@
 # linux/pnpm.yaml (merged by chezmoi at render time).
 pnpm:
   base:
-    - mmd@4.7.1
-    - "@earendil-works/pi-coding-agent@0.77.0"
+  - mmd@4.7.1
+  - "@earendil-works/pi-coding-agent@0.77.0"
   personal: []
   work: []
 # Packages moved from pnpm globals to pi-managed packages (pi install npm:).
 # The stale-removal script reads this list and uninstalls them.
 stalePackages:
-  - pi-web-access
-  - pi-subagents
-  - context-mode
-  - pi-intercom
-  - pi-powerline
-  - pi-mcp-adapter
-  - pi-kagi-api
+- pi-web-access
+- pi-subagents
+- context-mode
+- pi-intercom
+- pi-powerline
+- pi-mcp-adapter
+- pi-kagi-api

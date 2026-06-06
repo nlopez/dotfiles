@@ -1,2 +1,6 @@
 # Ignore all chezmoi modify_ files (scripts and modify-templates)
 **/modify_*
+
+# Handled by yamlfmt
+**/*.yaml
+**/*.yml
