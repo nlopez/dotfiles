@@ -161,20 +161,9 @@ packages:
         - name: "StopTheMadness Pro"
           id: 6471380298
     vscode:
-      base:
-        - anthropic.claude-code
-        - esbenp.prettier-vscode
-        - golang.go
-        - hashicorp.hcl
-        - hashicorp.terraform
-        - pkief.material-icon-theme
-        - redhat.vscode-yaml
-        - tamasfe.even-better-toml
-        - timonwong.shellcheck
-        - tailscale.vscode-tailscale
+      base: []
       personal: []
-      work:
-        - datadog.datadog-vscode
+      work: []
     gnu_tools:
       - coreutils
       - diffutils
