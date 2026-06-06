@@ -1,3 +1,2 @@
 # Minimal ZDOTDIR bootstrap — sets ZDOTDIR so zsh finds ~/.config/zsh/{zshenv,zprofile,zshrc}
-: "${ZDOTDIR:="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"}"
-[ -f "$ZDOTDIR/zshenv" ] && . "$ZDOTDIR/zshenv"
+ZDOTDIR="${XDG_CONFIG_HOME:-${HOME}/.config/zsh}"
