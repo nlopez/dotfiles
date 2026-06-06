@@ -64,15 +64,16 @@ for _d in \
   "/opt/dogbrew/bin" \
 {{- end }}
 ; do
-  [[ -d "$_d" ]] && path=("$_d" $path)
+  [[ -d "$_d" ]] && PATH="$_d:$PATH"
 done
 unset _d
 
 export PNPM_HOME="${XDG_DATA_HOME}/pnpm"
-path=($PNPM_HOME/bin $path)
+PATH="$PNPM_HOME/bin:$PATH"
 
 # Prepend ~/.local/bin last so shims here take priority over everything else.
-path=({{ joinPath $homeDir ".local/bin" }} $path)
+PATH="{{ joinPath $homeDir ".local/bin" }}:$PATH"
+typeset -U path
 export TENV_AUTO_INSTALL=true
 export TFENV_AUTO_INSTALL=true
 export GOPATH="${XDG_DATA_HOME}/go"
