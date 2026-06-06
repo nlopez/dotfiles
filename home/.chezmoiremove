@@ -30,9 +30,12 @@ Library/LaunchAgents/com.user.dark-notify-tmux.plist
 .config/git/config_datadog
 .config/git/config_hobby
 
-; Rclone media mount — replaced by rclone-mounts.sh (nfsmount + multi-mount)
+; Rclone mounts removed — clean up generated runtime artefacts
 .local/bin/rclone-media-mount.sh
 Library/LaunchAgents/mount-media.plist
+Library/LaunchAgents/localuser.rclone-media-ro.mount.plist
+Library/LaunchAgents/localuser.rclone-media-rw.mount.plist
+.local/share/rclone-mounts
 
 ; WindowsPowerShell — Windows-only, removed
 Documents/WindowsPowerShell
