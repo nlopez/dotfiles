@@ -121,41 +121,41 @@ All new tool configurations **must** follow the [XDG Base Directory Specificatio
 
 ### Migrated to XDG
 
-| Tool                   | Config / data location            | How                            |
-| ---------------------- | --------------------------------- | ------------------------------ |
-| Terraform CLI          | `~/.config/terraform/terraformrc` | `TF_CLI_CONFIG_FILE` env var   |
-| Homebrew Brewfile      | `~/.config/brew/Brewfile`         | `HOMEBREW_BUNDLE_FILE` env var |
-| Oh My Zsh              | `~/.local/share/oh-my-zsh`        | `export ZSH=` in `.zshrc`      |
-| atuin config           | `~/.config/atuin/`                | Native XDG support             |
-| atuin data             | `~/.local/share/atuin/`           | `db_path`/`key_path` in config |
-| atuin logs             | `~/.local/state/atuin/logs`       | `[logs] path =` in config      |
-| bat                    | `~/.config/bat/`                  | Native XDG support             |
-| ghostty                | `~/.config/ghostty/`              | Native XDG support             |
-| git                    | `~/.config/git/`                  | Native XDG support             |
-| jj                     | `~/.config/jj/`                   | Native XDG support             |
-| k9s                    | `~/.config/k9s/`                  | Native XDG support             |
-| neovim                 | `~/.config/nvim/`                 | Native XDG support             |
-| pnpm data              | `~/.local/share/pnpm/`            | `PNPM_HOME` env var            |
-| Go data                | `~/.local/share/go/`              | `GOPATH` env var               |
-| rclone                 | `~/.config/rclone/`               | Native XDG support             |
-| terraform plugin cache | `~/.cache/terraform/`             | `plugin_cache_dir` in config   |
-| tmux                   | `~/.config/tmux/`                 | Native XDG support             |
-| zabrze                 | `~/.config/zabrze/`               | Native XDG support             |
-| Zed                    | `~/.config/zed/`                  | Native XDG support             |
+| Tool                   | Config / data location                  | How                                |
+| ---------------------- | --------------------------------------- | ---------------------------------- |
+| Terraform CLI          | `~/.config/terraform/terraformrc`       | `TF_CLI_CONFIG_FILE` env var       |
+| Homebrew Brewfile      | `~/.config/brew/Brewfile`               | `HOMEBREW_BUNDLE_FILE` env var     |
+| Oh My Zsh              | `~/.local/share/oh-my-zsh`              | `export ZSH=` in `.zshrc`          |
+| atuin config           | `~/.config/atuin/`                      | Native XDG support                 |
+| atuin data             | `~/.local/share/atuin/`                 | `db_path`/`key_path` in config     |
+| atuin logs             | `~/.local/state/atuin/logs`             | `[logs] path =` in config          |
+| bat                    | `~/.config/bat/`                        | Native XDG support                 |
+| ghostty                | `~/.config/ghostty/`                    | Native XDG support                 |
+| git                    | `~/.config/git/`                        | Native XDG support                 |
+| jj                     | `~/.config/jj/`                         | Native XDG support                 |
+| k9s                    | `~/.config/k9s/`                        | Native XDG support                 |
+| neovim                 | `~/.config/nvim/`                       | Native XDG support                 |
+| pnpm data              | `~/.local/share/pnpm/`                  | `PNPM_HOME` env var                |
+| Go data                | `~/.local/share/go/`                    | `GOPATH` env var                   |
+| rclone                 | `~/.config/rclone/`                     | Native XDG support                 |
+| terraform plugin cache | `~/.cache/terraform/`                   | `plugin_cache_dir` in config       |
+| tmux                   | `~/.config/tmux/`                       | Native XDG support                 |
+| zabrze                 | `~/.config/zabrze/`                     | Native XDG support                 |
+| Zed                    | `~/.config/zed/`                        | Native XDG support                 |
+| zsh startup files      | `~/.config/zsh/{zshenv,zprofile,zshrc}` | `ZDOTDIR` in bootstrap `~/.zshenv` |
 
 ### Intentionally non-XDG
 
 These tools have no XDG support and no env-var workaround. Do not attempt to move them.
 
-| Tool              | Location                               | Reason                                                                                                     |
-| ----------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| SSH               | `~/.ssh/`                              | OpenSSH does not support XDG                                                                               |
-| bash/sh startup   | `~/.profile`, `~/.bash_profile`        | POSIX startup files; `.bash_profile` delegates to `.profile`; actual config in `~/.config/shell/env` (XDG) |
-| Claude Code       | `~/.claude/`                           | Hardcoded; not configurable                                                                                |
-| Pi agent          | `~/.pi/`                               | Config location not user-configurable                                                                      |
-| omlx root         | `~/.omlx/`                             | Root dir hardcoded; only `model_dirs` is redirected to `~/.local/share/omlx/models`                        |
-| Terraform data    | `~/.terraform.d/`                      | `TF_DATA_DIR` is per-workspace only; not safe to set globally                                              |
-| zsh startup files | `~/.zshrc`, `~/.zprofile`, `~/.zshenv` | `ZDOTDIR` bootstrap is fragile under SSH/sudo; `.zshenv` used only for minimal PATH sourcing               |
+| Tool            | Location                        | Reason                                                                                                     |
+| --------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| SSH             | `~/.ssh/`                       | OpenSSH does not support XDG                                                                               |
+| bash/sh startup | `~/.profile`, `~/.bash_profile` | POSIX startup files; `.bash_profile` delegates to `.profile`; actual config in `~/.config/shell/env` (XDG) |
+| Claude Code     | `~/.claude/`                    | Hardcoded; use `CLAUDE_CONFIG_DIR` to move to `$XDG_CONFIG_HOME/claude`                                    |
+| omlx root       | `~/.omlx/`                      | Root dir hardcoded; only `model_dirs` is redirected to `~/.local/share/omlx/models`                        |
+| Pi agent        | `~/.pi/`                        | Config location not user-configurable (use `PI_CODING_AGENT_DIR` for `$XDG_CONFIG_HOME/pi/agent`)          |
+| Terraform data  | `~/.terraform.d/`               | `TF_DATA_DIR` is per-workspace only; not safe to set globally                                              |
 
 ## ⚠️ Boundaries
 
