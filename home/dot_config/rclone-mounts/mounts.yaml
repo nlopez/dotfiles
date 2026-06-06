@@ -8,7 +8,6 @@
 #
 # To remove a mount: delete its entry, then run:
 #   rclone-mounts unmount <name> && rclone-mounts generate
-
 mounts:
   # ── Read-only: for media consumption (Plex/Jellyfin, browsing) ─────────────
   # No write cache; lower RAM usage; safe for multiple concurrent readers.
@@ -29,7 +28,6 @@ mounts:
     nfs_cache_handle_limit: 1000000
     rc: true
     rc_addr: "unix:/tmp/rclone-media-ro.sock"
-
   # ── Read-write: for uploads and library management ──────────────────────────
   # Full VFS cache enables random writes, seeking, and retry on failure.
   media-rw:

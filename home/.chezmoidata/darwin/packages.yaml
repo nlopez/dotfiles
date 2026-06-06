@@ -11,166 +11,166 @@ packages:
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
       brews:
         base:
-          - cormacrelf/tap/dark-notify
-          - tabiew
-          - distrobox
-          - podman
-          - age
-          - git-lfs
-          - jj
-          - flock
-          - skopeo
-          - duti
-          - mas
-          - yamlfmt
-          - sql-formatter
-          - fx # json tui
-          - 8ta4/plist/plist
-          - tree
-          - hyperfine
-          - ncdu
-          - atuin
-          - direnv
-          - fd
-          - fzf
-          - git
-          - yazi
-          - htop
-          - kubectl
-          - ripgrep
-          - gawk
-          - rustup
-          - ryooooooga/tap/zabrze
-          - tmux
-          - yq
-          - jq
-          - shellcheck
-          - uv
-          - pnpm
-          - zoxide
-          - k9s
-          - go
-          - coreutils
-          - diffutils
-          - bat
-          - eza
-          - gnu-tar
-          - gnu-sed
-          - gnu-time
-          - gnu-getopt
-          - findutils
-          - gnu-indent
-          - gnu-which
-          - grep
-          - gh
-          - terminal-notifier
-          - testssl
-          - cilium-cli
-          - chezmoi
-          - neovim
-          - watchman
-          - lazygit
-          - pv
-          - terminal-notifier
-          - graphviz
-          - helm
-          - kubectx
-          - kubernetes-cli
+        - cormacrelf/tap/dark-notify
+        - tabiew
+        - distrobox
+        - podman
+        - age
+        - git-lfs
+        - jj
+        - flock
+        - skopeo
+        - duti
+        - mas
+        - yamlfmt
+        - sql-formatter
+        - fx # json tui
+        - 8ta4/plist/plist
+        - tree
+        - hyperfine
+        - ncdu
+        - atuin
+        - direnv
+        - fd
+        - fzf
+        - git
+        - yazi
+        - htop
+        - kubectl
+        - ripgrep
+        - gawk
+        - rustup
+        - ryooooooga/tap/zabrze
+        - tmux
+        - yq
+        - jq
+        - shellcheck
+        - uv
+        - pnpm
+        - zoxide
+        - k9s
+        - go
+        - coreutils
+        - diffutils
+        - bat
+        - eza
+        - gnu-tar
+        - gnu-sed
+        - gnu-time
+        - gnu-getopt
+        - findutils
+        - gnu-indent
+        - gnu-which
+        - grep
+        - gh
+        - terminal-notifier
+        - testssl
+        - cilium-cli
+        - chezmoi
+        - neovim
+        - watchman
+        - lazygit
+        - pv
+        - terminal-notifier
+        - graphviz
+        - helm
+        - kubectx
+        - kubernetes-cli
         personal:
-          - doctl
-          - ffmpeg
-          - yt-dlp
-          - oxipng
-          - argocd
-          - media-info
-          - jundot/omlx/omlx
-          - eugene1g/safehouse/agent-safehouse
+        - doctl
+        - ffmpeg
+        - yt-dlp
+        - oxipng
+        - argocd
+        - media-info
+        - jundot/omlx/omlx
+        - eugene1g/safehouse/agent-safehouse
         work:
-          - awscli
-          - tenv
-          - glab
+        - awscli
+        - tenv
+        - glab
       # Casks listed here will be installed with `--require-sha`. If a cask is
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:
         base:
-          - sublime-text
-          - sublime-merge
-          - podman-desktop
-          - copyq
-          - grandperspective
-          - obsidian
-          - fsmonitor
-          - wireshark-app
-          - zed
-          - linearmouse
-          - standard-notes
-          - git-credential-manager
-          - ghostty
-          - font-monocraft
-          - tailscale-app
-          - 1password
-          - 1password-cli
-          - visual-studio-code
-          - jordanbaird-ice
-          - rectangle
-          - little-snitch
-          - espanso
-          - smittytone/smittytone/utitool
+        - sublime-text
+        - sublime-merge
+        - podman-desktop
+        - copyq
+        - grandperspective
+        - obsidian
+        - fsmonitor
+        - wireshark-app
+        - zed
+        - linearmouse
+        - standard-notes
+        - git-credential-manager
+        - ghostty
+        - font-monocraft
+        - tailscale-app
+        - 1password
+        - 1password-cli
+        - visual-studio-code
+        - jordanbaird-ice
+        - rectangle
+        - little-snitch
+        - espanso
+        - smittytone/smittytone/utitool
         personal:
-          - balenaetcher
-          - digikam
-          - brave-browser
-          - stolendata-mpv
-          - losslesscut
-          - mediainfo
-          - signal
-          - telegram-desktop
-          - zen
-          - keepingyouawake
-          - rustdesk
+        - balenaetcher
+        - digikam
+        - brave-browser
+        - stolendata-mpv
+        - losslesscut
+        - mediainfo
+        - signal
+        - telegram-desktop
+        - zen
+        - keepingyouawake
+        - rustdesk
         work:
-          - slack
-          - google-drive
-          - finicky
-          - cursor
+        - slack
+        - google-drive
+        - finicky
+        - cursor
       # Casks that intentionally have no SHA (autoupdate or :latest). Installed
       # without --require-sha. Add entries here when a normal install fails with
       # "no checksum".
       casks_unsigned:
         base:
-          - google-chrome
+        - google-chrome
         personal: []
         work: []
     uv:
       base:
-        - pre-commit
-        - unique-namer
-        - huggingface-hub
-        - osxphotos
+      - pre-commit
+      - unique-namer
+      - huggingface-hub
+      - osxphotos
       personal: []
       work: []
     mas:
       base: []
       personal:
-        - name: "1Blocker"
-          id: 1365531024
-        - name: "Kagi for Safari"
-          id: 1622835804
-        - name: "StopTheMadness Pro"
-          id: 6471380298
+      - name: "1Blocker"
+        id: 1365531024
+      - name: "Kagi for Safari"
+        id: 1622835804
+      - name: "StopTheMadness Pro"
+        id: 6471380298
     vscode:
       base: []
       personal: []
       work: []
     gnu_tools:
-      - coreutils
-      - diffutils
-      - findutils
-      - gawk
-      - gnu-sed
-      - gnu-tar
-      - gnu-time
-      - gnu-getopt
-      - gnu-indent
-      - gnu-which
-      - grep
+    - coreutils
+    - diffutils
+    - findutils
+    - gawk
+    - gnu-sed
+    - gnu-tar
+    - gnu-time
+    - gnu-getopt
+    - gnu-indent
+    - gnu-which
+    - grep

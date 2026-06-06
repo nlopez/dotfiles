@@ -1,31 +1,36 @@
 repos:
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.30.0
-    hooks:
-      - id: gitleaks
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.0
-    hooks:
-      - id: ruff-check
-        args: [--fix]
-      - id: ruff-format
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
-    hooks:
-      - id: prettier
-  - repo: local
-    hooks:
-      - id: shellcheck
-        name: shellcheck
-        language: system
-        entry: scripts/shellcheck.py
-        pass_filenames: false
-        always_run: true
-        verbose: true
-      # - id: configlint
-      #   name: configlint
-      #   language: system
-      #   entry: scripts/configlint.py
-      #   files: ^home/
-      #   pass_filenames: true
-      #   verbose: true
+- repo: https://github.com/gitleaks/gitleaks
+  rev: v8.30.0
+  hooks:
+  - id: gitleaks
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.12.0
+  hooks:
+  - id: ruff-check
+    args: [--fix]
+  - id: ruff-format
+- repo: https://github.com/pre-commit/mirrors-prettier
+  rev: v3.1.0
+  hooks:
+  - id: prettier
+- repo: local
+  hooks:
+  - id: shellcheck
+    name: shellcheck
+    language: system
+    entry: scripts/shellcheck.py
+    pass_filenames: false
+    always_run: true
+    verbose: true
+  - id: yamlfmt
+    name: yamlfmt
+    language: system
+    entry: yamlfmt -conf .yamlfmt.yaml
+    types: [yaml]
+  # - id: configlint
+  #   name: configlint
+  #   language: system
+  #   entry: scripts/configlint.py
+  #   files: ^home/
+  #   pass_filenames: true
+  #   verbose: true
