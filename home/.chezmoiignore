@@ -49,9 +49,6 @@ Library/Application Support/espanso/**
 # ── Personal-only files ────────────────────────────────────────────────────────
 {{ if not .personal -}}
 .config/rclone/rclone.conf
-.config/rclone-mounts/**
-.local/bin/rclone-mounts
-.chezmoiscripts/darwin/run_onchange_after_rclone-mounts-generate.sh
 {{ end -}}
 
 # ── Work-only files ────────────────────────────────────────────────────────────
