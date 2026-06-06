@@ -14,7 +14,6 @@ packages:
         - worktrunk
         - cormacrelf/tap/dark-notify
         - tabiew
-        - distrobox
         - podman
         - age
         - git-lfs
@@ -107,7 +106,6 @@ packages:
         - standard-notes
         - git-credential-manager
         - ghostty
-        - font-monocraft
         - tailscale-app
         - 1password
         - 1password-cli
@@ -127,7 +125,6 @@ packages:
         - signal
         - telegram-desktop
         - zen
-        - keepingyouawake
         - rustdesk
         work:
         - slack
@@ -138,8 +135,7 @@ packages:
       # without --require-sha. Add entries here when a normal install fails with
       # "no checksum".
       casks_unsigned:
-        base:
-        - google-chrome
+        base: []
         personal: []
         work: []
     uv:
