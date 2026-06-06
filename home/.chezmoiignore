@@ -81,3 +81,6 @@ Library/Application Support/espanso/**
 
 # ── Git bookkeeping: empty-dir markers — never deployed ───────────────────────
 **/.gitkeep
+home/dot_config/zsh/*.bak
+home/dot_config/rclone/*.bak
+home/dot_omlx/*.bak
