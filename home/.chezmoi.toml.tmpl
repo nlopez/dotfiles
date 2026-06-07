@@ -47,6 +47,14 @@ useBuiltinAge = false
 {{- end }}
   # work: AGE_KEY_OP_URI intentionally unset — fetch-age-key.sh skips gracefully
 
+# Editor — use VS Code with --new-window so --wait actually blocks until the file is closed.
+# On headless machines fall back to $EDITOR / vi.
+{{- if not $headless }}
+[edit]
+  command = "code"
+  args    = ["--new-window", "--wait"]
+{{- end }}
+
 # Fetch the age identity from 1Password before chezmoi reads (decrypts) source state.
 [hooks.read-source-state.pre]
   command = "bash"
