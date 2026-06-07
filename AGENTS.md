@@ -145,6 +145,7 @@ All new tool configurations **must** follow the [XDG Base Directory Specificatio
 | zsh startup files      | `~/.config/zsh/{zshenv,zprofile,zshrc}` | `ZDOTDIR` in bootstrap `~/.zshenv`            |
 | Claude Code            | `~/.config/claude/`                     | `CLAUDE_CONFIG_DIR` env var                   |
 | Pi agent               | `~/.config/pi/agent/`                   | `PI_CODING_AGENT_DIR` env var                 |
+| Context-mode           | `~/.local/state/pi/context-mode/`       | `CONTEXT_MODE_DIR` env var                    |
 
 ### Intentionally non-XDG
 
