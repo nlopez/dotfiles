@@ -1,0 +1,10 @@
+# mise global configuration — https://mise.jdx.dev/configuration.html
+
+[settings]
+# Only install stable releases; no pre-releases or release candidates.
+experimental = false
+
+[tools]
+# Declare global default tool versions here, e.g.:
+# node = "lts"
+# python = "3.12"

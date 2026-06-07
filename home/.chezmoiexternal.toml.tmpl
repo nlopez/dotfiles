@@ -1,3 +1,16 @@
+{{- $miseVersion := "v2026.6.1" -}}
+{{- $miseOS := "linux" -}}{{- if eq .chezmoi.os "darwin" -}}{{- $miseOS = "macos" -}}{{- end -}}
+{{- $miseArch := .chezmoi.arch -}}{{- if eq .chezmoi.arch "amd64" -}}{{- $miseArch = "x64" -}}{{- end -}}
+
+# mise — https://github.com/jdx/mise
+[".local/bin/mise"]
+    type = "archive-file"
+    # renovate: datasource=github-releases depName=jdx/mise
+    url = "https://github.com/jdx/mise/releases/download/{{ $miseVersion }}/mise-{{ $miseVersion }}-{{ $miseOS }}-{{ $miseArch }}.tar.gz"
+    path = "mise/bin/mise"
+    executable = true
+    refreshPeriod = "168h"
+
 [".local/bin/rclone"]
     type = "archive-file"
     url = "https://github.com/rclone/rclone/releases/download/v1.74.2/rclone-v1.74.2-osx-arm64.zip"

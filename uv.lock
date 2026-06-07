@@ -2,9 +2,6 @@ version = 1
 revision = 3
 requires-python = ">=3.11"
 
-[options]
-exclude-newer = "2026-05-24T04:00:00Z"
-
 [[package]]
 name = "chezmoi-scripts"
 version = "0.1.0"
