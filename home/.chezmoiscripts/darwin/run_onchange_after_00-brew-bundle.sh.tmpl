@@ -9,4 +9,5 @@
 set -eufo pipefail
 
 # HOMEBREW_BUNDLE_FILE is exported in .zprofile → ~/.config/brew/Brewfile
-brew bundle --file="${HOMEBREW_BUNDLE_FILE}"
+BREWFILE="${HOMEBREW_BUNDLE_FILE:-{{ .chezmoi.homeDir }}/.config/brew/Brewfile}"
+brew bundle --file="${BREWFILE}"
