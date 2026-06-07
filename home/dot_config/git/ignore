@@ -58,3 +58,4 @@ tfplan*
 .terragrunt-cache/
 
 **/.claude/settings.local.json
+.envrc
