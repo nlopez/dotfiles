@@ -16,13 +16,17 @@
 .local/share/oh-my-zsh/templates/**
 .local/share/oh-my-zsh/custom/themes/powerlevel10k/**/*.zwc
 
-# ── OMLX: darwin-only; ignore runtime-generated files (keep settings.json) ─────
-{{ if ne .chezmoi.os "darwin" -}}
+# ── OMLX: darwin personal-only ───────────────────────────────────────────────
+{{ if or (ne .chezmoi.os "darwin") .work -}}
 .omlx/**
 {{ else -}}
 .omlx/cache/**
 .omlx/logs/**
 .omlx/stats.json
+{{ end -}}
+{{ if .work -}}
+.chezmoiscripts/darwin/run_after_omlx-chat-template.sh
+.chezmoiscripts/darwin/run_once_after_01-omlx-models.sh
 {{ end -}}
 # models are now in ~/.local/share/omlx/models (redirected via settings.json)
 .local/share/omlx/models/**
