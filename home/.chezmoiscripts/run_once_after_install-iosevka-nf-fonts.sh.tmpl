@@ -1,5 +1,4 @@
 #!/bin/bash
-# Merge Iosevka Nerd Font subdirectories into the system font directory.
 # run_once: after all external sources are installed
 
 set -eufo pipefail
@@ -12,26 +11,12 @@ exit 0  # headless: no display server; fonts not needed
 {{- $fd := .platform.font_dir }}
 {{- if eq .chezmoi.os "linux" }}
 mkdir -p "{{ $home }}/{{ $fd }}"
-{{- end }}
 FONT_DIR="{{ $home }}/{{ $fd }}"
 
-# Merge Iosevka Nerd Font files
-if [ -d "$FONT_DIR/iosevka-nf" ]; then
-  cp "$FONT_DIR/iosevka-nf"/*.ttf "$FONT_DIR/" 2>/dev/null || true
-  rm -rf "$FONT_DIR/iosevka-nf"
-fi
-
-# Merge Iosevka Term Nerd Font files
-if [ -d "$FONT_DIR/iosevka-term-nf" ]; then
-  cp "$FONT_DIR/iosevka-term-nf"/*.ttf "$FONT_DIR/" 2>/dev/null || true
-  rm -rf "$FONT_DIR/iosevka-term-nf"
-fi
-
-{{- if eq .chezmoi.os "linux" }}
 # Rebuild font cache
 if command -v fc-cache &>/dev/null; then
   fc-cache -fv "$FONT_DIR" 2>&1 || true
 fi
 {{- end }}
 
-echo "iosevka-nf-fonts: fonts installed to $FONT_DIR"
+echo "iosevka-nf-fonts: fonts installed"
