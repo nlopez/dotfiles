@@ -8,6 +8,33 @@
 
 set -eufo pipefail
 
+export HOMEBREW_REQUIRE_TAP_TRUST=1
+
+# Trust individual tap formulas and casks before bundle install.
+# We trust each item explicitly (not the whole tap) per Homebrew tap-trust policy.
+# Only fully-qualified "user/repo/formula" entries are processed here; short-name
+# formulas from core are unaffected.
+{{- $brewConfig := .packages.darwin.brew -}}
+{{- $brews := $brewConfig.brews.base | default list -}}
+{{- $casks := $brewConfig.casks.base | default list -}}
+{{- if .personal -}}
+{{-   if index $brewConfig.brews "personal" -}}{{- $brews = concat $brews (index $brewConfig.brews "personal") -}}{{- end -}}
+{{-   if index $brewConfig.casks "personal" -}}{{- $casks = concat $casks (index $brewConfig.casks "personal") -}}{{- end -}}
+{{- end -}}
+{{- if .work -}}
+{{-   if index $brewConfig.brews "work" -}}{{- $brews = concat $brews (index $brewConfig.brews "work") -}}{{- end -}}
+{{-   if index $brewConfig.casks "work" -}}{{- $casks = concat $casks (index $brewConfig.casks "work") -}}{{- end -}}
+{{- end }}
+{{ range ($brews | sortAlpha | uniq) -}}
+{{- if contains "/" . -}}
+brew trust --formula {{ . | quote }} 2>/dev/null || true
+{{ end -}}
+{{- end -}}
+{{ range ($casks | sortAlpha | uniq) -}}
+{{- if contains "/" . -}}
+brew trust --cask {{ . | quote }} 2>/dev/null || true
+{{ end -}}
+{{- end }}
 # HOMEBREW_BUNDLE_FILE is exported in .zprofile → ~/.config/brew/Brewfile
 BREWFILE="${HOMEBREW_BUNDLE_FILE:-{{ .chezmoi.homeDir }}/.config/brew/Brewfile}"
 brew bundle --file="${BREWFILE}"

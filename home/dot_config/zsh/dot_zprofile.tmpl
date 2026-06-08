@@ -36,6 +36,7 @@ export MCP_OAUTH_CALLBACK_PORT=3118
 
 fpath+=("{{ $foundBrewPrefix }}/share/zsh/site-functions")
 eval "$({{ $foundBrewPrefix }}/bin/brew shellenv)"
+export HOMEBREW_REQUIRE_TAP_TRUST=1
 {{ end }}
 
 # Re-prepend GNU gnubin paths after brew shellenv — path_helper -s rebuilds

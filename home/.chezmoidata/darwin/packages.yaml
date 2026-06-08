@@ -12,7 +12,7 @@ packages:
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
       brews:
         base:
-        - krunkit
+        - slp/krun/krunkit
         - pass
         - worktrunk
         - cormacrelf/tap/dark-notify
