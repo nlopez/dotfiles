@@ -48,6 +48,16 @@ _source ~/.zshrc_local
 
 {{- if lookPath "zabrze" }}
 eval "$(zabrze init --bind-keys)"
+# zsh-autosuggestions fetches a suggestion the moment the trigger word (e.g.
+# 'gc') is typed. After zabrze expands it, that pre-expansion suggestion is
+# still attached and renders against the new buffer, corrupting the display.
+# Listing zabrze's widgets in CLEAR_WIDGETS drops the stale suggestion on
+# expansion rather than letting it bleed through into the expanded buffer.
+ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(
+  __zabrze::expand
+  __zabrze::expand-and-self-insert
+  __zabrze::expand-and-accept-line
+)
 # groot: after zabrze expands 'groot' → '"$(git rev-parse --show-toplevel)"',
 # this hook immediately evaluates it and replaces it with the actual path so
 # the buffer shows the resolved path, not the shell-expansion expression.
