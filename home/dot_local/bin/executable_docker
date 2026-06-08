@@ -1,0 +1,3 @@
+#!/bin/sh
+# Shim: forward docker commands to podman.
+exec podman "$@"
