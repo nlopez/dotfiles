@@ -14,12 +14,12 @@ snippet = "awk '{print $1}'"
 [[snippets]]
 name = "{{ .name }}"
 trigger = "{{ .name }}"
-snippet = "{{ .cmd }}"
+snippet = {{ .cmd | toToml }}
 {{ if index . "global" -}}
 global = true
 {{ end -}}
 {{ if index . "cursor" -}}
-cursor = "{{ .cursor }}"
+cursor = {{ .cursor | toToml }}
 {{ end }}
 {{ end -}}
 # ── Complex snippets (shell expansion, zsh only) ──────────────────────────────

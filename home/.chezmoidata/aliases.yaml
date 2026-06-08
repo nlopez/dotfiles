@@ -13,7 +13,9 @@
 aliases:
 - {name: g, cmd: "git"}
 - {name: ga, cmd: "git add"}
-- {name: gc, cmd: "git commit"}
+- name: gc
+  cmd: 'git commit -m "{}"'
+  cursor: "{}"
 - {name: gcane, cmd: "git commit --amend --no-edit"}
 - {name: gconf, cmd: "git config --list --show-origin --show-scope --includes"}
 - {name: gd, cmd: "git diff"}
