@@ -104,7 +104,6 @@ packages:
         - obsidian
         - fsmonitor
         - wireshark-app
-        - zed
         - linearmouse
         - standard-notes
         - git-credential-manager

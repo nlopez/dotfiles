@@ -7,7 +7,8 @@
 .config/ghostty/themes/solarized-light
 .config/k9s/skins/solarized-dark.yaml
 .config/k9s/skins/solarized-light.yaml
-.config/zed/themes/solarized.json
+; Zed removed — clean up config dir and binary
+.config/zed
 .config/tmux/colors/solarized-dark.conf
 .config/tmux/colors/solarized-light.conf
 .config/tmux/scripts/auto-theme.sh
@@ -15,7 +16,6 @@
 .config/tmux/theme-lock
 .config/tmux/theme-watcher.pid
 
-.local/bin/zed
 .local/share/gitcache
 .pi/agent/extensions/auto-theme.ts
 .npmrc

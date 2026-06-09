@@ -1,4 +1,0 @@
-# Zed install configuration for Fedora Silverblue (Aurora).
-# Override ZED_CHANNEL to "preview", "nightly", or "dev" as needed.
-ZED_CHANNEL: stable
-ZED_VERSION: latest
