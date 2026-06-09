@@ -50,7 +50,7 @@ const GH_API_REPLY_RE = /\bgh\s+api\b[\s\S]*?\/pulls\/\d+\/comments\/\d+\/replie
 
 /** Build the footer string from the current model name. */
 function buildFooter(modelName: string): string {
-  return `\n\n---\n*Co-authored with Pi${modelName ? ` (${modelName})` : ""}*`;
+  return `\n\n---\n*Co-authored with [Pi](https://pi.dev)${modelName ? ` (${modelName})` : ""}*`;
 }
 
 /**
