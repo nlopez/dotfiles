@@ -85,9 +85,5 @@ Documents/WindowsPowerShell
 ; Oh My Zsh backup copies (left over from OMZ upgrades)
 .p10k.zsh
 
-; Vanilla Vim files — user migrated to Neovim (~/.config/nvim/)
-.vim/
-.viminfo
-
 ; Codex config (redirected via CODEX_HOME to ~/.config/codex)
 .codex
