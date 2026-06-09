@@ -1,0 +1,3 @@
+# nix-direnv — faster, GC-safe use_nix / use_flake implementation.
+# https://github.com/nix-community/nix-direnv
+source "$(nix eval --raw nixpkgs#nix-direnv.outPath)/share/nix-direnv/direnvrc"
