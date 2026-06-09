@@ -4,7 +4,7 @@
 pnpm:
   base:
   - mmd@4.7.1
-  - "@earendil-works/pi-coding-agent@0.77.0"
+  - "@earendil-works/pi-coding-agent@0.79.0"
   personal: []
   work: []
 # Packages moved from pnpm globals to pi-managed packages (pi install npm:).

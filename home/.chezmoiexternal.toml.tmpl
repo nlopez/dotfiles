@@ -9,7 +9,6 @@
     url = "https://github.com/jdx/mise/releases/download/{{ $miseVersion }}/mise-{{ $miseVersion }}-{{ $miseOS }}-{{ $miseArch }}.tar.gz"
     path = "mise/bin/mise"
     executable = true
-    refreshPeriod = "168h"
 
 [".local/bin/rclone"]
     type = "archive-file"
@@ -17,7 +16,6 @@
     path = "rclone"
     stripComponents = 1
     executable = true
-    refreshPeriod = "168h"
 
 [".local/share/oh-my-zsh"]
     type = "archive"
@@ -54,6 +52,7 @@
     stripComponents = 1
 
 # HashiCorp Terraform agent skills - https://github.com/hashicorp/agent-skills
+# URLs fetch from main branch — content can change without URL update.
 {{- range list
     "code-generation/terraform-search-import"
     "code-generation/terraform-style-guide"
@@ -76,6 +75,7 @@
 {{ end -}}
 
 # everything-claude-code rules - https://github.com/affaan-m/everything-claude-code
+# Fetches from main branch — keep refreshPeriod to detect upstream changes.
 [".claude/rules/ecc"]
     type = "archive"
     url = "https://github.com/affaan-m/everything-claude-code/archive/refs/heads/main.tar.gz"
@@ -91,6 +91,7 @@
     ]
 
 # VoltAgent infra subagents - https://github.com/VoltAgent/awesome-claude-code-subagents
+# Fetches from main branch — keep refreshPeriod to detect upstream changes.
 {{- range list
     "azure-infra-engineer"
     "cloud-architect"
@@ -119,6 +120,7 @@
 # Iosevka Nerd Font (Normal + Mono + Propo variants)
 # Iosevka Term Nerd Font (Term + Mono + Propo variants)
 # Both extracted to subdirectories then merged via script
+# Pinned versions — no refreshPeriod needed (new version = new URL).
 
 # Iosevka Nerd Font — https://github.com/ryanoasis/nerd-fonts
 {{-   $iosevkaUrl := "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Iosevka.zip" }}
@@ -128,7 +130,6 @@
     include = ["IosevkaNerdFont*"]
     exact = false
     stripComponents = 0
-    refreshPeriod = "168h"
 
 # Iosevka Term Nerd Font
 {{-   $iosevkaTermUrl := "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/IosevkaTerm.zip" }}
@@ -138,5 +139,4 @@
     include = ["IosevkaTermNerdFont*"]
     exact = false
     stripComponents = 0
-    refreshPeriod = "168h"
 {{- end }}
