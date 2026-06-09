@@ -37,10 +37,7 @@ global = true
 
 # ── Misc (tool/OS-specific, not portable to PowerShell) ───────────────────────
 
-[[snippets]]
-name = "brewup"
-trigger = "brewup"
-snippet = "brew update && brew upgrade && brew cleanup"
+
 
 {{ if eq .chezmoi.os "linux" }}
 # https://www.kernel.org/doc/html/latest/admin-guide/sysrq.html
