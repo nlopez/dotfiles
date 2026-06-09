@@ -1,3 +1,34 @@
+#!/usr/bin/env bash
+# chezmoi modify script for ~/.ssh/config
+#
+# Preserves any external # BEGIN...# END blocks (e.g. injected by the
+# Workspaces CLI) and re-emits the chezmoi-managed content below them.
+
+set -eufo pipefail
+
+# Capture every # BEGIN...# END block from the current file (stdin).
+blocks=""
+in_block=""
+while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" =~ \#.*BEGIN ]]; then
+        in_block=1
+    fi
+    if [[ -n "$in_block" ]]; then
+        blocks+="${line}"$'\n'
+    fi
+    if [[ "$line" =~ \#.*END ]]; then
+        in_block=""
+    fi
+done
+
+# Re-emit preserved blocks first, separated from the managed config by a
+# blank line so the two sections are visually distinct.
+if [[ -n "$blocks" ]]; then
+    printf '%s\n' "$blocks"
+fi
+
+# Emit the chezmoi-managed config.
+cat <<'CHEZMOI_SSH_CONFIG'
 Host *
   Compression yes
   ServerAliveInterval 240
@@ -27,8 +58,8 @@ Host github.com-nlopez
   User git
   IdentityFile ~/.ssh/id_nlopez.pub
   IdentitiesOnly yes
-
 {{- if .work }}
+
 # nick-lopez_ddog GitHub identity: ddoghq + ddoghq-sandbox org repos.
 Host github.com-nick-lopez_ddog
   HostName github.com
@@ -36,8 +67,8 @@ Host github.com-nick-lopez_ddog
   IdentityFile ~/.ssh/id_nick-lopez_ddog.pub
   IdentitiesOnly yes
 {{- end }}
-
 {{- if .personal }}
+
 # SilentShout42 GitHub identity: silentshout42 + kamotimestamps org repos.
 Host github.com-silentshout42
   HostName github.com
@@ -45,3 +76,4 @@ Host github.com-silentshout42
   IdentityFile ~/.ssh/id_silentshout42.pub
   IdentitiesOnly yes
 {{- end }}
+CHEZMOI_SSH_CONFIG
