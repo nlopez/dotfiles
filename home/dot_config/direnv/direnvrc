@@ -1,3 +1,17 @@
 # nix-direnv — faster, GC-safe use_nix / use_flake implementation.
 # https://github.com/nix-community/nix-direnv
 source "$(nix eval --raw nixpkgs#nix-direnv.outPath)/share/nix-direnv/direnvrc"
+
+# Redirect layout cache to ~/.cache/direnv/layouts/<hash><human-readable-path>
+# instead of polluting each project with a .direnv directory.
+# https://github.com/direnv/direnv/wiki/Customizing-cache-location#human-readable-directories
+: "${XDG_CACHE_HOME:="${HOME}/.cache"}"
+declare -A direnv_layout_dirs
+direnv_layout_dir() {
+    local hash path
+    echo "${direnv_layout_dirs[$PWD]:=$(
+        hash="$(sha1sum - <<< "$PWD" | head -c40)"
+        path="${PWD//[^a-zA-Z0-9]/-}"
+        echo "${XDG_CACHE_HOME}/direnv/layouts/${hash}${path}"
+    )}"
+}
