@@ -37,6 +37,7 @@ useBuiltinAge = false
   recipientsFile = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/personal-recipient.txt"
 {{- end }}
 
+{{- if not $headless }}
 [onepassword]
   mode = "account"
 
@@ -46,6 +47,7 @@ useBuiltinAge = false
   AGE_KEY_OP_URI   = "op://evjh25ux2mnoufaut6qhvm2pdi/xrueqtieq2hj6qydr5m3urcoey/private-key"
 {{- end }}
   # work: AGE_KEY_OP_URI intentionally unset — fetch-age-key.sh skips gracefully
+{{- end }}
 
 # Editor — use VS Code with --new-window so --wait actually blocks until the file is closed.
 # On headless machines fall back to $EDITOR / vi.
@@ -55,10 +57,12 @@ useBuiltinAge = false
   args    = ["--new-window", "--wait"]
 {{- end }}
 
+{{- if not $headless }}
 # Fetch the age identity from 1Password before chezmoi reads (decrypts) source state.
 [hooks.read-source-state.pre]
   command = "bash"
   args    = ["{{ .chezmoi.workingTree }}/scripts/fetch-age-key.sh"]
+{{- end }}
 
 # ---------------------------------------------------------------------------
 [data]

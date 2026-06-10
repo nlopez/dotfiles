@@ -1,3 +1,4 @@
+{{- if not .headless -}}
 # 1Password SSH agent config — pin the exact items the agent offers.
 # Docs: https://developer.1password.com/docs/ssh/agent/config
 
@@ -12,4 +13,5 @@ vault = "Employee"
 [[ssh-keys]]
 item = "GitHub - SilentShout42"
 vault = "Private"
+{{- end }}
 {{- end }}

@@ -13,10 +13,12 @@ export XDG_CACHE_HOME="$HOME/.cache"
 
 export COLORTERM=truecolor
 
+{{- if not .headless }}
 {{- if .work }}
 export OP_ACCOUNT=datadog.1password.com
 {{- else }}
 export OP_ACCOUNT=my.1password.com
+{{- end }}
 {{- end }}
 {{- if .work }}
 
@@ -91,10 +93,12 @@ export EDITOR="vim"
 export AWS_VAULT_KEYCHAIN_NAME=login
 {{- end }}
 
+{{- if not .headless }}
 # Set on all machines — Automation vault (Kagi API)
 export KAGI_API_KEY={{ onepasswordRead "op://Automation/Kagi API/credential" "my.1password.com" }}
 
 {{- if .personal }}
 # Automation vault — personal machine secrets
 export HF_TOKEN={{ onepasswordRead "op://Automation/HF_TOKEN/credential" "my.1password.com" }}
+{{- end }}
 {{- end }}

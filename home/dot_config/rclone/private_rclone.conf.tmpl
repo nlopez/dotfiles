@@ -1,3 +1,4 @@
+{{- if not .headless -}}
 [do]
 type = s3
 provider = DigitalOcean
@@ -73,3 +74,4 @@ vfs-cache-max-age = 168h
 vfs-cache-poll-interval = 15m
 vfs-read-ahead = 128K
 vfs-read-chunk-size = 64K
+{{- end }}
