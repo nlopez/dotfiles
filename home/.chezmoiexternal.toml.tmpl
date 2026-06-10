@@ -51,69 +51,6 @@
     exact = true
     stripComponents = 1
 
-# HashiCorp Terraform agent skills - https://github.com/hashicorp/agent-skills
-# URLs fetch from main branch — content can change without URL update.
-{{- range list
-    "code-generation/terraform-search-import"
-    "code-generation/terraform-style-guide"
-    "code-generation/terraform-test"
-    "module-generation/refactor-module"
-    "module-generation/terraform-stacks"
-    "provider-development/new-terraform-provider"
-    "provider-development/provider-actions"
-    "provider-development/provider-docs"
-    "provider-development/provider-resources"
-    "provider-development/provider-test-patterns"
-    "provider-development/run-acceptance-tests" }}
-{{- $parts := splitList "/" . }}
-{{- $cat := index $parts 0 }}
-{{- $skill := index $parts 1 }}
-[".claude/skills/{{ $skill }}/SKILL.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/hashicorp/agent-skills/main/terraform/{{ $cat }}/skills/{{ $skill }}/SKILL.md"
-    refreshPeriod = "168h"
-{{ end -}}
-
-# everything-claude-code rules - https://github.com/affaan-m/everything-claude-code
-# Fetches from main branch — keep refreshPeriod to detect upstream changes.
-[".claude/rules/ecc"]
-    type = "archive"
-    url = "https://github.com/affaan-m/everything-claude-code/archive/refs/heads/main.tar.gz"
-    stripComponents = 2
-    refreshPeriod = "240h"
-    include = [
-        "rules/common/**",
-        "rules/typescript/**",
-        "rules/python/**",
-        "rules/golang/**",
-        "rules/rust/**",
-        "rules/web/**",
-    ]
-
-# VoltAgent infra subagents - https://github.com/VoltAgent/awesome-claude-code-subagents
-# Fetches from main branch — keep refreshPeriod to detect upstream changes.
-{{- range list
-    "azure-infra-engineer"
-    "cloud-architect"
-    "database-administrator"
-    "deployment-engineer"
-    "devops-engineer"
-    "devops-incident-responder"
-    "docker-expert"
-    "incident-responder"
-    "kubernetes-specialist"
-    "network-engineer"
-    "platform-engineer"
-    "security-engineer"
-    "sre-engineer"
-    "terraform-engineer"
-    "terragrunt-expert" }}
-[".claude/agents/{{ . }}.md"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/03-infrastructure/{{ . }}.md"
-    refreshPeriod = "168h"
-{{ end -}}
-
 {{- $fontDir := .platform.font_dir }}
 
 {{- if and $fontDir (not .headless) }}

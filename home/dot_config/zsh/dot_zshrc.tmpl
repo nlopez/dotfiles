@@ -1,8 +1,8 @@
 # Load shared POSIX env (gnubin PATH, etc.) for all shell types.
 . "${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
 
-# Skip interactive-only config when running under Claude Code or Pi.
-[[ -n "${CLAUDECODE:-}" || -n "${PI_CODING_AGENT:-}" ]] && return
+# Skip interactive-only config when running under Pi.
+[[ -n "${PI_CODING_AGENT:-}" ]] && return
 
 ###############################################################################
 # Oh My Zsh — variables must be set before sourcing

@@ -143,7 +143,6 @@ All new tool configurations **must** follow the [XDG Base Directory Specificatio
 | zabrze                 | `~/.config/zabrze/`                     | Native XDG support                            |
 | Zed                    | `~/.config/zed/`                        | Native XDG support                            |
 | zsh startup files      | `~/.config/zsh/{zshenv,zprofile,zshrc}` | `ZDOTDIR` in bootstrap `~/.zshenv`            |
-| Claude Code            | `~/.config/claude/`                     | `CLAUDE_CONFIG_DIR` env var                   |
 | Pi agent               | `~/.config/pi/agent/`                   | `PI_CODING_AGENT_DIR` env var                 |
 | Context-mode           | `~/.local/state/pi/context-mode/`       | `CONTEXT_MODE_DIR` env var                    |
 

@@ -87,3 +87,8 @@ Documents/WindowsPowerShell
 
 ; Codex config (redirected via CODEX_HOME to ~/.config/codex)
 .codex
+
+; Claude — no longer managed
+.config/claude
+.claude
+.local/bin/claude
