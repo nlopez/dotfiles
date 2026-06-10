@@ -39,13 +39,7 @@
 
 ; Per-identity SSH keys are selected via core.sshCommand in each identity
 ; include (see config_nlopez, config_nick-lopez_ddog, config_silentshout42).
-
-; Normalise all GitHub remote URLs to SSH (git@github.com:org/repo.git).
-; Covers HTTPS clones, git:// and the github: shorthand.
-[url "git@github.com:"]
-  insteadOf = https://github.com/
-  insteadOf = git://github.com/
-  insteadOf = github:
+; Remotes use natural github.com URLs — no insteadOf rewrites needed.
 
 [init]
   defaultBranch = main
