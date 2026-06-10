@@ -1,7 +1,7 @@
 {{- /* .chezmoiignore is always interpreted as a template — no .tmpl suffix needed. */ -}}
 
 # ── Work-only files ────────────────────────────────────────────────────────────
-{{- if not .work }}
+{{- if or (not .work) .headless }}
 .zshrc_local
 {{ end -}}
 
