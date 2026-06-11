@@ -7,7 +7,9 @@ exit 0
 
 set -eufo pipefail
 
-if command -v brew &>/dev/null; then
+# Check the real binary, not just PATH — a wrapper/shim could satisfy command -v
+# without Linuxbrew actually being installed.
+if [ -x "{{ .packages.linux.brew_prefix }}/bin/brew" ]; then
   echo "Homebrew already installed, skipping."
   exit 0
 fi

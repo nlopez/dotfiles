@@ -3,7 +3,7 @@
 
 # Ensure brew is in PATH when running immediately after install-homebrew runs
 # on a fresh machine where zprofile has not yet been sourced.
-export PATH="{{ .packages.brew_prefix }}/bin:$PATH"
+export PATH="{{ .packages.linux.brew_prefix }}/bin:$PATH"
 
 set -eufo pipefail
 
