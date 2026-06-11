@@ -3,8 +3,15 @@
 
 import json
 import os
+import shutil
 import subprocess
 import sys
+
+# Headless machines don't source zprofile, so brew-installed pnpm isn't in PATH.
+# Prepend the brew prefix so pnpm is found after install-packages-brew runs.
+_BREW_BIN = "{{ .packages.brew_prefix }}/bin"
+if _BREW_BIN not in os.environ.get("PATH", "").split(":"):
+    os.environ["PATH"] = f"{_BREW_BIN}:{os.environ.get('PATH', '')}"
 
 # --- Manifest: extract base package names (strip @version) ---
 def base_spec(spec):
@@ -41,6 +48,10 @@ MANIFEST = [
 manifest_set = {base_spec(s) for s in MANIFEST}
 
 # --- Get currently installed packages ---
+if not shutil.which("pnpm"):
+    print("✅ pnpm not found; nothing to clean up.")
+    sys.exit(0)
+
 result = subprocess.run(
     ["pnpm", "list", "-g", "--json"],
     capture_output=True,

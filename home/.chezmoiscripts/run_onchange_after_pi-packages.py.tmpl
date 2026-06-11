@@ -10,8 +10,15 @@ Hash trigger (chezmoi run_onchange):
 """
 import json
 import os
+import shutil
 import subprocess
 import sys
+
+# Headless machines don't source zprofile, so brew-installed npm isn't in PATH.
+# Prepend the brew prefix so npm is found after install-packages-brew runs.
+_BREW_BIN = "{{ .packages.brew_prefix }}/bin"
+if _BREW_BIN not in os.environ.get("PATH", "").split(":"):
+    os.environ["PATH"] = f"{_BREW_BIN}:{os.environ.get('PATH', '')}"
 
 # Declared packages (injected by chezmoi template from .chezmoidata/pi.yaml).
 # personal_only_packages are excluded on work machines.
@@ -55,7 +62,7 @@ def ensure_file(path: str, content: str) -> bool:
 
 # --- Pre-flight checks ---
 
-if subprocess.run(["npm", "--version"], capture_output=True).returncode != 0:
+if not shutil.which("npm"):
     print("npm not found, skipping Pi package reconciliation", file=sys.stderr)
     sys.exit(0)
 

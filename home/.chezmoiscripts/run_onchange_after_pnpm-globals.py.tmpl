@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
 """Install all pnpm global packages from the manifest in a single batch."""
 
+import os
+import shutil
 import subprocess
 import sys
+
+# Headless machines don't source zprofile, so brew-installed pnpm isn't in PATH.
+# Prepend the brew prefix so pnpm is found after install-packages-brew runs.
+_BREW_BIN = "{{ .packages.brew_prefix }}/bin"
+if _BREW_BIN not in os.environ.get("PATH", "").split(":"):
+    os.environ["PATH"] = f"{_BREW_BIN}:{os.environ.get('PATH', '')}"
 
 MANIFEST = [
 {{- range .pnpm.base }}
@@ -23,7 +31,11 @@ MANIFEST = [
 if not MANIFEST:
     sys.exit(0)
 
-env = {**dict(__import__("os").environ), "CI": "true"}
+if not shutil.which("pnpm"):
+    print("pnpm not found; skipping global package install", file=sys.stderr)
+    sys.exit(0)
+
+env = {**dict(os.environ), "CI": "true"}
 result = subprocess.run(
     ["pnpm", "add", "-g", "--reporter=append-only"] + MANIFEST,
     env=env,
