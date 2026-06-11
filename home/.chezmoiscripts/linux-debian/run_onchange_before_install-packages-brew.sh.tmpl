@@ -8,6 +8,9 @@ export PATH="{{ .packages.linux.brew_prefix }}/bin:$PATH"
 set -eufo pipefail
 
 brew bundle --file=/dev/stdin <<'EOF'
+brew "atuin"
+brew "eza"
 brew "node"
 brew "pnpm"
+brew "zoxide"
 EOF
