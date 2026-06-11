@@ -1,5 +1,4 @@
 #!/bin/bash
-{{ if eq .chezmoi.os "darwin" -}}
 # Wrapper: elevate via Privileges.app before privileged brew operations.
 # Mirrors the sudo alias pattern so both interactive and script use is covered.
 
@@ -25,8 +24,5 @@ if [[ "$needs_priv" == true ]]; then
     sleep 1
   fi
 fi
-{{ else -}}
-REAL_BREW=/home/linuxbrew/.linuxbrew/bin/brew
-{{ end -}}
 
 exec "$REAL_BREW" "$@"

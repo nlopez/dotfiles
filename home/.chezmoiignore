@@ -73,7 +73,7 @@ Library/Fonts
 {{ end -}}
 
 # ── ~/.local/bin: conditional scripts ─────────────────────────────────────────
-{{ if not .work -}}
+{{ if or (not .work) (ne .chezmoi.os "darwin") -}}
 .local/bin/brew
 {{ end -}}
 {{ if ne .chezmoi.os "darwin" -}}

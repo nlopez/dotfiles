@@ -80,6 +80,11 @@ Documents/WindowsPowerShell
 .zcompdump-*
 .zcompdump-local-*
 
+; brew shim is Darwin-only — remove from Linux machines
+{{ if ne .chezmoi.os "darwin" }}
+.local/bin/brew
+{{ end }}
+
 ; ── Cleanup untracked runtime files ──────────────────────────────────────────
 
 ; Oh My Zsh backup copies (left over from OMZ upgrades)
