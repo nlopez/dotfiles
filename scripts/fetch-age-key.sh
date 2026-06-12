@@ -4,8 +4,8 @@
 # available before chezmoi reads (and therefore needs to decrypt) any source files.
 #
 # Environment variables injected by chezmoi [scriptEnv] in chezmoi.toml:
-#   AGE_KEY_OP_URI      1Password Connect secret reference, e.g. op://evjh.../xrue.../private-key
-#                       Unset on work machines (age key not in Automation vault) — script skips.
+#   AGE_KEY_OP_URI      1Password secret reference, e.g. op://vault/item/private-key
+#                       Set via [scriptEnv] in chezmoi.toml.tmpl for both personal and work machines.
 #
 # The identity file is left on disk between chezmoi runs (no post-hook cleanup).
 # The directory is created with mode 700; the identity file is created with mode 600.
@@ -19,9 +19,9 @@ if [[ -s "${IDENTITY_FILE}" ]]; then
     exit 0
 fi
 
-# If AGE_KEY_OP_URI is absent this machine has no age key configured via Connect
-# (e.g. work machines where the key is not in the Automation vault, or headless/ephemeral).
-# Warn but do not fail so chezmoi continues normally.
+# If AGE_KEY_OP_URI is absent this machine has no age key configured
+# (e.g. headless/ephemeral machines). Warn but do not fail so chezmoi
+# continues normally.
 if [[ -z "${AGE_KEY_OP_URI:-}" ]]; then
     echo "fetch-age-key: AGE_KEY_OP_URI not set — skipping age key fetch" >&2
     exit 0

@@ -39,11 +39,11 @@ MATRIX: list[tuple[str, dict[str, bool]]] = [
     ("linux", {"work": False, "personal": True}),
 ]
 
-GIT_INCLUDES = ["config_nlopez", "config_nick-lopez_ddog", "config_silentshout42"]
+GIT_INCLUDES = ["config_nlopez", "config_work", "config_work_id", "config_silentshout42"]
 SSH_HOSTS = [
     "github.com",
     "github.com-nlopez",
-    "github.com-nick-lopez_ddog",
+    "github.com-work",
     "github.com-silentshout42",
 ]
 

@@ -67,6 +67,8 @@ Library/Fonts
 # ── Age encryption: exclude the other machine class's secrets directory ────────
 {{ if not .work -}}
 .config/work-secrets
+.config/git/config_work
+.config/git/config_work_id
 {{ end -}}
 {{ if not .personal -}}
 .config/personal-secrets

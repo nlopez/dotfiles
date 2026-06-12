@@ -14,16 +14,7 @@ export XDG_CACHE_HOME="$HOME/.cache"
 export COLORTERM=truecolor
 
 {{- if not .headless }}
-{{- if .work }}
-export OP_ACCOUNT=datadog.1password.com
-{{- else }}
 export OP_ACCOUNT=my.1password.com
-{{- end }}
-{{- end }}
-{{- if .work }}
-
-# Pi MCP adapter: Slack OAuth app expects callbacks on port 3118.
-export MCP_OAUTH_CALLBACK_PORT=3118
 {{- end }}
 
 {{- $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
@@ -68,9 +59,6 @@ unset _gnubin
 for _d in \
   "$HOME/go/bin" \
   "$HOME/.cargo/bin" \
-{{- if .work }}
-  "/opt/dogbrew/bin" \
-{{- end }}
 ; do
   [[ -d "$_d" ]] && PATH="$_d:$PATH"
 done
@@ -89,7 +77,8 @@ export VISUAL="code"
 export EDITOR="vim"
 
 {{- if .work }}
-export AWS_VAULT_KEYCHAIN_NAME=login
+# Source work-specific env vars (age-encrypted in source tree, decrypted on apply).
+[[ -r "${XDG_CONFIG_HOME}/work-secrets/env" ]] && source "${XDG_CONFIG_HOME}/work-secrets/env"
 {{- end }}
 
 {{- if not .headless }}

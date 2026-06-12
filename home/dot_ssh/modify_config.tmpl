@@ -52,7 +52,7 @@ Host github.com
 # Each alias pins exactly one public key so the 1Password agent offers the
 # right identity without attempting others.
 
-# nlopez GitHub identity: nlopez + DataDog org repos.
+# nlopez GitHub identity: nlopez personal repos and open-source.
 Host github.com-nlopez
   HostName github.com
   User git
@@ -60,11 +60,11 @@ Host github.com-nlopez
   IdentitiesOnly yes
 {{- if .work }}
 
-# nick-lopez_ddog GitHub identity: ddoghq + ddoghq-sandbox org repos.
-Host github.com-nick-lopez_ddog
+# Work GitHub identity — employer org repos.
+Host github.com-work
   HostName github.com
   User git
-  IdentityFile ~/.ssh/id_nick-lopez_ddog.pub
+  IdentityFile ~/.ssh/id_work.pub
   IdentitiesOnly yes
 {{- end }}
 {{- if .personal }}

@@ -41,12 +41,14 @@ useBuiltinAge = false
 [onepassword]
   mode = "account"
 
-# Environment variables passed to all scripts and hooks.
-# age-key — Automation vault copy of Private/age-key
+[scriptEnv]
+# AGE_KEY_OP_URI is injected into the read-source-state.pre hook (fetch-age-key.sh)
+# so the age private key is on disk before chezmoi decrypts any source files.
 {{- if $personal }}
-  AGE_KEY_OP_URI   = "op://evjh25ux2mnoufaut6qhvm2pdi/xrueqtieq2hj6qydr5m3urcoey/private-key"
+  AGE_KEY_OP_URI = "op://evjh25ux2mnoufaut6qhvm2pdi/xrueqtieq2hj6qydr5m3urcoey/private-key"
+{{- else if $work }}
+  AGE_KEY_OP_URI = {{ promptStringOnce . "workAgeKeyURI" "Work age key 1Password URI (op://vault/item/private-key)" | quote }}
 {{- end }}
-  # work: AGE_KEY_OP_URI intentionally unset — fetch-age-key.sh skips gracefully
 {{- end }}
 
 # Editor — use VS Code with --new-window so --wait actually blocks until the file is closed.

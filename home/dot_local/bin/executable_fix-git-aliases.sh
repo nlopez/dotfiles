@@ -5,7 +5,7 @@
 # Since identity selection now happens via core.sshCommand in per-repo git
 # config includes, remotes should use plain git@github.com:org/repo.git URLs.
 # Any remote using an old SSH alias (github.com-work, github.com-personal,
-# github.com-nlopez, github.com-nick-lopez_ddog, github.com-silentshout42,
+# github.com-nlopez, github.com-work, github.com-silentshout42,
 # github.com-ddog, github.com-hobby) needs to be rewritten.
 #
 # Usage:
@@ -17,7 +17,7 @@ set -euo pipefail
 SEARCH_DIR="${HOME}/src/github.com"
 
 # All known SSH alias patterns (old and new).
-ALIAS_RE='git@github\.com-(nlopez|nick-lopez_ddog|silentshout42|work|personal|ddog|hobby):'
+ALIAS_RE='git@github\.com-(nlopez|work|silentshout42|personal|ddog|hobby):'
 
 alias_to_natural() {
   local url="$1"

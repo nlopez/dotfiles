@@ -38,7 +38,7 @@
   guessRemote = true
 
 ; Per-identity SSH keys are selected via core.sshCommand in each identity
-; include (see config_nlopez, config_nick-lopez_ddog, config_silentshout42).
+; include (see config_nlopez, config_work, config_silentshout42).
 ; Remotes use natural github.com URLs — no insteadOf rewrites needed.
 
 [init]
@@ -110,7 +110,7 @@
 {{/* Per-identity includes go last so they override defaults above.       */}}
 {{/* Primary: gitdir-based (covers all URL variants for a given clone).   */}}
 
-; --- nlopez identity: DataDog + nlopez personal repos + chezmoi ---
+; --- nlopez identity: nlopez personal repos, open-source, and chezmoi ---
 
 [includeIf "gitdir/i:~/src/github.com/datadog/**"]
   path = config_nlopez
@@ -124,14 +124,11 @@
 [includeIf "gitdir/i:~/.local/share/chezmoi/.git/worktrees/**"]
   path = config_nlopez
 
-; --- nick-lopez_ddog identity: ddoghq + ddoghq-sandbox org repos ---
+; --- work identity (routing + identity in age-encrypted config_work / config_work_id) ---
 {{- if .work }}
 
-[includeIf "gitdir/i:~/src/github.com/ddoghq/**"]
-  path = config_nick-lopez_ddog
-
-[includeIf "gitdir/i:~/src/github.com/ddoghq-sandbox/**"]
-  path = config_nick-lopez_ddog
+[include]
+  path = config_work
 {{- end }}
 
 ; --- silentshout42 identity: silentshout42 + kamotimestamps org repos ---
@@ -163,22 +160,6 @@
 
 [includeIf "hasconfig:remote.*.url:git@github.com:[Nn][Ll]opez/**"]
   path = config_nlopez
-
-; --- nick-lopez_ddog identity fallbacks ---
-{{- if .work }}
-
-[includeIf "hasconfig:remote.*.url:https://github.com/[Dd][Dd]oghq/**"]
-  path = config_nick-lopez_ddog
-
-[includeIf "hasconfig:remote.*.url:git@github.com:[Dd][Dd]oghq/**"]
-  path = config_nick-lopez_ddog
-
-[includeIf "hasconfig:remote.*.url:https://github.com/[Dd][Dd]oghq-[Ss]andbox/**"]
-  path = config_nick-lopez_ddog
-
-[includeIf "hasconfig:remote.*.url:git@github.com:[Dd][Dd]oghq-[Ss]andbox/**"]
-  path = config_nick-lopez_ddog
-{{- end }}
 
 ; --- silentshout42 identity fallbacks ---
 {{- if .personal }}

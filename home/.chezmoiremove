@@ -23,12 +23,14 @@
 Library/LaunchAgents/com.user.dark-notify-tmux.plist
 .config/pnpm/rc
 
-; id_ddog.pub was the old name for id_nick-lopez_ddog.pub — ensure it is gone
+; id_ddog.pub and id_nick-lopez_ddog.pub were old names — ensure they are gone
 .ssh/id_ddog.pub
+.ssh/id_nick-lopez_ddog.pub
 
-; Renamed identity config files (old names from identity rename)
+; Renamed identity config files (old names from identity renames)
 .config/git/config_datadog
 .config/git/config_hobby
+.config/git/config_nick-lopez_ddog
 
 ; Rclone mounts removed — clean up generated runtime artefacts
 .local/bin/rclone-media-mount.sh

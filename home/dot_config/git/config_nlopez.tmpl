@@ -1,5 +1,5 @@
-; nlopez GitHub identity: nlopez + DataDog org repos (and the chezmoi
-; dotfile repo). Uses the noreply GitHub email.
+; nlopez GitHub identity: nlopez personal repos, open-source contributions,
+; and the chezmoi dotfile repo. Uses the noreply GitHub email.
 
 [user]
   name = Nick Lopez
@@ -14,9 +14,7 @@
 
 [core]
   sshCommand = ssh -o IdentityFile=~/.ssh/id_nlopez.pub -o IdentitiesOnly=yes
-{{- if .work }}
-  hooksPath = /usr/local/dd/global_hooks
-{{- end }}
+
 
 [credential "https://github.com"]
   username = nlopez
