@@ -54,6 +54,13 @@ Library/Fonts
 .config/ghostty
 {{ end -}}
 
+# ── Workspace environments: skip git config so the host identity is preserved ─
+{{ if env "IN_WORKSPACES" -}}
+.config/git/config
+.config/git/config_nlopez
+.config/git/allowed_signers
+{{ end -}}
+
 # ── Personal-only files ────────────────────────────────────────────────────────
 {{ if not .personal -}}
 .config/rclone/rclone.conf
