@@ -7,6 +7,8 @@
  *
  * Covered subcommands: gh {pr,issue} {create,edit,comment,review}
  *                      gh api .../pulls/<n>/comments/<n>/replies
+ *                      gh api -X PATCH .../pulls/<n>  (direct REST body update)
+ *                      gh api -X PATCH .../issues/<n> (direct REST body update)
  *
  * Two body delivery mechanisms are handled:
  *   --body "..."      → footer appended to the inline string in the command
@@ -16,9 +18,18 @@
  * Works on compound shell commands (e.g. `cd /path && gh pr edit 1 --body "..."`)
  * by operating on the raw command string before execution.
  *
+ * The footer is always placed at the very end of the body. Any pre-existing Pi
+ * footer found anywhere in the body (not just at the end) is stripped before the
+ * fresh footer is appended, so repeated edits — including cases where content was
+ * added after a previous footer — never accumulate duplicates.
+ *
+ * Note: gh pr/issue comment --edit-last is handled correctly; --body is injected
+ * the same way as for new comments and the existing footer is stripped globally.
+ *
  * Known limitations:
  * - --body-file - (stdin) cannot be intercepted
  * - $'...' ANSI-C quoting in --body is not intercepted
+ * - --editor / --web flags open an external editor or browser and cannot be intercepted
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
@@ -30,15 +41,25 @@ import { resolve } from "node:path";
 const GH_CONTENT_RE = /\bgh\s+(?:pr|issue)\s+(?:create|edit|comment|review)\b/;
 
 /**
- * Matches a Pi footer at the end of a body (actual newlines, optional trailing whitespace).
- * Used to strip any pre-existing footer before appending a fresh one, ensuring that
- * multiple edits to the same PR/issue never accumulate duplicate footers.
+ * Matches a Pi footer anywhere in a body (global, not end-anchored).
+ * Intentionally does NOT consume the trailing newline after the footer line —
+ * that lets the regex match two back-to-back footers in a single pass (the
+ * \n\n separator between them stays intact for the second match), and any
+ * leftover newlines are cleaned up by the subsequent trimEnd in stripFooter.
+ *
+ * ⚠️  This regex has the `g` flag — always reset lastIndex before reuse.
  */
-const FOOTER_RE = /\r?\n\r?\n---\r?\n\*Co-authored with Pi[^*]*\*\s*$/;
+const FOOTER_RE = /\r?\n\r?\n---\r?\n\*Co-authored with \[Pi\][^*]*\*[ \t]*/g;
 
-/** Remove any existing Pi footer from a body string. */
+/**
+ * Remove every Pi footer from a body string and trim trailing CR/LF chars.
+ * Trimming ensures the fresh footer's leading \n\n is the only separator
+ * between the body content and the attribution line, regardless of how many
+ * blank lines or CRLF endings were left behind after stripping.
+ */
 function stripFooter(body: string): string {
-  return body.replace(FOOTER_RE, "");
+  FOOTER_RE.lastIndex = 0;
+  return body.replace(FOOTER_RE, "").replace(/[\r\n]+$/, "");
 }
 
 // Matches --body-file <path> or -F <path> (quoted or unquoted, not stdin)
@@ -47,6 +68,12 @@ const BODY_FILE_RE = /(?:--body-file|-F)\s+(?:"([^"]+)"|'([^']+)'|(?!-)(\S+))/;
 // gh api calls to PR review-comment reply endpoints
 // e.g.: gh api repos/owner/repo/pulls/123/comments/456/replies -f body="..."
 const GH_API_REPLY_RE = /\bgh\s+api\b[\s\S]*?\/pulls\/\d+\/comments\/\d+\/replies\b/;
+
+// gh api -X PATCH calls that update the top-level body of a PR or issue directly.
+// e.g.: gh api -X PATCH repos/owner/repo/pulls/1 -f body="..."
+//       gh api -X PATCH repos/owner/repo/issues/1 -f body="..."
+// The (?!\/) lookahead prevents matching sub-resource paths like /pulls/1/reviews.
+const GH_API_PATCH_RE = /\bgh\s+api\b[\s\S]*?-X\s+PATCH\b[\s\S]*?\/(?:pulls|issues)\/\d+(?!\/)/;
 
 /** Build the footer string from the current model name. */
 function buildFooter(modelName: string): string {
@@ -133,7 +160,7 @@ function applyAttribution(command: string, footer: string, cwd: string): { comma
     return { command, modified: filePatched };
   }
 
-  if (GH_API_REPLY_RE.test(command)) {
+  if (GH_API_REPLY_RE.test(command) || GH_API_PATCH_RE.test(command)) {
     const rewritten = injectApiReplyBody(command, footer);
     if (rewritten !== null) return { command: rewritten, modified: true };
   }
