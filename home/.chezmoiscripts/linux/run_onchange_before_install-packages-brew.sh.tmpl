@@ -1,6 +1,7 @@
 #!/bin/bash
 
 {{ $brewConfig := index .packages "linux" "brew" -}}
+{{ $taps := $brewConfig.taps | default dict -}}
 {{ $brews := $brewConfig.brews.base -}}
 
 {{ if .personal -}}
@@ -29,7 +30,24 @@ export PATH="{{ .packages.brew_prefix }}/bin:$PATH"
 
 set -eufo pipefail
 
+# Explicitly tap all repositories before bundle install to guarantee they are
+# present on first install.
+{{ range $tap, $url := $taps -}}
+brew tap {{ $tap | quote }} {{ $url | quote }} 2>/dev/null || true
+{{ end -}}
+{{ range ($brews | sortAlpha | uniq) -}}
+{{- if contains "/" . -}}
+{{-   $parts := splitList "/" . -}}
+{{-   $tapKey := printf "%s/%s" (index $parts 0) (index $parts 1) -}}
+{{-   if not (hasKey $taps $tapKey) }}
+brew tap {{ $tapKey | quote }} 2>/dev/null || true
+{{-   end -}}
+{{ end -}}
+{{- end }}
 brew bundle --file=/dev/stdin --cleanup <<EOF
+{{ range $tap, $url := $taps -}}
+tap {{ $tap | quote }}, {{ $url | quote }}
+{{ end -}}
 {{ range ($brews | sortAlpha | uniq ) -}}
 brew {{ . | quote }}
 {{ end -}}

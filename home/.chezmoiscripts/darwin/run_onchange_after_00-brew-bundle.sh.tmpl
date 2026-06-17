@@ -52,6 +52,35 @@ brew trust --cask {{ . | quote }} 2>/dev/null || true
 {{- end -}}
 {{ end -}}
 {{- end }}
+# Explicitly tap all repositories before bundle install to guarantee they are
+# present on first install. brew bundle's inline tap processing is unreliable
+# under HOMEBREW_REQUIRE_TAP_TRUST=1 on a fresh machine.
+{{/* Custom-remote taps: tap with their explicit URLs. */}}
+{{- range $tap, $url := $customRemoteTaps }}
+brew tap {{ $tap | quote }} {{ $url | quote }} 2>/dev/null || true
+{{ end -}}
+{{/* Standard GitHub taps inferred from formula names (not in custom-remote). */}}
+{{ range ($brews | sortAlpha | uniq) -}}
+{{- if contains "/" . -}}
+{{-   $parts := splitList "/" . -}}
+{{-   $tapKey := printf "%s/%s" (index $parts 0) (index $parts 1) -}}
+{{-   if not (hasKey $customRemoteTaps $tapKey) }}
+brew trust {{ $tapKey | quote }} 2>/dev/null || true
+brew tap {{ $tapKey | quote }} 2>/dev/null || true
+{{-   end -}}
+{{ end -}}
+{{- end -}}
+{{/* Standard GitHub taps inferred from cask names (not in custom-remote). */}}
+{{ range ($casks | sortAlpha | uniq) -}}
+{{- if contains "/" . -}}
+{{-   $parts := splitList "/" . -}}
+{{-   $tapKey := printf "%s/%s" (index $parts 0) (index $parts 1) -}}
+{{-   if not (hasKey $customRemoteTaps $tapKey) }}
+brew trust {{ $tapKey | quote }} 2>/dev/null || true
+brew tap {{ $tapKey | quote }} 2>/dev/null || true
+{{-   end -}}
+{{ end -}}
+{{- end }}
 # HOMEBREW_BUNDLE_FILE is exported in .zprofile → ~/.config/brew/Brewfile
 BREWFILE="${HOMEBREW_BUNDLE_FILE:-{{ .chezmoi.homeDir }}/.config/brew/Brewfile}"
 brew bundle --file="${BREWFILE}"

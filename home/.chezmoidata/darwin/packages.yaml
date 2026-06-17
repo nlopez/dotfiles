@@ -10,6 +10,7 @@ packages:
         jundot/omlx: "https://github.com/jundot/omlx"
         ryooooooga/tap: "https://github.com/ryooooooga/homebrew-tap"
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
+        smittytone/smittytone: "https://github.com/smittytone/homebrew-smittytone"
       brews:
         base:
         - slp/krun/krunkit

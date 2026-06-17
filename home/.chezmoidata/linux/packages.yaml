@@ -4,6 +4,8 @@ packages:
   linux:
     brew_prefix: /home/linuxbrew/.linuxbrew
     brew:
+      taps:
+        ryooooooga/tap: "https://github.com/ryooooooga/homebrew-tap"
       brews:
         base:
         - gcc
