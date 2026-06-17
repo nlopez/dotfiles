@@ -26,6 +26,8 @@
 # ---------------------------------------------------------------------------
 # useBuiltinAge = false forces use of the external age binary (v1.3+) which
 # has native ML-KEM-768 + X25519 hybrid (PQ) support.
+# Skipped on headless — no 1Password to fetch the identity key.
+{{- if not $headless }}
 encryption    = "age"
 useBuiltinAge = false
 
@@ -35,6 +37,7 @@ useBuiltinAge = false
   recipientsFile = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/work-recipient.txt"
 {{- else if $personal }}
   recipientsFile = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/personal-recipient.txt"
+{{- end }}
 {{- end }}
 
 {{- if not $headless }}

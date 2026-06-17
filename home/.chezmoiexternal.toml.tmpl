@@ -6,6 +6,7 @@
 {{- $ageOS := .chezmoi.os -}}
 {{- $ageArch := .chezmoi.arch -}}
 
+{{- if not .headless }}
 # age — https://github.com/FiloSottile/age
 [".local/bin/age"]
     type = "archive-file"
@@ -20,6 +21,7 @@
     url = "https://github.com/FiloSottile/age/releases/download/{{ $ageVersion }}/age-{{ $ageVersion }}-{{ $ageOS }}-{{ $ageArch }}.tar.gz"
     path = "age/age-keygen"
     executable = true
+{{- end }}
 
 # mise — https://github.com/jdx/mise
 [".local/bin/mise"]
