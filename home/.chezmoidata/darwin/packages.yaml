@@ -18,7 +18,6 @@ packages:
         - cormacrelf/tap/dark-notify
         - tabiew
         - podman
-        - age
         - git-lfs
         - jj
         - flock

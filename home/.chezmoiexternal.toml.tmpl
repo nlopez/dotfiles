@@ -2,6 +2,25 @@
 {{- $miseOS := "linux" -}}{{- if eq .chezmoi.os "darwin" -}}{{- $miseOS = "macos" -}}{{- end -}}
 {{- $miseArch := .chezmoi.arch -}}{{- if eq .chezmoi.arch "amd64" -}}{{- $miseArch = "x64" -}}{{- end -}}
 
+{{- $ageVersion := "v1.3.1" -}}
+{{- $ageOS := .chezmoi.os -}}
+{{- $ageArch := .chezmoi.arch -}}
+
+# age — https://github.com/FiloSottile/age
+[".local/bin/age"]
+    type = "archive-file"
+    # renovate: datasource=github-releases depName=FiloSottile/age
+    url = "https://github.com/FiloSottile/age/releases/download/{{ $ageVersion }}/age-{{ $ageVersion }}-{{ $ageOS }}-{{ $ageArch }}.tar.gz"
+    path = "age/age"
+    executable = true
+
+[".local/bin/age-keygen"]
+    type = "archive-file"
+    # renovate: datasource=github-releases depName=FiloSottile/age
+    url = "https://github.com/FiloSottile/age/releases/download/{{ $ageVersion }}/age-{{ $ageVersion }}-{{ $ageOS }}-{{ $ageArch }}.tar.gz"
+    path = "age/age-keygen"
+    executable = true
+
 # mise — https://github.com/jdx/mise
 [".local/bin/mise"]
     type = "archive-file"
