@@ -15,6 +15,12 @@
  *   --body-file <path> → footer appended to the file on disk before gh reads it
  *                        (-F <path> shorthand also supported; stdin "-" is skipped)
  *
+ *   If --body-file references a file that doesn't exist yet at interception time
+ *   (e.g. the file is written by a heredoc earlier in the same compound bash call),
+ *   a deferred `printf '%b' '...' >> <file>` is injected into the command string
+ *   immediately before the `gh` invocation.  A `grep -qF` guard prevents double-
+ *   attribution if the same command block is re-run without recreating the file.
+ *
  * Works on compound shell commands (e.g. `cd /path && gh pr edit 1 --body "..."`)
  * by operating on the raw command string before execution.
  *
@@ -121,11 +127,27 @@ function injectApiReplyBody(command: string, footer: string): string | null {
 }
 
 /**
+ * Escape a string for safe embedding inside a single-quoted POSIX shell argument.
+ * Single quotes themselves become '\''  (end-quote, escaped-quote, re-open-quote).
+ * Literal newlines become the \n escape sequence so that
+ * `printf '<result>'` reproduces them correctly.
+ */
+function shellEscapeForPrintf(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/'/g, "'\\''").replace(/\n/g, "\\n");
+}
+
+/**
  * Append the footer to a --body-file target on disk.
  * Resolves relative paths against `cwd`. Skips stdin ("-").
- * Returns true if the file was modified.
+ *
+ * Returns:
+ *   true          — file was patched in-place (it existed at hook time)
+ *   string        — a modified command string with a deferred `printf >> <file>`
+ *                   injected just before the `gh` invocation (file didn't exist yet,
+ *                   e.g. it's created by a heredoc earlier in the same compound command)
+ *   false         — nothing could be done (no --body-file flag, stdin, or unresolvable)
  */
-function injectBodyFile(command: string, footer: string, cwd: string): boolean {
+function injectBodyFile(command: string, footer: string, cwd: string): string | boolean {
   if (!BODY_FILE_RE.test(command)) return false;
 
   const m = command.match(BODY_FILE_RE);
@@ -138,16 +160,39 @@ function injectBodyFile(command: string, footer: string, cwd: string): boolean {
   let content: string;
   try {
     content = readFileSync(filePath, "utf8");
+    // File exists — patch it in-place (fast path).
+    // Strip any existing footer first so repeated edits never accumulate duplicates.
+    const newContent = stripFooter(content) + footer;
+    if (newContent === content) return false; // already exactly correct, skip write
+    writeFileSync(filePath, newContent, "utf8");
+    return true;
   } catch {
-    return false; // file doesn't exist yet or unreadable — skip
+    // File doesn't exist yet — it will be created by an earlier step in the same
+    // compound command (e.g. a heredoc).  Fall through to deferred injection.
   }
 
-  // Strip any existing footer first so repeated edits never accumulate duplicates.
-  const newContent = stripFooter(content) + footer;
-  if (newContent === content) return false; // already exactly correct, skip write
+  // Deferred strategy: inject a `printf >> <file>` shell command immediately
+  // before the `gh` invocation so the footer is appended at execution time.
+  //
+  // We guard with `grep -qF` so that re-running the same command block never
+  // produces duplicate footers (the heredoc recreates the file, but just in case).
+  const ghIdx = command.search(GH_CONTENT_RE);
+  if (ghIdx === -1) return false;
 
-  writeFileSync(filePath, newContent, "utf8");
-  return true;
+  const escapedFooter = shellEscapeForPrintf(footer);
+  // Use a shell group so the guard + append + gh all share one exit-status chain.
+  // The printf uses %b to expand \n sequences.
+  const appendCmd = `grep -qF 'Co-authored with [Pi]' ${rawPath} 2>/dev/null || printf '%b' '${escapedFooter}' >> ${rawPath}`;
+
+  const before = command.slice(0, ghIdx);
+  const after = command.slice(ghIdx);
+
+  // Choose a separator that fits the surrounding context.
+  // If `before` already ends with a newline (heredoc EOF on its own line), just
+  // add the command on the next line joined with &&; otherwise use ' && \n'.
+  const sep = /\n\s*$/.test(before) ? "" : " && \n";
+  return `${before}${sep}${appendCmd} && \\
+${after}`;
 }
 
 /** Apply all strategies to a command; returns what changed. */
@@ -156,8 +201,9 @@ function applyAttribution(command: string, footer: string, cwd: string): { comma
     const inlined = injectInlineBody(command, footer);
     if (inlined !== null) return { command: inlined, modified: true };
 
-    const filePatched = injectBodyFile(command, footer, cwd);
-    return { command, modified: filePatched };
+    const fileResult = injectBodyFile(command, footer, cwd);
+    if (typeof fileResult === "string") return { command: fileResult, modified: true };
+    return { command, modified: fileResult };
   }
 
   if (GH_API_REPLY_RE.test(command) || GH_API_PATCH_RE.test(command)) {
