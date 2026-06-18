@@ -55,7 +55,7 @@ keybind = super+digit_6=unbind
 keybind = super+digit_7=unbind
 keybind = super+digit_8=unbind
 confirm-close-surface = false
-keybind = global:cmd+backquote=toggle_quick_terminal
+keybind = global:cmd+backquote=unbind
 
 # https://github.com/ghostty-org/ghostty/discussions/3836#discussioncomment-11688264
 cursor-style = block
