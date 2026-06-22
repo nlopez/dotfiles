@@ -141,10 +141,13 @@ function shellEscapeForPrintf(s: string): string {
  * Resolves relative paths against `cwd`. Skips stdin ("-").
  *
  * Returns:
- *   true          — file was patched in-place (it existed at hook time)
+ *   true          — file was patched in-place (it existed at hook time AND is not
+ *                   overwritten by an earlier command in the same compound call)
  *   string        — a modified command string with a deferred `printf >> <file>`
- *                   injected just before the `gh` invocation (file didn't exist yet,
- *                   e.g. it's created by a heredoc earlier in the same compound command)
+ *                   injected just before the `gh` invocation.  Used when the file
+ *                   doesn't exist yet (e.g. heredoc) OR when an earlier command in
+ *                   the same call redirects output to the same path (e.g.
+ *                   `cat > /tmp/body.md << 'EOF' ... EOF && gh pr edit --body-file`).
  *   false         — nothing could be done (no --body-file flag, stdin, or unresolvable)
  */
 function injectBodyFile(command: string, footer: string, cwd: string): string | boolean {
@@ -157,18 +160,31 @@ function injectBodyFile(command: string, footer: string, cwd: string): string | 
   if (!rawPath || rawPath === "-") return false; // stdin — uninterceptable
 
   const filePath = resolve(cwd, rawPath);
-  let content: string;
-  try {
-    content = readFileSync(filePath, "utf8");
-    // File exists — patch it in-place (fast path).
-    // Strip any existing footer first so repeated edits never accumulate duplicates.
-    const newContent = stripFooter(content) + footer;
-    if (newContent === content) return false; // already exactly correct, skip write
-    writeFileSync(filePath, newContent, "utf8");
-    return true;
-  } catch {
-    // File doesn't exist yet — it will be created by an earlier step in the same
-    // compound command (e.g. a heredoc).  Fall through to deferred injection.
+
+  // Compute ghIdx early so we can check whether an earlier command in the same
+  // compound call redirects output to the body file (e.g. `cat > /tmp/body.md
+  // << 'EOF' ... EOF`).  If it does, in-place patching is incorrect: the earlier
+  // command would overwrite the file after the hook patches it, erasing the
+  // footer before `gh` reads it.  In that case we skip in-place and always use
+  // the deferred injection strategy.
+  const ghIdx = command.search(GH_CONTENT_RE);
+  const beforeGh = ghIdx !== -1 ? command.slice(0, ghIdx) : "";
+  const fileOverwrittenBeforeGh = beforeGh.includes(`> ${rawPath}`) || beforeGh.includes(`>${rawPath}`);
+
+  if (!fileOverwrittenBeforeGh) {
+    try {
+      const content = readFileSync(filePath, "utf8");
+      // File exists and will NOT be overwritten by an earlier command — patch
+      // it in-place (fast path).
+      // Strip any existing footer first so repeated edits never accumulate duplicates.
+      const newContent = stripFooter(content) + footer;
+      if (newContent === content) return false; // already exactly correct, skip write
+      writeFileSync(filePath, newContent, "utf8");
+      return true;
+    } catch {
+      // File doesn't exist yet — it will be created by an earlier step in the same
+      // compound command (e.g. a heredoc).  Fall through to deferred injection.
+    }
   }
 
   // Deferred strategy: inject a `printf >> <file>` shell command immediately
@@ -176,7 +192,6 @@ function injectBodyFile(command: string, footer: string, cwd: string): string | 
   //
   // We guard with `grep -qF` so that re-running the same command block never
   // produces duplicate footers (the heredoc recreates the file, but just in case).
-  const ghIdx = command.search(GH_CONTENT_RE);
   if (ghIdx === -1) return false;
 
   const escapedFooter = shellEscapeForPrintf(footer);
