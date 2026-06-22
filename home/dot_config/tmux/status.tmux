@@ -6,8 +6,8 @@
 set-option -g status-position bottom
 set-option -g status-justify centre
 
-# Use Solarized theme variables for status bar colors
-set-option -g status-style "fg=#{@thm_subtle},bg=#{@thm_base}"
+# Status bar: use theme-defined status colors (purple for Quiet Light, blue for Solarized)
+set-option -g status-style "fg=#{@thm_status_fg},bg=#{@thm_status_bg}"
 
 # Window status styling with Solarized colors
 set-window-option -g window-status-style "fg=#{@thm_muted},bg=#{@thm_base}"
@@ -22,19 +22,18 @@ set-window-option -g window-status-current-format "  #{?@pi-status,#{@pi-status}
 set-option -g pane-border-style "fg=#{@thm_overlay}"
 set-option -g pane-active-border-style "fg=#{@thm_blue}"
 
-# Message styling with Solarized blue accent
-set-option -g message-style "fg=#{@thm_base},bg=#{@thm_blue}"
-set-option -g message-command-style "fg=#{@thm_base},bg=#{@thm_cyan}"
+# Message styling
+set-option -g message-style "fg=#{@thm_status_fg},bg=#{@thm_status_bg}"
+set-option -g message-command-style "fg=#{@thm_status_fg},bg=#{@thm_status_bg}"
 
 # Copy mode styling  
 set-window-option -g mode-style "fg=#{@thm_base},bg=#{@thm_yellow}"
 
-# Status left: UTC time (uses `date -u`; %% is escaped so tmux passes the
-# strftime directives through to date instead of expanding them as local time)
-set-option -g status-left "#[fg=#{@thm_cyan},bold] UTC #[fg=#{@thm_text},nobold]#(date -u +'%%H:%%M') "
+# Status left: UTC time
+set-option -g status-left "#[fg=#{@thm_status_fg},bold] UTC #[fg=#{@thm_status_fg},nobold]#(date -u +'%%H:%%M') "
 
-# Status right: local time + timezone (tmux native strftime = local time)
-set-option -g status-right "#[fg=#{@thm_text}]%H:%M #[fg=#{@thm_cyan},bold]%Z "
+# Status right: local time + timezone
+set-option -g status-right "#[fg=#{@thm_status_fg}]%H:%M #[fg=#{@thm_status_fg},bold]%Z "
 
 set-option -g status-left-length 48
 set-option -g status-right-length 48
