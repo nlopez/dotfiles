@@ -1,28 +1,740 @@
-#!/usr/bin/env -S uv run --script
+#!/usr/bin/env -S uv run --python 3.14.3 --script
 # Like the cloned sheep, because it runs git clone.
-from shlex import quote
-from subprocess import call
-from urllib.parse import urlparse
+# Bare repo + primary worktree: https://www.tomups.com/posts/git-worktrees/
+from __future__ import annotations
+
 import argparse
+import json
 import os
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from shlex import quote
+from subprocess import CalledProcessError, run
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
-# clones a git repo into a dir hierarchy based
-# on its url. for example, https://github.com/nlopez/dotfiles
-# will be cloned into ~/src/github.com/nlopez/dotfiles
+# Convention:
+#   ~/src/<host>/<owner>/<repo>/.bare       ← bare clone
+#   ~/src/<host>/<owner>/<repo>/.git        ← gitdir: ./.bare
+#   ~/src/<host>/<owner>/<repo>/default     ← symlink → <default-branch>
+#   ~/src/<host>/<owner>/<repo>/<worktree>/ ← worktrees
 
-parser = argparse.ArgumentParser()
-parser.add_argument("url", help="git clone <url>")
-parser.add_argument("git_args", nargs="*", help="additional arguments to pass to git clone")
-args = parser.parse_args()
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
-home = os.path.expanduser("~")
-url = urlparse(args.url)
-_netloc = url.netloc.split('@')[-1]
-clone_destination = home + "/src/" + _netloc + url.path
+_GREEN = "\033[32m"
+_YELLOW = "\033[33m"
+_RED = "\033[31m"
+_BOLD = "\033[1m"
+_RESET = "\033[0m"
 
-# Build the git clone command with additional arguments
-git_clone_cmd = ["git", "clone", url.geturl(), clone_destination]
-if args.git_args:
-    git_clone_cmd.extend(args.git_args)
 
-call(git_clone_cmd)
+def git(repo: Path, *args: str) -> None:
+    run(["git", "-C", str(repo), *args], check=True, text=True)
+
+
+def git_out(repo: Path, *args: str) -> str:
+    r = run(
+        ["git", "-C", str(repo), *args],
+        check=True,
+        text=True,
+        capture_output=True,
+    )
+    return r.stdout.strip()
+
+
+def _git_credential_token(url: str, cwd: Path | None = None) -> str | None:
+    """Ask git-credential for the token that matches *url*.
+
+    When *cwd* points inside a repo, ``git -C <cwd>`` activates the
+    ``includeIf`` / credential-helper routing for that directory — so the
+    correct identity is used for every org, exactly like ``git push``.
+    """
+    parsed = urlparse(url)
+    stdin = f"protocol={parsed.scheme}\nhost={parsed.hostname}\n"
+    if parsed.path and parsed.path != "/":
+        stdin += f"path={parsed.path.lstrip('/')}\n"
+    stdin += "\n"
+    cmd = ["git"]
+    if cwd is not None:
+        cmd.extend(["-C", str(cwd)])
+    cmd.extend(["credential", "fill"])
+    try:
+        r = run(
+            cmd,
+            input=stdin,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        for line in r.stdout.splitlines():
+            if line.startswith("password="):
+                return line.removeprefix("password=")
+    except (CalledProcessError, FileNotFoundError):
+        pass
+    return None
+
+
+def _github_api(endpoint: str, token: str | None = None) -> dict | None:
+    """GET a GitHub REST API *endpoint* (e.g. ``repos/owner/name``)."""
+    headers: dict[str, str] = {"Accept": "application/vnd.github+json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    req = Request(f"https://api.github.com/{endpoint}", headers=headers)
+    try:
+        with urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read())
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _canonical_github_path(
+    repo_path: str,
+    cwd: Path | None = None,
+) -> str | None:
+    """Return *owner/repo* with GitHub's canonical casing, or None on failure.
+
+    *cwd* is forwarded to ``_git_credential_token`` so ``includeIf``
+    rules resolve the right identity for private-org repos.
+    """
+    token = _git_credential_token(f"https://github.com/{repo_path}", cwd=cwd)
+    data = _github_api(f"repos/{repo_path}", token)
+    if data and "full_name" in data:
+        return data["full_name"]
+    return None
+
+
+def _find_dolly_root(start: Path | None = None) -> Path | None:
+    """Locate the dolly-managed repo root from anywhere inside the tree.
+
+    Works from the repo root, a worktree directory, or any subdirectory
+    within a worktree.  Uses ``git rev-parse --git-common-dir`` which
+    always resolves to ``.bare`` in a dolly repo.
+    """
+    if start is None:
+        start = Path.cwd()
+
+    # git's own mechanism — works from any depth inside a worktree.
+    try:
+        common = git_out(start, "rev-parse", "--git-common-dir")
+        common_path = Path(common)
+        if not common_path.is_absolute():
+            common_path = (start / common_path).resolve()
+        else:
+            common_path = common_path.resolve()
+
+        if common_path.name == ".bare" and common_path.is_dir():
+            return common_path.parent
+    except (CalledProcessError, FileNotFoundError):
+        pass
+
+    # Fallback: walk up looking for .bare/ + .git file.
+    current = start.resolve()
+    while True:
+        if (current / ".bare").is_dir() and (current / ".git").is_file():
+            return current
+        parent = current.parent
+        if parent == current:
+            break
+        current = parent
+
+    return None
+
+
+# ---------------------------------------------------------------------------
+# clone
+# ---------------------------------------------------------------------------
+
+
+def cmd_clone(args: argparse.Namespace) -> int:
+    url = urlparse(args.url)
+    netloc = url.netloc.split("@")[-1]
+    repo_path = url.path.lstrip("/").removesuffix(".git")
+
+    # For GitHub hosts, resolve canonical owner/repo casing via the API.
+    if netloc in ("github.com", "www.github.com"):
+        repo_path = _canonical_github_path(repo_path) or repo_path
+
+    dest = Path.home() / "src" / netloc / repo_path
+    clone_url = url._replace(
+        path=url.path if url.path.endswith(".git") else url.path + ".git",
+    ).geturl()
+    bare = dest / ".bare"
+
+    if dest.exists() and any(dest.iterdir()):
+        print(f"error: destination not empty: {dest}", file=sys.stderr)
+        return 1
+
+    dest.mkdir(parents=True, exist_ok=True)
+
+    try:
+        run(
+            ["git", "clone", "--bare", *args.git_args, clone_url, str(bare)],
+            check=True,
+        )
+        (dest / ".git").write_text("gitdir: ./.bare\n", encoding="utf-8")
+
+        # Bare clones often omit the fetch refspec — set it explicitly.
+        git(dest, "config", "--replace-all", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
+
+        branch = git_out(dest, "symbolic-ref", "--short", "HEAD")
+        git(dest, "fetch", "origin")
+        git(dest, "worktree", "add", branch, branch)
+
+        work = dest / branch
+
+        # Symlink 'default' → the default branch worktree so callers
+        # don't need to know whether it's main, master, develop, …
+        default_link = dest / "default"
+        if not default_link.exists():
+            default_link.symlink_to(branch)
+    except CalledProcessError as e:
+        return e.returncode if e.returncode else 1
+
+    print(f"Bare repo: {dest}")
+    print(f"Work in:   {work}")
+    print(f"Default:   {default_link} → {branch}")
+    print(f"Add more:  git -C {quote(str(dest))} worktree add <path> <branch>")
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# lint
+# ---------------------------------------------------------------------------
+
+
+class _LintResult:
+    def __init__(self) -> None:
+        self.errors = 0
+        self.warnings = 0
+        self.fixes = 0
+
+
+def _ok(msg: str) -> None:
+    print(f"  {_GREEN}✓{_RESET} {msg}")
+
+
+def _warn(msg: str) -> None:
+    print(f"  {_YELLOW}⚠{_RESET} {msg}")
+
+
+def _fail(msg: str) -> None:
+    print(f"  {_RED}✗{_RESET} {msg}")
+
+
+def _fixed(msg: str) -> None:
+    print(f"  {_GREEN}✓{_RESET} {msg} {_BOLD}(fixed){_RESET}")
+
+
+# -- individual checks ------------------------------------------------------
+
+
+def _check_bare(root: Path, fix: bool, r: _LintResult) -> None:
+    bare = root / ".bare"
+    if not bare.is_dir():
+        _fail(".bare directory missing")
+        r.errors += 1
+        return
+    if not (bare / "HEAD").exists():
+        _fail(".bare exists but is not a valid git directory (no HEAD)")
+        r.errors += 1
+    else:
+        _ok(".bare is a valid bare git directory")
+
+
+def _check_gitfile(root: Path, fix: bool, r: _LintResult) -> None:
+    gitfile = root / ".git"
+    expected = "gitdir: ./.bare\n"
+
+    if not gitfile.exists():
+        if fix:
+            gitfile.write_text(expected, encoding="utf-8")
+            _fixed(".git file created")
+            r.fixes += 1
+        else:
+            _fail(".git file missing")
+            r.errors += 1
+        return
+
+    if gitfile.is_dir():
+        _fail(".git is a directory (not a dolly-managed bare repo)")
+        r.errors += 1
+        return
+
+    content = gitfile.read_text(encoding="utf-8")
+    if content == expected:
+        _ok(".git → ./.bare")
+    elif fix:
+        gitfile.write_text(expected, encoding="utf-8")
+        _fixed(".git content corrected")
+        r.fixes += 1
+    else:
+        _fail(f".git has unexpected content: {content.strip()!r}")
+        r.errors += 1
+
+
+def _check_fetch_refspec(root: Path, fix: bool, r: _LintResult) -> None:
+    expected = "+refs/heads/*:refs/remotes/origin/*"
+    try:
+        raw = git_out(root, "config", "--get-all", "remote.origin.fetch")
+        values = [v for v in raw.splitlines() if v]
+    except CalledProcessError:
+        values = []
+
+    if values == [expected]:
+        _ok("fetch refspec configured")
+    elif fix:
+        git(root, "config", "--replace-all", "remote.origin.fetch", expected)
+        _fixed("fetch refspec set")
+        r.fixes += 1
+    else:
+        current = ", ".join(repr(v) for v in values) if values else "(unset)"
+        _fail(f"fetch refspec: got {current}, want {expected!r}")
+        r.errors += 1
+
+
+def _check_default_symlink(root: Path, fix: bool, r: _LintResult) -> None:
+    default_link = root / "default"
+
+    try:
+        branch = git_out(root, "symbolic-ref", "--short", "HEAD")
+    except CalledProcessError:
+        _warn("cannot determine default branch (detached HEAD?)")
+        r.warnings += 1
+        return
+
+    branch_dir = root / branch
+
+    if default_link.is_symlink():
+        target = os.readlink(default_link)
+        if target == branch:
+            if branch_dir.is_dir():
+                _ok(f"default → {branch}")
+            else:
+                _warn(f"default → {branch} (symlink OK but worktree directory missing)")
+                r.warnings += 1
+        elif fix:
+            default_link.unlink()
+            default_link.symlink_to(branch)
+            _fixed(f"default → {branch} (was → {target})")
+            r.fixes += 1
+        else:
+            _fail(f"default → {target} (should be → {branch})")
+            r.errors += 1
+    elif default_link.exists():
+        _fail("'default' exists but is not a symlink")
+        r.errors += 1
+    elif fix:
+        default_link.symlink_to(branch)
+        _fixed(f"default → {branch}")
+        r.fixes += 1
+    else:
+        _fail(f"'default' symlink missing (should be → {branch})")
+        r.errors += 1
+
+
+def _iter_worktree_branches(
+    root: Path,
+) -> list[tuple[Path, str, str | None]]:
+    """Return ``(path, local_branch, remote_short)`` for each live worktree.
+
+    ``remote_short`` is the upstream branch with the ``origin/`` prefix
+    stripped, or ``None`` if the branch has no upstream.  Bare,
+    detached, and prunable worktrees are skipped.
+    """
+    try:
+        raw = git_out(root, "worktree", "list", "--porcelain")
+    except CalledProcessError:
+        return []
+
+    @dataclass
+    class _WtRecord:
+        path: Path | None = None
+        branch: str | None = None
+        bare: bool = False
+        detached: bool = False
+        prunable: bool = False
+
+    records: list[_WtRecord] = []
+    cur = _WtRecord()
+    for line in raw.splitlines():
+        if line.startswith("worktree "):
+            cur = _WtRecord(path=Path(line.removeprefix("worktree ")))
+        elif line == "":
+            records.append(cur)
+            cur = _WtRecord()
+        elif line == "bare":
+            cur.bare = True
+        elif line.startswith("detached"):
+            cur.detached = True
+        elif line.startswith("prunable"):
+            cur.prunable = True
+        elif line.startswith("branch refs/heads/"):
+            cur.branch = line.removeprefix("branch refs/heads/")
+    records.append(cur)
+
+    out: list[tuple[Path, str, str | None]] = []
+    for rec in records:
+        if (
+            rec.path is None
+            or rec.branch is None
+            or rec.bare
+            or rec.detached
+            or rec.prunable
+        ):
+            continue
+        try:
+            upstream = git_out(
+                root,
+                "for-each-ref",
+                "--format=%(upstream:short)",
+                f"refs/heads/{rec.branch}",
+            )
+        except CalledProcessError:
+            upstream = ""
+        remote = upstream.removeprefix("origin/") if upstream else None
+        out.append((rec.path, rec.branch, remote))
+    return out
+
+
+def _check_branch_tracks_remote_name(root: Path, fix: bool, r: _LintResult) -> None:
+    """Ensure each local branch name matches its remote tracking branch name.
+
+    When they differ, rename the local branch to match the remote.  The
+    follow-on ``_check_worktree_branch_paths`` will then move the worktree
+    directory to match the new branch name.
+
+    Exception: if the upstream points at the repo's default branch but the
+    local branch doesn't, the upstream is almost certainly misconfigured
+    (common after a rebase) — leave the local name alone.
+    """
+    try:
+        default_branch = git_out(root, "symbolic-ref", "--short", "HEAD")
+    except CalledProcessError:
+        default_branch = None
+
+    problems = False
+    for _wt_path, local, remote in _iter_worktree_branches(root):
+        if not remote or remote == local:
+            continue
+        # Don't rename to the default branch when only the upstream
+        # mistakenly points at it.
+        if remote == default_branch and local != default_branch:
+            continue
+        problems = True
+        if fix:
+            try:
+                git(root, "branch", "-m", local, remote)
+                _fixed(f"branch renamed {local!r} → {remote!r} (matches remote)")
+                r.fixes += 1
+            except CalledProcessError:
+                _fail(
+                    f"branch {local!r} should be {remote!r}"
+                    f" (rename failed — target may exist)"
+                )
+                r.errors += 1
+        else:
+            _fail(f"branch {local!r} should be {remote!r} (tracks origin/{remote})")
+            r.errors += 1
+
+    if not problems:
+        _ok("local branch names match remote tracking branches")
+
+
+def _check_worktree_branch_paths(root: Path, fix: bool, r: _LintResult) -> None:
+    """Ensure each worktree's dir relative to root matches its branch name."""
+    worktrees_full = _iter_worktree_branches(root)
+    if not worktrees_full:
+        return
+    worktrees: list[tuple[Path, str]] = [(p, b) for p, b, _ in worktrees_full]
+    # Pre-resolved upstreams (avoid re-querying per branch below).
+    upstream_map: dict[str, str | None] = {b: r for _, b, r in worktrees_full}
+
+    root_resolved = root.resolve()
+
+    # The repo's default branch (main/master/…) — used to detect
+    # misconfigured upstreams that blindly point at the default branch.
+    try:
+        default_branch = git_out(root, "symbolic-ref", "--short", "HEAD")
+    except CalledProcessError:
+        default_branch = None
+
+    @dataclass
+    class _WtEntry:
+        rel: str
+        local: str
+        remote: str | None
+
+        @property
+        def canonical(self) -> str:
+            """The name the directory *should* have (remote wins).
+
+            Exception: when the upstream points at the repo's default
+            branch but the local branch doesn't, the upstream is
+            almost certainly misconfigured (common after a rebase or
+            when the tracking was never set up).  Fall back to the
+            local name in that case.
+            """
+            if (
+                self.remote
+                and self.remote == default_branch
+                and self.local != default_branch
+            ):
+                return self.local
+            return self.remote if self.remote else self.local
+
+    entries: list[_WtEntry] = []
+    for wt_path, branch in worktrees:
+        try:
+            rel = str(wt_path.resolve().relative_to(root_resolved))
+        except ValueError:
+            continue
+        entries.append(_WtEntry(rel=rel, local=branch, remote=upstream_map.get(branch)))
+
+    # Set of all worktree relative paths — used for nesting detection.
+    wt_set = {e.rel for e in entries}
+
+    def _parent_wt(rel: str) -> str | None:
+        """Return the enclosing worktree's relative path, or None."""
+        parts = Path(rel).parts
+        for i in range(1, len(parts)):
+            candidate = str(Path(*parts[:i]))
+            if candidate in wt_set:
+                return candidate
+        return None
+
+    def _move(e: _WtEntry, reason: str) -> None:
+        target = e.canonical
+        if fix:
+            try:
+                git(root, "worktree", "move", e.rel, target)
+                _fixed(f"worktree moved {e.rel!r} → {target!r} ({reason})")
+                r.fixes += 1
+            except CalledProcessError:
+                _fail(
+                    f"worktree {e.rel!r} should be {target!r} ({reason};"
+                    f" move failed — target may exist)"
+                )
+                r.errors += 1
+        else:
+            _fail(f"worktree {e.rel!r} should be {target!r} ({reason})")
+            r.errors += 1
+
+    problems = False
+    for e in entries:
+        parent = _parent_wt(e.rel)
+
+        if parent is not None:
+            # Nested inside another worktree — always wrong.
+            problems = True
+            if fix:
+                _move(e, f"nested inside {parent!r}")
+            else:
+                _warn(
+                    f"nested worktree {e.rel!r} inside {parent!r}"
+                    f" (tracks branch {e.canonical!r})"
+                )
+                r.warnings += 1
+        elif e.rel != e.canonical:
+            problems = True
+            if e.remote and e.remote != e.local:
+                _move(e, f"remote is {e.remote!r}, local is {e.local!r}")
+            elif e.remote:
+                _move(e, f"tracks remote {e.remote!r}")
+            else:
+                _move(e, f"tracks local branch {e.local!r}")
+
+    if not problems:
+        _ok("worktree paths match branch names")
+
+
+def _check_canonical_casing(root: Path, fix: bool, r: _LintResult) -> None:
+    try:
+        remote = git_out(root, "config", "--get", "remote.origin.url")
+    except CalledProcessError:
+        _warn("no remote.origin.url — skipping casing check")
+        r.warnings += 1
+        return
+
+    # Normalise SSH URLs (git@github.com:owner/repo.git) to HTTPS for parsing.
+    if remote.startswith("git@"):
+        remote = remote.replace(":", "/", 1).replace("git@", "https://", 1)
+
+    url = urlparse(remote)
+    netloc = url.netloc.split("@")[-1]
+
+    if netloc not in ("github.com", "www.github.com"):
+        _ok("non-GitHub remote — casing check skipped")
+        return
+
+    repo_path = url.path.lstrip("/").removesuffix(".git")
+    canonical = _canonical_github_path(repo_path, cwd=root)
+
+    if canonical is None:
+        _warn(f"could not query canonical GitHub casing for {repo_path}")
+        r.warnings += 1
+        return
+
+    expected = Path.home() / "src" / netloc / canonical
+
+    if root == expected:
+        _ok(f"directory casing matches GitHub ({canonical})")
+    else:
+        _fail(
+            f"directory casing mismatch:\n"
+            f"           have: {root}\n"
+            f"           want: {expected}"
+        )
+        r.errors += 1
+
+
+# -- orchestrator ------------------------------------------------------------
+
+
+def _lint_one(root: Path, fix: bool) -> _LintResult:
+    """Run all lint checks on a single dolly root.  Returns the result."""
+    label = f"{_BOLD}Linting{_RESET} {root}"
+    if fix:
+        label += f" {_BOLD}(--fix){_RESET}"
+    print(label)
+
+    r = _LintResult()
+    _check_bare(root, fix, r)
+    _check_gitfile(root, fix, r)
+    _check_fetch_refspec(root, fix, r)
+    _check_default_symlink(root, fix, r)
+    _check_branch_tracks_remote_name(root, fix, r)
+    _check_worktree_branch_paths(root, fix, r)
+    _check_canonical_casing(root, fix, r)
+    return r
+
+
+def _print_summary(r: _LintResult) -> None:
+    parts: list[str] = []
+    if r.errors:
+        parts.append(f"{_RED}{r.errors} error(s){_RESET}")
+    if r.warnings:
+        parts.append(f"{_YELLOW}{r.warnings} warning(s){_RESET}")
+    if r.fixes:
+        parts.append(f"{_GREEN}{r.fixes} fixed{_RESET}")
+    if not parts:
+        parts.append(f"{_GREEN}all checks passed{_RESET}")
+    print(f"  {', '.join(parts)}")
+
+
+def _find_all_dolly_roots(top: Path) -> list[Path]:
+    """Walk *top* and return every dolly root (directory containing .bare/)."""
+    roots: list[Path] = []
+    for dirpath, dirnames, _filenames in os.walk(top):
+        if ".bare" in dirnames:
+            roots.append(Path(dirpath))
+            # Don't descend into this repo's contents.
+            dirnames.clear()
+    roots.sort()
+    return roots
+
+
+def cmd_lint(args: argparse.Namespace) -> int:
+    fix = args.fix
+    start = Path(args.path).resolve() if args.path else None
+
+    # ---- recursive mode ----------------------------------------------------
+    if args.recursive:
+        top = start or Path.cwd()
+        if not top.is_dir():
+            print(f"error: {top} is not a directory", file=sys.stderr)
+            return 1
+
+        roots = _find_all_dolly_roots(top)
+        if not roots:
+            print(f"No dolly repos found under {top}", file=sys.stderr)
+            return 1
+
+        totals = _LintResult()
+        for i, root in enumerate(roots):
+            if i:
+                print()  # blank line between repos
+            r = _lint_one(root, fix)
+            _print_summary(r)
+            totals.errors += r.errors
+            totals.warnings += r.warnings
+            totals.fixes += r.fixes
+
+        # Grand total
+        print(f"\n{_BOLD}{'─' * 40}")
+        print(f"{len(roots)} repo(s) scanned{_RESET}")
+        _print_summary(totals)
+        return 1 if totals.errors else 0
+
+    # ---- single-repo mode --------------------------------------------------
+    root = _find_dolly_root(start)
+
+    if root is None:
+        print("error: not inside a dolly-managed repo (no .bare found)", file=sys.stderr)
+        return 1
+
+    r = _lint_one(root, fix)
+    print()
+    _print_summary(r)
+    return 1 if r.errors else 0
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="dolly",
+        description="Manage bare-repo + worktree Git clones under ~/src/",
+    )
+    sub = parser.add_subparsers(dest="command")
+
+    # -- clone ---------------------------------------------------------------
+    clone_p = sub.add_parser("clone", help="Clone a repo as bare + primary worktree")
+    clone_p.add_argument("url", help="git clone URL")
+    clone_p.add_argument(
+        "git_args",
+        nargs="*",
+        help="extra arguments forwarded to git clone --bare",
+    )
+
+    # -- lint ----------------------------------------------------------------
+    lint_p = sub.add_parser("lint", help="Check a repo against dolly best practices")
+    lint_p.add_argument(
+        "path",
+        nargs="?",
+        default=None,
+        help="repo or worktree path (default: current directory)",
+    )
+    lint_p.add_argument(
+        "--fix",
+        action="store_true",
+        help="auto-fix issues where possible",
+    )
+    lint_p.add_argument(
+        "-r",
+        "--recursive",
+        action="store_true",
+        help="find and lint every dolly repo under path (default: cwd)",
+    )
+
+    args = parser.parse_args()
+
+    if args.command is None:
+        parser.print_help()
+        return 2
+
+    if args.command == "clone":
+        return cmd_clone(args)
+    if args.command == "lint":
+        return cmd_lint(args)
+
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
