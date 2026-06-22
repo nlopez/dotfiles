@@ -5,82 +5,24 @@
 
 # run_onchange: triggers brew bundle only when packages.yaml brew section changes
 # Does NOT remove packages (no --cleanup) — installed packages are preserved
+#
+# Trust is handled declaratively via `trusted: true` in the Brewfile itself
+# (Brew Bundle format: https://docs.brew.sh/Brew-Bundle-and-Brewfile#trusted).
+# No imperative `brew trust` calls are needed here.
 
 set -eufo pipefail
 
 export HOMEBREW_REQUIRE_TAP_TRUST=1
 
-# Trust tap formulas and casks before bundle install.
-# For taps with custom remotes (defined in .packages.darwin.brew.taps),
-# we must trust the whole tap (brew trust <tap>) since Homebrew refuses
-# to trust individual items from custom-remote taps.
-# For standard GitHub taps, we trust each formula/cask explicitly per
-# Homebrew tap-trust policy.
-{{- $customRemoteTaps := .packages.darwin.brew.taps | default dict -}}
-{{- $brewConfig := .packages.darwin.brew -}}
-{{- $brews := $brewConfig.brews.base | default list -}}
-{{- $casks := $brewConfig.casks.base | default list -}}
-{{- if .personal -}}
-{{-   if index $brewConfig.brews "personal" -}}{{- $brews = concat $brews (index $brewConfig.brews "personal") -}}{{- end -}}
-{{-   if index $brewConfig.casks "personal" -}}{{- $casks = concat $casks (index $brewConfig.casks "personal") -}}{{- end -}}
-{{- end -}}
-{{- if .work -}}
-{{-   if index $brewConfig.brews "work" -}}{{- $brews = concat $brews (index $brewConfig.brews "work") -}}{{- end -}}
-{{-   if index $brewConfig.casks "work" -}}{{- $casks = concat $casks (index $brewConfig.casks "work") -}}{{- end -}}
-{{- end }}
-{{/* Trust whole taps that use custom remotes. */}}
-{{- range $tap, $url := $customRemoteTaps -}}
-brew trust {{ $tap }} 2>/dev/null || true
-{{ end -}}
-{{/* Trust individual formulas from standard GitHub taps. */}}
-{{ range ($brews | sortAlpha | uniq) -}}
-{{- if contains "/" . -}}
-{{-   $parts := splitList "/" . -}}
-{{-   $tapKey := printf "%s/%s" (index $parts 0) (index $parts 1) -}}
-{{-   if not (hasKey $customRemoteTaps $tapKey) -}}
-brew trust --formula {{ . | quote }} 2>/dev/null || true
-{{- end -}}
-{{ end -}}
-{{- end -}}
-{{/* Trust individual casks from standard GitHub taps. */}}
-{{ range ($casks | sortAlpha | uniq) -}}
-{{- if contains "/" . -}}
-{{-   $parts := splitList "/" . -}}
-{{-   $tapKey := printf "%s/%s" (index $parts 0) (index $parts 1) -}}
-{{-   if not (hasKey $customRemoteTaps $tapKey) -}}
-brew trust --cask {{ . | quote }} 2>/dev/null || true
-{{- end -}}
-{{ end -}}
-{{- end }}
-# Explicitly tap all repositories before bundle install to guarantee they are
-# present on first install. brew bundle's inline tap processing is unreliable
-# under HOMEBREW_REQUIRE_TAP_TRUST=1 on a fresh machine.
-{{/* Custom-remote taps: tap with their explicit URLs. */}}
+{{- $customRemoteTaps := .packages.darwin.brew.taps | default dict }}
+
+# Pre-tap all custom-remote repositories before brew bundle runs to guarantee
+# they are present on first install (brew bundle's inline tap processing can
+# be unreliable on a fresh machine).
 {{- range $tap, $url := $customRemoteTaps }}
 brew tap {{ $tap | quote }} {{ $url | quote }} 2>/dev/null || true
-{{ end -}}
-{{/* Standard GitHub taps inferred from formula names (not in custom-remote). */}}
-{{ range ($brews | sortAlpha | uniq) -}}
-{{- if contains "/" . -}}
-{{-   $parts := splitList "/" . -}}
-{{-   $tapKey := printf "%s/%s" (index $parts 0) (index $parts 1) -}}
-{{-   if not (hasKey $customRemoteTaps $tapKey) }}
-brew trust {{ $tapKey | quote }} 2>/dev/null || true
-brew tap {{ $tapKey | quote }} 2>/dev/null || true
-{{-   end -}}
-{{ end -}}
-{{- end -}}
-{{/* Standard GitHub taps inferred from cask names (not in custom-remote). */}}
-{{ range ($casks | sortAlpha | uniq) -}}
-{{- if contains "/" . -}}
-{{-   $parts := splitList "/" . -}}
-{{-   $tapKey := printf "%s/%s" (index $parts 0) (index $parts 1) -}}
-{{-   if not (hasKey $customRemoteTaps $tapKey) }}
-brew trust {{ $tapKey | quote }} 2>/dev/null || true
-brew tap {{ $tapKey | quote }} 2>/dev/null || true
-{{-   end -}}
-{{ end -}}
 {{- end }}
+
 # HOMEBREW_BUNDLE_FILE is exported in .zprofile → ~/.config/brew/Brewfile
 BREWFILE="${HOMEBREW_BUNDLE_FILE:-{{ .chezmoi.homeDir }}/.config/brew/Brewfile}"
 brew bundle --file="${BREWFILE}"

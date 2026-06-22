@@ -26,17 +26,25 @@
 {{-   if index $darwin.vscode   "work" -}}{{- $vscode    = concat $vscode   (index $darwin.vscode   "work") -}}{{- end -}}
 {{- end -}}
 
-# Taps (custom repos)
+# Taps (custom repos) — trusted: true so brew bundle handles tap trust declaratively
 {{ range $key, $url := $taps -}}
-tap {{ $key | quote }}, {{ $url | quote }}
+tap {{ $key | quote }}, {{ $url | quote }}, trusted: true
 {{ end }}
 
 {{ range ($brews | sortAlpha | uniq) -}}
+{{- if contains "/" . -}}
+brew {{ . | quote }}, trusted: true
+{{ else -}}
 brew {{ . | quote }}
 {{ end -}}
+{{- end -}}
 {{ range ($casks | sortAlpha | uniq) -}}
+{{- if contains "/" . -}}
+cask {{ . | quote }}, trusted: true
+{{ else -}}
 cask {{ . | quote }}
 {{ end -}}
+{{- end -}}
 {{ range ($unsigned | sortAlpha | uniq) -}}
 cask {{ . | quote }}
 {{ end -}}

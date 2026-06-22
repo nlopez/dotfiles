@@ -4,7 +4,7 @@ packages:
     brew_prefix: /opt/homebrew
     brew:
       taps:
-        slp/krun: "https://github.com/slp/homebrew-krun"
+        libkrun/krun: "https://github.com/libkrun/homebrew-krun"
         8ta4/plist: "https://github.com/8ta4/homebrew-plist"
         eugene1g/safehouse: "https://github.com/eugene1g/homebrew-safehouse"
         jundot/omlx: "https://github.com/jundot/omlx"
@@ -13,7 +13,7 @@ packages:
         smittytone/smittytone: "https://github.com/smittytone/homebrew-smittytone"
       brews:
         base:
-        - slp/krun/krunkit
+        - libkrun/krun/libkrun
         - pass
         - worktrunk
         - cormacrelf/tap/dark-notify
