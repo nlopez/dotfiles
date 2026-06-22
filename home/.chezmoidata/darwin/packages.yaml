@@ -10,6 +10,7 @@ packages:
         jundot/omlx: "https://github.com/jundot/omlx"
         ryooooooga/tap: "https://github.com/ryooooooga/homebrew-tap"
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
+        raullenchai/rapid-mlx: "https://github.com/raullenchai/homebrew-rapid-mlx"
       brews:
         base:
         - slp/krun/krunkit
@@ -88,6 +89,7 @@ packages:
         - media-info
         - jundot/omlx/omlx
         - eugene1g/safehouse/agent-safehouse
+        - rapid-mlx
         work:
         - awscli
         - tenv
