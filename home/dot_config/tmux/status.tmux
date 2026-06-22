@@ -10,7 +10,7 @@ set-option -g status-justify centre
 set-option -g status-style "fg=#{@thm_status_fg},bg=#{@thm_status_bg}"
 
 # Window status styling with Solarized colors
-set-window-option -g window-status-style "fg=#{@thm_muted},bg=#{@thm_base}"
+set-window-option -g window-status-style "fg=#{@thm_status_fg},bg=#{@thm_status_bg}"
 set-window-option -g window-status-current-style "fg=#{@thm_text},bg=#{@thm_surface},bold"
 set-window-option -g window-status-bell-style "fg=#{@thm_base},bg=#{@thm_red}"
 
