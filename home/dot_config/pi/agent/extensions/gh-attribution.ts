@@ -48,14 +48,17 @@ const GH_CONTENT_RE = /\bgh\s+(?:pr|issue)\s+(?:create|edit|comment|review)\b/;
 
 /**
  * Matches a Pi footer anywhere in a body (global, not end-anchored).
+ * Handles both actual newlines (\r?\n) and literal \\n escape sequences that
+ * agents may embed when constructing command strings from API-fetched content.
  * Intentionally does NOT consume the trailing newline after the footer line —
  * that lets the regex match two back-to-back footers in a single pass (the
- * \n\n separator between them stays intact for the second match), and any
- * leftover newlines are cleaned up by the subsequent trimEnd in stripFooter.
+ * separator between them stays intact for the second match), and any leftover
+ * newlines are cleaned up by the subsequent trimEnd in stripFooter.
  *
  * ⚠️  This regex has the `g` flag — always reset lastIndex before reuse.
  */
-const FOOTER_RE = /\r?\n\r?\n---\r?\n\*Co-authored with \[Pi\][^*]*\*[ \t]*/g;
+const NL = /(?:\\n|\r?\n)/;
+const FOOTER_RE = new RegExp(`${NL.source}${NL.source}---${NL.source}\\*Co-authored with \\[Pi\\][^*]*\\*[ \\t]*`, "g");
 
 /**
  * Remove every Pi footer from a body string and trim trailing CR/LF chars.
@@ -65,7 +68,8 @@ const FOOTER_RE = /\r?\n\r?\n---\r?\n\*Co-authored with \[Pi\][^*]*\*[ \t]*/g;
  */
 function stripFooter(body: string): string {
   FOOTER_RE.lastIndex = 0;
-  return body.replace(FOOTER_RE, "").replace(/[\r\n]+$/, "");
+  // Trim both actual trailing newlines and literal \n escape sequences.
+  return body.replace(FOOTER_RE, "").replace(/(\\n|[\r\n])+$/, "");
 }
 
 // Matches --body-file <path> or -F <path> (quoted or unquoted, not stdin)
