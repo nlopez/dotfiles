@@ -5,6 +5,7 @@
 # on a fresh machine where zprofile has not yet been sourced.
 export PATH="{{ .packages.linux.brew_prefix }}/bin:$PATH"
 
+export HOMEBREW_NO_AUTO_UPDATE=1  # Don't auto-update brew — just install from Brewfile
 set -eufo pipefail
 
 brew bundle --file=/dev/stdin <<'EOF'

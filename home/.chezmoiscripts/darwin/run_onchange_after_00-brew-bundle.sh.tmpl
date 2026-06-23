@@ -9,6 +9,7 @@
 set -eufo pipefail
 
 export HOMEBREW_REQUIRE_TAP_TRUST=1
+export HOMEBREW_NO_AUTO_UPDATE=1  # Don't auto-update brew — just install from Brewfile
 
 # Trust tap formulas and casks before bundle install.
 # For taps with custom remotes (defined in .packages.darwin.brew.taps),
