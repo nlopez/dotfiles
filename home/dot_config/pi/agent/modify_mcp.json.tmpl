@@ -1,21 +1,43 @@
 #!/bin/sh
-# Merge chezmoi-managed keys into the Pi agent dir mcp.json, preserving
-# runtime keys that pi writes itself (e.g. directTools).
-#
-# MCP server connection details (url, auth, type, oauth) now live in the
-# shared user-global config at ~/.config/mcp/mcp.json per pi-mcp-adapter
-# best practices.  This file holds only Pi-specific overrides: settings and
-# any directTools promoted to first-class Pi tools.
-#
-# On migration, the del() calls below strip connection details that the old
-# script wrote here, and remove server entries that have no Pi-specific keys
-# remaining (i.e. no directTools).  datadog and ddstaging keep their entries
-# because Pi writes directTools to them.
+# Merge chezmoi-managed keys into mcp.json, preserving runtime keys that pi
+# writes itself (e.g. directTools). Uses jq's recursive-merge operator so the
+# chezmoi overlay wins on conflicts, but unrecognised keys are kept as-is.
 
 OVERLAY=$(cat << 'EOF'
 {
   "settings": {
     "autoAuth": true
+  },
+  "mcpServers": {
+    {{- if .work }}
+    "datadog": {
+      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp?toolsets=core,ddsql",
+      "auth": "oauth"
+    },
+    "ddstaging": {
+      "url": "https://mcp.datad0g.com/api/unstable/mcp-server/mcp?toolsets=core,ddsql",
+      "auth": "oauth"
+    },
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v1/mcp",
+      "auth": "oauth"
+    },
+    "slack": {
+      "url": "https://mcp.slack.com/mcp",
+      "auth": "oauth",
+      "oauth": {
+        "clientId": "1601185624273.8899143856786"
+      }
+    },
+    "datadog-google-workspace": {
+      "type": "http",
+      "url": "https://google-workspace-mcp-server-834963730936.us-central1.run.app/mcp"
+    },
+    "supportdog-mcp-us1": {
+      "type": "http",
+      "url": "https://supportdog-mcp.mcp.us1.prod.dog:443/internal/mcp"
+    }
+    {{- end }}
   }
 }
 EOF
@@ -26,25 +48,5 @@ current=$(cat)
 if [ -z "$current" ]; then
   printf '%s\n' "$OVERLAY"
 else
-  printf '%s\n' "$current" | jq --argjson overlay "$OVERLAY" '
-    . * $overlay
-    | del(
-        .mcpServers.datadog.url,
-        .mcpServers.datadog.auth,
-        .mcpServers.ddstaging.url,
-        .mcpServers.ddstaging.auth,
-        .mcpServers.atlassian,
-        .mcpServers.slack,
-        .mcpServers["datadog-google-workspace"],
-        .mcpServers["supportdog-mcp-us1"],
-        .mcpServers.figma,
-        .mcpServers["supportdog-mcp-staging"],
-        .mcpServers["supportdog-mcp-us3"],
-        .mcpServers["supportdog-mcp-us5"],
-        .mcpServers["supportdog-mcp-eu1"],
-        .mcpServers["supportdog-mcp-ap1"],
-        .mcpServers["supportdog-mcp-ap2"]
-      )
-    | if (.mcpServers // {}) == {} then del(.mcpServers) else . end
-  '
+  printf '%s\n' "$current" | jq --argjson overlay "$OVERLAY" '. * $overlay | del(.mcpServers.figma, .mcpServers["supportdog-mcp-staging"], .mcpServers["supportdog-mcp-us3"], .mcpServers["supportdog-mcp-us5"], .mcpServers["supportdog-mcp-eu1"], .mcpServers["supportdog-mcp-ap1"], .mcpServers["supportdog-mcp-ap2"])'
 fi
