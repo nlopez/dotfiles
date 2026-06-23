@@ -79,11 +79,11 @@ const BODY_FILE_RE = /(?:--body-file|-F)\s+(?:"([^"]+)"|'([^']+)'|(?!-)(\S+))/;
 // e.g.: gh api repos/owner/repo/pulls/123/comments/456/replies -f body="..."
 const GH_API_REPLY_RE = /\bgh\s+api\b[\s\S]*?\/pulls\/\d+\/comments\/\d+\/replies\b/;
 
-// gh api -X PATCH calls that update the top-level body of a PR or issue directly.
+// gh api -X PATCH / --method PATCH calls that update the top-level body of a PR or issue.
 // e.g.: gh api -X PATCH repos/owner/repo/pulls/1 -f body="..."
-//       gh api -X PATCH repos/owner/repo/issues/1 -f body="..."
+//       gh api --method PATCH repos/owner/repo/issues/1 -f body="..."
 // The (?!\/) lookahead prevents matching sub-resource paths like /pulls/1/reviews.
-const GH_API_PATCH_RE = /\bgh\s+api\b[\s\S]*?-X\s+PATCH\b[\s\S]*?\/(?:pulls|issues)\/\d+(?!\/)/;
+const GH_API_PATCH_RE = /\bgh\s+api\b[\s\S]*?(?:-X\s+PATCH|--method\s+PATCH)\b[\s\S]*?\/(?:pulls|issues)\/\d+(?!\/)/;
 
 /** Build the footer string from the current model name. */
 function buildFooter(modelName: string): string {
@@ -93,6 +93,10 @@ function buildFooter(modelName: string): string {
 /**
  * Rewrite --body "..." / --body '...' occurrences in a shell command string.
  * Returns null when nothing matched or was already attributed.
+ *
+ * Always rewrites to double-quoted form. When the original used single quotes,
+ * chars that are special inside double quotes ($, `, \) are escaped so that
+ * rewriting never turns a literal value into a live shell expansion.
  */
 function injectInlineBody(command: string, footer: string): string | null {
   if (!command.includes("--body")) return null;
@@ -101,10 +105,22 @@ function injectInlineBody(command: string, footer: string): string | null {
   const result = command.replace(
     /(\bgh\s+(?:pr|issue)\s+(?:create|edit|comment|review)\b[\s\S]*?)--body\s+("((?:[^"\\]|\\[\s\S])*)"|'((?:[^'\\]|\\.)*)')/g,
     (_match, prefix, _quoted, dqBody, sqBody) => {
+      let safeBody: string;
+      if (dqBody !== undefined) {
+        // Double-quoted body: backslash-escapes are already present; only need to
+        // re-escape any bare " chars introduced after stripping.
+        const stripped = stripFooter(dqBody);
+        if (stripped.replace(/\\n/g, "").trim() === "") return _match; // skip empty body
+        safeBody = stripped.replace(/"/g, '\\"');
+      } else {
+        // Single-quoted body → converting to double-quoted context.
+        // Escape chars that are special inside double quotes but literal in single quotes.
+        // Order matters: \ must be handled first.
+        const stripped = stripFooter(sqBody);
+        if (stripped.replace(/\\n/g, "").trim() === "") return _match; // skip empty body
+        safeBody = stripped.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\$/g, "\\$").replace(/`/g, "\\`");
+      }
       modified = true;
-      const body = dqBody !== undefined ? dqBody : sqBody;
-      // Strip any existing footer first so repeated edits never accumulate duplicates.
-      const safeBody = stripFooter(body).replace(/"/g, '\\"');
       return `${prefix}--body "${safeBody}${footer}"`;
     },
   );
@@ -114,16 +130,26 @@ function injectInlineBody(command: string, footer: string): string | null {
 /**
  * Rewrite -f body=... / -F body=... in a `gh api` reply call.
  * Returns null if nothing matched or footer is already present.
+ *
+ * Applies the same empty-body guard and single→double quote safety as
+ * injectInlineBody.
  */
 function injectApiReplyBody(command: string, footer: string): string | null {
   let modified = false;
   const result = command.replace(
     /(-[fF]\s+body=|--(?:field|raw-field)\s+body=)("((?:[^"\\]|\\[\s\S])*)"|'((?:[^'\\]|\\[\s\S])*)'|(\S+))/g,
     (_match, flagPrefix, _quoted, dqBody, sqBody, bareBody) => {
+      const fromSq = dqBody === undefined && sqBody !== undefined;
+      const raw = dqBody !== undefined ? dqBody : sqBody !== undefined ? sqBody : bareBody ?? "";
+      const stripped = stripFooter(raw);
+      if (stripped.replace(/\\n/g, "").trim() === "") return _match; // skip empty body
+      let safeBody: string;
+      if (fromSq) {
+        safeBody = stripped.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\$/g, "\\$").replace(/`/g, "\\`");
+      } else {
+        safeBody = stripped.replace(/"/g, '\\"');
+      }
       modified = true;
-      const body = dqBody !== undefined ? dqBody : sqBody !== undefined ? sqBody : bareBody ?? "";
-      // Strip any existing footer first so repeated edits never accumulate duplicates.
-      const safeBody = stripFooter(body).replace(/"/g, '\\"');
       return `${flagPrefix}"${safeBody}${footer}"`;
     },
   );
