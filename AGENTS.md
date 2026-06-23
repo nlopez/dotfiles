@@ -121,30 +121,31 @@ All new tool configurations **must** follow the [XDG Base Directory Specificatio
 
 ### Migrated to XDG
 
-| Tool                   | Config / data location                  | How                                           |
-| ---------------------- | --------------------------------------- | --------------------------------------------- |
-| Terraform CLI          | `~/.config/terraform/terraformrc`       | `TF_CLI_CONFIG_FILE` env var                  |
-| Homebrew Brewfile      | `~/.config/brew/Brewfile`               | `HOMEBREW_BUNDLE_FILE` env var                |
-| Oh My Zsh              | `~/.local/share/oh-my-zsh`              | `export ZSH=` in `.zshrc`                     |
-| atuin config           | `~/.config/atuin/`                      | Native XDG support                            |
-| atuin data             | `~/.local/share/atuin/`                 | `db_path`/`key_path`/`session_path` in config |
-| atuin logs             | `~/.local/state/atuin/logs`             | `[logs] dir =` in config                      |
-| bat                    | `~/.config/bat/`                        | Native XDG support                            |
-| ghostty                | `~/.config/ghostty/`                    | Native XDG support                            |
-| git                    | `~/.config/git/`                        | Native XDG support                            |
-| jj                     | `~/.config/jj/`                         | Native XDG support                            |
-| k9s                    | `~/.config/k9s/`                        | Native XDG support                            |
-| neovim                 | `~/.config/nvim/`                       | Native XDG support                            |
-| pnpm data              | `~/.local/share/pnpm/`                  | `PNPM_HOME` env var                           |
-| Go data                | `~/.local/share/go/`                    | `GOPATH` env var                              |
-| rclone                 | `~/.config/rclone/`                     | Native XDG support                            |
-| terraform plugin cache | `~/.cache/terraform/`                   | `plugin_cache_dir` in config                  |
-| tmux                   | `~/.config/tmux/`                       | Native XDG support                            |
-| zabrze                 | `~/.config/zabrze/`                     | Native XDG support                            |
-| Zed                    | `~/.config/zed/`                        | Native XDG support                            |
-| zsh startup files      | `~/.config/zsh/{zshenv,zprofile,zshrc}` | `ZDOTDIR` in bootstrap `~/.zshenv`            |
-| Pi agent               | `~/.config/pi/agent/`                   | `PI_CODING_AGENT_DIR` env var                 |
-| Context-mode           | `~/.local/state/pi/context-mode/`       | `CONTEXT_MODE_DIR` env var                    |
+| Tool                   | Config / data location                  | How                                               |
+| ---------------------- | --------------------------------------- | ------------------------------------------------- |
+| Terraform CLI          | `~/.config/terraform/terraformrc`       | `TF_CLI_CONFIG_FILE` env var                      |
+| Homebrew Brewfile      | `~/.config/brew/Brewfile`               | `HOMEBREW_BUNDLE_FILE` env var                    |
+| Oh My Zsh              | `~/.local/share/oh-my-zsh`              | `export ZSH=` in `.zshrc`                         |
+| atuin config           | `~/.config/atuin/`                      | Native XDG support                                |
+| atuin data             | `~/.local/share/atuin/`                 | `db_path`/`key_path`/`session_path` in config     |
+| atuin logs             | `~/.local/state/atuin/logs`             | `[logs] dir =` in config                          |
+| bat                    | `~/.config/bat/`                        | Native XDG support                                |
+| ghostty                | `~/.config/ghostty/`                    | Native XDG support                                |
+| git                    | `~/.config/git/`                        | Native XDG support                                |
+| jj                     | `~/.config/jj/`                         | Native XDG support                                |
+| k9s                    | `~/.config/k9s/`                        | Native XDG support                                |
+| neovim                 | `~/.config/nvim/`                       | Native XDG support                                |
+| pnpm data              | `~/.local/share/pnpm/`                  | `PNPM_HOME` env var                               |
+| Go data                | `~/.local/share/go/`                    | `GOPATH` env var                                  |
+| rclone                 | `~/.config/rclone/`                     | Native XDG support                                |
+| terraform plugin cache | `~/.cache/terraform/`                   | `plugin_cache_dir` in config                      |
+| tmux                   | `~/.config/tmux/`                       | Native XDG support                                |
+| zabrze                 | `~/.config/zabrze/`                     | Native XDG support                                |
+| Zed                    | `~/.config/zed/`                        | Native XDG support                                |
+| zsh startup files      | `~/.config/zsh/{zshenv,zprofile,zshrc}` | `ZDOTDIR` in bootstrap `~/.zshenv`                |
+| Pi agent               | `~/.config/pi/agent/`                   | `PI_CODING_AGENT_DIR` env var                     |
+| Context-mode           | `~/.local/state/pi/context-mode/`       | `CONTEXT_MODE_DIR` env var                        |
+| MCP shared config      | `~/.config/mcp/mcp.json`                | Native XDG support (pi-mcp-adapter best practice) |
 
 ### Intentionally non-XDG
 
