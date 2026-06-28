@@ -11,6 +11,7 @@ packages:
         ryooooooga/tap: "https://github.com/ryooooooga/homebrew-tap"
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
         raullenchai/rapid-mlx: "https://github.com/raullenchai/homebrew-rapid-mlx"
+        smittytone/smittytone: "https://github.com/smittytone/homebrew-smittytone"
       brews:
         base:
         - slp/krun/krunkit
@@ -118,7 +119,7 @@ packages:
         - rectangle
         - little-snitch
         - espanso
-        - utitool
+        - smittytone/smittytone/utitool
         personal:
         - firefox
         - balenaetcher
