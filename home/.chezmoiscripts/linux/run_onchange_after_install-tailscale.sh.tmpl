@@ -8,5 +8,5 @@ set -eufo pipefail
 {{ end -}}
 
 {{- if not (lookPath "tailscale") }}
-brew install tailscale
+brew install tailscale --no-ask
 {{- end }}

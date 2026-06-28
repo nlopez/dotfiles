@@ -11,8 +11,6 @@ omlx:
     reasoning: true
     contextWindow: 262144
     maxTokens: 32768
-    compat:
-      thinkingFormat: "qwen-chat-template"
     input:
     - "text"
   - id: "Qwen3.6-35B-A3B-nvfp4"
@@ -21,8 +19,6 @@ omlx:
     reasoning: true
     contextWindow: 262144
     maxTokens: 32768
-    compat:
-      thinkingFormat: "qwen-chat-template"
     input:
     - "text"
   - id: "Qwen3.6-35B-A3B-UD-MLX-4bit"
@@ -31,8 +27,6 @@ omlx:
     reasoning: true
     contextWindow: 262144
     maxTokens: 32768
-    compat:
-      thinkingFormat: "qwen-chat-template"
     input:
     - "text"
   server:

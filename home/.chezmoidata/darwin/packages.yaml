@@ -132,6 +132,7 @@ packages:
         - telegram-desktop
         - zen
         - rustdesk
+        - steam
         work:
         - slack
         - google-drive

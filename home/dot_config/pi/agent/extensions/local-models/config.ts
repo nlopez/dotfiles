@@ -68,7 +68,6 @@ export const KNOWN_SERVERS: Array<{
   api: ApiType;
   /** Path relative to baseUrl used to list models */
   modelsEndpoint: string;
-  thinkingFormat: string | undefined;
   compat?: Record<string, unknown>;
   apiKey: string;
   authHeader?: boolean;
@@ -78,7 +77,6 @@ export const KNOWN_SERVERS: Array<{
     baseUrl: "http://localhost:8000/v1",
     api: "openai-completions",
     modelsEndpoint: "/models",
-    thinkingFormat: "qwen-chat-template",
     apiKey: "omlx-kdc8uke8vsvje15d",
     authHeader: true,
   },
