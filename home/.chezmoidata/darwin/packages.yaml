@@ -118,7 +118,7 @@ packages:
         - rectangle
         - little-snitch
         - espanso
-        - smittytone/smittytone/utitool
+        - utitool
         personal:
         - firefox
         - balenaetcher

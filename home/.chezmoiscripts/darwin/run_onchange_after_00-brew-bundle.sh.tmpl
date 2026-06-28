@@ -4,7 +4,8 @@
 # {{ .packages.darwin.brew | toJson | sha256sum }}
 
 # run_onchange: triggers brew bundle only when packages.yaml brew section changes
-# Does NOT remove packages (no --cleanup) — installed packages are preserved
+# Cleans up formulae/casks not declared in the Brewfile so the system
+# stays fully declarative — only what's rendered in the Brewfile survives.
 
 set -eufo pipefail
 
@@ -13,7 +14,9 @@ export HOMEBREW_NO_AUTO_UPDATE=1  # Don't auto-update brew — just install from
 
 # Remove stale taps not defined in source to avoid formula conflicts.
 # e.g. libkrun/krun was previously tapped but now conflicts with slp/krun/gvproxy.
+# Also remove smittytone/smittytone which is untrusted and not in source.
 brew untap --ignore-missing libkrun/krun 2>/dev/null || true
+brew untap --ignore-missing smittytone/smittytone 2>/dev/null || true
 
 # Trust tap formulas and casks before bundle install.
 # For taps with custom remotes (defined in .packages.darwin.brew.taps),
@@ -59,4 +62,10 @@ brew trust --cask {{ . | quote }} 2>/dev/null || true
 {{- end }}
 # HOMEBREW_BUNDLE_FILE is exported in .zprofile → ~/.config/brew/Brewfile
 BREWFILE="${HOMEBREW_BUNDLE_FILE:-{{ .chezmoi.homeDir }}/.config/brew/Brewfile}"
+
+# 1. Brew bundle install (update declared packages)
 brew bundle --file="${BREWFILE}"
+
+# 2. Clean up anything not in the Brewfile — formulae AND casks
+#    --ignore-missing means it won't error if the Brewfile is empty
+brew bundle cleanup --formulae --casks --file="${BREWFILE}" 2>/dev/null || true
