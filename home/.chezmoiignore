@@ -38,6 +38,7 @@
 .chezmoiscripts/darwin/**
 Library/Application Support/espanso/**
 Library/Fonts
+Library/Preferences/com.knollsoft.Rectangle.plist
 {{ end -}}
 {{ if eq .chezmoi.os "darwin" -}}
 .local/share/fonts
