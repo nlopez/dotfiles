@@ -64,6 +64,9 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
 
 # Hide widgets on the desktop
 defaults write com.apple.WindowManager HideDesktop -int 1
+# Disable desktop widgets (standard and Stage Manager modes)
+defaults write com.apple.WindowManager StandardHideWidgets -bool true
+defaults write com.apple.WindowManager StageManagerHideWidgets -bool true
 
 # Trackpad window management gestures
 defaults write com.apple.dock showDesktopGestureEnabled -bool false
