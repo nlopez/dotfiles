@@ -93,6 +93,12 @@ defaults write com.apple.dock mineffect -string "scale"
 # Window title bar double-click action: No Action
 defaults write -g AppleActionOnDoubleClick -string "None"
 
+# Date & Time
+# Use 24-hour time display
+defaults write -g AppleICUForce24HourTime -bool true
+defaults write com.apple.menuextra.clock ShowAMPM -bool false
+defaults write com.apple.menuextra.clock Show24Hour -bool true
+
 # Misc
 # Enable ctrl + cmd dragging of windows from anywhere in the window, not just the title bar
 defaults write -g NSWindowShouldDragOnGesture -bool true
