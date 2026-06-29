@@ -13,11 +13,7 @@ packages:
         smittytone/smittytone: "https://github.com/smittytone/homebrew-smittytone"
       brews:
         base:
-        - libkrun/krun/libkrun
-        - pass
         - worktrunk
-        - cormacrelf/tap/dark-notify
-        - tabiew
         - podman
         - git-lfs
         - jj
@@ -27,7 +23,6 @@ packages:
         - mas
         - yamlfmt
         - sql-formatter
-        - fx # json tui
         - 8ta4/plist/plist
         - tree
         - hyperfine
@@ -37,7 +32,6 @@ packages:
         - fd
         - fzf
         - git
-        - yazi
         - htop
         - kubectl
         - ripgrep
@@ -68,13 +62,10 @@ packages:
         - gh
         - terminal-notifier
         - testssl
-        - cilium-cli
         - chezmoi
-        - neovim
         - watchman
         - lazygit
         - pv
-        - terminal-notifier
         - graphviz
         - helm
         - kubectx
@@ -87,7 +78,7 @@ packages:
         - argocd
         - media-info
         - jundot/omlx/omlx
-        - eugene1g/safehouse/agent-safehouse
+        - cilium-cli
         work:
         - awscli
         - tenv
@@ -96,16 +87,12 @@ packages:
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:
         base:
-        - sublime-text
-        - sublime-merge
         - podman-desktop
-        - copyq
         - grandperspective
         - obsidian
         - fsmonitor
         - wireshark-app
         - linearmouse
-        - standard-notes
         - git-credential-manager
         - ghostty
         - tailscale-app
@@ -115,12 +102,13 @@ packages:
         - jordanbaird-ice
         - rectangle
         - little-snitch
-        - espanso
         - smittytone/smittytone/utitool
         personal:
+        - brave-origin
+        - espanso
+        - standard-notes
         - balenaetcher
         - digikam
-        - brave-browser
         - stolendata-mpv
         - losslesscut
         - mediainfo
@@ -132,7 +120,6 @@ packages:
         - slack
         - google-drive
         - finicky
-        - cursor
       # Casks that intentionally have no SHA (autoupdate or :latest). Installed
       # without --require-sha. Add entries here when a normal install fails with
       # "no checksum".
@@ -144,9 +131,9 @@ packages:
       base:
       - pre-commit
       - unique-namer
+      personal:
       - huggingface-hub
       - osxphotos
-      personal: []
       work: []
     mas:
       base: []

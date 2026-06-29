@@ -2,9 +2,7 @@
 # Per-platform personal and work packages live in darwin/pnpm.yaml and
 # linux/pnpm.yaml (merged by chezmoi at render time).
 pnpm:
-  base:
-  - mmd@4.7.1
-  - "@earendil-works/pi-coding-agent@0.79.10"
+  base: []
   personal: []
   work: []
 # Packages moved from pnpm globals to pi-managed packages (pi install npm:).
