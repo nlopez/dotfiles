@@ -62,8 +62,6 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
   Preview -bool true \
 	Privileges -bool true
 
-# Hide widgets on the desktop
-defaults write com.apple.WindowManager HideDesktop -int 1
 # Disable desktop widgets (standard and Stage Manager modes)
 defaults write com.apple.WindowManager StandardHideWidgets -bool true
 defaults write com.apple.WindowManager StageManagerHideWidgets -bool true
@@ -90,6 +88,10 @@ defaults write com.apple.dock autohide -bool true
 defaults write com.apple.dock autohide-delay -float 0
 defaults write com.apple.dock autohide-time-modifier -float 0
 defaults write com.apple.dock mineffect -string "scale"
+# Minimize windows into their application icon
+defaults write com.apple.dock minimize-to-application -bool true
+# Disable animate opening applications
+defaults write com.apple.dock launchanim -bool false
 # Window title bar double-click action: No Action
 defaults write -g AppleActionOnDoubleClick -string "None"
 
