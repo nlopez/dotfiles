@@ -3,6 +3,7 @@
 # ── Work-only files ────────────────────────────────────────────────────────────
 {{- if or (not .work) .headless }}
 .zshrc_local
+.finicky.js
 {{ end -}}
 
 # ── oh-my-zsh: keep only tracked plugins; ignore caches and generated files ───
