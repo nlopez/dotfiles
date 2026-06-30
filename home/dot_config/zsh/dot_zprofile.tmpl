@@ -15,6 +15,7 @@ export COLORTERM=truecolor
 
 {{- if not .headless }}
 export OP_ACCOUNT=my.1password.com
+export SSH_AUTH_SOCK="{{ .platform.ssh_auth_sock }}"
 {{- end }}
 
 {{- $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
