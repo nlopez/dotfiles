@@ -13,6 +13,7 @@ packages:
         smittytone/smittytone: "https://github.com/smittytone/homebrew-smittytone"
       brews:
         base:
+        - wget
         - worktrunk
         - podman
         - git-lfs
