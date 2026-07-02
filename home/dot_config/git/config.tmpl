@@ -22,6 +22,7 @@
   version = 4
 
 [credential]
+  helper =
   helper = manager
 {{- if eq .chezmoi.os "darwin" }}
   credentialStore = keychain
