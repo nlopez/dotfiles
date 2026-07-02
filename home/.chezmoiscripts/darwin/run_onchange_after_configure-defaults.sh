@@ -101,6 +101,10 @@ defaults write -g AppleICUForce24HourTime -bool true
 defaults write com.apple.menuextra.clock ShowAMPM -bool false
 defaults write com.apple.menuextra.clock Show24Hour -bool true
 
+# Sound
+# Play feedback (sound) when volume is changed
+defaults write -g com.apple.sound.beep.feedback -int 1
+
 # Misc
 # Enable ctrl + cmd dragging of windows from anywhere in the window, not just the title bar
 defaults write -g NSWindowShouldDragOnGesture -bool true
