@@ -6,7 +6,6 @@ packages:
       taps:
         libkrun/krun: "https://github.com/libkrun/homebrew-krun"
         8ta4/plist: "https://github.com/8ta4/homebrew-plist"
-        eugene1g/safehouse: "https://github.com/eugene1g/homebrew-safehouse"
         jundot/omlx: "https://github.com/jundot/omlx"
         ryooooooga/tap: "https://github.com/ryooooooga/homebrew-tap"
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
@@ -67,7 +66,6 @@ packages:
         - watchman
         - lazygit
         - pv
-        - graphviz
         - helm
         - kubectx
         - kubernetes-cli
