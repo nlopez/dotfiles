@@ -39,7 +39,7 @@ Host *
   LogLevel ERROR
   StrictHostKeyChecking accept-new
   User nlopez
-  IdentityAgent "{{ .platform.ssh_auth_sock }}"
+  IdentityAgent "{{ .platform.ssh_auth_sock | replace "~" .chezmoi.homeDir }}"
 
 # Direct github.com connections are anonymous — git uses core.sshCommand
 # (set per-repo by the identity includes) to authenticate instead.
