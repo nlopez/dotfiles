@@ -177,10 +177,3 @@
 [includeIf "hasconfig:remote.*.url:git@github.com:[Kk]amo[Tt]imestamps/**"]
   path = config_silentshout42
 {{- end }}
-
-; --- nlopez identity: default on work machines (applied last to win over config_work) ---
-{{- if .work }}
-
-[include]
-  path = config_nlopez
-{{- end }}
