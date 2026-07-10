@@ -44,6 +44,7 @@ current["showHardwareCursor"] = True
 # Declarative package list — exactly and only these packages.
 # Source of truth: home/.chezmoidata/pi.yaml
 # personal_only_packages are excluded on work machines.
+# Work-only local packages (datadog-pi-packages) are appended below.
 current["packages"] = [
 {{- range .pi.packages }}
     "{{ . }}",
@@ -52,6 +53,11 @@ current["packages"] = [
 {{- range .pi.personal_only_packages }}
     "{{ . }}",
 {{- end }}
+{{- end }}
+{{- if .work }}
+    # Local package from ddoghq-sandbox/datadog-pi-packages (cloned once by chezmoi).
+    # Provides /refresh-models command to sync AI Gateway model inventory.
+    "{{ .chezmoi.homeDir }}/dd/datadog-pi-packages/packages/refresh-models",
 {{- end }}
 ]
 

@@ -3,6 +3,12 @@
 {{- $work            := promptBoolOnce   . "work"            "Is this a work machine?"        -}}
 {{- $headless        := promptBoolOnce   . "headless"        "Is this a headless machine?"    -}}
 
+{{/* work-specific identifiers — stored in local config, never in source tree */}}
+{{- $workemail := "" -}}
+{{- if $work -}}
+{{-   $workemail = promptStringOnce . "workemail" "Work email (for LLM observability tagging, e.g. you@datadoghq.com)" -}}
+{{- end -}}
+
 
 {{- $ephemeral := false -}}{{/* true if this machine is ephemeral, e.g.: a cloud or VM instance */}}
 
@@ -77,6 +83,7 @@ signingkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEvDNgTluafxfN++WnyRNqyVO7Lfbv
 hostname = {{ $hostname | quote }}
 personal = {{ $personal }}
 work = {{ $work }}
+workemail = {{ $workemail | quote }}
 
 ephemeral = {{ $ephemeral }}
 headless = {{ $headless }}
