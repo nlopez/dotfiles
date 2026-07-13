@@ -11,31 +11,35 @@ OVERLAY=$(cat << 'EOF'
   "mcpServers": {
     {{- if .work }}
     "datadog": {
-      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp?toolsets=core,ddsql",
+      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-datadog/url" }}",
       "auth": "oauth"
     },
     "ddstaging": {
-      "url": "https://mcp.datad0g.com/api/unstable/mcp-server/mcp?toolsets=core,ddsql",
+      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-ddstaging/url" }}",
       "auth": "oauth"
     },
     "atlassian": {
-      "url": "https://mcp.atlassian.com/v1/mcp",
+      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-atlassian/url" }}",
       "auth": "oauth"
     },
     "slack": {
-      "url": "https://mcp.slack.com/mcp",
+      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-slack/url" }}",
       "auth": "oauth",
       "oauth": {
-        "clientId": "1601185624273.8899143856786"
+        "clientId": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-slack/client_id" }}"
       }
     },
     "datadog-google-workspace": {
       "type": "http",
-      "url": "https://google-workspace-mcp-server-834963730936.us-central1.run.app/mcp"
+      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-datadog-google-workspace/url" }}"
     },
     "supportdog-mcp-us1": {
       "type": "http",
-      "url": "https://supportdog-mcp.mcp.us1.prod.dog:443/internal/mcp"
+      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-supportdog-us1/url" }}"
+    },
+    "ddci-mcp-prod": {
+      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-ddci-prod/url" }}",
+      "auth": "oauth"
     }
     {{- end }}
   }
