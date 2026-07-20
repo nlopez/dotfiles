@@ -1,6 +1,7 @@
 #!/bin/bash
-# gh shim: auto-select GH_CONFIG_DIR for ddoghq remotes, and append Pi
-# co-authorship footer to --body / --body-file on PR/issue write commands.
+# gh shim: auto-select GH_CONFIG_DIR for ddoghq remotes, inject the effective
+# branch during rebases, and append a Pi co-authorship footer to --body /
+# --body-file on PR/issue write commands.
 # Keep in sync with gh-attribution.ts (covers non-shell contexts).
 
 REAL_GH={{ if eq .chezmoi.os "darwin" }}{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin/gh{{ else }}/usr/local/bin/gh{{ end }}{{ else }}/home/linuxbrew/.linuxbrew/bin/gh{{ end }}
@@ -8,6 +9,40 @@ REAL_GH={{ if eq .chezmoi.os "darwin" }}{{ if eq .chezmoi.arch "arm64" }}/opt/ho
 # --- GH_CONFIG_DIR routing ---
 if git remote -v 2>/dev/null | grep -qi 'github\.com[:/][Dd][Dd]oghq/'; then
   export GH_CONFIG_DIR="$HOME/.config/gh-ddog"
+fi
+
+# --- Rebase branch injection ---
+# During `git rebase -i` HEAD is detached and gh cannot determine the current
+# branch. Read the per-worktree rebase state file and inject the branch as a
+# positional arg for pr sub-commands that need it.
+_gh_effective_branch() {
+  local branch git_dir state_dir
+  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null)
+  if [[ -z "$branch" ]]; then
+    git_dir=$(git rev-parse --git-dir 2>/dev/null)
+    for state_dir in rebase-merge rebase-apply; do
+      if [[ -f "$git_dir/$state_dir/head-name" ]]; then
+        branch=$(< "$git_dir/$state_dir/head-name")
+        branch=${branch#refs/heads/}
+        break
+      fi
+    done
+  fi
+  printf '%s' "$branch"
+}
+
+if [[ "$1" == "pr" && $# -ge 2 ]]; then
+  case "$2" in
+    view|merge|diff|ready|close|reopen|comment|checks|review|edit)
+      # Only inject when no PR identifier is present yet (an identifier
+      # would be a 3rd arg that doesn't start with -) and HEAD is detached.
+      if [[ $# -lt 3 || "${3:0:1}" == "-" ]] && \
+         ! git symbolic-ref --quiet HEAD &>/dev/null; then
+        _branch=$(_gh_effective_branch)
+        [[ -n "$_branch" ]] && set -- "$1" "$2" "$_branch" "${@:3}"
+      fi
+      ;;
+  esac
 fi
 
 # --- Pi co-authorship footer ---
