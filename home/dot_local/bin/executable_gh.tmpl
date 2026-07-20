@@ -1,0 +1,66 @@
+#!/bin/bash
+# gh shim: auto-select GH_CONFIG_DIR for ddoghq remotes, and append Pi
+# co-authorship footer to --body / --body-file on PR/issue write commands.
+# Keep in sync with gh-attribution.ts (covers non-shell contexts).
+
+REAL_GH={{ if eq .chezmoi.os "darwin" }}{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin/gh{{ else }}/usr/local/bin/gh{{ end }}{{ else }}/home/linuxbrew/.linuxbrew/bin/gh{{ end }}
+
+# --- GH_CONFIG_DIR routing ---
+if git remote -v 2>/dev/null | grep -qi 'github\.com[:/][Dd][Dd]oghq/'; then
+  export GH_CONFIG_DIR="$HOME/.config/gh-ddog"
+fi
+
+# --- Pi co-authorship footer ---
+# Intercept: gh {pr,issue} {create,edit,comment,review} when --body/--body-file is given.
+if [[ $# -ge 2 ]]; then
+  case "$1 $2" in
+    "issue comment"|"issue create"|"issue edit"|\
+    "pr comment"|"pr review"|"pr edit"|"pr create")
+      args=("$@")
+      newargs=()
+      i=0
+      modified=0
+      while (( i < ${#args[@]} )); do
+        if [[ "${args[$i]}" == "--body" ]] && (( i + 1 < ${#args[@]} )); then
+          body="${args[$((i+1))]}"
+          if [[ "$body" != *"Co-authored with Pi"* ]]; then
+            pi_name=$(pi-model-name 2>/dev/null)
+            footer=$'\n\n---\n'"*Co-authored with Pi${pi_name:+ (${pi_name})}*"
+            body="${body}${footer}"
+            modified=1
+          fi
+          newargs+=("--body" "$body")
+          (( i += 2 ))
+        else
+          newargs+=("${args[$i]}")
+          (( i++ ))
+        fi
+      done
+
+      # --body-file <path>: append footer to the file in-place, keep args unchanged.
+      if (( ! modified )); then
+        j=0
+        while (( j < ${#args[@]} )); do
+          if [[ "${args[$j]}" == "--body-file" ]] && (( j + 1 < ${#args[@]} )); then
+            bf_path="${args[$((j+1))]}"
+            if [[ "$bf_path" != "-" && -f "$bf_path" ]]; then
+              bf_content=$(cat "$bf_path")
+              if [[ "$bf_content" != *"Co-authored with Pi"* ]]; then
+                pi_name=$(pi-model-name 2>/dev/null)
+                footer=$'\n\n---\n'"*Co-authored with Pi${pi_name:+ (${pi_name})}*"
+                printf '%s%s' "$bf_content" "$footer" > "$bf_path"
+                modified=1
+              fi
+            fi
+            break
+          fi
+          (( j++ ))
+        done
+      fi
+
+      (( modified )) && exec "$REAL_GH" "${newargs[@]}"
+      ;;
+  esac
+fi
+
+exec "$REAL_GH" "$@"
