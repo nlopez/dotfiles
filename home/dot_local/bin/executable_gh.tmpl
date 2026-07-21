@@ -60,7 +60,7 @@ if [[ $# -ge 2 ]]; then
           body="${args[$((i+1))]}"
           if [[ "$body" != *"Co-authored with Pi"* ]]; then
             pi_name=$(pi-model-name 2>/dev/null)
-            footer=$'\n\n---\n'"*Co-authored with Pi${pi_name:+ (${pi_name})}*"
+            footer=$'\n\n---\n'"*Co-authored with [Pi](https://pi.dev)${pi_name:+ (${pi_name})}*"
             body="${body}${footer}"
             modified=1
           fi
@@ -82,7 +82,7 @@ if [[ $# -ge 2 ]]; then
               bf_content=$(cat "$bf_path")
               if [[ "$bf_content" != *"Co-authored with Pi"* ]]; then
                 pi_name=$(pi-model-name 2>/dev/null)
-                footer=$'\n\n---\n'"*Co-authored with Pi${pi_name:+ (${pi_name})}*"
+                footer=$'\n\n---\n'"*Co-authored with [Pi](https://pi.dev)${pi_name:+ (${pi_name})}*"
                 printf '%s%s' "$bf_content" "$footer" > "$bf_path"
                 modified=1
               fi
