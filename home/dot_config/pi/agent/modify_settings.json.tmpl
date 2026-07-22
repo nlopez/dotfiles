@@ -61,6 +61,9 @@ current["packages"] = [
 {{- end }}
 ]
 
+# Standard Claude Code skill location — picks up any skills placed in ~/.claude/skills.
+current.setdefault("skills", ["~/.claude/skills"])
+
 # Compaction settings.
 current.setdefault("compaction", {
     "enabled": True,
