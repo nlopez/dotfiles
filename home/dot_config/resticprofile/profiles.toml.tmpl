@@ -1,0 +1,32 @@
+#:schema https://creativeprojects.github.io/resticprofile/jsonschema/config-1.json
+#
+# Restic configuration for DigitalOcean Spaces
+# Profile: palworld-k8s-backup
+#
+# Authentication:
+#   - AWS keys from 1Password (Automation vault, field: s3-access-key / s3-secret-key)
+#   - Password from 1Password (Automation vault, field: restic-password)
+#     via password-command (runtime retrieval, never stored in config)
+#
+# Usage: resticprofile ls, resticprofile snapshots, resticprofile restore <ref>
+#
+#
+{{ if not .headless -}}
+{{ $op := "my.1password.com" -}}
+
+version = "1"
+
+[default]
+  # DigitalOcean Spaces S3-compatible repo
+  # Bucket: distracted-gibbon, Region: sfo3
+  repository = "s3:https://sfo3.digitaloceanspaces.com/distracted-gibbon"
+
+  # Retrieve password at runtime — never stored in config on disk
+  password-command = 'op read "op://evjh25ux2mnoufaut6qhvm2pdi/7eoich6asp3jztnyqquvkjbeya/add more/restic-password" --account {{ $op }}'
+
+  # AWS credentials scoped to this profile (not global shell env)
+  [default.env]
+    AWS_ACCESS_KEY_ID = "{{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7eoich6asp3jztnyqquvkjbeya/add more/s3-access-key" $op }}"
+    AWS_SECRET_ACCESS_KEY = "{{ onepasswordRead "op://evjh25ux2mnoufaut6qhvm2pdi/7eoich6asp3jztnyqquvkjbeya/add more/s3-secret-key" $op }}"
+
+{{ end -}}

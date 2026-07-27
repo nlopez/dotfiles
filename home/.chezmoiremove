@@ -95,3 +95,4 @@ Documents/WindowsPowerShell
 ; Codex config (redirected via CODEX_HOME to ~/.config/codex)
 .codex
 
+~/.config/restic

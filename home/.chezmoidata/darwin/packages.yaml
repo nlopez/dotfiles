@@ -79,6 +79,7 @@ packages:
         - jundot/omlx/omlx
         - cilium-cli
         - restic
+        - resticprofile
         work:
         - awscli
         - tenv
