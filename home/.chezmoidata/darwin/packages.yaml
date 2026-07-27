@@ -78,6 +78,7 @@ packages:
         - media-info
         - jundot/omlx/omlx
         - cilium-cli
+        - restic
         work:
         - awscli
         - tenv
