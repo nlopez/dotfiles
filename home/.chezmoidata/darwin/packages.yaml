@@ -87,6 +87,7 @@ packages:
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:
         base:
+        - notunes
         - podman-desktop
         - grandperspective
         - obsidian
