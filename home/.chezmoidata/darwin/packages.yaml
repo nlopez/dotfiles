@@ -106,6 +106,7 @@ packages:
         - little-snitch
         - smittytone/smittytone/utitool
         personal:
+        - macfuse
         - brave-origin
         - espanso
         - standard-notes
