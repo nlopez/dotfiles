@@ -2,7 +2,7 @@
 """Reconcile Pi user packages with the declarative package list.
 
 Ensures ~/.pi/agent/npm/ contains exactly the declared packages by writing
-the correct package.json and running `npm install` to reconcile.
+the correct package.json and running `pnpm install` to reconcile.
 
 Hash trigger (chezmoi run_onchange):
 {{ .pi.packages | toJson | sha256sum }}
@@ -13,12 +13,6 @@ import os
 import shutil
 import subprocess
 import sys
-
-# Headless machines don't source zprofile, so brew-installed npm isn't in PATH.
-# Prepend the brew prefix so npm is found after install-packages-brew runs.
-_BREW_BIN = "{{ .packages.brew_prefix }}/bin"
-if _BREW_BIN not in os.environ.get("PATH", "").split(":"):
-    os.environ["PATH"] = f"{_BREW_BIN}:{os.environ.get('PATH', '')}"
 
 # Declared packages (injected by chezmoi template from .chezmoidata/pi.yaml).
 # personal_only_packages are excluded on work machines.
@@ -62,8 +56,8 @@ def ensure_file(path: str, content: str) -> bool:
 
 # --- Pre-flight checks ---
 
-if not shutil.which("npm"):
-    print("npm not found, skipping Pi package reconciliation", file=sys.stderr)
+if not shutil.which("pnpm"):
+    print("pnpm not found, skipping Pi package reconciliation", file=sys.stderr)
     sys.exit(0)
 
 # --- Build target state ---
@@ -82,12 +76,10 @@ ensure_file(
     "node_modules\n",
 )
 
-# --- Clean up pnpm virtual store ---
-# npm's arborist crashes when node_modules was previously managed by pnpm
-# (the .pnpm/ virtual store uses symlinks that confuse Link.matches).
+# --- Clean up stale node_modules ---
+# Ensure a clean slate before pnpm install.
 pnpm_store = os.path.join(NPM_DIR, "node_modules", ".pnpm")
 if os.path.isdir(pnpm_store):
-    import shutil
     print("Pi packages: removing stale pnpm virtual store", file=sys.stderr)
     shutil.rmtree(os.path.join(NPM_DIR, "node_modules"))
 
@@ -132,14 +124,11 @@ with open(pkg_path, "w") as f:
     )
     f.write("\n")
 
-# --- Reconcile with npm install ---
+# --- Reconcile with pnpm install ---
 
-# Clear npm_config_before if set (e.g. by corporate policy) — it blocks
-# packages published after the cutoff date.
-env = {k: v for k, v in os.environ.items() if k.lower() != "npm_config_before"}
-result = subprocess.run(["npm", "install"], cwd=NPM_DIR, env=env)
+result = subprocess.run(["pnpm", "install"], cwd=NPM_DIR)
 if result.returncode != 0:
-    print("Pi packages: npm install failed", file=sys.stderr)
+    print("Pi packages: pnpm install failed", file=sys.stderr)
     sys.exit(1)
 
 print(

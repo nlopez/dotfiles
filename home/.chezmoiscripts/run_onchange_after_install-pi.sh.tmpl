@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
-# Install the Pi coding agent via npm, matching the official pi.dev/install.sh.
+# Install the Pi coding agent via pnpm.
 #
-# Uses: npm install -g --ignore-scripts  (exactly as the official installer does)
-# --ignore-scripts: Pi does not require install scripts for normal npm installs.
-# --min-release-age=0: bypasses npm's release-age gate so freshly-published
-#   versions are always reachable (mirrors PI_NPM_INSTALL_MIN_AGE_ARG in install.sh).
+# Uses: pnpm add -g --ignore-scripts
+# --ignore-scripts: Pi does not require install scripts for normal installs.
 #
 # run_onchange_ trigger — chezmoi re-runs this script only when the rendered
 # content changes, i.e. when .pi.version is bumped in pi.yaml.
@@ -12,21 +10,10 @@
 
 set -euo pipefail
 
-# Headless machines don't source zprofile, so brew-installed npm isn't in PATH.
-BREW_BIN="{{ .packages.brew_prefix }}/bin"
-if [[ ":${PATH}:" != *":${BREW_BIN}:"* ]]; then
-  export PATH="${BREW_BIN}:${PATH}"
-fi
-
-if ! command -v npm &>/dev/null; then
-  echo "npm not found; skipping Pi install" >&2
-  exit 0
-fi
-
 TARGET="{{ .pi.version }}"
 
 # Skip if the right version is already installed.
-CURRENT=$(npm list -g --depth=0 --json 2>/dev/null \
+CURRENT=$(pnpm list -g --json 2>/dev/null \
   | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); \
              console.log(d.dependencies?.['@earendil-works/pi-coding-agent']?.version ?? '')" 2>/dev/null || true)
 
@@ -37,14 +24,11 @@ fi
 
 echo "Installing Pi $TARGET..."
 
-# Mirror run_npm_install_pi() from pi.dev/install.sh exactly.
-npm install -g \
+pnpm add -g \
   --ignore-scripts \
-  --min-release-age=0 \
   --no-fund \
   --no-audit \
   --loglevel=error \
-  --progress=false \
   "@earendil-works/pi-coding-agent@${TARGET}"
 
 echo "Pi $TARGET installed ✓"
