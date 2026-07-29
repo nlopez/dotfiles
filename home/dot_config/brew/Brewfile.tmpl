@@ -33,15 +33,16 @@ tap {{ $key | quote }}, {{ $url | quote }}, trusted: true
 {{ end }}
 
 {{ range ($brews | sortAlpha | uniq) }}
+{{- $formula := . -}}
 {{- if contains "/" . -}}
-{{- if index $opts . -}}
-brew {{ . | quote }}, args: {{ index $opts . }}, trusted: true
+{{- if $formulaOpts := index $opts . -}}
+brew {{ . | quote }}, args: [{{ range $i, $o := $formulaOpts }}{{ if $i }}, {{ end }}{{ $o | quote }}{{ end }}], trusted: true
 {{- else -}}
 brew {{ . | quote }}, trusted: true
 {{- end -}}
 {{- else -}}
-{{- if index $opts . -}}
-brew {{ . | quote }}, args: {{ index $opts . }}
+{{- if $formulaOpts := index $opts . -}}
+brew {{ . | quote }}, args: [{{ range $i, $o := $formulaOpts }}{{ if $i }}, {{ end }}{{ $o | quote }}{{ end }}]
 {{- else -}}
 brew {{ . | quote }}
 {{- end -}}
