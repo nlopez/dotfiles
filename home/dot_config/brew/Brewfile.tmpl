@@ -7,6 +7,7 @@
 {{- $masApps   := $darwin.mas.base          | default list -}}
 {{- $vscode    := $darwin.vscode.base       | default list -}}
 {{- $taps      := $brewConfig.taps          | default dict -}}
+{{- $opts      := $brewConfig.brew_options  | default dict -}}
 
 {{- if .personal -}}
 {{-   if index $brewConfig.brews    "personal" -}}{{- $brews     = concat $brews    (index $brewConfig.brews    "personal") -}}{{- end -}}
@@ -32,10 +33,19 @@ tap {{ $key | quote }}, {{ $url | quote }}, trusted: true
 {{ end }}
 
 {{ range ($brews | sortAlpha | uniq) -}}
+{{- $formula := . -}}
 {{- if contains "/" . -}}
+{{- if index $opts . -}}
+brew {{ . | quote }}, args: {{ index $opts . | quote }}, trusted: true
+{{- else -}}
 brew {{ . | quote }}, trusted: true
+{{- end -}}
 {{ else -}}
+{{- if index $opts . -}}
+brew {{ . | quote }}, args: {{ index $opts . | quote }}
+{{- else -}}
 brew {{ . | quote }}
+{{- end -}}
 {{ end -}}
 {{- end -}}
 {{ range ($casks | sortAlpha | uniq) -}}

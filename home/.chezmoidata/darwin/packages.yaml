@@ -80,6 +80,9 @@ packages:
         - cilium-cli
         - restic
         - resticprofile
+      brew_options:
+        jundot/omlx/omlx:
+        - "--with-grammar"
         work:
         - awscli
         - tenv
