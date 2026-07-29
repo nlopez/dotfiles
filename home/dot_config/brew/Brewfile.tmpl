@@ -32,22 +32,21 @@
 tap {{ $key | quote }}, {{ $url | quote }}, trusted: true
 {{ end }}
 
-{{ range ($brews | sortAlpha | uniq) -}}
-{{- $formula := . -}}
+{{ range ($brews | sortAlpha | uniq) }}
 {{- if contains "/" . -}}
 {{- if index $opts . -}}
-brew {{ . | quote }}, args: {{ index $opts . | quote }}, trusted: true
+brew {{ . | quote }}, args: {{ index $opts . }}, trusted: true
 {{- else -}}
 brew {{ . | quote }}, trusted: true
 {{- end -}}
-{{ else -}}
+{{- else -}}
 {{- if index $opts . -}}
-brew {{ . | quote }}, args: {{ index $opts . | quote }}
+brew {{ . | quote }}, args: {{ index $opts . }}
 {{- else -}}
 brew {{ . | quote }}
 {{- end -}}
-{{ end -}}
-{{- end -}}
+{{ end }}
+{{ end }}
 {{ range ($casks | sortAlpha | uniq) -}}
 {{- if contains "/" . -}}
 cask {{ . | quote }}, trusted: true
