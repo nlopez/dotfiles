@@ -44,10 +44,10 @@ Library/Preferences/com.knollsoft.Rectangle.plist
 .local/share/fonts
 # ── Library: ignore everything except explicitly managed subdirs ──────────────
 Library/**
-!Library/LaunchAgents
-!Library/Application Support
-!Library/Preferences
-!Library/exact_Fonts
+!Library/LaunchAgents/**
+!Library/Application Support/**
+!Library/Preferences/**
+!Library/exact_Fonts/**
 {{ end -}}
 {{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.osRelease.id "aurora") -}}
 .chezmoiscripts/linux-debian/**
