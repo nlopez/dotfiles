@@ -8,7 +8,7 @@
 # Oh My Zsh — variables must be set before sourcing
 ###############################################################################
 export ZSH="${XDG_DATA_HOME:-$HOME/.local/share}/oh-my-zsh"
-ZSH_THEME=""                        # using pure prompt
+ZSH_THEME="powerlevel10k/powerlevel10k"
 DISABLE_AUTO_TITLE="true"
 zstyle ':omz:update' mode disabled
 
@@ -29,7 +29,6 @@ setopt completealiases
 ###############################################################################
 
 # Prevent pure from setting window/terminal titles.
-zstyle ':prompt:pure:title' show no
 
 function _source() {
   [[ -f $1 ]] && source "$@"
@@ -99,10 +98,9 @@ alias e="code --add"
 ###############################################################################
 # AWS profile in preprompt when typing aws/terraform commands
 ###############################################################################
-# _pure_path: smart path string, updated each precmd. In git repos keeps
-# everything from the repo root downward unabbreviated and abbreviates above it
-# (last 3 components shown). Outside git repos abbreviates at ≥4 dirs after ~.
-typeset -g _pure_path=""
+# Smart path abbreviation (p10k-compatible).
+# Replaces %~ in p10k's dir segment with a smart abbreviated path.
+typeset -g _p10k_path=""
 
 function _smart_path_precmd() {
   local git_prefix git_rel repo_root p i au s d r
@@ -110,8 +108,6 @@ function _smart_path_precmd() {
 
   p="${PWD/#$HOME/~}"
 
-  # Abbreviate path parts: keep last 3 full, shorten earlier ones to
-  # leading-dots + first-non-dot char. Result in global _abbrev_result.
   _abbrev_parts() {
     local -a pp=("$@")
     local res="~" i au s d r
@@ -130,7 +126,6 @@ function _smart_path_precmd() {
   }
 
   if git_prefix=$(git rev-parse --show-prefix 2>/dev/null); then
-    # --show-prefix: path from repo root to CWD with trailing slash, empty at root
     if [[ -n "$git_prefix" ]]; then
       git_rel="${git_prefix%/}"
       repo_root="${p%/$git_rel}"
@@ -138,7 +133,6 @@ function _smart_path_precmd() {
       git_rel=""
       repo_root="$p"
     fi
-    # Abbreviate the pre-root portion; \~/ escapes ~ for EXTENDED_GLOB safety
     if [[ "$repo_root" == "~/"* ]]; then
       parts=("${(@s:/:)${repo_root#\~/}}")
       if (( ${#parts} >= 4 )); then
@@ -146,23 +140,23 @@ function _smart_path_precmd() {
         repo_root="$_abbrev_result"
       fi
     fi
-    _pure_path="${repo_root}${git_rel:+/$git_rel}"
+    _p10k_path="${repo_root}${git_rel:+/$git_rel}"
   else
     if [[ "$p" == "~/"* ]]; then
       parts=("${(@s:/:)${p#\~/}}")
       if (( ${#parts} >= 4 )); then
         _abbrev_parts "${parts[@]}"
-        _pure_path="$_abbrev_result"
+        _p10k_path="$_abbrev_result"
       else
-        _pure_path="$p"
+        _p10k_path="$p"
       fi
     else
-      _pure_path="$p"
+      _p10k_path="$p"
     fi
   fi
 }
 add-zsh-hook precmd _smart_path_precmd
-_smart_path_precmd  # prime before first prompt
+_smart_path_precmd
 
 ###############################################################################
 # ── Tmux pane border: push current command via @current_cmd ──────────────────
@@ -234,18 +228,12 @@ if command -v terminal-notifier &>/dev/null; then
 fi
 {{- end }}
 
-# Inject psvar[24] into PROMPT before pure's exec-time segment (%(19V.)).
-# Uses psvar[24] to avoid colliding with pure's psvar[12-23] range.
+# Inject psvar[24] into p10k prompt.
 # psvar[24] = AWS profile (shown when typing aws/terraform/tf commands).
-# Runs once after OMZ/pure have initialized PROMPT.
+# Replaces %~ in p10k's dir segment with smart abbreviated path.
 function _aws_prompt_setup() {
-  # Replace all %~ with ${_pure_path} (expanded by PROMPT_SUBST at render time)
-  local _path_var='${_pure_path}'
+  local _path_var='${_p10k_path}'
   PROMPT="${PROMPT//\%\~/$_path_var}"
-  # Inject psvar[24] (AWS profile) before pure's exec-time segment
-  local before="${PROMPT%%\%[(]19V.*}"
-  local after="${PROMPT#*\%[(]19V.}"
-  [[ "$before" != "$PROMPT" ]] && PROMPT="${before}%(24V. %F{yellow}%24v%f.)%(19V.${after}"
 }
 _aws_prompt_setup
 unfunction _aws_prompt_setup

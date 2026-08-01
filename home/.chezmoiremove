@@ -89,9 +89,6 @@ Documents/WindowsPowerShell
 
 ; ── Cleanup untracked runtime files ──────────────────────────────────────────
 
-; Oh My Zsh backup copies (left over from OMZ upgrades)
-.p10k.zsh
-
 ; Codex config (redirected via CODEX_HOME to ~/.config/codex)
 .codex
 
