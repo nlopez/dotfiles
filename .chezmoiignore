@@ -1,8 +1,0 @@
-# Ignore the entire Library directory by default
-Library/**
-
-# Un-ignore specific managed subdirectories
-!Library/LaunchAgents
-!Library/Application Support
-!Library/Preferences
-!Library/exact_Fonts
