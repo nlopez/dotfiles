@@ -22,8 +22,6 @@
   version = 4
 
 [credential]
-  helper =
-  helper = /usr/local/share/gcm-core/git-credential-manager
 {{- if eq .chezmoi.os "darwin" }}
   credentialStore = keychain
 {{- end }}
