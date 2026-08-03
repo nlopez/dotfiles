@@ -50,10 +50,10 @@
     url = "https://github.com/zdharma-continuum/fast-syntax-highlighting/archive/3d574ccf48804b10dca52625df13da5edae7f553.tar.gz"
     exact = true
     stripComponents = 1
-[".local/share/oh-my-zsh/custom/themes/pure"]
+[".local/share/oh-my-zsh/custom/plugins/pure"]
     type = "archive"
-    # renovate: datasource=github-commits depName=sindresorhus/pure
-    url = "https://github.com/sindresorhus/pure/archive/master.tar.gz"
+    # renovate: datasource=github-releases depName=sindresorhus/pure
+    url = "https://github.com/sindresorhus/pure/archive/v1.28.1.tar.gz"
     exact = true
     stripComponents = 1
 [".local/share/oh-my-zsh/custom/plugins/zsh-autosuggestions"]
@@ -71,15 +71,6 @@
     url = "https://github.com/Aloxaf/fzf-tab/archive/v1.3.0.tar.gz"
     exact = true
     stripComponents = 1
-
-# i-have-adhd Pi skill — https://github.com/ayghri/i-have-adhd
-[".config/pi/agent/skills/i-have-adhd"]
-    type = "archive"
-    # renovate: datasource=github-commits depName=ayghri/i-have-adhd
-    url = "https://github.com/ayghri/i-have-adhd/archive/16a42a01f7783e29db8557dfc46226baf8015618.tar.gz"
-    exact = true
-    stripComponents = 3
-    include = ["*/skills/i-have-adhd/**"]
 
 {{- $fontDir := .platform.font_dir }}
 
