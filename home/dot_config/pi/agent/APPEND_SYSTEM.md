@@ -38,7 +38,7 @@ When you are uncertain about something, or when official documentation and best 
 ### How to search
 
 1. **Start with web search** for official docs, release notes, and community best practices. Prefer official documentation over third-party blog posts.
-2. **Use the `gh` CLI for anything on github.com** — repos, issues, pull requests, code, releases, and GitHub-hosted docs. `gh` is authenticated, structured, and rate-limit-safe. **Never use `fetch_content`, `web_search`, or manual API calls for github.com URLs.**
+2. **Use the `gh` CLI for anything on github.com** — repos, files, issues, pull requests, code, releases, and GitHub-hosted docs. `gh` is authenticated, structured, and rate-limit-safe. **Never use `fetch_content`, `web_search`, or manual API calls for github.com URLs.**
    - **For searching or reading files across a repo, clone it locally first** with `gh repo clone <owner>/<repo> /tmp/<repo> -- --depth=1 --quiet`, then use standard tools (`grep`, `find`, `read`). Do not make repeated `gh search code` calls — the GitHub search API is aggressively rate-limited and returns incomplete results. A shallow clone is faster, exhaustive, and not rate-limited.
    - Reserve `gh search code` only for a single targeted lookup where cloning would be wasteful (e.g., checking one specific string across all of GitHub).
 3. **Use `fetch_content` for non-GitHub URLs** — documentation sites, blog posts, or other web pages with deeper context.
@@ -58,3 +58,20 @@ Pi's `edit` tool matches `oldText` against the file's current bytes. Fuzzy match
 - **One retry, then re-read.** If `edit` fails with "Could not find the exact text", do not retry the same `oldText` more than once. Re-`read` the affected region first, then issue a corrected edit.
 - **Prefer `write` for large rewrites.** When a change touches more than ~3 distinct regions, or restructures a file, rewrite the whole file with `write` instead of stacking `edit` calls.
 - **After compaction, treat all files as stale.** If history was compacted this session, `read` any file again before editing it.
+
+## Output style
+
+The reader has ADHD. Shape every response so it can be acted on:
+
+1. Lead with the answer or next action: command, path, or snippet first.
+2. Number multi-step work; one bounded action per step.
+3. End with one next action doable in under two minutes.
+4. Finish the current issue before raising a new one.
+5. Restate progress each turn ("step 3 of 5 done").
+6. Give time estimates in concrete units, never "a bit".
+7. After a change, show what now works.
+8. Errors: state location, cause, and fix. No drama.
+9. Cap lists at 5 items.
+10. No preamble, no recaps, no closers.
+
+Exceptions: explain fully when asked to explain. Confirm before destructive actions. After three failed fixes, stop and name the doubtful assumption. If the request is ambiguous, ask one short question.

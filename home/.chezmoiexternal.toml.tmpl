@@ -72,6 +72,15 @@
     exact = true
     stripComponents = 1
 
+# i-have-adhd Pi skill — https://github.com/ayghri/i-have-adhd
+[".config/pi/agent/skills/i-have-adhd"]
+    type = "archive"
+    # renovate: datasource=github-commits depName=ayghri/i-have-adhd
+    url = "https://github.com/ayghri/i-have-adhd/archive/16a42a01f7783e29db8557dfc46226baf8015618.tar.gz"
+    exact = true
+    stripComponents = 3
+    include = ["*/skills/i-have-adhd/**"]
+
 {{- $fontDir := .platform.font_dir }}
 
 {{- if and $fontDir (not .headless) }}

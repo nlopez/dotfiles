@@ -61,8 +61,17 @@ current["packages"] = [
 {{- end }}
 ]
 
-# Standard Claude Code skill location — picks up any skills placed in ~/.claude/skills.
-current.setdefault("skills", ["~/.claude/skills"])
+# Skills discovery paths:
+# - ~/.claude/skills: standard Claude Code skill location.
+# - ~/.config/pi/agent/skills: XDG-compliant Pi skills (matches PI_CODING_AGENT_DIR).
+skills = current.get("skills", [])
+for path in ["~/.claude/skills", "~/.config/pi/agent/skills"]:
+    if path not in skills:
+        skills.append(path)
+current["skills"] = skills
+
+# Enable /skill: slash commands in Pi sessions.
+current["enableSkillCommands"] = True
 
 # Compaction settings.
 current.setdefault("compaction", {
