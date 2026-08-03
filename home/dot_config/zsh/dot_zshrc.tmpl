@@ -1,10 +1,3 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.config/zsh/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
 # Load shared POSIX env (gnubin PATH, etc.) for all shell types.
 . "${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
 
@@ -15,7 +8,7 @@ fi
 # Oh My Zsh — variables must be set before sourcing
 ###############################################################################
 export ZSH="${XDG_DATA_HOME:-$HOME/.local/share}/oh-my-zsh"
-ZSH_THEME="powerlevel10k/powerlevel10k"
+ZSH_THEME="pure"
 DISABLE_AUTO_TITLE="true"
 zstyle ':omz:update' mode disabled
 
@@ -35,7 +28,7 @@ setopt completealiases
 # Interactive config
 ###############################################################################
 
-# Terminal title management (p10k handles its own prompt styling).
+# Terminal title management.
 
 function _source() {
   [[ -f $1 ]] && source "$@"
@@ -101,69 +94,6 @@ bindkey '^x^e' _edit_command_line
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
 alias e="code --add"
-
-###############################################################################
-# AWS profile in preprompt when typing aws/terraform commands
-###############################################################################
-# Smart path abbreviation (p10k-compatible).
-# Replaces %~ in p10k's dir segment with a smart abbreviated path.
-typeset -g _p10k_path=""
-
-function _smart_path_precmd() {
-  local git_prefix git_rel repo_root p i au s d r
-  local -a parts
-
-  p="${PWD/#$HOME/~}"
-
-  _abbrev_parts() {
-    local -a pp=("$@")
-    local res="~" i au s d r
-    au=$(( ${#pp} - 3 ))
-    for (( i = 1; i <= ${#pp}; i++ )); do
-      s="${pp[$i]}"
-      if (( i <= au )); then
-        d="" r="$s"
-        while [[ "$r" == .* ]]; do d="${d}."; r="${r:1}"; done
-        res="${res}/${d}${r:0:1}"
-      else
-        res="${res}/${s}"
-      fi
-    done
-    _abbrev_result="$res"
-  }
-
-  if git_prefix=$(git rev-parse --show-prefix 2>/dev/null); then
-    if [[ -n "$git_prefix" ]]; then
-      git_rel="${git_prefix%/}"
-      repo_root="${p%/$git_rel}"
-    else
-      git_rel=""
-      repo_root="$p"
-    fi
-    if [[ "$repo_root" == "~/"* ]]; then
-      parts=("${(@s:/:)${repo_root#\~/}}")
-      if (( ${#parts} >= 4 )); then
-        _abbrev_parts "${parts[@]}"
-        repo_root="$_abbrev_result"
-      fi
-    fi
-    _p10k_path="${repo_root}${git_rel:+/$git_rel}"
-  else
-    if [[ "$p" == "~/"* ]]; then
-      parts=("${(@s:/:)${p#\~/}}")
-      if (( ${#parts} >= 4 )); then
-        _abbrev_parts "${parts[@]}"
-        _p10k_path="$_abbrev_result"
-      else
-        _p10k_path="$p"
-      fi
-    else
-      _p10k_path="$p"
-    fi
-  fi
-}
-add-zsh-hook precmd _smart_path_precmd
-_smart_path_precmd
 
 ###############################################################################
 # ── Tmux pane border: push current command via @current_cmd ──────────────────
@@ -235,16 +165,6 @@ if command -v terminal-notifier &>/dev/null; then
 fi
 {{- end }}
 
-# Inject psvar[24] into p10k prompt.
-# psvar[24] = AWS profile (shown when typing aws/terraform/tf commands).
-# Replaces %~ in p10k's dir segment with smart abbreviated path.
-function _aws_prompt_setup() {
-  local _path_var='${_p10k_path}'
-  PROMPT="${PROMPT//\%\~/$_path_var}"
-}
-_aws_prompt_setup
-unfunction _aws_prompt_setup
-
 function _aws_profile_prompt() {
   local first_word="${${BUFFER##[[:space:]]#}%% *}"
   if [[ -n "$AWS_PROFILE" && "$first_word" == (aws|terraform|tfplan|tf) ]]; then
@@ -270,5 +190,4 @@ eval "$(mise activate zsh)"
 eval "$(wt config shell init zsh)"
 {{- end }}
 
-# To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
-[[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
+# Pure theme handles its own prompt.
