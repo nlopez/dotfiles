@@ -223,20 +223,20 @@
   typeset -g POWERLEVEL9K_PROMPT_CHAR_LEFT_{LEFT,RIGHT}_WHITESPACE=
 
   ##################################[ dir: current directory ]##################################
-  # Current directory background color.
-  typeset -g POWERLEVEL9K_DIR_BACKGROUND=4
-  # Default current directory foreground color.
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=254
+  # Current directory background color — transparent for Quiet Light.
+  typeset -g POWERLEVEL9K_DIR_BACKGROUND=
+  # Default current directory foreground color — Quiet Light blue.
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=4
   # If directory is too long, shorten some of its segments to the shortest possible unique
   # prefix. The shortened directory can be tab-completed to the original.
   typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
   # Replace removed segment suffixes with this symbol.
   typeset -g POWERLEVEL9K_SHORTEN_DELIMITER=
-  # Color of the shortened directory segments.
-  typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=250
+  # Color of the shortened directory segments — bright blue.
+  typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=12
   # Color of the anchor directory segments. Anchor segments are never shortened. The first
-  # segment is always an anchor.
-  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=255
+  # segment is always an anchor — Quiet Light blue.
+  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=4
   # Display anchor directory segments in bold.
   typeset -g POWERLEVEL9K_DIR_ANCHOR_BOLD=true
   # Don't shorten directories that contain any of these files. They are anchors.
@@ -362,12 +362,13 @@
   # typeset -g POWERLEVEL9K_DIR_PREFIX='in '
 
   #####################################[ vcs: git status ]######################################
-  # Version control background colors.
-  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND=2
-  typeset -g POWERLEVEL9K_VCS_MODIFIED_BACKGROUND=3
-  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=2
-  typeset -g POWERLEVEL9K_VCS_CONFLICTED_BACKGROUND=3
-  typeset -g POWERLEVEL9K_VCS_LOADING_BACKGROUND=8
+  # Version control background colors — pale highlights from Quiet Light palette.
+  typeset -g POWERLEVEL9K_VCS_FOREGROUND=0
+  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND=135
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_BACKGROUND=223
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=135
+  typeset -g POWERLEVEL9K_VCS_CONFLICTED_BACKGROUND=217
+  typeset -g POWERLEVEL9K_VCS_LOADING_BACKGROUND=253
 
   # Branch icon. Set this parameter to '\UE0A0 ' for the popular Powerline branch icon.
   typeset -g POWERLEVEL9K_VCS_BRANCH_ICON=
