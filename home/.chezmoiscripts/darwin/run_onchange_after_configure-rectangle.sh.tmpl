@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -eufo pipefail
+
+# Rectangle
+defaults write com.knollsoft.Rectangle SUEnableAutomaticChecks -bool false
+defaults write com.knollsoft.Rectangle allowAnyShortcut        -bool true
+defaults write com.knollsoft.Rectangle launchOnLogin           -bool {{ not .headless }}
+
+# Keyboard shortcuts
+defaults write com.knollsoft.Rectangle bottomHalf      -dict keyCode -int 38 modifierFlags -int 393216
+defaults write com.knollsoft.Rectangle bottomLeft      -dict keyCode -int 41 modifierFlags -int 393216
+defaults write com.knollsoft.Rectangle bottomRight     -dict keyCode -int 39 modifierFlags -int 393216
+defaults write com.knollsoft.Rectangle leftHalf        -dict keyCode -int  4 modifierFlags -int 393216
+defaults write com.knollsoft.Rectangle maximize        -dict keyCode -int 18 modifierFlags -int 393216
+defaults write com.knollsoft.Rectangle reflowTodo      -dict keyCode -int 45 modifierFlags -int 786432
+defaults write com.knollsoft.Rectangle rightHalf       -dict keyCode -int 37 modifierFlags -int 393216
+defaults write com.knollsoft.Rectangle toggleTodo      -dict keyCode -int 11 modifierFlags -int 786432
+defaults write com.knollsoft.Rectangle topHalf         -dict keyCode -int 40 modifierFlags -int 393216
+defaults write com.knollsoft.Rectangle topLeft         -dict keyCode -int 33 modifierFlags -int 393216
+defaults write com.knollsoft.Rectangle topRight        -dict keyCode -int 30 modifierFlags -int 393216
+
+# Explicitly cleared shortcuts (empty dict = no shortcut assigned)
+for key in center larger maximizeHeight nextDisplay previousDisplay restore smaller; do
+    /usr/libexec/PlistBuddy -c "Delete :${key}" ~/Library/Preferences/com.knollsoft.Rectangle.plist 2>/dev/null || true
+    /usr/libexec/PlistBuddy -c "Add :${key} dict" ~/Library/Preferences/com.knollsoft.Rectangle.plist
+done
