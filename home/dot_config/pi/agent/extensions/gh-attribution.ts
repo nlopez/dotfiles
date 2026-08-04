@@ -107,11 +107,15 @@ function injectInlineBody(command: string, footer: string): string | null {
     (_match, prefix, _quoted, dqBody, sqBody) => {
       let safeBody: string;
       if (dqBody !== undefined) {
-        // Double-quoted body: backslash-escapes are already present; only need to
-        // re-escape any bare " chars introduced after stripping.
+        // Double-quoted body: backslash-escapes are already correct. Do NOT
+        // re-escape with .replace(/"/g, '\"') — the regex (?:[^"\\]|\\[\s\S])*
+        // guarantees every '"' in dqBody is already part of a \" escape sequence.
+        // Re-escaping turns \" into \\" which bash parses as \\ → \ and then
+        // the next '"' closes the double-quoted string, corrupting the body
+        // ("sdp-iam" becomes \sdp-iam\ in the rendered comment).
         const stripped = stripFooter(dqBody);
         if (stripped.replace(/\\n/g, "").trim() === "") return _match; // skip empty body
-        safeBody = stripped.replace(/"/g, '\\"');
+        safeBody = stripped; // already correctly shell-escaped; footer has no bare "
       } else {
         // Single-quoted body → converting to double-quoted context.
         // Escape chars that are special inside double quotes but literal in single quotes.

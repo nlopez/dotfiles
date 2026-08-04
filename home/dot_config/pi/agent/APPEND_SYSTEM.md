@@ -2,6 +2,28 @@
 
 Always use the `gh` CLI to fetch GitHub content — repos, files, issues, pull requests, releases, and GitHub-hosted docs. `gh` is authenticated, structured, and rate-limit-safe. Never use web fetch tools or manual API calls for github.com URLs.
 
+### Posting PR/issue comments
+
+When a comment body contains code blocks, double quotes, backticks, `$` signs, or other special characters, **always** use `--body-file` with a single-quoted heredoc to avoid any shell-escaping corruption:
+
+```bash
+gh pr comment <number> --body-file - << 'EOF'
+Your comment with "double quotes" and `backticks` and $variables safely.
+EOF
+```
+
+For compound commands (write then comment), use a temp file:
+
+```bash
+cat > /tmp/gh-body.$$.md << 'EOF'
+Your comment here.
+EOF
+gh pr comment <number> --body-file /tmp/gh-body.$$.md
+rm -f /tmp/gh-body.$$.md
+```
+
+Avoid `--body "...escaped..."` for anything beyond a single short sentence. Shell-escaping double quotes inside double-quoted strings is error-prone and degrades to `\` in rendered comments.
+
 ## Git Cloning and Worktrees
 
 Use **`dolly clone`** to clone repos and **`worktrunk` (`wt`)** to manage worktrees.
