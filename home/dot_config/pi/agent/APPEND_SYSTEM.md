@@ -2,7 +2,49 @@
 
 Always use the `gh` CLI to fetch GitHub content — repos, files, issues, pull requests, releases, and GitHub-hosted docs. `gh` is authenticated, structured, and rate-limit-safe. Never use web fetch tools or manual API calls for github.com URLs.
 
-## Package Management
+## Git Cloning and Worktrees
+
+Use **`dolly clone`** to clone repos and **`worktrunk` (`wt`)** to manage worktrees.
+
+### Cloning repos with `dolly clone`
+
+When you need to work with a git repo, prefer `dolly clone` over `git clone`. It creates a bare clone + primary worktree under `~/src/`:
+
+```sh
+dolly clone https://github.com/owner/repo.git
+```
+
+This produces:
+
+- `~/src/<host>/<owner>/<repo>/` — the repo root directory
+- `~/src/<host>/<owner>/<repo>/.bare` — the bare clone (object store)
+- `~/src/<host>/<owner>/<repo>/.git` — gitdir pointing to `.bare`
+- `~/src/<host>/<owner>/<repo>/default` — symlink to the default branch worktree
+
+`dolly clone` handles credential forwarding via `git-credential` automatically, so authenticated repos work without extra configuration.
+
+### Managing worktrees with `worktrunk` (`wt`)
+
+Use `worktrunk` to create and manage worktrees for any branch:
+
+```sh
+wt switch --create <branch-name>   # Create worktree and switch to it
+wt switch <branch-name>            # Switch to existing worktree
+wt list                            # List all worktrees
+wt remove                          # Remove worktree (deletes branch if merged)
+```
+
+**Always create a worktree for any branch** — never work directly on a branch outside a worktree. This keeps branches isolated and parallelizable, which is essential for multi-agent or parallel task workflows.
+
+### Git conventions
+
+- The shell functions `gwa`, `gwl`, `gwr`, `gwm` (from `git-worktree.zsh`) provide repo-root-aware worktree management for dolly-managed repos:
+  - `gwa <branch>` — create a new worktree for a branch
+  - `gwl` — list worktrees
+  - `gwr <worktree>` — remove a worktree
+  - `gwm <worktree> <new-path>` — move a worktree
+- These functions work for both dolly-managed (bare) and plain repos.
+- When inside a repo or worktree, `git rev-parse --git-common-dir` resolves to the `.bare` (or `.git`) directory, so its parent is always the worktree root.
 
 Always prefer **`uv`** for Python and **`pnpm`** for Node.js.
 
