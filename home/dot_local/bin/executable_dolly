@@ -176,8 +176,9 @@ def cmd_clone(args: argparse.Namespace) -> int:
         )
         (dest / ".git").write_text("gitdir: ./.bare\n", encoding="utf-8")
 
-        # Bare clones often omit the fetch refspec — set it explicitly.
+        # Bare clones often omit refspecs — set both fetch and push.
         git(dest, "config", "--replace-all", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
+        git(dest, "config", "--replace-all", "remote.origin.push", "+refs/heads/*:refs/heads/*")
 
         branch = git_out(dest, "symbolic-ref", "--short", "HEAD")
         git(dest, "fetch", "origin")
@@ -292,6 +293,26 @@ def _check_fetch_refspec(root: Path, fix: bool, r: _LintResult) -> None:
     else:
         current = ", ".join(repr(v) for v in values) if values else "(unset)"
         _fail(f"fetch refspec: got {current}, want {expected!r}")
+        r.errors += 1
+
+
+def _check_push_refspec(root: Path, fix: bool, r: _LintResult) -> None:
+    expected = "+refs/heads/*:refs/heads/*"
+    try:
+        raw = git_out(root, "config", "--get-all", "remote.origin.push")
+        values = [v for v in raw.splitlines() if v]
+    except CalledProcessError:
+        values = []
+
+    if values == [expected]:
+        _ok("push refspec configured")
+    elif fix:
+        git(root, "config", "--replace-all", "remote.origin.push", expected)
+        _fixed("push refspec set")
+        r.fixes += 1
+    else:
+        current = ", ".join(repr(v) for v in values) if values else "(unset)"
+        _fail(f"push refspec: got {current}, want {expected!r}")
         r.errors += 1
 
 
@@ -604,6 +625,7 @@ def _lint_one(root: Path, fix: bool) -> _LintResult:
     _check_bare(root, fix, r)
     _check_gitfile(root, fix, r)
     _check_fetch_refspec(root, fix, r)
+    _check_push_refspec(root, fix, r)
     _check_default_symlink(root, fix, r)
     _check_branch_tracks_remote_name(root, fix, r)
     _check_worktree_branch_paths(root, fix, r)
