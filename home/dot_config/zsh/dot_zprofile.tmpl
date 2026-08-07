@@ -51,6 +51,21 @@ for _gnubin in \
   [ -d "$_gnubin" ] && PATH="$_gnubin:$PATH"
 done
 unset _gnubin
+
+# keg-only brew formulae that need to shadow system versions.
+# Add formula names here; all relevant paths are wired up automatically.
+for _keg_formula in \
+  curl \
+; do
+  _keg="{{ $darwinBrewPrefix }}/opt/$_keg_formula"
+  [[ -d "$_keg/bin" ]]           && PATH="$_keg/bin:$PATH"
+  [[ -d "$_keg/share/man" ]]     && MANPATH="$_keg/share/man:$MANPATH"
+  [[ -d "$_keg/lib/pkgconfig" ]] && PKG_CONFIG_PATH="$_keg/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+  [[ -d "$_keg/lib" ]]           && LDFLAGS="-L$_keg/lib${LDFLAGS:+ $LDFLAGS}"
+  [[ -d "$_keg/include" ]]       && CPPFLAGS="-I$_keg/include${CPPFLAGS:+ $CPPFLAGS}"
+done
+unset _keg _keg_formula
+export MANPATH PKG_CONFIG_PATH LDFLAGS CPPFLAGS
 {{- end }}
 {{- end }}
 {{- $homeDir := .chezmoi.homeDir }}
