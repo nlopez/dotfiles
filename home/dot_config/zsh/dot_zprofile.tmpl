@@ -99,10 +99,10 @@ export EDITOR="vim"
 
 {{- if not .headless }}
 # Set on all machines — Automation vault (Kagi API)
-export KAGI_API_KEY={{ onepasswordRead "op://Automation/Kagi API/credential" "my.1password.com" }}
+export KAGI_API_KEY={{ onepasswordRead "op://Automation/Kagi API/credential" }}
 
 {{- if .personal }}
 # Automation vault — personal machine secrets
-export HF_TOKEN={{ onepasswordRead "op://Automation/HF_TOKEN/credential" "my.1password.com" }}
+export HF_TOKEN={{ onepasswordRead "op://Automation/HF_TOKEN/credential" }}
 {{- end }}
 {{- end }}

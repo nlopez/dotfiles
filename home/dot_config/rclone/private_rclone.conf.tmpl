@@ -2,24 +2,24 @@
 [do]
 type = s3
 provider = DigitalOcean
-access_key_id = {{ onepasswordRead "op://Automation/do/access_key_id" "my.1password.com" }}     {{/* do */}}
-secret_access_key = {{ onepasswordRead "op://Automation/do/secret_access_key" "my.1password.com" }} {{/* do */}}
-endpoint = {{ onepasswordRead "op://Automation/do/endpoint" "my.1password.com" }}                 {{/* do */}}
+access_key_id = {{ onepasswordRead "op://Automation/do/access_key_id" }}     {{/* do */}}
+secret_access_key = {{ onepasswordRead "op://Automation/do/secret_access_key" }} {{/* do */}}
+endpoint = {{ onepasswordRead "op://Automation/do/endpoint" }}                 {{/* do */}}
 
 [media]
 type = webdav
-url = {{ onepasswordRead "op://Automation/media_webdav/url" "my.1password.com" }}   {{/* media_webdav */}}
-user = {{ onepasswordRead "op://Automation/media_webdav/user" "my.1password.com" }} {{/* media_webdav */}}
-pass = {{ onepasswordRead "op://Automation/media_webdav/pass" "my.1password.com" }} {{/* media_webdav */}}
+url = {{ onepasswordRead "op://Automation/media_webdav/url" }}   {{/* media_webdav */}}
+user = {{ onepasswordRead "op://Automation/media_webdav/user" }} {{/* media_webdav */}}
+pass = {{ onepasswordRead "op://Automation/media_webdav/pass" }} {{/* media_webdav */}}
 vendor = rclone
 
 [dropbox_personal]
 type = dropbox
-token = {{ onepasswordRead "op://Automation/dropbox_personal/token" "my.1password.com" }} {{/* dropbox_personal */}}
+token = {{ onepasswordRead "op://Automation/dropbox_personal/token" }} {{/* dropbox_personal */}}
 
 [dropbox_alt]
 type = dropbox
-token = {{ onepasswordRead "op://Automation/dropbox_alt/token" "my.1password.com" }} {{/* dropbox_alt */}}
+token = {{ onepasswordRead "op://Automation/dropbox_alt/token" }} {{/* dropbox_alt */}}
 
 [gdrive_personal]
 type = combine
@@ -27,17 +27,17 @@ upstreams = "My Drive=gdrive_personal_my_drive:" "Shared with me=gdrive_personal
 
 [gdrive_personal_shared_with_me]
 type = drive
-client_id = {{ onepasswordRead "op://Automation/gdrive_personal/client_id" "my.1password.com" }}         {{/* gdrive_personal */}}
-client_secret = {{ onepasswordRead "op://Automation/gdrive_personal/client_secret" "my.1password.com" }} {{/* gdrive_personal */}}
-token = {{ onepasswordRead "op://Automation/gdrive_personal/token" "my.1password.com" }}                 {{/* gdrive_personal */}}
+client_id = {{ onepasswordRead "op://Automation/gdrive_personal/client_id" }}         {{/* gdrive_personal */}}
+client_secret = {{ onepasswordRead "op://Automation/gdrive_personal/client_secret" }} {{/* gdrive_personal */}}
+token = {{ onepasswordRead "op://Automation/gdrive_personal/token" }}                 {{/* gdrive_personal */}}
 scope = drive
 shared_with_me = true
 
 [gdrive_personal_my_drive]
 type = drive
-client_id = {{ onepasswordRead "op://Automation/gdrive_personal/client_id" "my.1password.com" }}         {{/* gdrive_personal */}}
-client_secret = {{ onepasswordRead "op://Automation/gdrive_personal/client_secret" "my.1password.com" }} {{/* gdrive_personal */}}
-token = {{ onepasswordRead "op://Automation/gdrive_personal/token" "my.1password.com" }}                 {{/* gdrive_personal */}}
+client_id = {{ onepasswordRead "op://Automation/gdrive_personal/client_id" }}         {{/* gdrive_personal */}}
+client_secret = {{ onepasswordRead "op://Automation/gdrive_personal/client_secret" }} {{/* gdrive_personal */}}
+token = {{ onepasswordRead "op://Automation/gdrive_personal/token" }}                 {{/* gdrive_personal */}}
 scope = drive
 shared_with_me = false
 
@@ -47,19 +47,19 @@ upstreams = "My Drive=gdrive_alt_my_drive:" "Shared with me=gdrive_alt_shared_wi
 
 [gdrive_alt_shared_with_me]
 type = drive
-client_id = {{ onepasswordRead "op://Automation/gdrive_alt/client_id" "my.1password.com" }}         {{/* gdrive_alt */}}
-client_secret = {{ onepasswordRead "op://Automation/gdrive_alt/client_secret" "my.1password.com" }} {{/* gdrive_alt */}}
+client_id = {{ onepasswordRead "op://Automation/gdrive_alt/client_id" }}         {{/* gdrive_alt */}}
+client_secret = {{ onepasswordRead "op://Automation/gdrive_alt/client_secret" }} {{/* gdrive_alt */}}
 scope = drive
 shared_with_me = true
-token = {{ onepasswordRead "op://Automation/gdrive_alt/token" "my.1password.com" }}                 {{/* gdrive_alt */}}
+token = {{ onepasswordRead "op://Automation/gdrive_alt/token" }}                 {{/* gdrive_alt */}}
 
 [gdrive_alt_my_drive]
 type = drive
-client_id = {{ onepasswordRead "op://Automation/gdrive_alt/client_id" "my.1password.com" }}         {{/* gdrive_alt */}}
-client_secret = {{ onepasswordRead "op://Automation/gdrive_alt/client_secret" "my.1password.com" }} {{/* gdrive_alt */}}
+client_id = {{ onepasswordRead "op://Automation/gdrive_alt/client_id" }}         {{/* gdrive_alt */}}
+client_secret = {{ onepasswordRead "op://Automation/gdrive_alt/client_secret" }} {{/* gdrive_alt */}}
 scope = drive
 shared_with_me = false
-token = {{ onepasswordRead "op://Automation/gdrive_alt/token" "my.1password.com" }}               {{/* gdrive_alt */}}
+token = {{ onepasswordRead "op://Automation/gdrive_alt/token" }}               {{/* gdrive_alt */}}
 
 # VFS cache - global settings for all remotes.
 # Ref: https://rclone.org/vfs/

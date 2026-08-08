@@ -61,7 +61,7 @@ For secrets that must exist at the same destination path on both machine classes
 {{ if .work -}}
 API_KEY={{ onepasswordRead "op://Private/sometool-work/api-key" "datadog.1password.com" }}
 {{ else if .personal -}}
-API_KEY={{ onepasswordRead "op://Private/sometool-personal/api-key" "my.1password.com" }}
+API_KEY={{ onepasswordRead "op://Private/sometool-personal/api-key" }}
 {{ end -}}
 ```
 
