@@ -1,4 +1,5 @@
 .local/bin/aws
+.local/bin/docker
 .local/bin/git
 .local/bin/gitcache
 .local/bin/git-use-gitcache
