@@ -4,7 +4,6 @@ packages:
     brew_prefix: /opt/homebrew
     brew:
       taps:
-        libkrun/krun: "https://github.com/libkrun/homebrew-krun"
         8ta4/plist: "https://github.com/8ta4/homebrew-plist"
         jundot/omlx: "https://github.com/jundot/omlx"
         ryooooooga/tap: "https://github.com/ryooooooga/homebrew-tap"
@@ -14,7 +13,7 @@ packages:
         base:
         - wget
         - worktrunk
-        - podman
+        - colima
         - git-lfs
         - jj
         - flock
@@ -92,7 +91,6 @@ packages:
       casks:
         base:
         - notunes
-        - podman-desktop
         - grandperspective
         - obsidian
         - fsmonitor
