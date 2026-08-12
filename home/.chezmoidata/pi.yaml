@@ -14,6 +14,9 @@ pi:
   - "npm:pi-powerline@0.7.1"
   - "npm:@mjakl/pi-kagi-api@0.1.0"
   - "npm:pi-btw@0.4.0"
+  - "npm:pi-markdown-preview@0.14.0"
+  - "npm:pi-powerline-footer@0.13.0"
+  - "npm:@juicesharp/rpiv-ask-user-question@2.4.0"
   # Installed only on personal (non-work) machines.
   personal_only_packages:
   - "npm:pi-lmstudio@1.3.0"
