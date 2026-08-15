@@ -1,12 +1,40 @@
 {{- /* ~/.config/zsh/zshenv — runs for EVERY zsh session: login, interactive, non-interactive,
    scripts, and agent subshells. Keep this minimal; interactive-only setup stays
    in zshrc, login-only setup stays in zprofile.
+
+   ~/.zshenv is a symlink to this file (see home/symlink_dot_zshenv.tmpl), so
+   zsh's very first read of ~/.zshenv (before ZDOTDIR is known) already runs
+   this exact content — including the ZDOTDIR export below. That makes every
+   later stage (.zprofile, .zshrc, .zlogin) find its file under ZDOTDIR too,
+   for every kind of zsh invocation, without needing ZDOTDIR pre-exported by
+   a parent shell. See https://zsh.org/mla/workers/2013/msg00698.html.
 */ -}}
+# Must be the very first thing: this file is read as ~/.zshenv (via symlink)
+# before ZDOTDIR exists, so zsh doesn't yet know where to find .zprofile,
+# .zshrc, or .zlogin. Exporting it here — and only here — makes every
+# subsequent zsh stage, in every shell type, resolve under $ZDOTDIR.
+export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+
 # Load shared POSIX env (gnubin PATH, etc.) for all shell types.
 . "${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
 
 # Deduplicate PATH entries (zsh-specific; harmless no-op if already unique).
 typeset -U path
+
+{{- if eq .chezmoi.os "darwin" }}
+{{- $darwinBrewPrefix := "" -}}
+{{- range (list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local") -}}
+  {{- if and (not $darwinBrewPrefix) (stat (printf "%s/bin/brew" .)) -}}
+    {{- $darwinBrewPrefix = . -}}
+  {{- end -}}
+{{- end }}
+
+# Keg-only brew formulae (e.g. curl) need to shadow the system version in
+# every zsh shell, login or not, interactive or not. .zprofile re-applies
+# the same partial for login shells only, after path_helper -s rebuilds
+# PATH from /etc/paths(.d) and would otherwise wipe this out.
+{{ template "keg-only-brew-formulae.tmpl" (dict "prefix" $darwinBrewPrefix) }}
+{{- end }}
 
 # Disable macOS Terminal.app session saving — writes to ~/.zsh_sessions/
 # which is not XDG-compliant. We use in-memory history instead.
