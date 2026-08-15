@@ -14,7 +14,6 @@ packages:
         - wget
         - worktrunk
         - colima
-        - docker
         - git-lfs
         - jj
         - flock
