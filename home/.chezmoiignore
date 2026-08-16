@@ -96,9 +96,6 @@ Library/**
 {{ if ne .chezmoi.os "darwin" -}}
 .local/bin/gitcache
 {{ end -}}
-{{ if not (lookPath "podman") -}}
-.local/bin/docker
-{{ end -}}
 .local/bin/zed
 
 # ── XDG: generated/runtime files at new locations ────────────────────────────────

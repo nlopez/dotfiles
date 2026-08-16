@@ -110,7 +110,6 @@ packages:
         - macfuse
         - brave-origin
         - espanso
-        - standard-notes
         - balenaetcher
         - digikam
         - stolendata-mpv
