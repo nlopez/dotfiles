@@ -13,10 +13,29 @@ if [[ ! -d "$TPM_DIR" ]]; then
   git clone --depth=1 https://github.com/tmux-plugins/tpm "$TPM_DIR"
 fi
 
-# TPM reads TMUX_PLUGIN_MANAGER_PATH from the tmux environment.
-# start-server ensures the server is up and the env var is set even when
-# no session exists.
+# TPM reads TMUX_PLUGIN_MANAGER_PATH from the *live server's* global tmux
+# environment (not this shell's env) — it's set by the `run '...tpm'` line in
+# tmux.conf actually executing. Two things can leave it unset on first install:
+#   1. If a server is already running (e.g. a lingering session from earlier
+#      in this same bootstrap), start-server is a no-op and tmux.conf is never
+#      (re-)parsed, so the `run` line never fires for that server.
+#   2. Even on a fresh server, tmux's `run` shell-command hook is async, so
+#      TPM's env-var-setting script may not have finished by the time we'd
+#      otherwise call install_plugins right after start-server.
+# Force a source-file (covers case 1) and then poll for the var (covers case 2)
+# instead of racing ahead.
 tmux start-server
+tmux source-file "$HOME/.config/tmux/tmux.conf"
+
+for _ in $(seq 1 50); do
+  tmux show-environment -g TMUX_PLUGIN_MANAGER_PATH &>/dev/null && break
+  sleep 0.1
+done
+
+if ! tmux show-environment -g TMUX_PLUGIN_MANAGER_PATH &>/dev/null; then
+  echo "TMUX_PLUGIN_MANAGER_PATH never became set — aborting plugin install." >&2
+  exit 1
+fi
 
 echo "Installing tmux plugins..."
 "$TPM_DIR/bin/install_plugins"
