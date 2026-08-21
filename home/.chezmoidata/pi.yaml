@@ -1,10 +1,9 @@
-# Pi — single source of truth for the CLI version and user packages.
-# run_onchange_after_install-pi.sh.tmpl reads .pi.version to install/upgrade Pi.
+# Pi — single source of truth for user packages.
 # modify_settings.json.tmpl and run_onchange_after_pi-packages.py.tmpl
 # read .pi.packages at template render time.
 # Renovate scans this file for npm:pkg@version patterns.
+# The Pi coding agent itself is installed out of band, not via chezmoi.
 pi:
-  version: "0.80.2"
   packages:
   - "npm:pi-auto-theme@1.1.1"
   - "npm:pi-mcp-adapter@2.9.0"

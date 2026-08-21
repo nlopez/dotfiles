@@ -30,17 +30,8 @@ Pi npm packages (extensions, skills, adapters) are managed via the `packages` ke
 3. Install the package at runtime: `pi install npm:<package>@<version>`.
 4. Commit the source change.
 
-Pi npm packages are **not** pnpm globals. They live in `~/.pi/agent/npm/` and are
-managed by `pi install`, not `pnpm add -g`. Do not add them to `pnpm.yaml`.
-
-## pnpm globals — declare in `pnpm.yaml`
-
-Standalone CLI tools that need to be on `PATH` (e.g., `mmd`, `pi-coding-agent`)
-are installed as pnpm globals. Add them to the `pnpm.base` list in
-`home/.chezmoidata/pnpm.yaml`.
-
-The `run_onchange_after_pnpm-globals.sh.tmpl` script reads `pnpm.yaml` and runs
-`pnpm add -g` for each entry on every `chezmoi apply`.
+Pi npm packages are managed by `pi install`, not `pnpm add -g`. Nothing is installed
+as a pnpm global in this repo — chezmoi does not run `pnpm add -g` for anything.
 
 ## ⚠️ Boundaries
 
@@ -48,8 +39,7 @@ The `run_onchange_after_pnpm-globals.sh.tmpl` script reads `pnpm.yaml` and runs
 
 - Use `uv run scripts/jsonlint.py` before committing
 - Run `pre-commit run --all-files` locally
-- Declare Pi npm packages in `modify_settings.json`, not `pnpm.yaml`
-- Declare pnpm globals in `pnpm.yaml`, not `modify_settings.json`
+- Declare Pi npm packages in `modify_settings.json`
 - Follow chezmoi `modify_` semantics: plain `modify_*` files are scripts; only use
   `chezmoi:modify-template` when the rendered template output should become the final file;
   modify templates must not have a `.tmpl` suffix
@@ -65,5 +55,5 @@ The `run_onchange_after_pnpm-globals.sh.tmpl` script reads `pnpm.yaml` and runs
 - Commit files that fail linting
 - Bypass pre-commit hooks
 - Install packages directly to `~/.local/bin/` outside chezmoi
-- Use `pi install` to declare new packages — it writes to destination only. First add to `modify_settings.json` (Pi plugins) or `pnpm.yaml` (pnpm globals), then `chezmoi apply` and `pi install`.
-- Add Pi npm packages to `pnpm.yaml` — they must go in `modify_settings.json`.
+- Install anything via `pnpm add -g` (pnpm globals) — this repo does not manage global pnpm packages
+- Use `pi install` to declare new packages — it writes to destination only. First add to `modify_settings.json` (Pi plugins), then `chezmoi apply` and `pi install`.

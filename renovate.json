@@ -22,12 +22,6 @@
       "managerFilePatterns": ["/(^|/)home/\\.chezmoidata/pi\\.yaml$/"],
       "matchStrings": ["npm:(?<packageName>(?:@[^/]+/)?[^@\\s\"]+)@(?<currentValue>[0-9][^\\s\",]+)"],
       "datasourceTemplate": "npm"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": ["/(^|/)home/\\.chezmoidata/(darwin|linux)/packages\\.yaml$/"],
-      "matchStrings": ["- \"?(?<packageName>(?:@[^/\\s\"]+/)?[^@\\s\"]+)@(?<currentValue>[0-9][^\\s\",\\n]+)\"?"],
-      "datasourceTemplate": "npm"
     }
   ],
   "packageRules": [
@@ -43,14 +37,6 @@
       "matchManagers": ["custom.regex"],
       "matchFileNames": ["home/.chezmoidata/pi.yaml"],
       "groupName": "pi packages"
-    },
-    {
-      "matchManagers": ["custom.regex"],
-      "matchFileNames": ["home/.chezmoidata/darwin/packages.yaml", "home/.chezmoidata/linux/packages.yaml"],
-      "groupName": "pnpm global packages",
-      "automerge": true,
-      "automergeType": "pr",
-      "automergeStrategy": "squash"
     }
   ]
 }

@@ -71,7 +71,6 @@ Place scripts in `home/.chezmoiscripts/`. The top-level scripts (non-platform-sp
 
 ```sh
 home/.chezmoiscripts/run_after_reload-tmux.sh       # Reloads tmux every apply
-home/.chezmoiscripts/run_onchange_after_pnpm-globals.py.tmpl  # Platform-specific, only on change
 home/.chezmoiscripts/run_once_after_install-iosevka-nf-fonts.sh.tmpl  # One-time install
 ```
 

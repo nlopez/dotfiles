@@ -1,6 +1,0 @@
-# Per-platform pnpm global packages for Linux.
-# These are merged with the shared pnpm.yaml (base list).
-# Add entries under pnpm.personal or pnpm.work as needed.
-pnpm:
-  personal: []
-  work: []

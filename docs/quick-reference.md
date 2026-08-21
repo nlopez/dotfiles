@@ -34,13 +34,12 @@ When working in this repo, keep these mental models in mind:
 
 ## Path disambiguation
 
-| What you want                | Where it lives                                                       |
-| ---------------------------- | -------------------------------------------------------------------- |
-| This file (`AGENTS.md`)      | Repo root: `AGENTS.md`                                               |
-| chezmoi scripts              | `home/.chezmoiscripts/` (NOT repo root `scripts/`)                   |
-| Lint scripts                 | Repo root: `scripts/` (NOT chezmoi-managed)                          |
-| The `.chezmoiroot` file      | Repo root: `.chezmoiroot`                                            |
-| chezmoi ignore patterns      | `home/.chezmoiignore`                                                |
-| Source for `~/.gitconfig`    | `home/dot_gitconfig`                                                 |
-| Source for `~/.config/tmux/` | `home/dot_config/tmux/`                                              |
-| pnpm global data             | `home/.chezmoidata/pnpm.yaml` + `home/.chezmoidata/darwin/pnpm.yaml` |
+| What you want                | Where it lives                                     |
+| ---------------------------- | -------------------------------------------------- |
+| This file (`AGENTS.md`)      | Repo root: `AGENTS.md`                             |
+| chezmoi scripts              | `home/.chezmoiscripts/` (NOT repo root `scripts/`) |
+| Lint scripts                 | Repo root: `scripts/` (NOT chezmoi-managed)        |
+| The `.chezmoiroot` file      | Repo root: `.chezmoiroot`                          |
+| chezmoi ignore patterns      | `home/.chezmoiignore`                              |
+| Source for `~/.gitconfig`    | `home/dot_gitconfig`                               |
+| Source for `~/.config/tmux/` | `home/dot_config/tmux/`                            |
