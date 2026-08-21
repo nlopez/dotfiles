@@ -49,10 +49,7 @@ Library/**
 !Library/Preferences/**
 !Library/exact_Fonts/**
 {{ end -}}
-{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.osRelease.id "aurora") -}}
-.chezmoiscripts/linux-debian/**
-{{ end -}}
-{{ if or (eq .chezmoi.os "darwin") (ne .chezmoi.osRelease.id "aurora") -}}
+{{ if eq .chezmoi.os "darwin" -}}
 .chezmoiscripts/linux/**
 {{ end -}}
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import yaml
 
-OSES = ["darwin", "linux", "linux-debian", "windows"]
+OSES = ["darwin", "linux", "windows"]
 
 
 def chezmoi_root() -> Path:
@@ -18,12 +18,9 @@ def chezmoi_root() -> Path:
 
 def build_data(root: Path, os_name: str) -> dict:
     """Build override and user data for template rendering."""
-    # linux-debian targets Ubuntu/Debian; chezmoi.os must be "linux" with a
-    # non-aurora osRelease so the .chezmoiignore gates fire correctly.
-    effective_os = "linux" if os_name == "linux-debian" else os_name
     override_data = {
         "chezmoi": {
-            "os": effective_os,
+            "os": os_name,
             "osRelease": {
                 "id": "ubuntu",
                 "ubuntuCodename": "noble",

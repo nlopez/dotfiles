@@ -52,4 +52,4 @@ return {
 ## Managing Neovim Binary
 
 - **macOS**: Installed via Homebrew (`brew install neovim`)
-- **Aurora Linux**: Installed via Linuxbrew (`brew install neovim`)
+- **Linux**: Installed out-of-band (managed manually, not via chezmoi)

@@ -18,7 +18,8 @@ export OP_ACCOUNT=my.1password.com
 export SSH_AUTH_SOCK="{{ .platform.ssh_auth_sock | replace "~" .chezmoi.homeDir }}"
 {{- end }}
 
-{{- $brewPrefixes := list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local" -}}
+{{- if eq .chezmoi.os "darwin" }}
+{{- $brewPrefixes := list "/opt/homebrew" "/usr/local" -}}
 {{- $foundBrewPrefix := "" -}}
 {{- range $brewPrefix := $brewPrefixes -}}
   {{- if and (not $foundBrewPrefix) (stat (printf "%s/bin/brew" $brewPrefix)) -}}
@@ -31,13 +32,14 @@ fpath+=("{{ $foundBrewPrefix }}/share/zsh/site-functions")
 eval "$({{ $foundBrewPrefix }}/bin/brew shellenv)"
 export HOMEBREW_REQUIRE_TAP_TRUST=1
 {{ end }}
+{{- end }}
 
 # Re-prepend GNU gnubin paths after brew shellenv — path_helper -s rebuilds
 # PATH from /etc/paths + /etc/paths.d and appends the old PATH (containing
 # the gnubin dirs from ~/.zshenv) at the end, so we must re-prepend here.
 {{- if eq .chezmoi.os "darwin" }}
 {{- $darwinBrewPrefix := "" -}}
-{{- range (list "/opt/homebrew" "/home/linuxbrew/.linuxbrew" "/usr/local") -}}
+{{- range (list "/opt/homebrew" "/usr/local") -}}
   {{- if and (not $darwinBrewPrefix) (stat (printf "%s/bin/brew" .)) -}}
     {{- $darwinBrewPrefix = . -}}
   {{- end -}}

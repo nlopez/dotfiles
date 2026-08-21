@@ -4,7 +4,13 @@
 # --body-file on PR/issue write commands.
 # Keep in sync with gh-attribution.ts (covers non-shell contexts).
 
-REAL_GH={{ if eq .chezmoi.os "darwin" }}{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin/gh{{ else }}/usr/local/bin/gh{{ end }}{{ else }}/home/linuxbrew/.linuxbrew/bin/gh{{ end }}
+{{- if eq .chezmoi.os "darwin" }}
+REAL_GH={{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin/gh{{ else }}/usr/local/bin/gh{{ end }}
+{{- else }}
+# Linux: gh is installed out-of-band (apt/dnf/manual), not via chezmoi. Resolve
+# the real binary at runtime, skipping this shim's own location in PATH.
+REAL_GH=$(command -v -a gh | grep -vF "$HOME/.local/bin/gh" | head -n1)
+{{- end }}
 
 # --- GH_CONFIG_DIR routing ---
 if git remote -v 2>/dev/null | grep -qi 'github\.com[:/][Dd][Dd]oghq/'; then

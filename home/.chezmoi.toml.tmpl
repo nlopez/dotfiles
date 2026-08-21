@@ -12,12 +12,6 @@
 
 {{- $ephemeral := false -}}{{/* true if this machine is ephemeral, e.g.: a cloud or VM instance */}}
 
-{{- $osID := .chezmoi.os -}}
-{{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
-{{-   $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
-{{- end -}}
-
-
 {{/* work around unreliable hostname on darwin */}}
 {{- $hostname := .chezmoi.hostname -}}
 {{- if eq .chezmoi.os "darwin" -}}

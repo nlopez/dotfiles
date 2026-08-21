@@ -4,8 +4,9 @@
 #
 # Outputs like a git/chezmoi diff: "-" for removals (red), "+" for additions (green).
 #
-# Usage: scripts/brew-declarative-preview.sh [os]
-#   os: darwin (default) or linux
+# Homebrew is darwin-only (Linuxbrew is not used on Linux hosts).
+#
+# Usage: scripts/brew-declarative-preview.sh
 set -ufo pipefail
 
 # ANSI colors
@@ -14,23 +15,13 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 CHEZMOI_ROOT="${CHEZMOI_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || realpath "$(dirname "$0")/.." )}"
-OS="${1:-darwin}"
 
 TMPDIR_WORK=$(mktemp -d)
 trap 'rm -rf "$TMPDIR_WORK"' EXIT
 
 # --- Generate Brewfile from config ---
-if [ "$OS" = "darwin" ]; then
-    GENERATED="$TMPDIR_WORK/generated.brewfile"
-    (cd "$CHEZMOI_ROOT" && chezmoi execute-template -f home/dot_Brewfile.tmpl) > "$GENERATED" 2>/dev/null
-elif [ "$OS" = "linux" ]; then
-    echo "Linux Brew config (no standalone Brewfile to compare):"
-    cat "$CHEZMOI_ROOT/home/.chezmoidata/linux/packages.yaml"
-    exit 0
-else
-    echo "Unknown OS: $OS (use darwin or linux)"
-    exit 1
-fi
+GENERATED="$TMPDIR_WORK/generated.brewfile"
+(cd "$CHEZMOI_ROOT" && chezmoi execute-template -f home/dot_config/brew/Brewfile.tmpl) > "$GENERATED" 2>/dev/null
 
 # --- Dump current installed state ---
 CURRENT="$TMPDIR_WORK/current.brewfile"

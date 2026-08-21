@@ -6,11 +6,13 @@ import shutil
 import subprocess
 import sys
 
+{{- if eq .chezmoi.os "darwin" }}
 # Headless machines don't source zprofile, so brew-installed pnpm isn't in PATH.
 # Prepend the brew prefix so pnpm is found after install-packages-brew runs.
 _BREW_BIN = "{{ .packages.brew_prefix }}/bin"
 if _BREW_BIN not in os.environ.get("PATH", "").split(":"):
     os.environ["PATH"] = f"{_BREW_BIN}:{os.environ.get('PATH', '')}"
+{{- end }}
 
 MANIFEST = [
 {{- range .pnpm.base }}
