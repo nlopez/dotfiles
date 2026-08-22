@@ -100,3 +100,6 @@ Documents/WindowsPowerShell
 .config/restic
 .config/resticprofile
 .config/resticprofile/profiles.toml
+
+.bashrc
+.bash_profile
