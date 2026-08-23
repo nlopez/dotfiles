@@ -18,6 +18,23 @@
 {{-   $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
 {{- end -}}
 
+{{/* platform-specific values — templates reference .platform.* instead of
+     embedding .chezmoi.os conditionals themselves */}}
+{{- $platform := dict
+      "ssh_auth_sock" "~/.1password/agent.sock"
+      "gpg_op_path"   "/opt/1Password/op-ssh-sign"
+      "font_dir"      ".local/share/fonts"
+      "reload_path"   "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+-}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $platform = dict
+        "ssh_auth_sock" "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+        "gpg_op_path"   "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+        "font_dir"      "Library/Fonts"
+        "reload_path"   "/usr/bin:/bin:/usr/sbin:/sbin"
+-}}
+{{- end -}}
+
 
 
 
@@ -92,3 +109,9 @@ zshPlugins = [
   "fast-syntax-highlighting",
   "pure",
 ]
+
+[data.platform]
+ssh_auth_sock = {{ $platform.ssh_auth_sock | quote }}
+gpg_op_path   = {{ $platform.gpg_op_path | quote }}
+font_dir      = {{ $platform.font_dir | quote }}
+reload_path   = {{ $platform.reload_path | quote }}
