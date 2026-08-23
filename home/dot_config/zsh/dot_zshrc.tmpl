@@ -271,6 +271,7 @@ alias restic-restore='resticprofile restore --target ~/restic-restore/'
 eval "$(direnv hook zsh)"
 eval "$(zoxide init zsh)"
 eval "$(mise activate zsh)"
+eval "$(zabrze init --bind-keys)"
 {{- if lookPath "wt" }}
 eval "$(wt config shell init zsh)"
 {{- end }}

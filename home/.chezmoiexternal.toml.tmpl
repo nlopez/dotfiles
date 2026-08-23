@@ -6,6 +6,10 @@
 {{- $ageOS := .chezmoi.os -}}
 {{- $ageArch := .chezmoi.arch -}}
 
+{{- $zabrzeVersion := "v0.7.3" -}}
+{{- $zabrzeArch := "x86_64" -}}{{- if eq .chezmoi.arch "arm64" -}}{{- $zabrzeArch = "aarch64" -}}{{- end -}}
+{{- $zabrzeTarget := "unknown-linux-gnu" -}}{{- if eq .chezmoi.os "darwin" -}}{{- $zabrzeTarget = "apple-darwin" -}}{{- end -}}
+
 {{- if not .headless }}
 # age — https://github.com/FiloSottile/age
 [".local/bin/age"]
@@ -29,6 +33,14 @@
     # renovate: datasource=github-releases depName=jdx/mise
     url = "https://github.com/jdx/mise/releases/download/{{ $miseVersion }}/mise-{{ $miseVersion }}-{{ $miseOS }}-{{ $miseArch }}.tar.gz"
     path = "mise/bin/mise"
+    executable = true
+
+# zabrze — https://github.com/Ryooooooga/zabrze
+[".local/bin/zabrze"]
+    type = "archive-file"
+    # renovate: datasource=github-releases depName=Ryooooooga/zabrze
+    url = "https://github.com/Ryooooooga/zabrze/releases/download/{{ $zabrzeVersion }}/zabrze-{{ $zabrzeVersion }}-{{ $zabrzeArch }}-{{ $zabrzeTarget }}.tar.gz"
+    path = "zabrze"
     executable = true
 
 [".local/bin/rclone"]
