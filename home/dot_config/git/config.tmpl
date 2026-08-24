@@ -38,7 +38,12 @@
 
 ; Per-identity SSH keys are selected via core.sshCommand in each identity
 ; include (see config_nlopez, config_work, config_silentshout42).
-; Remotes use natural github.com URLs — no insteadOf rewrites needed.
+; Force all github.com clones/fetches/pushes over SSH, even when an
+; https://github.com/... URL is given (e.g. `git clone` from a browser
+; link). remote.*.url stays literally https in .git/config, so the
+; hasconfig identity-routing includes below still match correctly.
+[url "ssh://git@github.com/"]
+  insteadOf = https://github.com/
 
 [init]
   defaultBranch = main
