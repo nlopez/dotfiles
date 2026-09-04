@@ -4,11 +4,7 @@ session_path = "${XDG_DATA_HOME}/atuin/session"
 sync_address = "https://terminal-frost.desertbluffs.com"
 sync_frequency = "30m"
 
-{{- if .work }}
-auto_sync = false
-{{- else }}
 auto_sync = true
-{{- end }}
 update_check = false
 
 filter_mode = "global"
