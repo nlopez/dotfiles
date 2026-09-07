@@ -62,8 +62,9 @@ unset _gnubin
 {{- end }}
 {{- $homeDir := .chezmoi.homeDir }}
 
-# Dynamic PATH additions — checked at every login/reload, so new tool
-# installations (cargo, go, etc.) show up without needing chezmoi apply.
+# Dynamic PATH additions — also done in ~/.config/shell/env (all shell types);
+# repeated here so they re-prepend on macOS after path_helper -s rebuilds PATH
+# in a login shell. typeset -U path dedupes the overlap.
 for _d in \
   "$HOME/go/bin" \
   "$HOME/.cargo/bin" \
