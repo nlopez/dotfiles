@@ -1,7 +1,11 @@
 {{- if lookPath "atuin" }}
-# Disable history file and zsh's own history management in favor of atuin
+# Disable zsh's history file in favor of atuin (atuin handles persistence).
+# Do NOT define a plain zshaddhistory() function here — atuin registers its
+# own _atuin_zshaddhistory via add-zsh-hook, and a pre-existing plain function
+# blocks that hook from ever being called (add-zsh-hook only installs its
+# wrapper when the function is undefined). Leaving it undefined means atuin
+# correctly captures comment lines and other commands that skip preexec.
 unset HISTFILE
-function zshaddhistory() { return 1 }
 alias history="atuin history list"
 {{- end }}
 
