@@ -17,4 +17,4 @@ cursor-style = block
 cursor-style-blink = true
 shell-integration-features = no-cursor
 
-initial-command = /usr/bin/zsh --login
+initial-command = /usr/bin/zsh --login -c 'tmux attach -t 0 || tmux new -s 0'
