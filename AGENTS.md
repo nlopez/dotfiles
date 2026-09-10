@@ -133,7 +133,6 @@ All new tool configurations **must** follow the [XDG Base Directory Specificatio
 | git                    | `~/.config/git/`                        | Native XDG support                            |
 | jj                     | `~/.config/jj/`                         | Native XDG support                            |
 | k9s                    | `~/.config/k9s/`                        | Native XDG support                            |
-| neovim                 | `~/.config/nvim/`                       | Native XDG support                            |
 | pnpm data              | `~/.local/share/pnpm/`                  | `PNPM_HOME` env var                           |
 | Go data                | `~/.local/share/go/`                    | `GOPATH` env var                              |
 | rclone                 | `~/.config/rclone/`                     | Native XDG support                            |
@@ -198,36 +197,8 @@ Package management on Linux hosts is **out of band** — chezmoi does not instal
 
 ### macOS
 
-- Neovim installed via Homebrew (`brew install neovim`).
 - CLI tools configured via `packages.yaml` → `darwin.brews` section.
 - GUI apps via Homebrew Casks (or mas for Mac App Store apps).
-
-### Neovim Direct Management
-
-The Neovim configuration is **directly managed** in the chezmoi source tree — not via external git-repo:
-
-```
-home/dot_config/nvim/
-├── init.lua              # Bootstrap entry (sources config/lazy.lua)
-├── README.md             # Usage documentation
-├── stylua.toml           # Lua formatting config
-├── lua/
-│   ├── config/           # LazyVim config files
-│   │   ├── lazy.lua      # lazy.nvim bootstrap + LazyVim import
-│   │   ├── options.lua   # Neovim options
-│   │   ├── keymaps.lua   # Neovim keybindings
-│   │   ├── autocmds.lua  # Neovim autocommands
-│   │   └── overrides.lua # LazyVim opts overrides
-│   ├── mapping/          # Custom keybinding extensions
-│   │   └── custom.lua
-│   └── plugins/          # Custom plugin specs
-│       └── init.lua
-└── package.json          # Package metadata
-```
-
-- **Binary**: macOS uses Homebrew (via `packages.yaml` → `brews.base`). On Linux, Neovim is installed out-of-band by the user, not by chezmoi.
-- **Config**: Directly in `home/dot_config/nvim/` — full `chezmoi diff`/`status` visibility.
-- **Extensions**: Edit `lua/plugins/init.lua` for plugin specs, `lua/config/overrides.lua` for LazyVim opts.
 
 ## Further Reading
 
