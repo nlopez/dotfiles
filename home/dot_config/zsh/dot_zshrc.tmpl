@@ -83,6 +83,11 @@ eval "$(atuin init zsh)"
 # newlines to spaces, and strips any trailing newline so the Enter key must
 # be pressed deliberately to run a command.
 autoload -Uz bracketed-paste-magic
+# '.self-*' forces the builtin self-insert widgets during a paste, bypassing
+# url-quote-magic so pasted URLs / special chars ($ ? & = space) are inserted
+# literally instead of being backslash-escaped. Newline handling above is
+# unaffected.
+zstyle ':bracketed-paste-magic' active-widgets '.self-*'
 zle -N bracketed-paste bracketed-paste-magic
 
 autoload -U edit-command-line
