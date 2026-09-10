@@ -150,3 +150,7 @@ set -g @theme-path "$HOME/.config/tmux/status.tmux"
 
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
 run '~/.config/tmux/plugins/tpm/tpm'
+{{ if stat (joinPath .chezmoi.homeDir ".config/tmux/themes/noctalia.conf") }}
+# Noctalia-generated theme override (sourced after tpm so it wins)
+source-file -q "$XDG_CONFIG_HOME/tmux/themes/noctalia.conf"
+{{ end -}}
