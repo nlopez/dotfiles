@@ -1,0 +1,229 @@
+config_version = 14
+
+[audio]
+enable_overdrive = true
+enable_sounds = true
+
+[bar.default]
+center = [ "active_window" ]
+end = [ "tray", "notifications", "network", "volume", "clock", "session" ]
+start = [ "launcher", "workspaces", "group:g1" ]
+
+[battery.device."/org/freedesktop/UPower/devices/headset_dev_80_C3_BA_9C_37_0A"]
+warning_threshold = 20
+
+[brightness]
+enable_ddcutil = true
+
+[control_center.calendar]
+show_events_card = false
+
+[dock]
+enabled = true
+layer = "overlay"
+pinned = [ "com.mitchellh.ghostty", "code" ]
+reserve_space = false
+show_dots = true
+smart_auto_hide = true
+
+[location]
+address = "Astoria, NY"
+
+[lockscreen_widgets]
+enabled = false
+schema_version = 2
+widget_order = [
+    "lockscreen-login-box@FALLBACK",
+    "lockscreen-login-box@DP-3",
+    "lockscreen-login-box@DP-2",
+    "lockscreen-login-box@DP-1"
+]
+
+    [lockscreen_widgets.grid]
+    cell_size = 16
+    major_interval = 4
+    visible = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@DP-1"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 1024.0
+    cy = 970.0
+    output = "DP-1"
+    placement_height = 1152.0
+    placement_width = 2048.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@DP-1".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@DP-2"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 1376.0
+    cy = 970.0
+    output = "DP-2"
+    placement_height = 1152.0
+    placement_width = 2752.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@DP-2".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@DP-3"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 1024.0
+    cy = 970.0
+    output = "DP-3"
+    placement_height = 1152.0
+    placement_width = 2048.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@DP-3".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@FALLBACK"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 960.0
+    cy = 898.0
+    output = "FALLBACK"
+    placement_height = 1080.0
+    placement_width = 1920.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@FALLBACK".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+[nightlight]
+enabled = true
+
+[notification]
+history_retention_hours = 8
+position = "bottom_center"
+
+[shell]
+date_format = "%a %b%e"
+external_ip_enabled = true
+font_family = "SF Pro"
+settings_show_advanced = false
+telemetry_enabled = true
+time_format = "%k:%M"
+
+    [shell.greeter_sync]
+    auto_sync = false
+
+    [shell.screenshot]
+    copy_to_clipboard = true
+    directory = "/home/localuser/Pictures/Screenshots"
+    save_to_file = true
+
+[theme]
+community_palette = "Kemuri Koke"
+mode = "auto"
+source = "community"
+wallpaper_scheme = "m3-tonal-spot"
+
+    [theme.templates]
+    builtin_ids = [ "btop", "gtk3", "gtk4", "ghostty", "hyprland", "kcolorscheme", "kitty", "qt" ]
+    community_ids = [ "claude-code", "brave-origin", "gimp", "vscode", "vicinae", "fastfetch", "bat", "tmux" ]
+
+[wallpaper]
+fill_color = "secondary"
+
+    [wallpaper.default]
+    path = "/home/localuser/Pictures/r1999_wallpaper/2560x1440/81 2560x1440_9de37233119d4a39adf11d9bef0b4848.jpg"
+
+    [wallpaper.last]
+    path = "/home/localuser/Pictures/Wallpaper/3440x1440/Fude 2 - 3440x1440.webp"
+
+    [wallpaper.monitors.DP-1]
+    path = "/home/localuser/Pictures/Wallpaper/2560x1440/Kanna Birthday 2024 - 2560x1440.png"
+
+    [wallpaper.monitors.DP-2]
+    path = "/home/localuser/Pictures/Wallpaper/3440x1440/Fude 2 - 3440x1440.webp"
+
+    [wallpaper.monitors.DP-3]
+    path = "/home/localuser/Pictures/Wallpaper/2560x1440/Fude 2 - 2560x1440.png"
+
+    [[wallpaper.favorite]]
+    builtin_palette = "Catppuccin"
+    palette_source = "builtin"
+    path = "/home/localuser/Pictures/r1999_wallpaper/11_9fa79900f8474d70a3a7c9fe28433c68.jpg"
+    theme_mode = "auto"
+
+    [[wallpaper.favorite]]
+    path = "/home/localuser/Pictures/r1999_wallpaper/2560x1440/1 2560x1440_f2f500ff77934961ad01503b440bc9be.jpg"
+    theme_mode = "auto"
+
+[weather]
+unit = "imperial"
+
+[widget.clock]
+format = "%k:%M · %a %b%e"
+
+[widget.network]
+show_label = false
+
+    [widget.network.actions]
+    right = "none"
+
+[widget.volume]
+show_label = false

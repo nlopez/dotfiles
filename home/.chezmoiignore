@@ -63,6 +63,7 @@ Library/**
 {{ if or (ne .chezmoi.os "linux") .headless -}}
 .config/hypr
 .config/noctalia
+.local/state/noctalia
 {{ end -}}
 
 # ── Workspace environments: skip git config so the host identity is preserved ─
