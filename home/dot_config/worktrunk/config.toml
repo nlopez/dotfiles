@@ -1,0 +1,42 @@
+skip-commit-generation-prompt = true
+
+[post-start]
+copy-ignored = "wt step copy-ignored"
+[projects."github.com/DataDog/service-discovery-platform"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/DataDog/awesome-monkey"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/DataDog/cloud-inventory"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/ddoghq/dd-source"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/DataDog/cloudops"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/DataDog/runtime-metadata-service"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/DataDog/apis"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/DataDog/terraform-provider-runtime-metadata-service"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/DataDog/terraform-config"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/DataDog/ddtool"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/DataDog/documentation"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[projects."github.com/ddoghq/service-discovery-platform"]
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+
+[list]
+json-schema = 2
