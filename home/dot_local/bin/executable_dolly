@@ -15,10 +15,11 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 # Convention:
-#   ~/src/<host>/<owner>/<repo>/.bare       ← bare clone
-#   ~/src/<host>/<owner>/<repo>/.git        ← gitdir: ./.bare
-#   ~/src/<host>/<owner>/<repo>/default     ← symlink → <default-branch>
-#   ~/src/<host>/<owner>/<repo>/<worktree>/ ← worktrees
+#   <root>/<host>/<owner>/<repo>/.bare       ← bare clone
+#   <root>/<host>/<owner>/<repo>/.git        ← gitdir: ./.bare
+#   <root>/<host>/<owner>/<repo>/default     ← symlink → <default-branch>
+#   <root>/<host>/<owner>/<repo>/<worktree>/ ← worktrees
+# <root> is ~/Projects if it exists, else ~/src.
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -29,6 +30,12 @@ _YELLOW = "\033[33m"
 _RED = "\033[31m"
 _BOLD = "\033[1m"
 _RESET = "\033[0m"
+
+
+def _projects_root() -> Path:
+    """Root under which repos are cloned: ~/Projects if it exists, else ~/src."""
+    projects = Path.home() / "Projects"
+    return projects if projects.is_dir() else Path.home() / "src"
 
 
 def git(repo: Path, *args: str) -> None:
@@ -157,7 +164,7 @@ def cmd_clone(args: argparse.Namespace) -> int:
     if netloc in ("github.com", "www.github.com"):
         repo_path = _canonical_github_path(repo_path) or repo_path
 
-    dest = Path.home() / "src" / netloc / repo_path
+    dest = _projects_root() / netloc / repo_path
     clone_url = url._replace(
         path=url.path if url.path.endswith(".git") else url.path + ".git",
     ).geturl()
@@ -598,7 +605,7 @@ def _check_canonical_casing(root: Path, fix: bool, r: _LintResult) -> None:
         r.warnings += 1
         return
 
-    expected = Path.home() / "src" / netloc / canonical
+    expected = _projects_root() / netloc / canonical
 
     if root == expected:
         _ok(f"directory casing matches GitHub ({canonical})")
@@ -711,7 +718,7 @@ def cmd_lint(args: argparse.Namespace) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(
         prog="dolly",
-        description="Manage bare-repo + worktree Git clones under ~/src/",
+        description="Manage bare-repo + worktree Git clones under ~/Projects (or ~/src)",
     )
     sub = parser.add_subparsers(dest="command")
 

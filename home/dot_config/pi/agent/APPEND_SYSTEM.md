@@ -30,18 +30,18 @@ Use **`dolly clone`** to clone repos and **`worktrunk` (`wt`)** to manage worktr
 
 ### Cloning repos with `dolly clone`
 
-When you need to work with a git repo, prefer `dolly clone` over `git clone`. It creates a bare clone + primary worktree under `~/src/`:
+When you need to work with a git repo, prefer `dolly clone` over `git clone`. It creates a bare clone + primary worktree under `~/Projects/` (or `~/src/` if `~/Projects` doesn't exist):
 
 ```sh
 dolly clone https://github.com/owner/repo.git
 ```
 
-This produces:
+This produces (using `<root>` for whichever of the two applies):
 
-- `~/src/<host>/<owner>/<repo>/` — the repo root directory
-- `~/src/<host>/<owner>/<repo>/.bare` — the bare clone (object store)
-- `~/src/<host>/<owner>/<repo>/.git` — gitdir pointing to `.bare`
-- `~/src/<host>/<owner>/<repo>/default` — symlink to the default branch worktree
+- `<root>/<host>/<owner>/<repo>/` — the repo root directory
+- `<root>/<host>/<owner>/<repo>/.bare` — the bare clone (object store)
+- `<root>/<host>/<owner>/<repo>/.git` — gitdir pointing to `.bare`
+- `<root>/<host>/<owner>/<repo>/default` — symlink to the default branch worktree
 
 `dolly clone` handles credential forwarding via `git-credential` automatically, so authenticated repos work without extra configuration.
 

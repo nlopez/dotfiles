@@ -1,10 +1,11 @@
 # git worktree helpers — repo-root-aware
 #
 # Convention (established by `dolly`):
-#   ~/src/<host>/<repo>/.bare    ← bare clone
-#   ~/src/<host>/<repo>/.git     ← "gitdir: ./.bare"
-#   ~/src/<host>/<repo>/default  ← symlink → default branch worktree
-#   ~/src/<host>/<repo>/<wt>/    ← worktrees
+#   <root>/<host>/<repo>/.bare    ← bare clone
+#   <root>/<host>/<repo>/.git     ← "gitdir: ./.bare"
+#   <root>/<host>/<repo>/default  ← symlink → default branch worktree
+#   <root>/<host>/<repo>/<wt>/    ← worktrees
+# <root> is ~/Projects if it exists, else ~/src.
 #
 # `git rev-parse --git-common-dir` returns the absolute path to .bare from
 # anywhere inside the tree (repo root or any worktree subdirectory).

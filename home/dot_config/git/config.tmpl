@@ -113,13 +113,21 @@
 
 {{/* Per-identity includes go last so they override defaults above.       */}}
 {{/* Primary: gitdir-based (covers all URL variants for a given clone).   */}}
+{{/* `dolly` clones under ~/Projects when it exists, else ~/src, so both  */}}
+{{/* trees get gitdir rules here.                                        */}}
 
 ; --- nlopez identity: nlopez personal repos, open-source, and chezmoi ---
 
 [includeIf "gitdir/i:~/src/github.com/datadog/**"]
   path = config_nlopez
 
+[includeIf "gitdir/i:~/Projects/github.com/datadog/**"]
+  path = config_nlopez
+
 [includeIf "gitdir/i:~/src/github.com/nlopez/**"]
+  path = config_nlopez
+
+[includeIf "gitdir/i:~/Projects/github.com/nlopez/**"]
   path = config_nlopez
 
 [includeIf "gitdir/i:~/.local/share/chezmoi/.git"]
@@ -141,7 +149,13 @@
 [includeIf "gitdir/i:~/src/github.com/silentshout42/**"]
   path = config_silentshout42
 
+[includeIf "gitdir/i:~/Projects/github.com/silentshout42/**"]
+  path = config_silentshout42
+
 [includeIf "gitdir/i:~/src/github.com/kamotimestamps/**"]
+  path = config_silentshout42
+
+[includeIf "gitdir/i:~/Projects/github.com/kamotimestamps/**"]
   path = config_silentshout42
 {{- end }}
 
