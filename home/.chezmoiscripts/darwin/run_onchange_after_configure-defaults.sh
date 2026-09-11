@@ -20,6 +20,7 @@ defaults write -g NSAutomaticQuoteSubstitutionEnabled -int 0
 defaults write -g NSAutomaticSpellingCorrectionEnabled -int 0
 defaults write -g NSAutomaticTextCorrectionEnabled -int 0
 defaults write -g NSAutomaticWindowAnimationsEnabled -int 0
+defaults write -g NSWindowShouldDragOnGesture -bool true
 defaults write -g NSUserDictionaryReplacementItems '()'
 defaults write -g WebAutomaticSpellingCorrectionEnabled -int 0
 

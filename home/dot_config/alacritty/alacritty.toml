@@ -7,19 +7,17 @@ TERM = "xterm-256color"
 WINIT_X11_SCALE_FACTOR = "1.0"
 
 [window]
-dimensions = { columns = 100, lines = 30 }
+dimensions = { columns = 80, lines = 24 }
 dynamic_padding = true
 decorations = "Full"
 opacity = 0.8
-title = "Alacritty@CachyOS"
 class = { instance = "Alacritty", general = "Alacritty" }
-decorations_theme_variant = "Dark"
+# decorations_theme_variant = "Dark"
 
 [scrolling]
 history = 10000
 multiplier = 3
 
-# Font matches ghostty (font-family = IosevkaTerm NFM, font-size = 12)
 [font]
 normal = { family = "IosevkaTerm NFM", style = "Regular" }
 bold = { family = "IosevkaTerm NFM", style = "Bold" }
