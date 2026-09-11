@@ -58,6 +58,12 @@ def _git_credential_token(url: str, cwd: Path | None = None) -> str | None:
     When *cwd* points inside a repo, ``git -C <cwd>`` activates the
     ``includeIf`` / credential-helper routing for that directory — so the
     correct identity is used for every org, exactly like ``git push``.
+
+    This is a best-effort lookup only (it just raises the GitHub API rate
+    limit / grants private-repo access for the canonical-casing check), so
+    prompting is disabled: without a credential helper configured, ``git
+    credential fill`` would otherwise block on an interactive username/
+    password prompt instead of simply failing.
     """
     parsed = urlparse(url)
     stdin = f"protocol={parsed.scheme}\nhost={parsed.hostname}\n"
@@ -68,6 +74,7 @@ def _git_credential_token(url: str, cwd: Path | None = None) -> str | None:
     if cwd is not None:
         cmd.extend(["-C", str(cwd)])
     cmd.extend(["credential", "fill"])
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
     try:
         r = run(
             cmd,
@@ -75,6 +82,7 @@ def _git_credential_token(url: str, cwd: Path | None = None) -> str | None:
             capture_output=True,
             text=True,
             check=True,
+            env=env,
         )
         for line in r.stdout.splitlines():
             if line.startswith("password="):
