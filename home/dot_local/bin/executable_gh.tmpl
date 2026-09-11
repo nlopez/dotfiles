@@ -13,9 +13,51 @@ REAL_GH=$(command -v -a gh | grep -vF "$HOME/.local/bin/gh" | head -n1)
 {{- end }}
 
 # --- GH_CONFIG_DIR routing ---
-if git remote -v 2>/dev/null | grep -qi 'github\.com[:/][Dd][Dd]oghq/'; then
+# CLI args take priority over the git remote of the cwd.  Extract the org from:
+#   --repo / -R  ORG/REPO   (any subcommand)
+#   gh api /repos/ORG/REPO  or  /orgs/ORG   (api subcommand URL path)
+_gh_detect_org() {
+  local i
+  for (( i=1; i<=$#; i++ )); do
+    case "${!i}" in
+      --repo=*|-R=*)
+        local val="${!i#*=}"
+        printf '%s' "${val%%/*}"; return ;;
+      --repo|-R)
+        (( i++ ))
+        printf '%s' "${!i%%/*}"; return ;;
+    esac
+  done
+  # For 'gh api <endpoint>', parse the URL path argument
+  if [[ "$1" == "api" ]]; then
+    for (( i=2; i<=$#; i++ )); do
+      [[ "${!i}" == -* ]] && continue
+      local path="${!i#/}"          # strip optional leading slash
+      case "$path" in
+        repos/*/*)
+          local rest="${path#*/}"   # strip 'repos/'
+          printf '%s' "${rest%%/*}" # org component
+          ;;
+        orgs/*)
+          local rest="${path#*/}"   # strip 'orgs/'
+          printf '%s' "${rest%%/*}" # org component
+          ;;
+      esac
+      break  # first non-flag arg is the endpoint; stop
+    done
+  fi
+}
+_cli_org=$(_gh_detect_org "$@")
+if [[ -n "$_cli_org" ]]; then
+  # Explicit org on CLI wins over git remote
+  if [[ "$_cli_org" =~ ^[Dd][Dd]oghq$ ]]; then
+    export GH_CONFIG_DIR="$HOME/.config/gh-ddog"
+  fi
+  # else: DataDog or any other org → leave GH_CONFIG_DIR unset (default config)
+elif git remote -v 2>/dev/null | grep -qi 'github\.com[:/][Dd][Dd]oghq/'; then
   export GH_CONFIG_DIR="$HOME/.config/gh-ddog"
 fi
+unset _cli_org
 
 # --- Rebase branch injection ---
 # During `git rebase -i` HEAD is detached and gh cannot determine the current
