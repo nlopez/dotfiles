@@ -6,6 +6,8 @@
 .local/bin/terragrunt
 .config/ghostty/themes/solarized-dark
 .config/ghostty/themes/solarized-light
+; Replaced by config.ghostty
+.config/ghostty/config
 .config/k9s/skins/solarized-dark.yaml
 .config/k9s/skins/solarized-light.yaml
 ; Zed removed — clean up config dir and binary
