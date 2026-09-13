@@ -1,10 +1,12 @@
 set -g focus-events on
 set -s extended-keys on
 set -g extended-keys-format csi-u
-set -g default-terminal "xterm-256color"
+set -g default-terminal "tmux-256color"
 set -ga terminal-overrides ",xterm-256color:RGB"
+set -ga terminal-overrides ",xterm-ghostty:RGB"
 set -ga terminal-overrides ',*256color*:smcup@:rmcup@'
 set -ga terminal-features 'xterm-256color:extkeys'
+set -ga terminal-features 'xterm-ghostty:extkeys'
 
 # explicitly set 'C-b' prefix
 set -g prefix C-b
