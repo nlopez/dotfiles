@@ -12,7 +12,7 @@ decorations = "None"
 opacity = 0.88
 blur = true
 class = { instance = "Alacritty", general = "Alacritty" }
-# decorations_theme_variant = "Dark"
+decorations_theme_variant = "Dark"
 
 [scrolling]
 history = 0
