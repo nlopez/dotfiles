@@ -3,6 +3,13 @@
 // Check the wiki for a full description of the configuration:
 // https://niri-wm.github.io/niri/Configuration:-Introduction
 
+// Environment variables set for niri and processes it spawns.
+environment {
+    // Force VA-API to use the nvidia driver (libva-nvidia-driver), needed for
+    // hardware accelerated video decode in brave-origin / other Chromium browsers.
+    LIBVA_DRIVER_NAME "nvidia"
+}
+
 // Input device configuration.
 // Find the full list of options on the wiki:
 // https://niri-wm.github.io/niri/Configuration:-Input
@@ -385,21 +392,21 @@ window-rule {
 
 // Transparency + blur for all windows, mirroring
 // ~/.config/hypr/config/decorations.lua (decoration.active/inactive_opacity + blur).
-window-rule {
-    background-effect {
-        blur true
-    }
-}
+// window-rule {
+//     background-effect {
+//         blur true
+//     }
+// }
 
-window-rule {
-    match is-active=true
-    opacity 0.95
-}
+// window-rule {
+//     match is-active=true
+//     opacity 0.95
+// }
 
-window-rule {
-    match is-active=false
-    opacity 0.85
-}
+// window-rule {
+//     match is-active=false
+//     opacity 0.85
+// }
 
 binds {
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
