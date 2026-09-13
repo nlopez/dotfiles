@@ -407,6 +407,7 @@ binds {
     Mod+E hotkey-overlay-title="Open the File Manager: dolphin" { spawn "dolphin"; }
     Mod+Space hotkey-overlay-title="Open Noctalia Launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     Mod+Period hotkey-overlay-title="Open Noctalia Emoji Picker" { spawn "noctalia" "msg" "panel-toggle" "launcher" "/emo"; }
+    Alt+Space hotkey-overlay-title="Toggle Vicinae" { spawn "vicinae" "toggle"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
