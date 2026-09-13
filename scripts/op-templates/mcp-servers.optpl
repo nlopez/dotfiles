@@ -1,0 +1,31 @@
+"datadog": {
+  "url": "{{ op://ed52wahww5txzax6reg4me3bl4/mcp-datadog/url }}",
+  "auth": "oauth"
+},
+"ddstaging": {
+  "url": "{{ op://ed52wahww5txzax6reg4me3bl4/mcp-ddstaging/url }}",
+  "auth": "oauth"
+},
+"atlassian": {
+  "url": "{{ op://ed52wahww5txzax6reg4me3bl4/mcp-atlassian/url }}",
+  "auth": "oauth"
+},
+"slack": {
+  "url": "{{ op://ed52wahww5txzax6reg4me3bl4/mcp-slack/url }}",
+  "auth": "oauth",
+  "oauth": {
+    "clientId": "{{ op://ed52wahww5txzax6reg4me3bl4/mcp-slack/client_id }}"
+  }
+},
+"datadog-google-workspace": {
+  "type": "http",
+  "url": "{{ op://ed52wahww5txzax6reg4me3bl4/mcp-datadog-google-workspace/url }}"
+},
+"supportdog-mcp-us1": {
+  "type": "http",
+  "url": "{{ op://ed52wahww5txzax6reg4me3bl4/mcp-supportdog-us1/url }}"
+},
+"ddci-mcp-prod": {
+  "url": "{{ op://ed52wahww5txzax6reg4me3bl4/mcp-ddci-prod/url }}",
+  "auth": "oauth"
+}

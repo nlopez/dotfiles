@@ -108,6 +108,11 @@ export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
 alias e="code --add"
 
+# Fast-iteration chezmoi: skips every 1Password (`op`) read, which otherwise
+# dominates apply/status/diff time (~1-1.5s per secret, ~30 secrets on a work
+# machine). Use for routine dotfile changes that don't touch secrets.
+alias chezmoi-fast="CHEZMOI_SKIP_SECRETS=1 chezmoi"
+
 ###############################################################################
 # AWS profile in preprompt when typing aws/terraform commands
 ###############################################################################

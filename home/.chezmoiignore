@@ -84,6 +84,13 @@ Library/**
 .pi/agent/mcp.json
 {{ end -}}
 
+# ── Fast iteration: CHEZMOI_SKIP_SECRETS=1 skips files built entirely from
+#    1Password reads so routine applies don't pay the `op` CLI cost ──────────
+{{ if env "CHEZMOI_SKIP_SECRETS" -}}
+.config/rclone/rclone.conf
+.pi/agent/mcp.json
+{{ end -}}
+
 # ── Age encryption: exclude the other machine class's secrets directory ────────
 {{ if not .work -}}
 .config/work-secrets

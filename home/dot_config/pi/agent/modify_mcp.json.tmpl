@@ -10,37 +10,7 @@ OVERLAY=$(cat << 'EOF'
   },
   "mcpServers": {
     {{- if .work }}
-    "datadog": {
-      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-datadog/url" }}",
-      "auth": "oauth"
-    },
-    "ddstaging": {
-      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-ddstaging/url" }}",
-      "auth": "oauth"
-    },
-    "atlassian": {
-      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-atlassian/url" }}",
-      "auth": "oauth"
-    },
-    "slack": {
-      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-slack/url" }}",
-      "auth": "oauth",
-      "oauth": {
-        "clientId": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-slack/client_id" }}"
-      }
-    },
-    "datadog-google-workspace": {
-      "type": "http",
-      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-datadog-google-workspace/url" }}"
-    },
-    "supportdog-mcp-us1": {
-      "type": "http",
-      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-supportdog-us1/url" }}"
-    },
-    "ddci-mcp-prod": {
-      "url": "{{ onepasswordRead "op://ed52wahww5txzax6reg4me3bl4/mcp-ddci-prod/url" }}",
-      "auth": "oauth"
-    }
+    {{ output "op" "inject" "-i" (joinPath .chezmoi.workingTree "scripts/op-templates/mcp-servers.optpl") | trim }}
     {{- end }}
   }
 }

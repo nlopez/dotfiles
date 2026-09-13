@@ -90,7 +90,7 @@ export EDITOR="vim"
 [[ -r "${XDG_CONFIG_HOME}/work-secrets/env" ]] && source "${XDG_CONFIG_HOME}/work-secrets/env"
 {{- end }}
 
-{{- if not .headless }}
+{{- if and (not .headless) (not (env "CHEZMOI_SKIP_SECRETS")) }}
 # Set on all machines — Automation vault (Kagi API)
 export KAGI_API_KEY={{ onepasswordRead "op://Automation/Kagi API/credential" "my.1password.com" }}
 

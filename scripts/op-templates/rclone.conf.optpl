@@ -1,0 +1,75 @@
+[do]
+type = s3
+provider = DigitalOcean
+access_key_id = {{ op://Automation/do/access_key_id }}
+secret_access_key = {{ op://Automation/do/secret_access_key }}
+endpoint = {{ op://Automation/do/endpoint }}
+
+[media]
+type = webdav
+url = {{ op://Automation/media_webdav/url }}
+user = {{ op://Automation/media_webdav/user }}
+pass = {{ op://Automation/media_webdav/pass }}
+vendor = rclone
+
+[dropbox_personal]
+type = dropbox
+token = {{ op://Automation/dropbox_personal/token }}
+
+[dropbox_alt]
+type = dropbox
+token = {{ op://Automation/dropbox_alt/token }}
+
+[gdrive_personal]
+type = combine
+upstreams = "My Drive=gdrive_personal_my_drive:" "Shared with me=gdrive_personal_shared_with_me:"
+
+[gdrive_personal_shared_with_me]
+type = drive
+client_id = {{ op://Automation/gdrive_personal/client_id }}
+client_secret = {{ op://Automation/gdrive_personal/client_secret }}
+token = {{ op://Automation/gdrive_personal/token }}
+scope = drive
+shared_with_me = true
+
+[gdrive_personal_my_drive]
+type = drive
+client_id = {{ op://Automation/gdrive_personal/client_id }}
+client_secret = {{ op://Automation/gdrive_personal/client_secret }}
+token = {{ op://Automation/gdrive_personal/token }}
+scope = drive
+shared_with_me = false
+
+[gdrive_alt]
+type = combine
+upstreams = "My Drive=gdrive_alt_my_drive:" "Shared with me=gdrive_alt_shared_with_me:"
+
+[gdrive_alt_shared_with_me]
+type = drive
+client_id = {{ op://Automation/gdrive_alt/client_id }}
+client_secret = {{ op://Automation/gdrive_alt/client_secret }}
+scope = drive
+shared_with_me = true
+token = {{ op://Automation/gdrive_alt/token }}
+
+[gdrive_alt_my_drive]
+type = drive
+client_id = {{ op://Automation/gdrive_alt/client_id }}
+client_secret = {{ op://Automation/gdrive_alt/client_secret }}
+scope = drive
+shared_with_me = false
+token = {{ op://Automation/gdrive_alt/token }}
+
+# VFS cache - global settings for all remotes.
+# Ref: https://rclone.org/vfs/
+# Cache mode: full = cache metadata + file content (recommended)
+# max-size:   cap on total cached file size
+# max-age:    files older than this become eligible for cleanup
+# poll-interval: how often the cache checks for changes
+[rclone]
+vfs-cache-mode = full
+vfs-cache-max-size = 50G
+vfs-cache-max-age = 168h
+vfs-cache-poll-interval = 15m
+vfs-read-ahead = 128K
+vfs-read-chunk-size = 64K
