@@ -3,14 +3,11 @@ font-family = ""
 font-family = IosevkaTerm NFM
 quit-after-last-window-closed = true
 theme = noctalia
-# window-padding-x = 0
-# window-padding-y = 0
-# window-padding-color = extend
+
 # Disable ligatures
 font-feature = -calt
-# macos-titlebar-style = hidden
-# gtk-tabs-location = hidden
-
+macos-titlebar-style = hidden
+gtk-tabs-location = hidden
 
 # https://github.com/ghostty-org/ghostty/discussions/3836#discussioncomment-11688264
 cursor-style = block
@@ -18,3 +15,7 @@ cursor-style-blink = true
 shell-integration-features = no-cursor
 
 initial-command = /usr/bin/zsh --login -c 'tmux attach -t 0 || tmux new -s 0'
+
+background-opacity-cells = true
+background-blur = 20
+background-opacity = 0.88
