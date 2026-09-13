@@ -17,5 +17,3 @@ shell-integration-features = no-cursor
 initial-command = /usr/bin/zsh --login -c 'tmux attach -t 0 || tmux new -s 0'
 
 background-opacity-cells = true
-background-blur = 20
-background-opacity = 0.88
