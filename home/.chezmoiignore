@@ -65,6 +65,7 @@ Library/**
 .config/niri
 .config/noctalia
 .local/state/noctalia
+.config/BraveSoftware/Brave-Origin/NativeMessagingHosts
 {{ end -}}
 
 # ── Workspace environments: skip git config so the host identity is preserved ─
