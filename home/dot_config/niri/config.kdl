@@ -392,21 +392,21 @@ window-rule {
 
 // Transparency + blur for all windows, mirroring
 // ~/.config/hypr/config/decorations.lua (decoration.active/inactive_opacity + blur).
-// window-rule {
-//     background-effect {
-//         blur true
-//     }
-// }
+window-rule {
+    background-effect {
+        blur true
+    }
+}
 
-// window-rule {
-//     match is-active=true
-//     opacity 0.95
-// }
+window-rule {
+    match is-active=true
+    opacity 1.0
+}
 
-// window-rule {
-//     match is-active=false
-//     opacity 0.85
-// }
+window-rule {
+    match is-active=false
+    opacity 0.95
+}
 
 binds {
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
