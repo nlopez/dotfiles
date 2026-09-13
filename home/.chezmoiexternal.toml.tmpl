@@ -84,29 +84,10 @@
     exact = true
     stripComponents = 1
 
-{{- $fontDir := .platform.font_dir }}
-
-{{- if and $fontDir (not .headless) }}
-# Iosevka Nerd Font (Normal + Mono + Propo variants)
-# Iosevka Term Nerd Font (Term + Mono + Propo variants)
-# Both extracted to subdirectories then merged via script
-# Pinned versions — no refreshPeriod needed (new version = new URL).
-
-# Iosevka Nerd Font — https://github.com/ryanoasis/nerd-fonts
-{{-   $iosevkaUrl := "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Iosevka.zip" }}
-["{{ $fontDir }}/iosevka-nf"]
-    type = "archive"
-    url = {{ printf "%q" $iosevkaUrl }}
-    include = ["IosevkaNerdFont*"]
-    exact = false
-    stripComponents = 0
-
-# Iosevka Term Nerd Font
-{{-   $iosevkaTermUrl := "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/IosevkaTerm.zip" }}
-["{{ $fontDir }}/iosevka-term-nf"]
-    type = "archive"
-    url = {{ printf "%q" $iosevkaTermUrl }}
-    include = ["IosevkaTermNerdFont*"]
-    exact = false
-    stripComponents = 0
-{{- end }}
+# Nerd Fonts (Iosevka) are intentionally NOT managed by chezmoi as externals:
+# the release zips are ~375MB each and chezmoi must fully decompress an
+# "archive" external into memory to compute its target state on every
+# apply/status/diff, even when excluded from application — this alone cost
+# several seconds and ~3GB of peak heap on every invocation. Install fonts
+# manually (e.g. via your package manager, or download once from
+# https://github.com/ryanoasis/nerd-fonts/releases) instead.
