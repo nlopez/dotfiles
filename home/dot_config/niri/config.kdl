@@ -400,14 +400,13 @@ binds {
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+T hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
-    Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     // niri's KDL config has no variable/include mechanism like Hyprland's lua
     // FILE_MANAGER var (~/.config/hypr/config/variables.lua), so it's spawned
     // directly here; the window-rule below floats it (see window-rule section).
     Mod+E hotkey-overlay-title="Open the File Manager: dolphin" { spawn "dolphin"; }
-    Mod+Space hotkey-overlay-title="Open Noctalia Launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+    // Mod+Space hotkey-overlay-title="Open Noctalia Launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     Mod+Period hotkey-overlay-title="Open Noctalia Emoji Picker" { spawn "noctalia" "msg" "panel-toggle" "launcher" "/emo"; }
-    Alt+Space hotkey-overlay-title="Toggle Vicinae" { spawn "vicinae" "toggle"; }
+    Mod+Space hotkey-overlay-title="Toggle Vicinae" { spawn "vicinae" "toggle"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
@@ -630,7 +629,9 @@ binds {
     // Pixel sizes use logical, or scaled, pixels. I.e. on an output with scale 2.0,
     // set-column-width "100" will make the column occupy 200 physical screen pixels.
     Mod+Minus { set-column-width "-10%"; }
+    Mod+KP_Add { set-column-width "-10%"; }
     Mod+Equal { set-column-width "+10%"; }
+    Mod+KP_Subtract { set-column-width "+10%"; }
 
     // Finer height adjustments when in column with other windows.
     Mod+Shift+Minus { set-window-height "-10%"; }
