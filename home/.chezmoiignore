@@ -59,9 +59,10 @@ Library/**
 .config/ghostty
 {{ end -}}
 
-# ── Linux desktop-only: Hyprland + Noctalia ─────────────────────────────────
+# ── Linux desktop-only: Hyprland + niri + Noctalia ───────────────────────────
 {{ if or (ne .chezmoi.os "linux") .headless -}}
 .config/hypr
+.config/niri
 .config/noctalia
 .local/state/noctalia
 {{ end -}}
