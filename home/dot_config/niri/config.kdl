@@ -372,6 +372,15 @@ window-rule {
     open-floating true
 }
 
+// Always float GIMP's utility dialogs (they're not meant to be tiled).
+window-rule {
+    match app-id=r#"^gimp"# title="^Preferences$"
+    match app-id=r#"^gimp"# title="^Configure Input Devices$"
+    match app-id=r#"^gimp"# title="^Configure Keyboard Shortcuts$"
+    match app-id=r#"^gimp"# title="^Module Manager$"
+    open-floating true
+}
+
 // Example: block out two password managers from screen capture.
 // (This example rule is commented out with a "/-" in front.)
 /-window-rule {
