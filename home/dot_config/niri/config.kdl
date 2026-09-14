@@ -439,11 +439,10 @@ window-rule {
     clip-to-geometry true
 }
 
-// Transparency + blur for all windows, mirroring
-// ~/.config/hypr/config/decorations.lua (decoration.active/inactive_opacity + blur).
-window-rule {
+/* Apps: blur them all without xray so it looks more realistic. */window-rule {
     background-effect {
         blur true
+        xray false
     }
 }
 
@@ -488,6 +487,7 @@ binds {
     // Mod+Space hotkey-overlay-title="Open Noctalia Launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     Mod+Period hotkey-overlay-title="Open Noctalia Emoji Picker" { spawn "noctalia" "msg" "panel-toggle" "launcher" "/emo"; }
     Mod+S hotkey-overlay-title="Open Noctalia Control Center" { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
+    Mod+Comma { spawn-sh "noctalia msg settings-toggle"; }
     Mod+Space hotkey-overlay-title="Toggle Vicinae" { spawn "vicinae" "toggle"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
@@ -671,7 +671,7 @@ binds {
     Mod+BracketRight { consume-or-expel-window-right; }
 
     // Consume one window from the right to the bottom of the focused column.
-    Mod+Comma  { consume-window-into-column; }
+    // Mod+Comma  { consume-window-into-column; }
     // Expel the bottom window from the focused column to the right.
     // Mod+Period is used for the Noctalia emoji picker instead (see above).
     // Mod+Period { expel-window-from-column; }
