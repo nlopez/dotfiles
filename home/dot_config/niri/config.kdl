@@ -8,6 +8,8 @@ environment {
     // Force VA-API to use the nvidia driver (libva-nvidia-driver), needed for
     // hardware accelerated video decode in brave-origin / other Chromium browsers.
     LIBVA_DRIVER_NAME "nvidia"
+    // Style Qt apps with qt6ct instead of their default theme.
+    QT_QPA_PLATFORMTHEME "qt6ct"
 }
 
 // Input device configuration.
