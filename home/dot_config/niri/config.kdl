@@ -446,15 +446,15 @@ window-rule {
     }
 }
 
-window-rule {
-    match is-active=true
-    opacity 1.0
-}
+// window-rule {
+//     match is-active=true
+//     opacity 1.0
+// }
 
-window-rule {
-    match is-active=false
-    opacity 0.95
-}
+// window-rule {
+//     match is-active=false
+//     opacity 0.95
+// }
 
 // Blur Noctalia's wallpaper behind windows/backdrop in the Overview,
 // per Noctalia's niri docs: https://docs.noctalia.dev/noctalia/compositor-settings/niri/
