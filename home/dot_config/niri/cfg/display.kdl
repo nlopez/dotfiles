@@ -1,0 +1,35 @@
+// ────────────── Output Configuration ──────────────
+// You can run `niri msg outputs` to get the correct name for your displays.
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
+
+// The built-in laptop monitor is usually called "eDP-1". Remember to
+// uncomment the node by removing "/-" if you use one.
+/-output "eDP-1" {
+    mode "1920x1080@120.030"
+    scale 2
+    transform "normal"
+    position x=1280 y=0
+}
+
+// Monitor layout, left-to-right in logical (scaled) pixels:
+// MONITOR1 = Dell S2721DGF 50TSZ83  -> DP-1
+// MONITOR2 = Dell AW3423DW          -> DP-2 (primary, VRR enabled)
+// MONITOR3 = Dell S2721DGF FHXQX83  -> DP-3
+output "DP-1" {
+    mode "2560x1440@165.080"
+    scale 1.25
+    position x=0 y=0
+}
+
+output "DP-2" {
+    mode "3440x1440@174.963"
+    scale 1.25
+    position x=2048 y=0
+    variable-refresh-rate on-demand=true // flicker fix
+}
+
+output "DP-3" {
+    mode "2560x1440@165.080"
+    scale 1.25
+    position x=4800 y=0
+}

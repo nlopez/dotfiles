@@ -1,0 +1,45 @@
+// Environment variables set for niri and processes it spawns.
+environment {
+    // Force VA-API to use the nvidia driver (libva-nvidia-driver), needed
+    // for hardware accelerated video decode in brave-origin / other
+    // Chromium browsers.
+    LIBVA_DRIVER_NAME "nvidia"
+
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    QT_QPA_PLATFORM "wayland"
+    // Style Qt apps with qt6ct instead of their default theme.
+    QT_QPA_PLATFORMTHEME "qt6ct"
+    QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
+    XDG_CURRENT_DESKTOP "niri"
+    XDG_SESSION_TYPE "wayland"
+}
+
+// Ask clients to omit their client-side decorations if possible.
+prefer-no-csd
+
+// Screenshots are saved with the date/time in the filename (strftime format).
+// Set this to null instead to disable saving screenshots to disk.
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+cursor {
+    xcursor-theme "capitaine-cursors"
+    xcursor-size 24
+}
+
+blur {
+    passes 2        // more passes = stronger blur (default: 3)
+    offset 3.0      // sample distance per pass (default: 3.0)
+    noise 0.03      // grain overlay (default: 0.02)
+    saturation 1.0  // color saturation boost (default: 1.5)
+}
+
+// Recommended by Noctalia's niri integration docs so its launcher/panels
+// get correct window activation/focus behavior:
+// https://docs.noctalia.dev/noctalia/compositor-settings/niri/
+debug {
+    honor-xdg-activation-with-invalid-serial
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
