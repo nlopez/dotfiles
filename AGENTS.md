@@ -82,7 +82,7 @@ Place scripts in `home/.chezmoiscripts/`. The top-level scripts (non-platform-sp
 
 ```sh
 home/.chezmoiscripts/run_after_reload-tmux.sh       # Reloads tmux every apply
-home/.chezmoiscripts/run_once_after_install-iosevka-nf-fonts.sh.tmpl  # One-time install
+home/.chezmoiscripts/run_once_after_install-1password.sh.tmpl  # One-time install
 ```
 
 - No executable bit needed — chezmoi handles this internally.
@@ -92,7 +92,7 @@ home/.chezmoiscripts/run_once_after_install-iosevka-nf-fonts.sh.tmpl  # One-time
 
 ### `.chezmoiscripts/` — one-time setup and package installation
 
-Place non-config scripts in `.chezmoiscripts/` with prefixes like `run_once_`, `run_onchange_`, `run_before_`, `run_after_` for platform-specific one-off setup (package installs, font installs, etc.). See [Use scripts to perform actions](https://chezmoi.io/user-guide/use-scripts-to-perform-actions/).
+Place non-config scripts in `.chezmoiscripts/` with prefixes like `run_once_`, `run_onchange_`, `run_before_`, `run_after_` for platform-specific one-off setup (package installs, credential setup, etc.). See [Use scripts to perform actions](https://chezmoi.io/user-guide/use-scripts-to-perform-actions/).
 
 ### `run_` scripts — run on every apply
 

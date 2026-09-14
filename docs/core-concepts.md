@@ -221,9 +221,9 @@ This is a **convention**, not a requirement. Chezmoi does not require OS-specifi
 ```gotemplate
 #!/bin/bash
 {{- if eq .chezmoi.os "darwin" }}
-FONT_DIR="{{ .chezmoi.homeDir }}/Library/Fonts"
+SSH_AUTH_SOCK="{{ .chezmoi.homeDir }}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 {{- else if eq .chezmoi.os "linux" }}
-FONT_DIR="{{ .chezmoi.homeDir }}/.local/share/fonts"
+SSH_AUTH_SOCK="{{ .chezmoi.homeDir }}/.1password/agent.sock"
 {{- end }}
 ```
 
@@ -231,7 +231,7 @@ FONT_DIR="{{ .chezmoi.homeDir }}/.local/share/fonts"
 
 **Rule of thumb:** if the script has platform-specific logic _and_ shared logic, use one script with `.chezmoi.os` conditionals. If the scripts are completely different per platform, use OS-specific directories to avoid template complexity.
 
-In this repo, we use OS-specific directories for scripts that are entirely platform-specific (e.g., macOS-only Brewfile updates, Linux-only font cache rebuilds), and we consider placing shared scripts (like font merge scripts) directly under `.chezmoiscripts/` with conditionals when the logic overlaps substantially across platforms.
+In this repo, we use OS-specific directories for scripts that are entirely platform-specific (e.g., macOS-only Brewfile updates, Linux-only 1Password installs), and we consider placing shared scripts directly under `.chezmoiscripts/` with conditionals when the logic overlaps substantially across platforms.
 
 ### External dependencies
 
