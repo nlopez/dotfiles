@@ -363,6 +363,12 @@ window-rule {
     open-floating true
 }
 
+// Always open the Nautilus file manager as floating.
+window-rule {
+    match app-id=r#"^org\.gnome\.Nautilus$"#
+    open-floating true
+}
+
 // Always open the Noctalia settings window as floating
 // (mirrors the "(dev\.)?noctalia\.Noctalia\.Settings" rule in
 // ~/.config/hypr/config/windowrules.lua). Matched by title since the
