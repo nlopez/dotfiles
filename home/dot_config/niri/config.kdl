@@ -351,6 +351,11 @@ window-rule {
 }
 
 // Always open these windows as floating.
+// This section mirrors the float rules in
+// ~/.config/hypr/config/windowrules.lua, translated to niri's app-id/title
+// matching (niri has no class/initial_title matching, so a few
+// hyprland-only exclusions and the initial_title="Open File" rule are
+// dropped here).
 window-rule {
     // Firefox picture-in-picture player. This app-id regular expression
     // will work for both:
@@ -371,6 +376,33 @@ window-rule {
     match app-id=r#"^gimp"# title="^Configure Input Devices$"
     match app-id=r#"^gimp"# title="^Configure Keyboard Shortcuts$"
     match app-id=r#"^gimp"# title="^Module Manager$"
+    // Wine/Windows .exe windows.
+    match app-id=r#"\.exe$"#
+    // App launchers.
+    match app-id=r#"(?i)launcher"#
+    // Calculator apps.
+    match app-id=r#"(?i)calc"#
+    // KDE's "Open With" file type editor.
+    match app-id=r#"^org\.kde\.keditfiletype$"#
+    // Screenshot/image viewer utilities.
+    match app-id=r#"satty"# title="^Satty$"
+    match app-id=r#"phototonic"# title=r#".*Phototonic$"#
+    match app-id=r#"swayimg"# title="^Swayimg:.+$"
+    // Qt/theme/network utility windows.
+    match app-id=r#"^(kvantummanager|qt[56]ct|nwg-look)$"#
+    match app-id=r#"^(org\.pulseaudio\.pavucontrol|blueman-manager|nm-applet|nm-connection-editor)$"#
+    match title=r#"^(Winetricks.*|Protontricks.*)$"#
+    // Common file/save/auth dialogs.
+    match title=r#"^(Open|Authentication Required|Add Folder to Workspace|Choose Files|Save As|Confirm to replace files|File Operation Progress)$"#
+    match app-id=r#"^[Xx]dg-desktop-portal-gtk$"#
+    match title=r#"^(File Upload|Choose wallpaper|Library)(.*)$"#
+    match app-id=r#"(?i)dialog"#
+    match title=r#"(?i)dialog"#
+    // Steam's Friends List and "Launching..." windows. (The rest of
+    // hyprland's Steam/gaming rules route to a "gaming" workspace, which
+    // isn't configured here, so only the plain float bits are ported.)
+    match app-id=r#"^steam$"# title="^Friends List$"
+    match app-id=r#"^steam$"# title=r#"^Launching\.\.\.$"#
     open-floating true
 }
 
@@ -656,13 +688,15 @@ binds {
     // Pixel sizes use logical, or scaled, pixels. I.e. on an output with scale 2.0,
     // set-column-width "100" will make the column occupy 200 physical screen pixels.
     Mod+Minus { set-column-width "-10%"; }
-    Mod+KP_Add { set-column-width "-10%"; }
+    Mod+KP_Subtract { set-column-width "-10%"; }
     Mod+Equal { set-column-width "+10%"; }
-    Mod+KP_Subtract { set-column-width "+10%"; }
+    Mod+KP_Add { set-column-width "+10%"; }
 
     // Finer height adjustments when in column with other windows.
     Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+KP_Subtract { set-column-width "-10%"; }
     Mod+Shift+Equal { set-window-height "+10%"; }
+    Mod+Shift+KP_Add { set-column-width "-10%"; }
 
     // Move the focused window between the floating and the tiling layout.
     Mod+V       { toggle-window-floating; }
