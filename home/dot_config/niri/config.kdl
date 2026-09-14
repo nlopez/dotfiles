@@ -305,9 +305,24 @@ layout {
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
 
+// niri's IPC socket path embeds its PID, so NIRI_SOCKET changes on every
+// login and goes stale in long-lived shells (tmux, background services)
+// across a logout/login cycle. Point a stable symlink at the current
+// socket on every startup; ~/.config/zsh/zshenv.tmpl points NIRI_SOCKET
+// at this symlink instead of trusting an inherited env var.
+// https://github.com/niri-wm/niri/discussions/2634
+spawn-sh-at-startup "ln -sf \"$NIRI_SOCKET\" \"$XDG_RUNTIME_DIR/niri.sock\""
+
 hotkey-overlay {
     // Uncomment this line to disable the "Important Hotkeys" pop-up at startup.
     skip-at-startup
+}
+
+// Recommended by Noctalia's niri integration docs so its launcher/panels
+// get correct window activation/focus behavior:
+// https://docs.noctalia.dev/noctalia/compositor-settings/niri/
+debug {
+    honor-xdg-activation-with-invalid-serial
 }
 
 // Uncomment this line to ask the clients to omit their client-side decorations if possible.
@@ -442,6 +457,13 @@ window-rule {
     opacity 0.95
 }
 
+// Blur Noctalia's wallpaper behind windows/backdrop in the Overview,
+// per Noctalia's niri docs: https://docs.noctalia.dev/noctalia/compositor-settings/niri/
+layer-rule {
+    match namespace="^noctalia-backdrop"
+    place-within-backdrop true
+}
+
 binds {
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
     // in the end. To find an XKB name for a particular key, you may use a program
@@ -465,6 +487,7 @@ binds {
     Mod+E hotkey-overlay-title="Open the File Manager: dolphin" { spawn "dolphin"; }
     // Mod+Space hotkey-overlay-title="Open Noctalia Launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     Mod+Period hotkey-overlay-title="Open Noctalia Emoji Picker" { spawn "noctalia" "msg" "panel-toggle" "launcher" "/emo"; }
+    Mod+S hotkey-overlay-title="Open Noctalia Control Center" { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
     Mod+Space hotkey-overlay-title="Toggle Vicinae" { spawn "vicinae" "toggle"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 

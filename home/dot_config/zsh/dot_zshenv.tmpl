@@ -40,6 +40,17 @@ typeset -U path
 # which is not XDG-compliant. We use in-memory history instead.
 export SHELL_SESSIONS_DISABLE=1
 
+{{- if eq .chezmoi.os "linux" }}
+# niri's IPC socket path embeds its PID, so NIRI_SOCKET changes on every
+# login/logout, leaving stale values in long-lived shells (tmux,
+# background services) started before the last login. niri's own
+# startup (~/.config/niri/config.kdl) keeps a stable symlink pointed at
+# the current socket; use that instead of trusting an inherited
+# NIRI_SOCKET. Harmless (unused) outside niri sessions.
+# https://github.com/niri-wm/niri/discussions/2634
+export NIRI_SOCKET="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/niri.sock"
+{{- end }}
+
 # Zsh history (XDG_STATE_HOME/zsh/history)
 export HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
 
