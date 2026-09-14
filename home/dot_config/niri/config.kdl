@@ -348,38 +348,23 @@ window-rule {
     default-column-width {}
 }
 
-// Open the Firefox picture-in-picture player as floating by default.
+// Always open these windows as floating.
 window-rule {
-    // This app-id regular expression will work for both:
+    // Firefox picture-in-picture player. This app-id regular expression
+    // will work for both:
     // - host Firefox (app-id is "firefox")
     // - Flatpak Firefox (app-id is "org.mozilla.firefox")
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
-    open-floating true
-}
-
-// Always open the Dolphin file manager as floating.
-window-rule {
+    // Dolphin file manager.
     match app-id=r#"^org\.kde\.dolphin$"#
-    open-floating true
-}
-
-// Always open the Nautilus file manager as floating.
-window-rule {
+    // Nautilus file manager.
     match app-id=r#"^org\.gnome\.Nautilus$"#
-    open-floating true
-}
-
-// Always open the Noctalia settings window as floating
-// (mirrors the "(dev\.)?noctalia\.Noctalia\.Settings" rule in
-// ~/.config/hypr/config/windowrules.lua). Matched by title since the
-// window's app-id doesn't carry a distinct "Settings" variant.
-window-rule {
+    // Noctalia settings window (mirrors the
+    // "(dev\.)?noctalia\.Noctalia\.Settings" rule in
+    // ~/.config/hypr/config/windowrules.lua). Matched by title since the
+    // window's app-id doesn't carry a distinct "Settings" variant.
     match app-id=r#"^dev\.noctalia\.Noctalia$"#
-    open-floating true
-}
-
-// Always float GIMP's utility dialogs (they're not meant to be tiled).
-window-rule {
+    // GIMP's utility dialogs (they're not meant to be tiled).
     match app-id=r#"^gimp"# title="^Preferences$"
     match app-id=r#"^gimp"# title="^Configure Input Devices$"
     match app-id=r#"^gimp"# title="^Configure Keyboard Shortcuts$"
