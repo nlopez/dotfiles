@@ -4,6 +4,13 @@ font-family = IosevkaTerm NFM
 quit-after-last-window-closed = true
 theme = noctalia
 
+# Ghostty has no way to exempt just tmux/screen from this (open feature
+# request: https://github.com/ghostty-org/ghostty/discussions/2677) — it's
+# all-or-nothing, and every surface here always runs tmux (see
+# initial-command below), so disable it entirely rather than get prompted
+# on every close.
+confirm-close-surface = false
+
 # Disable ligatures
 font-feature = -calt
 macos-titlebar-style = hidden
