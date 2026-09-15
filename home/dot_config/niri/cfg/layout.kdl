@@ -3,7 +3,7 @@
 // https://niri-wm.github.io/niri/Configuration:-Layout
 layout {
     gaps 16 // Gap between windows
-    center-focused-column "never" // Don't auto-center focused column
+    center-focused-column "never" // Don’t auto-center focused column
 
     background-color "transparent" // <- needed for noctalia-shell to set wallpaper
 
@@ -13,47 +13,5 @@ layout {
         proportion 0.66667
     }
 
-    // You can change the default width of the new windows.
-    default-column-width { proportion 0.5; }
-
-    // You can change how the focus ring looks.
-    focus-ring {
-        // Ring disabled; the border below is used instead.
-        off
-
-        width 4
-
-        active-color "#7fc8ff"
-        inactive-color "#505050"
-    }
-
-    // Colors/width mirrored from the Hyprland decorations config this
-    // replaced (general.col).
-    border {
-        width 2
-        active-gradient from="#82dcccff" to="#007d6fff" angle=45
-        inactive-color "#798bb2ff"
-        urgent-color "#9b0000"
-    }
-
-    // You can enable drop shadows for windows.
-    shadow {
-        on
-
-        // draw-behind-window true
-
-        softness 30
-        spread 5
-        offset x=0 y=5
-        color "#0007"
-    }
-
-    // Struts shrink the area occupied by windows, similarly to layer-shell
-    // panels. They're set in logical pixels.
-    struts {
-        // left 64
-        // right 64
-        // top 64
-        // bottom 64
-    }
+    struts {}
 }

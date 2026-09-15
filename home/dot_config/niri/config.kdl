@@ -14,7 +14,4 @@ include "./cfg/layout.kdl"
 include "./cfg/rules.kdl"
 include "./cfg/misc.kdl"
 
-// noctalia-shell writes theme colors here (layout/focus-ring/border/recent-windows
-// colors); it's regenerated whenever the active palette changes, so it's not
-// tracked by chezmoi. See ~/.config/niri/noctalia.kdl on disk.
 include "noctalia.kdl"
