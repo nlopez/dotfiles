@@ -2,8 +2,6 @@ font-size = 12
 font-family = ""
 font-family = IosevkaTerm NFM
 quit-after-last-window-closed = true
-theme = noctalia
-
 # Ghostty has no way to exempt just tmux/screen from this (open feature
 # request: https://github.com/ghostty-org/ghostty/discussions/2677) — it's
 # all-or-nothing, and every surface here always runs tmux (see
@@ -21,6 +19,6 @@ cursor-style = block
 cursor-style-blink = true
 shell-integration-features = no-cursor
 
-initial-command = /usr/bin/zsh --login -c 'tmux attach -t 0 || tmux new -s 0'
+initial-command = /bin/zsh --login -c "tmux attach -t 0 || tmux new -s 0"
 
 background-opacity-cells = true
