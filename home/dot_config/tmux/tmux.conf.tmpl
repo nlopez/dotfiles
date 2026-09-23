@@ -146,11 +146,9 @@ set -g @continuum-restore 'on'
 set -g @continuum-save-interval '15'
 
 # tmux-theme configuration
-# Select dark theme (default: catppuccin-mocha)
-set -g @theme-dark 'solarized-dark'  # Custom Solarized dark theme (matches Ghostty)
-
-# Select light theme (default: catppuccin-latte)
-set -g @theme-light 'quiet-light'  # Custom Quiet Light theme (matches Ghostty)
+# Auto-switches between light/dark based on system appearance
+set -g @theme-dark 'solarized-dark'
+set -g @theme-light 'quiet-light'
 
 # Optional: Path to custom status bar config (sourced after theme colors)
 set -g @theme-path "$HOME/.config/tmux/status.tmux"

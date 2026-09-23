@@ -22,3 +22,6 @@ shell-integration-features = no-cursor
 initial-command = /bin/zsh --login -c "tmux attach -t 0 || tmux new -s 0"
 
 background-opacity-cells = true
+
+# Auto-switch theme based on macOS appearance
+theme = light:Quiet Light,dark:Solarized Dark
