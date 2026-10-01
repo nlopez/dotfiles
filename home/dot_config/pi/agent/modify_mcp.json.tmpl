@@ -1,13 +1,16 @@
 #!/bin/sh
 # Merge chezmoi-managed keys into mcp.json, preserving runtime keys that pi
-# writes itself (e.g. directTools). Uses jq's recursive-merge operator so the
-# chezmoi overlay wins on conflicts, but unrecognised keys are kept as-is.
+# writes itself (e.g. exposure, enabled state). Uses jq's recursive-merge
+# operator so the chezmoi overlay wins on conflicts, but unrecognised keys
+# are kept as-is.
+#
+# Also migrates pi-mcp-adapter legacy fields to native pi 1.0 format:
+#   directTools: true  →  exposure: "direct"
+#   auth: "oauth"      →  removed (pi auto-detects OAuth from server response)
+#   settings.autoAuth  →  removed (not a native pi mcp.json field)
 
 OVERLAY=$(cat << 'EOF'
 {
-  "settings": {
-    "autoAuth": true
-  },
   "mcpServers": {
     {{- if .work }}
     {{ output "op" "inject" "-i" (joinPath .chezmoi.workingTree "scripts/op-templates/mcp-servers.optpl") | trim }}
@@ -22,5 +25,23 @@ current=$(cat)
 if [ -z "$current" ]; then
   printf '%s\n' "$OVERLAY"
 else
-  printf '%s\n' "$current" | jq --argjson overlay "$OVERLAY" '. * $overlay | del(.mcpServers.figma, .mcpServers["supportdog-mcp-staging"], .mcpServers["supportdog-mcp-us3"], .mcpServers["supportdog-mcp-us5"], .mcpServers["supportdog-mcp-eu1"], .mcpServers["supportdog-mcp-ap1"], .mcpServers["supportdog-mcp-ap2"])'
+  printf '%s\n' "$current" | jq --argjson overlay "$OVERLAY" '
+    . * $overlay |
+    del(.settings) |
+    .mcpServers |= with_entries(
+      .value |= (
+        (if .directTools == true then . + {"exposure": "direct"} else . end) |
+        del(.directTools, .auth)
+      )
+    ) |
+    del(
+      .mcpServers.figma,
+      .mcpServers["supportdog-mcp-staging"],
+      .mcpServers["supportdog-mcp-us3"],
+      .mcpServers["supportdog-mcp-us5"],
+      .mcpServers["supportdog-mcp-eu1"],
+      .mcpServers["supportdog-mcp-ap1"],
+      .mcpServers["supportdog-mcp-ap2"]
+    )
+  '
 fi
