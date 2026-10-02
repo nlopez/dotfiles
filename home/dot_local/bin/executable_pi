@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Shim: finds and runs the real `pi` binary, then cleans up on exit.
+# Shim for pi-coding-agent (npm-installed).
+# Directly invokes node with the npm binary so it doesn't depend on PATH ordering.
+# Update: npm install -g @earendil-works/pi-coding-agent@latest
 
-# Strip this shim's directory from PATH so `command -v` finds the real binary.
-_shim_dir="$(cd "$(dirname "$0")" && pwd)"
-_clean_path="$(printf '%s' "$PATH" | tr ':' '\n' | grep -vxF "$_shim_dir" | tr '\n' ':' | sed 's/:$//')"
-_real="$(PATH="$_clean_path" command -v pi 2>/dev/null)"
+_NPM_BIN="/opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js"
 
-if [[ -z "$_real" ]]; then
-  echo "pi shim: could not locate real pi binary" >&2
+if [[ ! -f "$_NPM_BIN" ]]; then
+  echo "pi shim: npm binary not found at $_NPM_BIN" >&2
+  echo "pi shim: run 'npm install -g @earendil-works/pi-coding-agent@latest'" >&2
   exit 1
 fi
 
@@ -65,7 +65,7 @@ if _is_interactive_pi "$@"; then
 fi
 
 unset AWS_PROFILE
-"$_real" "$@"
+node "$_NPM_BIN" "$@"
 _exit=$?
 
 # Clear @pi-status on the tmux window after pi exits.
