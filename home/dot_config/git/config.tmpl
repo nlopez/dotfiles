@@ -38,12 +38,8 @@
 
 ; Per-identity SSH keys are selected via core.sshCommand in each identity
 ; include (see config_nlopez, config_work, config_silentshout42).
-; identity includeIf blocks below key off the literal remote URL you typed
-; (https or ssh), which insteadOf leaves untouched in remote.*.url — only
-; the transport used for fetch/push is rewritten to SSH.
-
-[url "git@github.com:"]
-  insteadOf = https://github.com/
+; Both https:// and git@ github URLs are supported — the transport you type
+; is the transport that gets used.
 
 [init]
   defaultBranch = main
