@@ -9,6 +9,7 @@ packages:
         ryooooooga/tap: "https://github.com/ryooooooga/homebrew-tap"
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
         smittytone/smittytone: "https://github.com/smittytone/homebrew-smittytone"
+        hashicorp/tap: "https://github.com/hashicorp/homebrew-tap"
       brews:
         base:
         - wget
@@ -86,6 +87,7 @@ packages:
         - awscli
         - tenv
         - glab
+        - hashicorp/tap/vault
       # Casks listed here will be installed with `--require-sha`. If a cask is
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:
