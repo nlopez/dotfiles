@@ -30,7 +30,6 @@ export SSH_AUTH_SOCK="{{ .platform.ssh_auth_sock | replace "~" .chezmoi.homeDir 
 
 fpath+=("{{ $foundBrewPrefix }}/share/zsh/site-functions")
 eval "$({{ $foundBrewPrefix }}/bin/brew shellenv)"
-export HOMEBREW_REQUIRE_TAP_TRUST=1
 {{ end }}
 {{- end }}
 

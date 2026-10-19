@@ -10,9 +10,7 @@
 #
 # Configures: theme, npmCommand, showHardwareCursor, compaction,
 #             and the declarative package list.
-# No defaultProvider or defaultModel — Pi selects the first available
-# scoped model at startup (previously used provider is kept in session).
-# 
+# Default model: anthropic / claude-sonnet-5-5 (Claude Sonnet 5.5).
 import json
 import sys
 
@@ -28,10 +26,9 @@ except Exception:
 # Theme: sensible default; auto-theme extension syncs with macOS appearance.
 current.setdefault("theme", "solarized-light")
 
-# Preserve defaultModel and defaultProvider if set interactively.
-# These are NOT managed by chezmoi — whatever you set via Pi stays put.
-# (If absent, Pi auto-selects the first available scoped model.)
-pass  # No-op: keep existing defaultModel/defaultProvider as-is
+# Default model — declared here so it is identical on every machine.
+current["defaultProvider"] = "anthropic"
+current["defaultModel"] = "claude-sonnet-5-5"
 
 # Use npm for package operations. pnpm's strict linking breaks Pi's
 # extension loader which resolves modules from the literal symlink path,

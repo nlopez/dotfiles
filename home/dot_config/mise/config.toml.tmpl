@@ -1,0 +1,14 @@
+# mise global configuration — https://mise.jdx.dev/configuration.html
+# Tool list is declared in .chezmoidata/mise.yaml.
+
+[settings]
+# Only install stable releases; no pre-releases or release candidates.
+experimental = false
+
+[tools]
+{{- $tools := .mise.tools.base }}
+{{- if .personal }}{{ $tools = merge (dict) $tools .mise.tools.personal }}{{ end }}
+{{- if .work }}{{ $tools = merge (dict) $tools .mise.tools.work }}{{ end }}
+{{- range $name, $version := $tools }}
+{{ $name | quote }} = {{ $version | quote }}
+{{- end }}

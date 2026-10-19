@@ -6,51 +6,28 @@ packages:
       taps:
         8ta4/plist: "https://github.com/8ta4/homebrew-plist"
         jundot/omlx: "https://github.com/jundot/omlx"
-        ryooooooga/tap: "https://github.com/ryooooooga/homebrew-tap"
         cormacrelf/tap: "https://github.com/cormacrelf/homebrew-tap"
         smittytone/smittytone: "https://github.com/smittytone/homebrew-smittytone"
-        hashicorp/tap: "https://github.com/hashicorp/homebrew-tap"
+        libkrun/krun: "https://github.com/libkrun/homebrew-krun"
       brews:
         base:
         - wget
-        - worktrunk
         - colima
-        - git-lfs
-        - jj
+        - libkrun/krun/krunkit
         - flock
         - skopeo
         - duti
-        - mas
-        - yamlfmt
         - sql-formatter
         - 8ta4/plist/plist
         - tree
-        - hyperfine
         - ncdu
-        - atuin
-        - direnv
-        - fd
-        - fzf
         - git
         - htop
-        - kubectl
-        - ripgrep
         - gawk
-        - rustup
-        - ryooooooga/tap/zabrze
         - tmux
-        - yq
-        - jq
-        - shellcheck
         - uv
-        - pnpm
-        - zoxide
-        - k9s
-        - go
         - coreutils
         - diffutils
-        - bat
-        - eza
         - gnu-tar
         - gnu-sed
         - gnu-time
@@ -59,35 +36,19 @@ packages:
         - gnu-indent
         - gnu-which
         - grep
-        - gh
         - terminal-notifier
         - testssl
-        - chezmoi
         - watchman
-        - lazygit
         - pv
-        - helm
-        - kubectx
-        - kubernetes-cli
         personal:
-        - doctl
         - ffmpeg
-        - yt-dlp
-        - oxipng
-        - argocd
         - media-info
         - jundot/omlx/omlx
-        - cilium-cli
-        - restic
         - resticprofile
       brew_options:
         jundot/omlx/omlx:
         - "--with-grammar"
         work:
-        - awscli
-        - tenv
-        - glab
-        - hashicorp/tap/vault
       # Casks listed here will be installed with `--require-sha`. If a cask is
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:

@@ -1,0 +1,47 @@
+# Tools managed by mise (rendered into ~/.config/mise/config.toml).
+# Prefer mise over Homebrew wherever a tool is available in the mise registry;
+# brew remains for GNU tools, casks, taps without releases, and anything needing
+# system integration (colima, tmux, git, uv bootstrap for `brew bundle`, etc.).
+mise:
+  tools:
+    base:
+      chezmoi: latest
+      atuin: latest
+      bat: latest
+      direnv: latest
+      eza: latest
+      fd: latest
+      fzf: latest
+      gh: latest
+      git-lfs: latest
+      go: latest
+      helm: latest
+      hyperfine: latest
+      jj: latest
+      jq: latest
+      k9s: latest
+      kubectl: latest
+      kubectx: latest
+      lazygit: latest
+      mas: latest
+      pnpm: latest
+      ripgrep: latest
+      rust: latest
+      shellcheck: latest
+      worktrunk: latest
+      yamlfmt: latest
+      yq: latest
+      zoxide: latest
+      "github:ryooooooga/zabrze": latest
+    personal:
+      argocd: latest
+      cilium-cli: latest
+      doctl: latest
+      oxipng: latest
+      restic: latest
+      yt-dlp: latest
+    work:
+      awscli: latest
+      glab: latest
+      vault: latest
+      "aqua:tofuutils/tenv": latest

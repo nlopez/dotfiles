@@ -12,7 +12,6 @@
 
 set -eufo pipefail
 
-export HOMEBREW_REQUIRE_TAP_TRUST=1
 
 {{- $customRemoteTaps := .packages.darwin.brew.taps | default dict }}
 

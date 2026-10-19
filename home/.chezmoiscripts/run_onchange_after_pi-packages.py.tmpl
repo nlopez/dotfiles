@@ -56,6 +56,11 @@ def ensure_file(path: str, content: str) -> bool:
 
 # --- Pre-flight checks ---
 
+# pnpm is provided by mise; make its shims visible to this script.
+os.environ["PATH"] = (
+    os.path.expanduser("~/.local/share/mise/shims") + os.pathsep + os.environ["PATH"]
+)
+
 if not shutil.which("pnpm"):
     print("pnpm not found, skipping Pi package reconciliation", file=sys.stderr)
     sys.exit(0)

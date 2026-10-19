@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Re-run when the declared tool set changes.
+# {{ .mise.tools | toJson | sha256sum }}
+
+set -eufo pipefail
+
+MISE="{{ .chezmoi.homeDir }}/.local/bin/mise"
+[ -x "$MISE" ] || { echo "mise not found at $MISE, skipping" >&2; exit 0; }
+
+"$MISE" install --yes
+"$MISE" reshim
