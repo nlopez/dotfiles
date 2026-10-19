@@ -76,6 +76,8 @@ function _groot_inline_expand() {
 }
 add-zle-hook-widget zle-line-pre-redraw _groot_inline_expand
 {{- end }}
+# mise first: atuin, zoxide, direnv etc. are mise-installed.
+eval "$(mise activate zsh)"
 eval "$(atuin init zsh)"
 
 # Prevent pasted newlines from ever executing a command.
@@ -287,7 +289,6 @@ alias restic-restore='resticprofile restore --target ~/restic-restore/'
 ###############################################################################
 eval "$(direnv hook zsh)"
 eval "$(zoxide init zsh)"
-eval "$(mise activate zsh)"
 {{- if lookPath "wt" }}
 eval "$(wt config shell init zsh)"
 {{- end }}

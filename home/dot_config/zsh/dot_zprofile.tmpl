@@ -75,6 +75,10 @@ unset _d
 export PNPM_HOME="${XDG_DATA_HOME}/pnpm"
 PATH="$PNPM_HOME/bin:$PATH"
 
+# mise shims — tools installed by mise (atuin, etc.) must resolve in every
+# login shell, ahead of Homebrew, before .zshrc runs `mise activate`.
+PATH="${XDG_DATA_HOME}/mise/shims:$PATH"
+
 # Prepend ~/.local/bin last so shims here take priority over everything else.
 PATH="{{ joinPath $homeDir ".local/bin" }}:$PATH"
 typeset -U path

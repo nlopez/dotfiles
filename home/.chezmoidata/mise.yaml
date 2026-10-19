@@ -1,7 +1,7 @@
 # Tools managed by mise (rendered into ~/.config/mise/config.toml).
 # Prefer mise over Homebrew wherever a tool is available in the mise registry;
 # brew remains for GNU tools, casks, taps without releases, and anything needing
-# system integration (colima, tmux, git, uv bootstrap for `brew bundle`, etc.).
+# system integration (colima, tmux, git, etc.).
 mise:
   tools:
     base:
@@ -28,6 +28,9 @@ mise:
       ripgrep: latest
       rust: latest
       shellcheck: latest
+      uv: latest
+      "pipx:pre-commit": latest
+      "pipx:unique-namer": latest
       worktrunk: latest
       yamlfmt: latest
       yq: latest
@@ -39,6 +42,8 @@ mise:
       doctl: latest
       oxipng: latest
       restic: latest
+      "pipx:huggingface-hub": latest
+      "pipx:osxphotos": latest
       yt-dlp: latest
     work:
       awscli: latest

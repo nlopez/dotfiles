@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # Checksum to trigger when brew packages change
-# {{ .packages.darwin.brew | toJson | sha256sum }}
+# {{ .packages.darwin | toJson | sha256sum }}
 
 # run_onchange: triggers brew bundle only when packages.yaml brew section changes
-# Does NOT remove packages (no --cleanup) — installed packages are preserved
+# Removes undeclared packages only when packages.darwin.brew.cleanup is true;
+# otherwise installed packages are preserved (preview with `brew-cleanup`).
 #
 # Trust is handled declaratively via `trusted: true` in the Brewfile itself
 # (Brew Bundle format: https://docs.brew.sh/Brew-Bundle-and-Brewfile#trusted).
@@ -13,15 +14,6 @@
 set -eufo pipefail
 
 
-{{- $customRemoteTaps := .packages.darwin.brew.taps | default dict }}
-
-# Pre-tap all custom-remote repositories before brew bundle runs to guarantee
-# they are present on first install (brew bundle's inline tap processing can
-# be unreliable on a fresh machine).
-{{- range $tap, $url := $customRemoteTaps }}
-brew tap {{ $tap | quote }} {{ $url | quote }} 2>/dev/null || true
-{{- end }}
-
 # HOMEBREW_BUNDLE_FILE is exported in .zprofile → ~/.config/brew/Brewfile
 BREWFILE="${HOMEBREW_BUNDLE_FILE:-{{ .chezmoi.homeDir }}/.config/brew/Brewfile}"
-brew bundle --file="${BREWFILE}"
+brew bundle{{ if .packages.darwin.brew.cleanup }} --cleanup --force{{ end }} --file="${BREWFILE}"

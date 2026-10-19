@@ -3,6 +3,9 @@ packages:
   darwin:
     brew_prefix: /opt/homebrew
     brew:
+      # When true, `brew bundle` also uninstalls anything not declared here
+      # (--cleanup --force). Preview first with `brew-cleanup`.
+      cleanup: false
       taps:
         8ta4/plist: "https://github.com/8ta4/homebrew-plist"
         jundot/omlx: "https://github.com/jundot/omlx"
@@ -23,19 +26,7 @@ packages:
         - ncdu
         - git
         - htop
-        - gawk
         - tmux
-        - uv
-        - coreutils
-        - diffutils
-        - gnu-tar
-        - gnu-sed
-        - gnu-time
-        - gnu-getopt
-        - findutils
-        - gnu-indent
-        - gnu-which
-        - grep
         - terminal-notifier
         - testssl
         - watchman
@@ -92,17 +83,7 @@ packages:
       casks_unsigned:
         base: []
         personal: []
-        work: []
-    uv:
-      base:
-      - pre-commit
-      - unique-namer
-      personal:
-      - huggingface-hub
-      - osxphotos
-      work: []
     mas:
-      base: []
       personal:
       - name: "1Blocker"
         id: 1365531024
@@ -110,10 +91,7 @@ packages:
         id: 1622835804
       - name: "StopTheMadness Pro"
         id: 6471380298
-    vscode:
-      base: []
-      personal: []
-      work: []
+    # Brewed GNU tools: installed via brew and their gnubin dirs prepended to PATH.
     gnu_tools:
     - coreutils
     - diffutils

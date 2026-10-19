@@ -1,69 +1,41 @@
 {{- $darwin     := .packages.darwin -}}
 {{- $brewConfig := $darwin.brew -}}
-{{- $brews     := $brewConfig.brews.base    | default list -}}
-{{- $casks     := $brewConfig.casks.base    | default list -}}
-{{- $unsigned := (index $brewConfig "casks_unsigned" | default dict).base | default list -}}
-{{- $uvTools   := $darwin.uv.base           | default list -}}
-{{- $masApps   := $darwin.mas.base          | default list -}}
-{{- $vscode    := $darwin.vscode.base       | default list -}}
-{{- $taps      := $brewConfig.taps          | default dict -}}
-{{- $opts      := $brewConfig.brew_options  | default dict -}}
+{{- $opts       := $brewConfig.brew_options | default dict -}}
+{{- $unsignedCfg := index $brewConfig "casks_unsigned" | default dict -}}
 
-{{- if .personal -}}
-{{-   if index $brewConfig.brews    "personal" -}}{{- $brews     = concat $brews    (index $brewConfig.brews    "personal") -}}{{- end -}}
-{{-   if index $brewConfig.casks    "personal" -}}{{- $casks     = concat $casks    (index $brewConfig.casks    "personal") -}}{{- end -}}
-{{-   if index (index $brewConfig "casks_unsigned" | default dict) "personal" -}}{{- $unsigned = concat $unsigned (index $brewConfig.casks_unsigned "personal") -}}{{- end -}}
-{{-   if index $darwin.uv       "personal" -}}{{- $uvTools   = concat $uvTools  (index $darwin.uv       "personal") -}}{{- end -}}
-{{-   if index $darwin.mas      "personal" -}}{{- $masApps   = concat $masApps  (index $darwin.mas      "personal") -}}{{- end -}}
-{{-   if index $darwin.vscode   "personal" -}}{{- $vscode    = concat $vscode   (index $darwin.vscode   "personal") -}}{{- end -}}
-{{- end -}}
+{{- /* Package groups that apply to this machine. */ -}}
+{{- $groups := list "base" -}}
+{{- if .personal }}{{ $groups = append $groups "personal" }}{{ end -}}
+{{- if .work }}{{ $groups = append $groups "work" }}{{ end -}}
 
-{{- if .work -}}
-{{-   if index $brewConfig.brews    "work" -}}{{- $brews     = concat $brews    (index $brewConfig.brews    "work") -}}{{- end -}}
-{{-   if index $brewConfig.casks    "work" -}}{{- $casks     = concat $casks    (index $brewConfig.casks    "work") -}}{{- end -}}
-{{-   if index (index $brewConfig "casks_unsigned" | default dict) "work" -}}{{- $unsigned = concat $unsigned (index $brewConfig.casks_unsigned "work") -}}{{- end -}}
-{{-   if index $darwin.uv       "work" -}}{{- $uvTools   = concat $uvTools  (index $darwin.uv       "work") -}}{{- end -}}
-{{-   if index $darwin.mas      "work" -}}{{- $masApps   = concat $masApps  (index $darwin.mas      "work") -}}{{- end -}}
-{{-   if index $darwin.vscode   "work" -}}{{- $vscode    = concat $vscode   (index $darwin.vscode   "work") -}}{{- end -}}
+{{- $brews := $darwin.gnu_tools | default list -}}
+{{- $casks := list -}}
+{{- $unsigned := list -}}
+{{- $masApps := list -}}
+{{- range $g := $groups -}}
+{{-   $brews    = concat $brews    (index $brewConfig.brews $g  | default list) -}}
+{{-   $casks    = concat $casks    (index $brewConfig.casks $g  | default list) -}}
+{{-   $unsigned = concat $unsigned (index $unsignedCfg $g       | default list) -}}
+{{-   $masApps  = concat $masApps  (index ($darwin.mas | default dict) $g | default list) -}}
 {{- end -}}
 
 # Taps (custom repos) — trusted: true so brew bundle handles tap trust declaratively
-{{ range $key, $url := $taps -}}
+{{ range $key, $url := ($brewConfig.taps | default dict) -}}
 tap {{ $key | quote }}, {{ $url | quote }}, trusted: true
 {{ end }}
 
 {{ range ($brews | sortAlpha | uniq) }}
-{{- $formula := . -}}
-{{- if contains "/" . -}}
-{{- if $formulaOpts := index $opts . -}}
-brew {{ . | quote }}, args: [{{ range $i, $o := $formulaOpts }}{{ if $i }}, {{ end }}{{ $o | quote }}{{ end }}], trusted: true
-{{- else -}}
-brew {{ . | quote }}, trusted: true
-{{- end -}}
-{{- else -}}
-{{- if $formulaOpts := index $opts . -}}
-brew {{ . | quote }}, args: [{{ range $i, $o := $formulaOpts }}{{ if $i }}, {{ end }}{{ $o | quote }}{{ end }}]
-{{- else -}}
+{{- $formulaOpts := index $opts . -}}
 brew {{ . | quote }}
-{{- end -}}
-{{ end }}
+{{- if $formulaOpts }}, args: [{{ range $i, $o := $formulaOpts }}{{ if $i }}, {{ end }}{{ $o | quote }}{{ end }}]{{ end }}
+{{- if contains "/" . }}, trusted: true{{ end }}
 {{ end }}
 {{ range ($casks | sortAlpha | uniq) -}}
-{{- if contains "/" . -}}
-cask {{ . | quote }}, trusted: true
-{{ else -}}
-cask {{ . | quote }}
+cask {{ . | quote }}{{ if contains "/" . }}, trusted: true{{ end }}
 {{ end -}}
-{{- end -}}
 {{ range ($unsigned | sortAlpha | uniq) -}}
 cask {{ . | quote }}
 {{ end -}}
 {{ range $masApps -}}
 mas {{ .name | quote }}, id: {{ .id }}
-{{ end -}}
-{{ range ($uvTools | sortAlpha | uniq) -}}
-uv {{ . | quote }}
-{{ end -}}
-{{ range ($vscode | sortAlpha | uniq) -}}
-vscode {{ . | quote }}
 {{ end -}}
