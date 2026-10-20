@@ -2,13 +2,21 @@
 # gh shim: auto-select GH_CONFIG_DIR for ddoghq remotes, inject the effective
 # branch during rebases.
 
-{{- if eq .chezmoi.os "darwin" }}
-REAL_GH={{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin/gh{{ else }}/usr/local/bin/gh{{ end }}
-{{- else }}
-# Linux: gh is installed out-of-band (apt/dnf/manual), not via chezmoi. Resolve
-# the real binary at runtime, skipping this shim's own location in PATH.
-REAL_GH=$(command -v -a gh | grep -vF "$HOME/.local/bin/gh" | head -n1)
-{{- end }}
+# Find the real gh: the first `gh` on PATH that is not this shim. Works with
+# any install method (mise, brew, apt, ...), whatever order PATH is in, and
+# regardless of where the shim is installed (-ef compares inode, so symlinks
+# and relative PATH entries are handled).
+REAL_GH=
+IFS=: read -ra _path_dirs <<< "$PATH"
+for _dir in "${_path_dirs[@]}"; do
+  _cand="${_dir:-.}/gh"
+  if [[ -f "$_cand" && -x "$_cand" && ! "$_cand" -ef "${BASH_SOURCE[0]}" ]]; then
+    REAL_GH=$_cand
+    break
+  fi
+done
+unset _path_dirs _dir _cand
+[[ -n "$REAL_GH" ]] || { echo "gh shim: real gh not found on PATH" >&2; exit 127; }
 
 # --- GH_CONFIG_DIR routing ---
 # CLI args take priority over the git remote of the cwd.  Extract the org from:
