@@ -78,6 +78,15 @@ add-zle-hook-widget zle-line-pre-redraw _groot_inline_expand
 {{- end }}
 # mise first: atuin, zoxide, direnv etc. are mise-installed.
 eval "$(mise activate zsh)"
+
+# `mise activate` re-prepends each tool's install dir to PATH on every prompt
+# and directory change, which would put real binaries (e.g. gh) ahead of our
+# ~/.local/bin shims. Hooks registered after mise's run after it, so shims
+# always win.
+_local_bin_first() { path=("$HOME/.local/bin" ${path:#"$HOME/.local/bin"}) }
+precmd_functions+=(_local_bin_first)
+chpwd_functions+=(_local_bin_first)
+_local_bin_first
 eval "$(atuin init zsh)"
 
 # Prevent pasted newlines from ever executing a command.
