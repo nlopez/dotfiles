@@ -114,3 +114,8 @@ Documents/WindowsPowerShell
 .local/state/pi/pane-models
 ; window-switch hook was unused; emoji status now comes from tmux-agent-tabs
 .config/tmux/scripts/window-switch.sh
+
+; tfenv shim and unused tmux helper scripts removed
+.local/bin/tfenv
+.config/tmux/scripts/prompt-rename-window.sh
+.config/tmux/scripts/reload-notify.sh

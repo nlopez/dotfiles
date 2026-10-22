@@ -41,5 +41,5 @@ When working in this repo, keep these mental models in mind:
 | Lint scripts                 | Repo root: `scripts/` (NOT chezmoi-managed)        |
 | The `.chezmoiroot` file      | Repo root: `.chezmoiroot`                          |
 | chezmoi ignore patterns      | `home/.chezmoiignore`                              |
-| Source for `~/.gitconfig`    | `home/dot_gitconfig`                               |
+| Source for `~/.config/git/`  | `home/dot_config/git/`                             |
 | Source for `~/.config/tmux/` | `home/dot_config/tmux/`                            |

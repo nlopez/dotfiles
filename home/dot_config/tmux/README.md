@@ -7,7 +7,10 @@ This directory contains the tmux configuration managed by chezmoi.
 The configuration includes:
 
 - **TPM (Tmux Plugin Manager)**: Automatically installed via chezmoi external sources
-- **tmux-contrib/tmux-theme**: Modern auto-switching theme plugin with custom Solarized themes (matches Ghostty)
+- **tmux-contrib/tmux-theme**: Auto-switching theme plugin with custom themes (Solarized Dark / Quiet Light, matching Ghostty)
+- **jhickner/tmux-agent-tabs**: Agent status markers in window tabs (colors set per theme)
+- **tmux-resurrect / tmux-continuum**: Session save and restore
+- **tap** (`prefix + g`): agent-aware pane picker
 - Custom key bindings and status bar configuration
 - Automatic light/dark mode detection using tmux 3.5+ hooks
 
@@ -51,17 +54,14 @@ Once TPM is installed, you can use these key bindings within tmux:
 
 ### Theme Settings
 
-The tmux-theme plugin is configured with custom Solarized themes:
+The tmux-theme plugin is configured with custom themes in `themes/`:
 
-- `@theme-dark 'solarized-dark'` - Solarized Dark theme (matches Ghostty)
-- `@theme-light 'solarized-light'` - Solarized Light theme (matches Ghostty)
-- Automatic switching based on system appearance (no manual intervention needed)
-- Uses Ethan Schoonover's Solarized color palette for perfect consistency
-
-**Available Themes:**
-
-- **Custom Solarized**: `solarized-dark`, `solarized-light` (installed automatically)
-- **Built-in**: `catppuccin-mocha`, `catppuccin-frappe`, `catppuccin-macchiato`, `catppuccin-latte`, `rose-pine`, `rose-pine-moon`, `rose-pine-dawn`
+- `@theme-dark 'solarized-dark'` - Solarized Dark (matches Ghostty)
+- `@theme-light 'quiet-light'` - Quiet Light (matches Ghostty)
+- `solarized-light` is also available
+- Each theme defines `@thm_*` colors and the `@agent_tabs_color_*` markers
+- Automatic switching based on system appearance
+- `status.tmux` is sourced after the theme and applies the status bar styling
 
 ### Adding New Plugins
 
@@ -74,20 +74,22 @@ To add new plugins:
 ### Files
 
 - `tmux.conf` - Main tmux configuration with plugin setup
-- `scripts/` - Helper scripts for window operations and utilities
+- `status.tmux` - Status bar styling (uses theme colors)
+- `themes/` - Custom theme color definitions
+- `scripts/` - Helper scripts (`pane-cmd.sh`, `rename-window.sh`)
 - `plugins/` - Plugin directory (managed by TPM)
   - `tpm/` - Tmux Plugin Manager
-  - `tmux-theme/` - Auto-switching theme plugin
+  - `tmux-theme/`, `tmux-agent-tabs/`, `tmux-resurrect/`, `tmux-continuum/`
 
-## Automatic Solarized Theme Switching
+## Automatic Theme Switching
 
-The tmux-contrib/tmux-theme plugin automatically detects your system's light/dark mode using tmux 3.5+ `client-dark-theme` and `client-light-theme` hooks. When you change your system appearance, tmux will instantly switch between Solarized Dark and Solarized Light themes to match your Ghostty terminal.
+The tmux-contrib/tmux-theme plugin automatically detects your system's light/dark mode using tmux 3.5+ `client-dark-theme` and `client-light-theme` hooks. When you change your system appearance, tmux will instantly switch between the dark and light themes to match your Ghostty terminal.
 
 **How it works:**
 
 - Plugin uses native tmux theme detection (tmux 3.5+ hooks)
-- Custom Solarized themes automatically installed during chezmoi apply
-- Perfect color consistency with Ghostty's Solarized themes
+- Custom themes installed during chezmoi apply
+- Color consistency with Ghostty themes
 - No external dependencies or background processes needed
 - Instant switching when system appearance changes
 - Works with all modern terminals that support CSI 2031 (Ghostty, Kitty, WezTerm, etc.)

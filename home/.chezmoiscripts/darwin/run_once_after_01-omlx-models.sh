@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Leave models.json empty — omlx models are auto-discovered via the
-# local-models extension (see home/dot_pi/agent/extensions/local-models/).
+# local-models extension (see home/dot_config/pi/agent/extensions/local-models/).
 # The extension probes the omlx API and registers models dynamically.
 # Skips silently if Pi is not available.
 
