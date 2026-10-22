@@ -1,83 +1,25 @@
 /**
  * tmux-status extension
  *
- * Mirrors the Claude hooks tmux window-title emoji behaviour for pi:
- *   🤖  – agent is working (turn_start: fires each time the LLM is called)
- *   ✳️  – agent finished without a question (agent_end)
- *   🛎️  – agent finished with a question (agent_end)
+ * Sends a macOS terminal-notifier notification when the agent finishes
+ * ("Complete", or "Waiting for input" if the last message ends with "?").
+ * Clicking it switches to the tmux window and focuses the terminal.
  *
- * Also fires a macOS terminal-notifier notification when the agent finishes.
+ * Window status markers are handled by tmux-agent-tabs (its pi-hook.ts),
+ * and the pane picker by `tap`; this extension no longer touches tmux state.
  *
- * Because pi runs as a TUI process *directly inside* the tmux pane, we read
- * TMUX_PANE from the environment instead of walking the process tree the way
- * the Claude shell hooks do.
- *
- * turn_start is used (rather than before_agent_start) because it fires right
- * as the LLM is called — unambiguously "working" — and re-fires on every
- * tool-calling turn so the emoji stays correct throughout multi-turn runs.
- *
- * All setWindowTitle calls are serialised through a promise queue so that a
- * slow turn_start rename can never land after a faster agent_end rename and
- * leave the robot stuck. Title cleanup on exit is handled by the pi() shell
- * wrapper in .zshrc, which runs after the process exits and is immune to
- * async timing issues inside the extension.
+ * pi runs directly inside the tmux pane, so TMUX_PANE comes from the
+ * environment.
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { mkdir, writeFile, unlink } from "node:fs/promises";
-import { join } from "node:path";
 
 export default function (pi: ExtensionAPI) {
   // Only activate inside tmux.
   const tmuxPane = process.env.TMUX_PANE;
   if (!process.env.TMUX || !tmuxPane) return;
 
-  // ── runtime model tracking ───────────────────────────────────────────────
-  // Write the live model name to a per-pane state file so that out-of-process
-  // tools (e.g. pi-model-name, called by the zsh gh() wrapper) can read the
-  // runtime model rather than the settings.json default — correctly reflecting
-  // mid-session /model or Ctrl+P changes.
-  const MODEL_STATE_DIR = join(process.env.HOME ?? "", ".local/state/pi/pane-models");
-  const modelFile = join(MODEL_STATE_DIR, tmuxPane.replace("%", ""));
-
-  async function writeModel(model: { name?: string; id: string }): Promise<void> {
-    try {
-      await mkdir(MODEL_STATE_DIR, { recursive: true });
-      await writeFile(modelFile, model.name ?? model.id, "utf8");
-    } catch {
-      /* non-fatal */
-    }
-  }
-
-  pi.on("session_start", (_event, ctx) => {
-    if (ctx.model) void writeModel(ctx.model);
-  });
-
-  pi.on("model_select", (event) => {
-    void writeModel(event.model);
-  });
-
-  pi.on("session_shutdown", () => {
-    void unlink(modelFile).catch(() => {});
-  });
-
-  // ── serial title queue ───────────────────────────────────────────────────
-  // Serialise every rename through a promise chain so concurrent turn_start
-  // and agent_end calls can't interleave their tmux exec pairs and stamp the
-  // wrong emoji last.
-  let titleQueue: Promise<void> = Promise.resolve();
-
-  function enqueueTitle(emoji: string): void {
-    titleQueue = titleQueue.then(() => setWindowStatus(emoji)).catch(() => {}); // not fatal
-  }
-
   // ── helpers ──────────────────────────────────────────────────────────────
-
-  async function setWindowStatus(emoji: string): Promise<void> {
-    // Set a user option on the window so the status-bar format can
-    // display it — the window *name* (title) is never touched.
-    await pi.exec("tmux", ["set-option", "-w", "-t", tmuxPane, "@pi-status", `${emoji} `]);
-  }
 
   async function notify(message: string): Promise<void> {
     const { stdout: info } = await pi.exec("tmux", [
@@ -135,14 +77,6 @@ export default function (pi: ExtensionAPI) {
 
   // ── event handlers ───────────────────────────────────────────────────────
 
-  // 🤖 – fires every time the LLM is about to be called (each turn).
-  // Using turn_start rather than before_agent_start because it fires right
-  // as the LLM call begins and re-fires during every tool-calling turn.
-  pi.on("turn_start", () => {
-    enqueueTitle("🤖");
-  });
-
-  // ✳️ / 🛎️ – pick emoji based on whether the last assistant message ends "?".
   pi.on("agent_end", async (event) => {
     try {
       // Walk messages in reverse to find the last assistant text.
@@ -161,18 +95,12 @@ export default function (pi: ExtensionAPI) {
         }
       }
 
-      const lastChar = lastText.trimEnd().slice(-1);
-      const emoji = lastChar === "?" ? "🛎️" : "✳️";
-      enqueueTitle(emoji);
-
-      const notifyMsg = lastChar === "?" ? "Waiting for input" : "Complete";
-      await notify(notifyMsg).catch(() => {
+      const asked = lastText.trimEnd().endsWith("?");
+      await notify(asked ? "Waiting for input" : "Complete").catch(() => {
         // terminal-notifier may not be installed; ignore silently.
       });
     } catch {
       // Not fatal.
     }
   });
-
-  // Title cleanup is handled by the pi() shell wrapper in .zshrc after exit.
 }

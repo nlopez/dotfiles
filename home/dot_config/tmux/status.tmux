@@ -14,9 +14,9 @@ set-window-option -g window-status-style "fg=#{@thm_status_fg},bg=#{@thm_status_
 set-window-option -g window-status-current-style "fg=#{@thm_text},bg=#{@thm_surface},bold"
 set-window-option -g window-status-bell-style "fg=#{@thm_base},bg=#{@thm_red}"
 
-# Window status format (keep existing format with Pi status integration)
-set-window-option -g window-status-format "  #{?@pi-status,#{@pi-status},}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
-set-window-option -g window-status-current-format "  #{?@pi-status,#{@pi-status},}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
+# Window status format (#{agent_tab_icon} comes from tmux-agent-tabs)
+set-window-option -g window-status-format "  #{agent_tab_icon}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
+set-window-option -g window-status-current-format "  #{agent_tab_icon}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
 
 # Pane borders using Solarized accent colors
 set-option -g pane-border-style "fg=#{@thm_overlay}"

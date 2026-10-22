@@ -60,14 +60,10 @@ bind l select-pane -R
 # status bar ------------------------------------------------------------------
 set-option -g status-position bottom
 # window labels: show index and name, with padding for spacing
-# Use #{?@pi-status,#{@pi-status},} instead of #E{@pi-status} because
-# the #E{} echo syntax is broken in this tmux 3.6b build — it renders
-# literally instead of expanding user variables.
-# Default @pi-status to empty so it doesn't show literally when pi isn't running.
-# The pi extension sets it to an emoji (🤖/✳️/🛎️) when the agent is active.
-set-window-option -g @pi-status ""
-set-window-option -g window-status-format "  #{?@pi-status,#{@pi-status},}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
-set-window-option -g window-status-current-format "  #{?@pi-status,#{@pi-status},}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
+# #{agent_tab_icon} is substituted by the tmux-agent-tabs plugin (spinner /
+# done / question markers for claude, codex, pi).
+set-window-option -g window-status-format "  #{agent_tab_icon}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
+set-window-option -g window-status-current-format "  #{agent_tab_icon}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
 
 #### statusbar ####
 set -g status-justify centre # centre-align window list between status-left / status-right
@@ -137,6 +133,7 @@ set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-contrib/tmux-theme'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @plugin 'jhickner/tmux-agent-tabs'
 
 # tmux-resurrect / tmux-continuum
 # Manual save/restore: prefix + Ctrl-s / prefix + Ctrl-r
@@ -144,6 +141,9 @@ set -g @plugin 'tmux-plugins/tmux-continuum'
 set -g @resurrect-capture-pane-contents 'on'
 set -g @continuum-restore 'on'
 set -g @continuum-save-interval '15'
+
+# tap: agent-aware pane picker (prefix + g). Binary comes from mise.
+bind-key g display-popup -E -w 90% -h 80% "tap pick"
 
 # tmux-theme configuration
 # Auto-switches between light/dark based on system appearance

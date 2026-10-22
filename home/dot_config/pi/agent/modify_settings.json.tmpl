@@ -46,6 +46,9 @@ current["packages"] = [
 {{- range .pi.packages }}
     "{{ . }}",
 {{- end }}
+{{- range .pi.git_packages }}
+    "{{ . }}",
+{{- end }}
 {{- if not .work }}
 {{- range .pi.personal_only_packages }}
     "{{ . }}",

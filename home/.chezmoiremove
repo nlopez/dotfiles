@@ -108,3 +108,9 @@ Documents/WindowsPowerShell
 
 ; update-pi-agent removed — use `pi update`
 .local/bin/update-pi-agent.sh
+
+; model-name tracking removed (attribution hooks are gone)
+.local/bin/pi-model-name
+.local/state/pi/pane-models
+; window-switch hook was unused; emoji status now comes from tmux-agent-tabs
+.config/tmux/scripts/window-switch.sh
