@@ -81,6 +81,11 @@ PATH="${XDG_DATA_HOME}/mise/shims:$PATH"
 
 # Prepend ~/.local/bin last so shims here take priority over everything else.
 PATH="{{ joinPath $homeDir ".local/bin" }}:$PATH"
+
+# Work shims (e.g. gh) must beat ~/.local/bin and mise installs.
+{{ if .work -}}
+PATH="/opt/dogbrew/shims/bin:$PATH"
+{{ end -}}
 typeset -U path
 export TENV_AUTO_INSTALL=true
 export TFENV_AUTO_INSTALL=true
