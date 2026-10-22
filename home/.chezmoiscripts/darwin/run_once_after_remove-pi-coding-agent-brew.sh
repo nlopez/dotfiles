@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Remove Homebrew pi-coding-agent; replaced by pnpm global install so `pi update` works.
+# Remove Homebrew pi-coding-agent; replaced by the managed install so `pi update` works.
 set -eufo pipefail
 
 if brew list --formula 2>/dev/null | grep -q '^pi-coding-agent$'; then
@@ -8,4 +8,4 @@ if brew list --formula 2>/dev/null | grep -q '^pi-coding-agent$'; then
     brew uninstall pi-coding-agent
 fi
 
-echo "✅ Homebrew pi-coding-agent removed (pnpm global install takes over)"
+echo "✅ Homebrew pi-coding-agent removed (managed install takes over)"
