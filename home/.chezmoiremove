@@ -105,3 +105,6 @@ Documents/WindowsPowerShell
 
 .bashrc
 .bash_profile
+
+; update-pi-agent removed — use `pi update`
+.local/bin/update-pi-agent.sh
