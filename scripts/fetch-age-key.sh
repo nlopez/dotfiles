@@ -14,6 +14,11 @@ set -euo pipefail
 IDENTITY_DIR="${HOME}/.local/share/chezmoi-age"
 IDENTITY_FILE="${IDENTITY_DIR}/identity.txt"
 
+# chezmoi-fast (CHEZMOI_SKIP_SECRETS=1): never touch 1Password.
+if [[ -n "${CHEZMOI_SKIP_SECRETS:-}" ]]; then
+    exit 0
+fi
+
 # Fast path: key already present — skip 1Password entirely.
 if [[ -s "${IDENTITY_FILE}" ]]; then
     exit 0

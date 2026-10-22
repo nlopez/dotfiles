@@ -79,14 +79,20 @@ Library/**
 
 # ── Work-only files ────────────────────────────────────────────────────────────
 {{ if not .work -}}
-.pi/agent/mcp.json
+.config/pi/agent/mcp.json
 {{ end -}}
 
 # ── Fast iteration: CHEZMOI_SKIP_SECRETS=1 skips files built entirely from
 #    1Password reads so routine applies don't pay the `op` CLI cost ──────────
 {{ if env "CHEZMOI_SKIP_SECRETS" -}}
 .config/rclone/rclone.conf
-.pi/agent/mcp.json
+.config/pi/agent/mcp.json
+# age-encrypted files: the identity may not be on disk when 1Password is skipped
+.zshrc_local
+.finicky.js
+.config/work-secrets
+.config/git/config_work
+.config/git/config_work_id
 {{ end -}}
 
 # ── Age encryption: exclude the other machine class's secrets directory ────────
