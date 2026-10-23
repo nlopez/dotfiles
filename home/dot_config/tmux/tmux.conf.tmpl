@@ -86,6 +86,8 @@ set-option -g automatic-rename off
 # new windows start with the name 'untitled' (including the first window on session creation)
 set-hook -g after-new-session 'rename-window untitled'
 set-hook -g after-new-window 'rename-window untitled'
+# clear the removed window-switch.sh hook from already-running servers (source-file doesn't unset hooks)
+set-hook -gu after-select-window
 
 # confirm before killing a window or the server
 bind-key K confirm kill-pane
