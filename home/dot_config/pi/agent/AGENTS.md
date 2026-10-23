@@ -1,5 +1,5 @@
-# Global agent instructions
+## Style Guide
 
-## Pull requests
+### General Principles
 
-Always open pull requests as drafts. Pass `--draft` to `gh pr create`. Never mark a PR ready for review unless the user asks.
+- Before adding complexity for a speculative or vanishingly unlikely race or security edge case, explain the concrete failure mode, likelihood, and complexity cost to the user and get their buy-in. Do not silently expand scope for theoretical robustness.
