@@ -46,6 +46,7 @@ mise:
       "pipx:osxphotos": latest
       yt-dlp: latest
     work:
+      aws-vault: latest
       awscli: latest
       glab: latest
       vault: latest
