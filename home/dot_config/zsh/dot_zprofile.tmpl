@@ -79,13 +79,14 @@ PATH="$PNPM_HOME/bin:$PATH"
 # login shell, ahead of Homebrew, before .zshrc runs `mise activate`.
 PATH="${XDG_DATA_HOME}/mise/shims:$PATH"
 
-# Work shims (e.g. gh) must beat mise installs, but sit behind ~/.local/bin so
-# our shims there (e.g. gh) run first and chain to them.
+# Work shims (e.g. gh) must beat mise installs, but sit behind ~/.local/bin/shims
+# so our shims run first and chain to them.
 {{ if .work -}}
 PATH="/opt/dogbrew/shims/bin:$PATH"
 {{ end -}}
-# Prepend ~/.local/bin last so shims here take priority over everything else.
 PATH="{{ joinPath $homeDir ".local/bin" }}:$PATH"
+# Prepend shims last so they take priority over everything else.
+PATH="{{ joinPath $homeDir ".local/bin/shims" }}:$PATH"
 
 typeset -U path
 export TENV_AUTO_INSTALL=true

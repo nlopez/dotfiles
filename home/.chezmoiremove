@@ -85,9 +85,11 @@ Documents/WindowsPowerShell
 .zcompdump-*
 .zcompdump-local-*
 
-; brew shim is Darwin-only — remove from Linux machines
-{{ if ne .chezmoi.os "darwin" }}
+; shims moved to ~/.local/bin/shims; brew shim is Darwin-only
+.local/bin/gh
 .local/bin/brew
+{{ if ne .chezmoi.os "darwin" }}
+.local/bin/shims/brew
 {{ end }}
 
 ; ── Cleanup untracked runtime files ──────────────────────────────────────────

@@ -82,13 +82,14 @@ eval "$(mise activate zsh)"
 # `mise activate` re-prepends each tool's install dir to PATH on every prompt
 # and directory change, which would put real binaries (e.g. gh) ahead of our
 # shims. Hooks registered after mise's run after it, so shims always win.
-# ~/.local/bin goes first, then /opt/dogbrew/shims/bin (work shims); our gh
-# shim in ~/.local/bin chains to the dogbrew one.
+# ~/.local/bin/shims goes first (each shim strips its own dir from PATH to find
+# the real binary), then ~/.local/bin, then /opt/dogbrew/shims/bin (work shims).
 _local_bin_first() {
 {{- if .work }}
   path=(/opt/dogbrew/shims/bin ${path:#/opt/dogbrew/shims/bin})
 {{- end }}
   path=("$HOME/.local/bin" ${path:#"$HOME/.local/bin"})
+  path=("$HOME/.local/bin/shims" ${path:#"$HOME/.local/bin/shims"})
 }
 precmd_functions+=(_local_bin_first)
 chpwd_functions+=(_local_bin_first)

@@ -3,7 +3,15 @@
 # Mirrors the sudo alias pattern so both interactive and script use is covered.
 
 PRIVILEGES_CLI=/Applications/Privileges.app/Contents/MacOS/PrivilegesCLI
-REAL_BREW={{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin/brew{{ else }}/usr/local/bin/brew{{ end }}
+
+# Drop this shim's dir from PATH, then find the real brew.
+dir=$(cd "$(dirname "$0")" && pwd -P)
+new=; IFS=:
+for d in $PATH; do
+  [[ "$(cd "$d" 2>/dev/null && pwd -P)" == "$dir" ]] || new=${new:+$new:}$d
+done
+unset IFS; PATH=$new
+REAL_BREW=$(command -v brew) || { echo "brew: no real brew found on PATH" >&2; exit 127; }
 
 priv_commands=(bundle install update upgrade uninstall cleanup reinstall doctor config)
 

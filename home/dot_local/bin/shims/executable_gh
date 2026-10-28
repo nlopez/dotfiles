@@ -1,0 +1,34 @@
+#!/bin/sh
+# gh shim: always create pull requests as drafts.
+# Lives in ~/.local/bin/shims; drops its own dir from PATH, then runs the next
+# `gh` (e.g. dogbrew's, or mise's).
+dir=$(cd "$(dirname "$0")" && pwd -P)
+new=; IFS=:
+for d in $PATH; do
+  [ "$(cd "$d" 2>/dev/null && pwd -P)" = "$dir" ] || new=${new:+$new:}$d
+done
+unset IFS; PATH=$new
+real=$(command -v gh) || { echo "gh: no real gh found on PATH" >&2; exit 127; }
+
+# Add --draft after `pr create` (global flags such as -R may come first),
+# unless a draft flag is already present.
+draft=
+for a in "$@"; do
+  case "$a" in
+    --draft|--draft=true) draft=1 ;;
+    --*) ;;
+    -*d*) draft=1 ;;
+  esac
+done
+if [ -z "$draft" ]; then
+  n=$#; i=0; prev=; done_=
+  while [ "$i" -lt "$n" ]; do
+    a=$1; shift; i=$((i + 1))
+    set -- "$@" "$a"
+    if [ -z "$done_" ] && [ "$prev" = pr ] && [ "$a" = create ]; then
+      set -- "$@" --draft; done_=1
+    fi
+    prev=$a
+  done
+fi
+exec "$real" "$@"
