@@ -15,6 +15,7 @@ pi:
   - "npm:pi-markdown-preview@0.21.5"
   - "npm:pi-powerline-footer@0.20.1"
   - "npm:@juicesharp/rpiv-ask-user-question@2.13.8"
+  - "npm:pi-interrupt-steer@0.1.0"
   # Git-sourced packages; pi clones and reconciles these itself, so they are
   # written to settings.json only (not handled by the npm reconcile script).
   git_packages:
