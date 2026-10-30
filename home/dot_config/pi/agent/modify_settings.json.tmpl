@@ -38,6 +38,11 @@ current["npmCommand"] = ["npm"]
 # Hardware cursor — enabled on startup.
 current["showHardwareCursor"] = True
 
+# Regular TUI mode: use the terminal's normal scrollback instead of the
+# fullscreen alternate screen, so tmux copy-mode search (prefix+[, then /)
+# can find text from the pi transcript.
+current["tuiMode"] = "regular"
+
 # Declarative package list — exactly and only these packages.
 # Source of truth: home/.chezmoidata/pi.yaml
 # personal_only_packages are excluded on work machines.
