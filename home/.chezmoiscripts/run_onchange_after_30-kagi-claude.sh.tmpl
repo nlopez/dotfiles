@@ -1,0 +1,30 @@
+{{- if not .headless -}}
+#!/bin/bash
+
+# Registers Kagi's official MCP server (kagimcp: kagi_search_fetch, kagi_summarizer)
+# with Claude Code at user scope. Pi gets Kagi from @mjakl/pi-kagi-api in pi.yaml.
+#
+# The API key is never written to ~/.claude.json: the server's env references
+# ${KAGI_API_KEY}, which Claude expands from its own environment at launch
+# (exported from 1Password in dot_zprofile.tmpl). Launch Claude from a shell.
+# Runs via the mise uvx shim, so it survives uv upgrades.
+# Re-run by bumping the revision below.
+# kagi-mcp-revision: 1
+
+set -eufo pipefail
+
+export CLAUDE_CONFIG_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/claude"
+
+export PATH="{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ .chezmoi.homeDir }}/.local/bin:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+command -v uvx >/dev/null 2>&1 || { echo "uvx not found, skipping" >&2; exit 0; }
+
+claude mcp remove kagi --scope user >/dev/null 2>&1 || true
+claude mcp add-json kagi --scope user '{
+  "type": "stdio",
+  "command": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/uvx",
+  "args": ["kagimcp"],
+  "env": {"KAGI_API_KEY": "${KAGI_API_KEY}"}
+}'
+{{- end }}

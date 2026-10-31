@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Managed by chezmoi — source: home/dot_claude/modify_settings.json
-# ⚠️  DO NOT EDIT ~/.claude/settings.json for these keys; they are reset on
+# Managed by chezmoi — source: home/dot_config/claude/modify_settings.json
+# ⚠️  DO NOT EDIT ~/.config/claude/settings.json for these keys; they are reset on
 #     every `chezmoi apply`. All other keys are left untouched.
 #
 # Receives the current settings.json on stdin, writes the replacement to stdout.

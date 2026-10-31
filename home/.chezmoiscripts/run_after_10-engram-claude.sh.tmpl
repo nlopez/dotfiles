@@ -10,6 +10,8 @@
 
 set -eufo pipefail
 
+export CLAUDE_CONFIG_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/claude"
+
 MISE="{{ .chezmoi.homeDir }}/.local/bin/mise"
 export PATH="{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ .chezmoi.homeDir }}/.local/bin:$PATH"
 export ENGRAM_DATA_DIR="${XDG_DATA_HOME:-{{ .chezmoi.homeDir }}/.local/share}/engram"

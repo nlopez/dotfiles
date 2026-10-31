@@ -8,6 +8,8 @@
 
 set -eufo pipefail
 
+export CLAUDE_CONFIG_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/claude"
+
 export PATH="{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ .chezmoi.homeDir }}/.local/bin:$PATH"
 
 command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }

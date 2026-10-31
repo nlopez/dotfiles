@@ -152,3 +152,7 @@ Documents/WindowsPowerShell
 .local/bin/tfenv
 .config/tmux/scripts/prompt-rename-window.sh
 .config/tmux/scripts/reload-notify.sh
+
+; Claude Code moved to ~/.config/claude (CLAUDE_CONFIG_DIR); the dir and .claude.json are
+; moved by run_before_05-claude-xdg-migrate.sh
+.claude.json.backup
