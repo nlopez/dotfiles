@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Installs the context-mode plugin (hooks + MCP server) for Claude Code at user
+# scope. Pi gets context-mode from the npm package in pi.yaml. Claude's data dir
+# is pinned in dot_config/claude/modify_settings.json so it doesn't share pi's.
+# Idempotent: only adds the marketplace / installs the plugin when missing.
+
+set -eufo pipefail
+
+export CLAUDE_CONFIG_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/claude"
+
+export PATH="{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ .chezmoi.homeDir }}/.local/bin:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+
+marketplaces="$(claude plugin marketplace list 2>/dev/null || true)"
+if ! printf '%s\n' "$marketplaces" | grep -qE '^\s*❯ context-mode\s*$'; then
+  claude plugin marketplace add mksglu/context-mode
+fi
+
+plugins="$(claude plugin list 2>/dev/null || true)"
+if ! printf '%s\n' "$plugins" | grep -q 'context-mode@context-mode'; then
+  claude plugin install context-mode@context-mode --scope user
+fi

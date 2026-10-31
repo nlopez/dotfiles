@@ -8,7 +8,7 @@
 # Configures: attribution (empty strings disable the Co-Authored-By trailer
 #             on commits and the "Generated with Claude Code" line on PRs).
 # Removes:    custom hooks, statusLine, ECC env, and all plugin/marketplace entries
-#             except engram (Claude is kept close to stock). Plugins themselves are
+#             except engram and context-mode (Claude is kept close to stock). Plugins themselves are
 #             uninstalled by .chezmoiscripts/run_onchange_after_20-claude-plugins-remove.sh.tmpl.
 import json
 import os
@@ -46,6 +46,12 @@ for marketplace in ("ecc", "cloudflare"):
 # `engram` server, so only mcp__engram__* is real).
 xdg_data = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
 current.setdefault("env", {})["ENGRAM_DATA_DIR"] = os.path.join(xdg_data, "engram")
+
+# Context-mode: Claude's own state dir (shell env.tmpl exports pi's CONTEXT_MODE_DIR,
+# which Claude would otherwise inherit and share sessions/index with pi).
+xdg_state = os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state")
+current["env"]["CONTEXT_MODE_DIR"] = os.path.join(xdg_state, "claude", "context-mode")
+
 permissions = current.get("permissions", {})
 if "allow" in permissions:
     permissions["allow"] = [
