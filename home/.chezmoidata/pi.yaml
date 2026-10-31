@@ -21,6 +21,7 @@ pi:
   # written to settings.json only (not handled by the npm reconcile script).
   git_packages:
   - "git:github.com/ahmedelgabri/tmux-agent-panel@v0.2.3"
+  - "git:github.com/ayghri/i-have-adhd@v0.4.1"
   # Installed only on personal (non-work) machines.
   personal_only_packages:
   - "npm:pi-lmstudio@1.5.0"

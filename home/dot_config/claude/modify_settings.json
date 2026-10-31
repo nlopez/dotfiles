@@ -8,7 +8,7 @@
 # Configures: attribution (empty strings disable the Co-Authored-By trailer
 #             on commits and the "Generated with Claude Code" line on PRs).
 # Removes:    custom hooks, statusLine, ECC env, and all plugin/marketplace entries
-#             except engram, context-mode and worktrunk (Claude is kept close to stock). Plugins themselves are
+#             except engram, context-mode, worktrunk and i-have-adhd (Claude is kept close to stock). Plugins themselves are
 #             uninstalled by .chezmoiscripts/run_onchange_after_20-claude-plugins-remove.sh.tmpl.
 import json
 import os

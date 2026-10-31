@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Installs the i-have-adhd plugin (/i-have-adhd skill + always-on SessionStart
+# hook) for Claude Code at user scope. Pi gets it as the git package in pi.yaml
+# (git_packages). Always-on is enabled by the empty flag files
+# dot_config/claude/empty_dot_i-have-adhd-always and
+# dot_config/pi/agent/empty_dot_i-have-adhd-always; delete both to go back to
+# on-demand.
+# Idempotent: only adds the marketplace / installs the plugin when missing.
+
+set -eufo pipefail
+
+export CLAUDE_CONFIG_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/claude"
+
+export PATH="{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ .chezmoi.homeDir }}/.local/bin:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+
+marketplaces="$(claude plugin marketplace list 2>/dev/null || true)"
+if ! printf '%s\n' "$marketplaces" | grep -qE '^\s*❯ i-have-adhd\s*$'; then
+  claude plugin marketplace add ayghri/i-have-adhd
+fi
+
+plugins="$(claude plugin list 2>/dev/null || true)"
+if ! printf '%s\n' "$plugins" | grep -q 'i-have-adhd@i-have-adhd'; then
+  claude plugin install i-have-adhd@i-have-adhd --scope user
+fi
