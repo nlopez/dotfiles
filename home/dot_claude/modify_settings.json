@@ -7,6 +7,9 @@
 #
 # Configures: attribution (empty strings disable the Co-Authored-By trailer
 #             on commits and the "Generated with Claude Code" line on PRs).
+# Removes:    custom hooks, statusLine, ECC env, and all plugin/marketplace entries
+#             except engram (Claude is kept close to stock). Plugins themselves are
+#             uninstalled by .chezmoiscripts/run_onchange_after_20-claude-plugins-remove.sh.tmpl.
 import json
 import sys
 
@@ -19,5 +22,20 @@ except Exception:
     pass
 
 current["attribution"] = {"commit": "", "pr": ""}
+
+# Stock cleanup: drop leftovers from the removed ECC plugin and custom hooks/statusline.
+for key in ("hooks", "statusLine"):
+    current.pop(key, None)
+for key in ("ECC_DISABLED_MCPS", "_ZO_DOCTOR"):
+    current.get("env", {}).pop(key, None)
+for plugin in (
+    "ecc@ecc",
+    "gopls-lsp@claude-plugins-official",
+    "pr-review-toolkit@claude-plugins-official",
+    "frontend-design@claude-plugins-official",
+):
+    current.get("enabledPlugins", {}).pop(plugin, None)
+for marketplace in ("ecc", "cloudflare"):
+    current.get("extraKnownMarketplaces", {}).pop(marketplace, None)
 
 print(json.dumps(current, indent=2))

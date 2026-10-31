@@ -117,6 +117,34 @@ Documents/WindowsPowerShell
 ; window-switch hook was unused; emoji status now comes from tmux-agent-tabs
 .config/tmux/scripts/window-switch.sh
 
+; Claude Code kept close to stock: custom hooks/statusline, third-party agents,
+; skills (HashiCorp Terraform, graphify, ECC "learned") and ECC rules removed.
+; ~/.claude/skills/synced is Claude-managed and intentionally left alone.
+.claude/hooks
+.claude/statusline.sh
+.claude/agents
+.claude/rules/ecc
+; ECC runtime logs, session data, plugin cache/data
+.claude/bash-commands.log
+.claude/cost-tracker.log
+.claude/metrics
+.claude/session-data
+.claude/plugins/cache/ecc
+.claude/plugins/data/ecc-ecc
+.claude/skills/graphify
+.claude/skills/learned
+.claude/skills/new-terraform-provider
+.claude/skills/provider-actions
+.claude/skills/provider-docs
+.claude/skills/provider-resources
+.claude/skills/provider-test-patterns
+.claude/skills/refactor-module
+.claude/skills/run-acceptance-tests
+.claude/skills/terraform-search-import
+.claude/skills/terraform-stacks
+.claude/skills/terraform-style-guide
+.claude/skills/terraform-test
+
 ; tfenv shim and unused tmux helper scripts removed
 .local/bin/tfenv
 .config/tmux/scripts/prompt-rename-window.sh

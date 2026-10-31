@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Keeps Claude Code close to stock: uninstalls every user-scope plugin except
+# engram (see run_onchange_after_10-engram-claude.sh.tmpl) and removes the
+# third-party ECC and Cloudflare marketplaces.
+# Re-run by bumping the revision below.
+# plugins-removal-revision: 2
+
+set -eufo pipefail
+
+export PATH="{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ .chezmoi.homeDir }}/.local/bin:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+
+installed="$(claude plugin list 2>/dev/null || true)"
+for plugin in ecc@ecc gopls-lsp@claude-plugins-official pr-review-toolkit@claude-plugins-official frontend-design@claude-plugins-official; do
+  if printf '%s\n' "$installed" | grep -q "$plugin"; then
+    claude plugin uninstall "$plugin" --scope user
+  fi
+done
+
+marketplaces="$(claude plugin marketplace list 2>/dev/null || true)"
+for marketplace in ecc cloudflare; do
+  if printf '%s\n' "$marketplaces" | grep -qE "^\s*❯ $marketplace\s*$"; then
+    claude plugin marketplace remove "$marketplace"
+  fi
+done
