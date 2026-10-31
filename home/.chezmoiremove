@@ -124,6 +124,9 @@ Documents/WindowsPowerShell
 .claude/statusline.sh
 .claude/agents
 .claude/rules/ecc
+; Stray Engram store created when a process ran without ENGRAM_DATA_DIR (real
+; store is ~/.local/share/engram)
+.engram
 ; ECC runtime logs, session data, plugin cache/data
 .claude/bash-commands.log
 .claude/cost-tracker.log
