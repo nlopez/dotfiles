@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Installs/updates the Engram plugin and user-level MCP server for Claude Code
+# (user scope). Pi gets Engram from the gentle-engram package in pi.yaml.
+#
+# `engram setup claude-code` registers the *resolved* binary path
+# (.../engram/<version>/engram) with Claude, which goes stale when mise upgrades
+# engram. So this runs every apply but only calls setup when the plugin is
+# missing or the registered path no longer matches the mise-managed binary.
+
+set -eufo pipefail
+
+MISE="{{ .chezmoi.homeDir }}/.local/bin/mise"
+export PATH="{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ .chezmoi.homeDir }}/.local/bin:$PATH"
+export ENGRAM_DATA_DIR="${XDG_DATA_HOME:-{{ .chezmoi.homeDir }}/.local/share}/engram"
+
+[ -x "$MISE" ] || { echo "mise not found at $MISE, skipping" >&2; exit 0; }
+command -v engram >/dev/null 2>&1 || { echo "engram not found, skipping" >&2; exit 0; }
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+
+engram_bin="$(readlink -f "$("$MISE" which engram)")"
+
+plugins="$(claude plugin list 2>/dev/null || true)"
+mcp="$(claude mcp get engram 2>/dev/null || true)"
+
+if printf '%s\n' "$plugins" | grep -q 'engram@engram' &&
+  printf '%s\n' "$mcp" | grep -qF "Command: $engram_bin"; then
+  exit 0
+fi
+
+engram setup claude-code

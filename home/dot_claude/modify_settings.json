@@ -11,6 +11,7 @@
 #             except engram (Claude is kept close to stock). Plugins themselves are
 #             uninstalled by .chezmoiscripts/run_onchange_after_20-claude-plugins-remove.sh.tmpl.
 import json
+import os
 import sys
 
 current_raw = sys.stdin.read()
@@ -37,5 +38,18 @@ for plugin in (
     current.get("enabledPlugins", {}).pop(plugin, None)
 for marketplace in ("ecc", "cloudflare"):
     current.get("extraKnownMarketplaces", {}).pop(marketplace, None)
+
+# Engram: pin one data dir so hooks and the MCP server never fall back to ~/.engram
+# when Claude isn't launched from a shell that exports ENGRAM_DATA_DIR (see
+# dot_config/shell/env.tmpl), and drop permissions for the nonexistent
+# plugin-provided MCP server (`engram setup claude-code` registers a user-level
+# `engram` server, so only mcp__engram__* is real).
+xdg_data = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+current.setdefault("env", {})["ENGRAM_DATA_DIR"] = os.path.join(xdg_data, "engram")
+permissions = current.get("permissions", {})
+if "allow" in permissions:
+    permissions["allow"] = [
+        p for p in permissions["allow"] if not p.startswith("mcp__plugin_engram_engram__")
+    ]
 
 print(json.dumps(current, indent=2))
