@@ -156,3 +156,7 @@ Documents/WindowsPowerShell
 ; Claude Code moved to ~/.config/claude (CLAUDE_CONFIG_DIR); the dir and .claude.json are
 ; moved by run_before_05-claude-xdg-migrate.sh
 .claude.json.backup
+
+; i-have-adhd skill was hand-copied here; Pi now gets it from the git package in
+; .chezmoidata/pi.yaml (a leftover copy would collide with the package's skill name)
+.config/pi/agent/skills/i-have-adhd
