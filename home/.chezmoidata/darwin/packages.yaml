@@ -36,7 +36,7 @@ packages:
         - jundot/omlx/omlx
       brew_options:
         jundot/omlx/omlx:
-        - "--with-grammar"
+        - "with-grammar"
         work:
       # Casks listed here will be installed with `--require-sha`. If a cask is
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
