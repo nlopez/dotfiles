@@ -6,15 +6,15 @@
 pi:
   packages:
   - "npm:pi-auto-theme@1.1.1"
-  - "npm:pi-subagents@0.78.0"
+  - "npm:pi-subagents@0.83.0"
   - "npm:context-mode@1.0.169"
-  - "npm:pi-intercom@0.17.0"
+  - "npm:pi-intercom@0.18.1"
   - "npm:pi-powerline@0.11.1"
   - "npm:@mjakl/pi-kagi-api@0.1.0"
   - "npm:pi-btw@0.8.0"
-  - "npm:pi-markdown-preview@0.21.5"
-  - "npm:pi-powerline-footer@0.20.1"
-  - "npm:@juicesharp/rpiv-ask-user-question@2.13.8"
+  - "npm:pi-markdown-preview@0.25.0"
+  - "npm:pi-powerline-footer@0.21.0"
+  - "npm:@juicesharp/rpiv-ask-user-question@2.15.0"
   - "npm:pi-interrupt-steer@0.1.0"
   - "npm:gentle-engram@0.4.2"
   # Git-sourced packages; pi clones and reconciles these itself, so they are
