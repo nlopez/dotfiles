@@ -36,6 +36,7 @@ mise:
       zoxide: latest
       "github:ryooooooga/zabrze": latest
       "github:ahmedelgabri/tmux-agent-panel": latest
+      "github:Gentleman-Programming/engram": latest
     personal:
       argocd: latest
       cilium-cli: latest
