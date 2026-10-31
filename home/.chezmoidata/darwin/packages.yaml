@@ -15,7 +15,6 @@ packages:
       brews:
         base:
         - wget
-        - colima
         - libkrun/krun/krunkit
         - flock
         - skopeo
@@ -35,7 +34,6 @@ packages:
         - ffmpeg
         - media-info
         - jundot/omlx/omlx
-        - resticprofile
       brew_options:
         jundot/omlx/omlx:
         - "--with-grammar"

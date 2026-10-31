@@ -1,0 +1,22 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# Run colima at login via the LaunchAgent in Library/LaunchAgents/com.local.colima.plist
+# (replaces `brew services start colima`). Reloads the job when the plist changes.
+# Runs after 00-mise-install so the mise colima/lima binaries exist.
+# {{ include "Library/LaunchAgents/com.local.colima.plist.tmpl" | sha256sum }}
+
+set -eufo pipefail
+
+DOMAIN="gui/$(id -u)"
+PLIST="$HOME/Library/LaunchAgents/com.local.colima.plist"
+
+mkdir -p "${XDG_STATE_HOME:-$HOME/.local/state}/colima"
+
+# Drop the old brew-services job (stops colima if it was started by it).
+launchctl bootout "$DOMAIN/homebrew.mxcl.colima" 2>/dev/null || true
+rm -f "$HOME/Library/LaunchAgents/homebrew.mxcl.colima.plist"
+
+launchctl bootout "$DOMAIN/com.local.colima" 2>/dev/null || true
+launchctl bootstrap "$DOMAIN" "$PLIST"
+{{- end }}

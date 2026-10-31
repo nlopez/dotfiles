@@ -305,6 +305,4 @@ alias restic-restore='resticprofile restore --target ~/restic-restore/'
 ###############################################################################
 eval "$(direnv hook zsh)"
 eval "$(zoxide init zsh)"
-{{- if lookPath "wt" }}
-eval "$(wt config shell init zsh)"
-{{- end }}
+command -v wt >/dev/null && eval "$(wt config shell init zsh)"

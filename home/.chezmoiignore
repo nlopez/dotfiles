@@ -41,10 +41,11 @@ Library/Preferences/com.knollsoft.Rectangle.plist
 {{ end -}}
 {{ if eq .chezmoi.os "darwin" -}}
 # ── Library: ignore everything except explicitly managed subdirs ──────────────
-Library/**
-!Library/LaunchAgents/**
-!Library/Application Support/**
-!Library/Preferences/**
+# (`Library/**` would also match `Library` itself and ignore the whole tree.)
+Library/*
+!Library/LaunchAgents
+!Library/Application Support
+!Library/Preferences
 {{ end -}}
 {{ if eq .chezmoi.os "darwin" -}}
 .chezmoiscripts/linux/**

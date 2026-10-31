@@ -1,0 +1,33 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# Remove Homebrew copies of tools now managed by mise (see .chezmoidata/mise.yaml).
+# Runs after 00-mise-install so the mise binary exists before brew's is removed.
+# Each formula is only uninstalled once mise resolves its binary, and brew
+# refuses (without --ignore-dependencies) if another formula still needs it.
+# {{ .mise.tools | toJson | sha256sum }}
+
+set -eufo pipefail
+
+MISE="{{ .chezmoi.homeDir }}/.local/bin/mise"
+[ -x "$MISE" ] || { echo "mise not found at $MISE, skipping" >&2; exit 0; }
+command -v brew >/dev/null || exit 0
+
+# brew formula:binary provided by the mise tool
+for entry in \
+  argocd:argocd atuin:atuin bat:bat bazel:bazel chezmoi:chezmoi \
+  cilium-cli:cilium colima:colima direnv:direnv doctl:doctl fd:fd fx:fx fzf:fzf \
+  gh:gh git-lfs:git-lfs go:go helm:helm hyperfine:hyperfine jq:jq \
+  k9s:k9s kubernetes-cli:kubectl lima:limactl lazygit:lazygit mas:mas neovim:nvim \
+  oxipng:oxipng packer:packer resticprofile:resticprofile restic:restic \
+  ripgrep:rg shellcheck:shellcheck tabiew:tw tenv:tenv uv:uv velero:velero \
+  worktrunk:wt yamlfmt:yamlfmt yazi:yazi yt-dlp:yt-dlp zabrze:zabrze \
+  zoxide:zoxide \
+; do
+  formula="${entry%%:*}"
+  bin="${entry#*:}"
+  brew list --formula "$formula" &>/dev/null || continue
+  "$MISE" which "$bin" &>/dev/null || { echo "mise has no $bin, keeping brew $formula" >&2; continue; }
+  brew uninstall "$formula" || echo "kept brew $formula (still required by another formula)" >&2
+done
+{{- end }}

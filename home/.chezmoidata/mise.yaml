@@ -1,14 +1,18 @@
 # Tools managed by mise (rendered into ~/.config/mise/config.toml).
 # Prefer mise over Homebrew wherever a tool is available in the mise registry;
 # brew remains for GNU tools, casks, taps without releases, and anything needing
-# system integration (colima, tmux, git, etc.).
+# system integration (tmux, git, etc.).
 mise:
   tools:
     base:
+      1password-cli: latest
+      age: latest
       chezmoi: latest
+      colima: latest
       atuin: latest
       bat: latest
       direnv: latest
+      docker-cli: latest
       fd: latest
       fzf: latest
       gh: latest
@@ -16,8 +20,8 @@ mise:
       go: latest
       helm: latest
       hyperfine: latest
-      jj: latest
       jq: latest
+      lima: latest
       k9s: latest
       kubectl: latest
       kubectx: latest
@@ -28,25 +32,34 @@ mise:
       rust: latest
       shellcheck: latest
       uv: latest
-      "pipx:pre-commit": latest
-      "pipx:unique-namer": latest
       worktrunk: latest
       yamlfmt: latest
       yq: latest
       zoxide: latest
+      "pypi:pre-commit": latest
+      "pypi:unique-namer": latest
       "github:ryooooooga/zabrze": latest
       "github:ahmedelgabri/tmux-agent-panel": latest
       "github:Gentleman-Programming/engram": latest
       claude-code: latest
+      bazel: latest
+      fx: latest
+      neovim: latest
+      packer: latest
+      velero: latest
+      yazi: latest
+      "github:shshemi/tabiew": latest
+      "aqua:tofuutils/tenv": latest
     personal:
       argocd: latest
       cilium-cli: latest
       doctl: latest
       oxipng: latest
       restic: latest
-      "pipx:huggingface-hub": latest
-      "pipx:osxphotos": latest
       yt-dlp: latest
+      "pypi:huggingface-hub": latest
+      "pypi:osxphotos": latest
+      "github:creativeprojects/resticprofile": latest
     work:
       aws-vault: latest
       awscli: latest
@@ -54,4 +67,3 @@ mise:
       gcloud: latest
       glab: latest
       vault: latest
-      "aqua:tofuutils/tenv": latest

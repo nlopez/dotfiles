@@ -142,7 +142,6 @@ All new tool configurations **must** follow the [XDG Base Directory Specificatio
 | bat                    | `~/.config/bat/`                        | Native XDG support                                     |
 | ghostty                | `~/.config/ghostty/`                    | Native XDG support                                     |
 | git                    | `~/.config/git/`                        | Native XDG support                                     |
-| jj                     | `~/.config/jj/`                         | Native XDG support                                     |
 | k9s                    | `~/.config/k9s/`                        | Native XDG support                                     |
 | pnpm data              | `~/.local/share/pnpm/`                  | `PNPM_HOME` env var                                    |
 | Go data                | `~/.local/share/go/`                    | `GOPATH` env var                                       |
