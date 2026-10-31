@@ -37,6 +37,7 @@ mise:
       "github:ryooooooga/zabrze": latest
       "github:ahmedelgabri/tmux-agent-panel": latest
       "github:Gentleman-Programming/engram": latest
+      claude-code: latest
     personal:
       argocd: latest
       cilium-cli: latest
@@ -49,6 +50,8 @@ mise:
     work:
       aws-vault: latest
       awscli: latest
+      azure-cli: latest
+      gcloud: latest
       glab: latest
       vault: latest
       "aqua:tofuutils/tenv": latest
