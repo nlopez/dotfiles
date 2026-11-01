@@ -1,4 +1,6 @@
 skip-commit-generation-prompt = true
+# Bare-repo layout (see dolly): worktrees live at <repo>/<branch>, beside .bare
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
 
 [post-start]
 copy-ignored = "wt step copy-ignored"
