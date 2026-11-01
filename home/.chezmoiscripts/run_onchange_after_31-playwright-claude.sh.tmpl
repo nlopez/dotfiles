@@ -1,0 +1,24 @@
+{{- if not .headless -}}
+#!/bin/bash
+
+# Registers the Playwright MCP server (@playwright/mcp) with Claude Code at user
+# scope. Pi gets it from the mcp.json overlay in dot_config/pi/agent/modify_mcp.json.tmpl.
+# The version is pinned in .chezmoidata/mcp.yaml, so bumping it re-runs this script.
+# Runs via the mise npx shim, so it survives node upgrades.
+
+set -eufo pipefail
+
+export CLAUDE_CONFIG_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/claude"
+
+export PATH="{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ .chezmoi.homeDir }}/.local/bin:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+command -v npx >/dev/null 2>&1 || { echo "npx not found, skipping" >&2; exit 0; }
+
+claude mcp remove playwright --scope user >/dev/null 2>&1 || true
+claude mcp add-json playwright --scope user '{
+  "type": "stdio",
+  "command": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/npx",
+  "args": ["-y", "{{ .mcp.playwright | trimPrefix "npm:" }}"]
+}'
+{{- end }}
