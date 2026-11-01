@@ -2,14 +2,35 @@
 # Managed by chezmoi — source: home/dot_config/claude/modify_private_dot_claude.json.tmpl
 # Target: ~/.config/claude/.claude.json (CLAUDE_CONFIG_DIR).
 #
-# Pre-accepts the workspace trust dialog for the directories in
-# .chezmoidata/trust.yaml. Claude Code walks parent directories looking for
-# projects[<dir>].hasTrustDialogAccepted, so every repo and worktree beneath
-# them is trusted. All other keys are left untouched.
+# Pre-accepts the workspace trust dialog (projects[<dir>].hasTrustDialogAccepted)
+# for every repo directly under the directories in .chezmoidata/trust.yaml.
+#
+# Unlike Pi, Claude Code does not inherit trust from directories above the repo:
+# it looks up the cwd's git root (bounded to the repo) and, for worktrees, the
+# canonical repo root. So parents can't be trusted; each repo is. That key is
+# <repo>/.bare for the bare layout (dolly) and <repo> for a normal clone, and
+# covers every worktree. Repos cloned later are picked up on the next apply.
+# All other keys are left untouched.
 import json
+import os
 import sys
 
-TRUSTED = {{ includeTemplate "trusted-dirs.tmpl" . }}
+TRUSTED_ROOTS = {{ includeTemplate "trusted-dirs.tmpl" . }}
+
+
+def trust_keys(root):
+    try:
+        names = sorted(os.listdir(root))
+    except OSError:
+        return
+    for name in names:
+        repo = os.path.join(root, name)
+        if os.path.isdir(os.path.join(repo, ".bare")):
+            yield repo
+            yield os.path.join(repo, ".bare")
+        elif os.path.exists(os.path.join(repo, ".git")):
+            yield repo
+
 
 raw = sys.stdin.read()
 try:
@@ -21,11 +42,12 @@ except Exception:
 
 projects = current.setdefault("projects", {})
 changed = False
-for path in TRUSTED:
-    entry = projects.setdefault(path, {})
-    if entry.get("hasTrustDialogAccepted") is not True:
-        entry["hasTrustDialogAccepted"] = True
-        changed = True
+for root in TRUSTED_ROOTS:
+    for path in trust_keys(root):
+        entry = projects.setdefault(path, {})
+        if entry.get("hasTrustDialogAccepted") is not True:
+            entry["hasTrustDialogAccepted"] = True
+            changed = True
 
 # Pass the file through byte-for-byte when nothing changed.
-sys.stdout.write(json.dumps(current, indent=2) if changed else raw)
+sys.stdout.write(json.dumps(current, indent=2, ensure_ascii=False) if changed else raw)

@@ -1,5 +1,7 @@
 # Directories (relative to $HOME) whose repos Claude Code and Pi trust without
-# prompting. Trust is inherited by everything beneath them, including worktrees.
+# prompting, including their worktrees. Each entry is an owner directory holding
+# repos. Pi inherits trust from the directory itself; Claude only trusts per
+# repo, so its script lists the repos directly beneath each entry.
 # Rendered to absolute paths by .chezmoitemplates/trusted-dirs.tmpl; consumed by
 # dot_config/claude/modify_private_dot_claude.json.tmpl and
 # dot_config/pi/agent/modify_trust.json.tmpl.
