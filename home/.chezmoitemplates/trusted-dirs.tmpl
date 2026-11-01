@@ -1,0 +1,6 @@
+{{- /* JSON array of absolute trusted directories (see .chezmoidata/trust.yaml). Call with the root context. */ -}}
+{{- $rel := .trust.dirs -}}
+{{- if .work }}{{ $rel = concat $rel .trust.work_dirs }}{{ end -}}
+{{- $abs := list -}}
+{{- range $rel }}{{ $abs = append $abs (joinPath $.chezmoi.homeDir .) }}{{ end -}}
+{{- toJson $abs -}}

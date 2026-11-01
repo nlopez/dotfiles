@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+# Managed by chezmoi — source: home/dot_config/claude/modify_private_dot_claude.json.tmpl
+# Target: ~/.config/claude/.claude.json (CLAUDE_CONFIG_DIR).
+#
+# Pre-accepts the workspace trust dialog for the directories in
+# .chezmoidata/trust.yaml. Claude Code walks parent directories looking for
+# projects[<dir>].hasTrustDialogAccepted, so every repo and worktree beneath
+# them is trusted. All other keys are left untouched.
+import json
+import sys
+
+TRUSTED = {{ includeTemplate "trusted-dirs.tmpl" . }}
+
+raw = sys.stdin.read()
+try:
+    current = json.loads(raw) if raw.strip() else {}
+except Exception:
+    # .claude.json also holds auth and history; never replace what we can't parse.
+    sys.stdout.write(raw)
+    sys.exit(0)
+
+projects = current.setdefault("projects", {})
+changed = False
+for path in TRUSTED:
+    entry = projects.setdefault(path, {})
+    if entry.get("hasTrustDialogAccepted") is not True:
+        entry["hasTrustDialogAccepted"] = True
+        changed = True
+
+# Pass the file through byte-for-byte when nothing changed.
+sys.stdout.write(json.dumps(current, indent=2) if changed else raw)

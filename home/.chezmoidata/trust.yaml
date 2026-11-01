@@ -1,0 +1,12 @@
+# Directories (relative to $HOME) whose repos Claude Code and Pi trust without
+# prompting. Trust is inherited by everything beneath them, including worktrees.
+# Rendered to absolute paths by .chezmoitemplates/trusted-dirs.tmpl; consumed by
+# dot_config/claude/modify_private_dot_claude.json.tmpl and
+# dot_config/pi/agent/modify_trust.json.tmpl.
+trust:
+  dirs:
+  - src/github.com/nlopez
+  # Added only on work machines.
+  work_dirs:
+  - src/github.com/DataDog
+  - src/github.com/ddoghq
