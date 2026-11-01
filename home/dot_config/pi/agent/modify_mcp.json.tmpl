@@ -12,7 +12,11 @@
 OVERLAY=$(cat << 'EOF'
 {
   "mcpServers": {
-    {{- if .work }}
+    "playwright": {
+      "command": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/npx",
+      "args": ["-y", "{{ .mcp.playwright | trimPrefix "npm:" }}"]
+    }
+    {{- if and .work (not (env "CHEZMOI_SKIP_SECRETS")) }},
     {{ output "op" "inject" "-i" (joinPath .chezmoi.workingTree "scripts/op-templates/mcp-servers.optpl") | trim }}
     {{- end }}
   }

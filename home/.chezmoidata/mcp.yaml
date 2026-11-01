@@ -1,0 +1,5 @@
+# MCP servers launched via npx, shared by Claude (run_onchange_after_31-playwright-claude.sh.tmpl)
+# and Pi (dot_config/pi/agent/modify_mcp.json.tmpl).
+# Renovate scans this file for npm:pkg@version patterns.
+mcp:
+  playwright: "npm:@playwright/mcp@0.0.84"
