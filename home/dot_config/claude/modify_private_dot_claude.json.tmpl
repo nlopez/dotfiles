@@ -8,7 +8,7 @@
 # Unlike Pi, Claude Code does not inherit trust from directories above the repo:
 # it looks up the cwd's git root (bounded to the repo) and, for worktrees, the
 # canonical repo root. So parents can't be trusted; each repo is. That key is
-# <repo>/.bare for the bare layout (dolly) and <repo> for a normal clone, and
+# <repo>/.bare for a bare-repo layout and <repo> for a normal clone, and
 # covers every worktree. Repos cloned later are picked up on the next apply.
 # All other keys are left untouched.
 import json

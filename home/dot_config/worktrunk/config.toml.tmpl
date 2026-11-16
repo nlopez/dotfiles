@@ -1,7 +1,7 @@
 # chezmoi:template:left-delimiter="[[" right-delimiter="]]"
 skip-commit-generation-prompt = true
-# Bare-repo layout (see dolly): worktrees live at <repo>/<branch>, beside .bare
-worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+# Worktrees sit beside the clone: <owner>/<repo>.<branch>
+worktree-path = "{{ repo_path }}/../{{ repo }}.{{ branch | sanitize }}"
 
 [post-start]
 copy-ignored = "wt step copy-ignored"

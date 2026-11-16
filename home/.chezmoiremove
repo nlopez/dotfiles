@@ -163,3 +163,5 @@ Documents/WindowsPowerShell
 
 ; rex-session Pi extension removed
 .config/pi/agent/extensions/rex-session.ts
+.local/bin/dolly
+.config/zsh/git-worktree.zsh

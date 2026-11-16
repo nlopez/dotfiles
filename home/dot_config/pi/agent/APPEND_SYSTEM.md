@@ -26,47 +26,20 @@ Avoid `--body "...escaped..."` for anything beyond a single short sentence. Shel
 
 ## Git Cloning and Worktrees
 
-Use **`dolly clone`** to clone repos and **`worktrunk` (`wt`)** to manage worktrees.
+Clone with **`ghq get <owner>/<repo>`** (or a full URL). It clones to
+`<root>/<host>/<owner>/<repo>`, where `<root>` is `~/Projects` if it exists, else `~/src`.
+`ghq list -p` lists local clones.
 
-### Cloning repos with `dolly clone`
-
-When you need to work with a git repo, prefer `dolly clone` over `git clone`. It creates a bare clone + primary worktree under `~/Projects/` (or `~/src/` if `~/Projects` doesn't exist):
-
-```sh
-dolly clone https://github.com/owner/repo.git
-```
-
-This produces (using `<root>` for whichever of the two applies):
-
-- `<root>/<host>/<owner>/<repo>/` — the repo root directory
-- `<root>/<host>/<owner>/<repo>/.bare` — the bare clone (object store)
-- `<root>/<host>/<owner>/<repo>/.git` — gitdir pointing to `.bare`
-- `<root>/<host>/<owner>/<repo>/default` — symlink to the default branch worktree
-
-`dolly clone` handles credential forwarding via `git-credential` automatically, so authenticated repos work without extra configuration.
-
-### Managing worktrees with `worktrunk` (`wt`)
-
-Use `worktrunk` to create and manage worktrees for any branch:
+Manage worktrees with **worktrunk (`wt`)**. Worktrees sit beside the clone as `<repo>.<branch>`.
 
 ```sh
-wt switch --create <branch-name>   # Create worktree and switch to it
-wt switch <branch-name>            # Switch to existing worktree
-wt list                            # List all worktrees
-wt remove                          # Remove worktree (deletes branch if merged)
+wt switch --create <branch>   # new worktree + branch
+wt switch <branch>            # existing worktree
+wt list
+wt remove                     # remove worktree (deletes branch if merged)
 ```
 
-**Always create a worktree for any branch** — never work directly on a branch outside a worktree. This keeps branches isolated and parallelizable, which is essential for multi-agent or parallel task workflows.
-
-### Git conventions
-
-- The shell functions `gwa`, `gwl`, `gwr`, `gwm` (from `git-worktree.zsh`) provide repo-root-aware worktree management for dolly-managed repos:
-  - `gwa <branch>` — create a new worktree for a branch
-  - `gwl` — list worktrees
-  - `gwr <worktree>` — remove a worktree
-  - `gwm <worktree> <new-path>` — move a worktree
-- These functions work for both dolly-managed (bare) and plain repos.
-- When inside a repo or worktree, `git rev-parse --git-common-dir` resolves to the `.bare` (or `.git`) directory, so its parent is always the worktree root.
+One task, one branch, one worktree. Remove it once merged.
 
 Always prefer **`uv`** for Python and **`pnpm`** for Node.js.
 

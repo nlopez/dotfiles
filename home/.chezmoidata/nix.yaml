@@ -35,6 +35,7 @@ nix:
     - fx
     - fzf
     - gh
+    - ghq
     # gh-stack: wired as a gh extension via
     # dot_config/gh/extensions/symlink_tmpl_gh-stack — gh 2.56 does not
     # discover gh-<name> binaries on PATH, only its extensions dir.
