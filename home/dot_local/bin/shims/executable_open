@@ -1,0 +1,28 @@
+#!/bin/sh
+# open shim: OAuth authorization URLs (MCP sign-in from pi, Claude Code, etc.)
+# open without the browser taking focus. Every other call passes straight
+# through to /usr/bin/open.
+#
+# Chrome raises its own window for URLs it gets from `open`, even with -g, so
+# when Chrome is running the URL goes in as a new tab via AppleScript, which
+# leaves the window where it is. Otherwise fall back to `open -g`.
+if [ "$#" -eq 1 ]; then
+  case $1 in
+    http://*response_type=*|https://*response_type=*|\
+    http://*code_challenge=*|https://*code_challenge=*)
+      if pgrep -xq "Google Chrome" &&
+        osascript - "$1" >/dev/null 2>&1 <<'EOF'
+on run argv
+  tell application "Google Chrome"
+    if (count of windows) = 0 then make new window
+    tell window 1 to make new tab with properties {URL:item 1 of argv}
+  end tell
+end run
+EOF
+      then
+        exit 0
+      fi
+      exec /usr/bin/open -g "$1" ;;
+  esac
+fi
+exec /usr/bin/open "$@"

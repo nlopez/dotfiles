@@ -115,6 +115,7 @@ Library/*
 # ── ~/.local/bin: conditional scripts ─────────────────────────────────────────
 {{ if or (not .work) (ne .chezmoi.os "darwin") -}}
 .local/bin/brew
+.local/bin/shims/open
 {{ end -}}
 {{ if ne .chezmoi.os "darwin" -}}
 .local/bin/gitcache
