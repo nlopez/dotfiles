@@ -34,6 +34,9 @@ def build_data(root: Path, os_name: str) -> dict:
         "wsl": False,
         "headless": False,
         "ephemeral": False,
+        # Render private-data from its plaintext defaults: no machine can decrypt
+        # both classes' files, and lint output should not contain private values.
+        "encryption": False,
     }
 
     pkg_file = root / ".chezmoidata" / os_name / "packages.yaml"

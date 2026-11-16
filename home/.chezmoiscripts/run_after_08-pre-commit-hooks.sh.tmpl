@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Install this repo's pre-commit hooks (gitleaks, private-patterns, ...) into the
+# source checkout. A clone does not carry .git/hooks, so check on every apply.
+set -euo pipefail
+
+repo={{ .chezmoi.workingTree | quote }}
+command -v pre-commit >/dev/null 2>&1 || exit 0
+[[ -f "$repo/.pre-commit-config.yaml" ]] || exit 0
+
+hook="$(git -C "$repo" rev-parse --path-format=absolute --git-path hooks)/pre-commit"
+grep -q "pre-commit" "$hook" 2>/dev/null && exit 0
+
+cd "$repo"
+pre-commit install --install-hooks
