@@ -5,11 +5,11 @@ worktree-path = "{{ repo_path }}/../{{ repo }}.{{ branch | sanitize }}"
 
 [post-start]
 copy-ignored = "wt step copy-ignored"
-[[- /* Work repos ship their own worktree-path; keep the bare-repo layout for
-       them too. The list comes from the private data (docs/private-data.md). */]]
+[[- /* Work repos ship their own worktree-path; override it with the same
+       sibling layout. The list comes from the private data (docs/private-data.md). */]]
 [[- range (includeTemplate "private-data" . | fromYaml).worktrunk_projects ]]
 [projects."[[ . ]]"]
-worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+worktree-path = "{{ repo_path }}/../{{ repo }}.{{ branch | sanitize }}"
 [[ end ]]
 [list]
 json-schema = 2
