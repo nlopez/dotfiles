@@ -2,9 +2,10 @@
 skip-commit-generation-prompt = true
 [[- /* Worktrees live centrally, outside every repo, so parent-directory
        context discovery (AGENTS.md/CLAUDE.md) only sees the worktree's own
-       files. Root matches ghq.root in git/config.tmpl (~/src); trust entries are
+       files. The <repo>.<branch> leaf keeps the repo name in
+       basename-only status lines. Root matches ghq.root in git/config.tmpl (~/src); trust entries are
        derived in .chezmoitemplates/trusted-dirs.tmpl. */]]
-worktree-path = "~/src/.worktrees/{{ owner }}/{{ repo }}/{{ branch | sanitize }}"
+worktree-path = "~/src/.worktrees/{{ owner }}/{{ repo }}.{{ branch | sanitize }}"
 
 [post-start]
 copy-ignored = "wt step copy-ignored"
@@ -12,7 +13,7 @@ copy-ignored = "wt step copy-ignored"
        central layout. The list comes from the private data (docs/private-data.md). */]]
 [[- range (includeTemplate "private-data" . | fromYaml).worktrunk_projects ]]
 [projects."[[ . ]]"]
-worktree-path = "~/src/.worktrees/{{ owner }}/{{ repo }}/{{ branch | sanitize }}"
+worktree-path = "~/src/.worktrees/{{ owner }}/{{ repo }}.{{ branch | sanitize }}"
 [[ end ]]
 [list]
 json-schema = 2

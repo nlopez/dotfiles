@@ -31,7 +31,7 @@ Clone with **`ghq get <owner>/<repo>`** (or a full URL). It clones to
 `ghq list -p` lists local clones.
 
 Worktrees come from **worktrunk (`wt`)** only; never run `git worktree add` directly.
-They live under `~/src/.worktrees/<owner>/<repo>/<branch>`. Claude Code (`claude -w`) and
+They live under `~/src/.worktrees/<owner>/<repo>.<branch>`. Claude Code (`claude -w`) and
 pi-subagents (`worktree: true`) create theirs through `wt` too.
 
 ```sh
