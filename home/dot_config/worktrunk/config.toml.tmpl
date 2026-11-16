@@ -1,15 +1,18 @@
 # chezmoi:template:left-delimiter="[[" right-delimiter="]]"
 skip-commit-generation-prompt = true
-# Worktrees sit beside the clone: <owner>/<repo>.<branch>
-worktree-path = "{{ repo_path }}/../{{ repo }}.{{ branch | sanitize }}"
+[[- /* Worktrees live centrally, outside every repo, so parent-directory
+       context discovery (AGENTS.md/CLAUDE.md) only sees the worktree's own
+       files. Root matches ghq.root in git/config.tmpl (~/src); trust entries are
+       derived in .chezmoitemplates/trusted-dirs.tmpl. */]]
+worktree-path = "~/src/.worktrees/{{ owner }}/{{ repo }}/{{ branch | sanitize }}"
 
 [post-start]
 copy-ignored = "wt step copy-ignored"
 [[- /* Work repos ship their own worktree-path; override it with the same
-       sibling layout. The list comes from the private data (docs/private-data.md). */]]
+       central layout. The list comes from the private data (docs/private-data.md). */]]
 [[- range (includeTemplate "private-data" . | fromYaml).worktrunk_projects ]]
 [projects."[[ . ]]"]
-worktree-path = "{{ repo_path }}/../{{ repo }}.{{ branch | sanitize }}"
+worktree-path = "~/src/.worktrees/{{ owner }}/{{ repo }}/{{ branch | sanitize }}"
 [[ end ]]
 [list]
 json-schema = 2

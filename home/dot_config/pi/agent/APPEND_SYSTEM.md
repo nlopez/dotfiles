@@ -27,10 +27,12 @@ Avoid `--body "...escaped..."` for anything beyond a single short sentence. Shel
 ## Git Cloning and Worktrees
 
 Clone with **`ghq get <owner>/<repo>`** (or a full URL). It clones to
-`<root>/<host>/<owner>/<repo>`, where `<root>` is `~/Projects` if it exists, else `~/src`.
+`~/src/<host>/<owner>/<repo>`.
 `ghq list -p` lists local clones.
 
-Manage worktrees with **worktrunk (`wt`)**. Worktrees sit beside the clone as `<repo>.<branch>`.
+Worktrees come from **worktrunk (`wt`)** only; never run `git worktree add` directly.
+They live under `~/src/.worktrees/<owner>/<repo>/<branch>`. Claude Code (`claude -w`) and
+pi-subagents (`worktree: true`) create theirs through `wt` too.
 
 ```sh
 wt switch --create <branch>   # new worktree + branch

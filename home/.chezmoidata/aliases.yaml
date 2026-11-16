@@ -25,6 +25,8 @@ aliases:
 - {name: grhh, cmd: "git reset --hard HEAD"}
 - {name: gst, cmd: "git status"}
 - {name: gup, cmd: "git pull --rebase"}
+- {name: wtc, cmd: "wt switch -x claude --create"}
+- {name: wtp, cmd: "wt switch -x pi --create"}
 - {name: k, cmd: "kubectl"}
 - {name: kd, cmd: "kubectl describe"}
 - {name: kdp, cmd: "kubectl describe pod"}

@@ -3,4 +3,7 @@
 {{- if .work }}{{ $rel = concat $rel ((includeTemplate "private-data" . | fromYaml).trust_dirs | default list) }}{{ end -}}
 {{- $abs := list -}}
 {{- range $rel }}{{ $abs = append $abs (joinPath $.chezmoi.homeDir .) }}{{ end -}}
+{{- /* Central worktrees (worktrunk config): <root>/<host>/<owner>/... is also
+       trusted at <root>/.worktrees/<owner>/... */ -}}
+{{- range $rel }}{{ $p := splitList "/" . }}{{ if ge (len $p) 3 }}{{ $abs = append $abs (joinPath $.chezmoi.homeDir (index $p 0) ".worktrees" (rest (rest $p) | join "/")) }}{{ end }}{{ end -}}
 {{- toJson $abs -}}

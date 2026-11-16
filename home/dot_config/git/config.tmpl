@@ -148,12 +148,11 @@
 {{/* run_onchange_after_40-workspace-git-identity.sh.                        */}}
 
 [ghq]
-  root = {{ if stat (joinPath .chezmoi.homeDir "Projects") }}~/Projects{{ else }}~/src{{ end }}
+  root = ~/src
 
 {{/* Per-identity includes go last so they override defaults above.       */}}
 {{/* Primary: gitdir-based (covers all URL variants for a given clone).   */}}
-{{/* `ghq` clones under ~/Projects when it exists, else ~/src, so both    */}}
-{{/* trees get gitdir rules here.                                        */}}
+{{/* `ghq` clones under ~/src (ghq.root above).                          */}}
 
 ; --- nlopez identity: nlopez personal repos, open-source, and chezmoi ---
 
