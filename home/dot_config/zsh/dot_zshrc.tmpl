@@ -350,10 +350,11 @@ command -v wt >/dev/null && eval "$(wt config shell init zsh)"
 {{- if and .workspace .work (not (index . "encryption")) }}
 
 # Workspaces: dotfiles install before the CLI uploads workspace secrets, so the
-# first apply ran without the age identity and skipped the private data. Once
-# the identity secret is here, re-run init (which turns on encryption) and
-# apply, once, in the background. The re-rendered .zshrc drops this block.
-if [[ -s /run/user/$UID/secrets/CHEZMOI_AGE_IDENTITY ]] && mkdir "${XDG_CACHE_HOME:-$HOME/.cache}/chezmoi-first-login.lock" 2>/dev/null; then
+# first apply ran without the age identity (or before Nix installed age) and
+# skipped the private data. Once both are here, re-run init (which turns on
+# encryption) and apply, once, in the background. The re-rendered .zshrc
+# drops this block.
+if [[ -s /run/user/$UID/secrets/CHEZMOI_AGE_IDENTITY ]] && (( $+commands[age] )) && mkdir "${XDG_CACHE_HOME:-$HOME/.cache}/chezmoi-first-login.lock" 2>/dev/null; then
   print -P "%F{blue}chezmoi:%f age identity found; applying private dotfiles in the background"
   (
     _log="${XDG_STATE_HOME:-$HOME/.local/state}/chezmoi-first-login.log"

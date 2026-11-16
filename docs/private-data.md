@@ -28,7 +28,8 @@ never becomes a target.
 Workspaces have no 1Password. A work Mac uploads its age identity as the
 workspace secret `CHEZMOI_AGE_IDENTITY` (not exported) in
 `darwin/run_onchange_after_21-workspace-secrets.sh.tmpl`, and `.chezmoi.toml.tmpl`
-turns on age when that file exists.
+turns on age when that file exists and the `age` binary (from the Nix profile)
+is installed.
 
 The workspaces CLI uploads secrets after it installs dotfiles, so the first
 apply on a new workspace has no identity and renders the defaults. On the first
