@@ -22,6 +22,8 @@ worktrunk_projects: []
 scan_patterns: []
 local_models:
   omlx_api_key: ""
+nix:
+  packages: []
 workspace_secrets:
   aws_vault_passphrase: ""
 claude:

@@ -54,6 +54,7 @@ without the hook.
 | `worktrunk_projects`                                  | `dot_config/worktrunk/config.toml.tmpl`                                                                              |
 | `scan_patterns`                                       | `dot_config/dotfiles/private-patterns.txt.tmpl` (pre-commit hook)                                                    |
 | `local_models.omlx_api_key`                           | Pi `extensions/local-models/config.ts.tmpl`                                                                          |
+| `nix.packages`                                        | `.chezmoitemplates/nix-packages` (extra nixpkgs attributes for the Nix profile)                                      |
 
 Add a new key to the defaults in `.chezmoitemplates/private-data` too.
 
