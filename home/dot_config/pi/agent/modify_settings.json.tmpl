@@ -97,8 +97,10 @@ current["packages"] = [
 # Skills discovery paths:
 # - ~/.claude/skills: standard Claude Code skill location.
 # - ~/.config/pi/agent/skills: XDG-compliant Pi skills (matches PI_CODING_AGENT_DIR).
+# - -~/.claude/skills/rex: `rex skill setup` writes the same skill to
+#   ~/.agents/skills/rex for Pi, which Pi discovers by default.
 skills = current.get("skills", [])
-for path in ["~/.claude/skills", "~/.config/pi/agent/skills"]:
+for path in ["~/.claude/skills", "~/.config/pi/agent/skills", "-~/.claude/skills/rex"]:
     if path not in skills:
         skills.append(path)
 current["skills"] = skills
