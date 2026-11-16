@@ -1,0 +1,6 @@
+# Personal macOS hosts only: tools with no nixpkgs package (see base.toml).
+#
+# Versions are pinned; Renovate bumps them (see renovate.json).
+
+[tools]
+"pypi:osxphotos" = "0.78.1"

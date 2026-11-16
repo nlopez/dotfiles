@@ -1,0 +1,56 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# Remove Homebrew copies of tools now provided by the Nix profile
+# (.chezmoidata/nix.yaml). Runs after 00-nix-packages so the profile exists
+# before brew's copy goes. Each formula is only uninstalled once the profile
+# has its binary, and brew refuses (without --ignore-dependencies) if another
+# formula still needs it.
+# {{ includeTemplate "nix-packages" . | sha256sum }}
+
+set -eufo pipefail
+
+PROFILE_BIN="{{ includeTemplate "nix-profile" . }}/bin"
+[ -d "$PROFILE_BIN" ] || { echo "nix profile not built yet, skipping" >&2; exit 0; }
+command -v brew >/dev/null || exit 0
+
+# brew formula:binary now in the Nix profile. Two passes: removing one formula
+# (e.g. pass) can free its dependencies (tree, gnu-getopt) for the next.
+for _pass in 1 2; do
+for entry in \
+  autossh:autossh duti:duti ffmpeg:ffmpeg flock:flock htop:btop krunkit:krunkit \
+  mas:mas media-info:mediainfo ncdu:ncdu pv:pv skopeo:skopeo \
+  sql-formatter:sql-formatter terminal-notifier:terminal-notifier \
+  testssl:testssl.sh tree:tree uv:uv watchman:watchman wget:wget \
+  coreutils:ls diffutils:diff findutils:find gawk:gawk gnu-getopt:getopt \
+  gnu-indent:indent gnu-sed:sed gnu-tar:tar gnu-time:time gnu-which:which \
+  grep:grep \
+  graphviz:dot kubectx:kubectx pass:pass pnpm:pnpm qemu:qemu-img rust:rustc \
+  sshpass:sshpass virtctl:virtctl zsh:zsh curl:curl rustup:rustup \
+  argocd:argocd atuin:atuin bat:bat bazel:bazel chezmoi:chezmoi \
+  cilium-cli:cilium colima:colima direnv:direnv doctl:doctl fd:fd fx:fx fzf:fzf \
+  gh:gh git:git git-lfs:git-lfs go:go helm:helm hyperfine:hyperfine jq:jq \
+  k9s:k9s kubernetes-cli:kubectl lima:limactl lazygit:lazygit neovim:nvim \
+  oxipng:oxipng resticprofile:resticprofile restic:restic \
+  ripgrep:rg shellcheck:shellcheck tabiew:tw tenv:tenv tmux:tmux velero:velero \
+  worktrunk:wt yamlfmt:yamlfmt yazi:yazi yt-dlp:yt-dlp zoxide:zoxide \
+; do
+  formula="${entry%%:*}"
+  bin="${entry#*:}"
+  brew list --formula "$formula" &>/dev/null || continue
+  [ -x "$PROFILE_BIN/$bin" ] || { echo "nix profile has no $bin, keeping brew $formula" >&2; continue; }
+  brew uninstall "$formula" || echo "kept brew $formula (still required by another formula)" >&2
+done
+done
+
+# Casks that only ship a CLI, now in the Nix profile (GUI casks stay in brew).
+for entry in \
+  1password-cli:op claude-code:claude git-credential-manager:git-credential-manager \
+; do
+  cask="${entry%%:*}"
+  bin="${entry#*:}"
+  brew list --cask "$cask" &>/dev/null || continue
+  [ -x "$PROFILE_BIN/$bin" ] || { echo "nix profile has no $bin, keeping brew cask $cask" >&2; continue; }
+  brew uninstall --cask "$cask" || echo "kept brew cask $cask (uninstall failed)" >&2
+done
+{{- end }}

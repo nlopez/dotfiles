@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Installs the tools nixpkgs lacks (.chezmoitemplates/mise/*.toml). Runs after
+# 00-nix-packages so uv (used by mise's pypi backend) is on PATH. Re-run when
+# the declared tool set changes.
+# {{ includeTemplate "mise-tools" . | sha256sum }}
+
+set -eufo pipefail
+
+export PATH="{{ includeTemplate "nix-profile" . }}/bin:$PATH"
+MISE="{{ .chezmoi.homeDir }}/.local/bin/mise"
+[ -x "$MISE" ] || { echo "mise not found at $MISE, skipping" >&2; exit 0; }
+
+"$MISE" install --yes
+"$MISE" reshim

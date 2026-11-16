@@ -1,0 +1,12 @@
+{{- /* JSON object of the private MCP servers (private-data mcp_servers) that this
+     machine registers. On workspaces, servers in mcp_workspace_exclude are left
+     out. Each server is a URL plus optional OAuth client settings, not a
+     credential; each machine signs in through /mcp. */ -}}
+{{- $p := includeTemplate "private-data" . | fromYaml -}}
+{{- $servers := dict -}}
+{{- range $k, $v := ($p.mcp_servers | default dict) -}}
+{{-   if and $v.url (or (not $.workspace) (not (has $k ($p.mcp_workspace_exclude | default list)))) -}}
+{{-     $servers = set $servers $k $v -}}
+{{-   end -}}
+{{- end -}}
+{{- $servers | toJson -}}

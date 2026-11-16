@@ -1,0 +1,140 @@
+nix:
+  # nixpkgs revision every host's package set is built from (rendered into
+  # ~/.config/nix/packages/flake.nix). Renovate bumps it to the current
+  # nixpkgs-unstable head (see renovate.json).
+  # renovate: datasource=git-refs packageName=https://github.com/NixOS/nixpkgs branch=nixpkgs-unstable
+  nixpkgs_rev: ea9e3ef341e11c193537f674f821a99f9f436729
+  # Unfree packages allowed in the set (matched against lib.getName / pname).
+  unfree:
+  - 1password-cli
+  - claude-code
+  - vault-bin
+  # nixpkgs attribute paths ("python3Packages.foo" works). Installed into the
+  # ~/.local/state/nix/profiles/dotfiles profile by
+  # .chezmoiscripts/run_onchange_after_00-nix-packages.sh.tmpl.
+  #
+  # Anything not packaged in nixpkgs goes to mise (.chezmoitemplates/mise/),
+  # then Homebrew on macOS (.chezmoidata/darwin/packages.yaml) as a last resort.
+  packages:
+    # Every host (macOS and Linux).
+    base:
+    - _1password-cli
+    - age
+    # atuin: release binary via .chezmoiexternal.toml.tmpl (mirrors setup.atuin.sh)
+    - bat
+    - bazel_9
+    - carapace
+    - chezmoi
+    - claude-code
+    - colima
+    # dig: bind's dnsutils output (dig, nslookup, host).
+    - dig
+    - direnv
+    - docker-client
+    - fd
+    - fx
+    - fzf
+    - gh
+    # gh-stack: wired as a gh extension via
+    # dot_config/gh/extensions/symlink_tmpl_gh-stack — gh 2.56 does not
+    # discover gh-<name> binaries on PATH, only its extensions dir.
+    - gh-stack
+    - git
+    - git-lfs
+    - go_latest
+    - hyperfine
+    - jq
+    - k9s
+    - kubectl
+    - kubectx
+    - kubernetes-helm
+    - lazygit
+    - lima
+    - neovim
+    - nodejs
+    - pi-coding-agent
+    - pnpm
+    - pre-commit
+    - pure-prompt
+    - ripgrep
+    # rustup provides the cargo/rustc/rustfmt/clippy proxies; the toolchain
+    # itself is installed by run_onchange_after_01-rustup-toolchain.sh.tmpl.
+    - rustup
+    - shellcheck
+    - tabiew
+    - tenv
+    - tmux
+    - uv
+    - velero
+    - worktrunk
+    - yamlfmt
+    - yazi
+    - yq-go
+    - zoxide
+    # zsh plugins (no framework): sourced explicitly from ~/.config/zsh/dot_zshrc.
+    - zsh-autosuggestions
+    - zsh-completions
+    - zsh-fast-syntax-highlighting
+    personal:
+    - argocd
+    - cilium-cli
+    - doctl
+    - hubble
+    - immich-cli
+    - oxipng
+    - python3Packages.huggingface-hub
+    - restic
+    - resticprofile
+    - yt-dlp
+    work:
+    - aws-vault
+    - awscli2
+    # azure-cli: Homebrew on macOS (.chezmoidata/darwin/packages.yaml); its
+    # nixpkgs build depends on python3Packages.fabric, which is marked broken.
+    - glab
+    - google-cloud-sdk
+    - vault-bin
+    # macOS only (formerly Homebrew formulae, plus mac-only tools).
+    darwin:
+      base:
+      - btop
+      - duti
+      - flock
+      - git-credential-manager
+      - graphviz
+      - krunkit
+      - kubevirt
+      - mas
+      - ncdu
+      - pass
+      - pv
+      - qemu
+      - skopeo
+      - sql-formatter
+      - sshpass
+      - terminal-notifier
+      - testssl
+      - tree
+      - watchman
+      - wget
+      - zsh
+      # GNU userland (formerly brew gnubin dirs). Nix installs these under
+      # their plain names, so the profile's bin/ shadows the BSD tools.
+      - coreutils
+      - curl
+      - diffutils
+      - findutils
+      - gawk
+      - getopt
+      - gnugrep
+      - gnused
+      - gnutar
+      - indent
+      - time
+      - which
+      personal:
+      - ffmpeg
+      - mediainfo
+      # osxphotos is marked broken on darwin in nixpkgs; it comes from brew
+      # bundle's `uv` entries instead (.chezmoidata/darwin/packages.yaml).
+      work: []

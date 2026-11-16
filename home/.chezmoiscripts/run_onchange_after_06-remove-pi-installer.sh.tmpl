@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Remove the pi.dev installer-managed pi-coding-agent; the Nix profile
+# (.chezmoidata/nix.yaml) provides `pi` now. ~/.local/bin precedes the profile on
+# PATH, so the installer's symlink would shadow the Nix binary until it's gone.
+# Runs after 00-nix-packages and only once the profile has `pi`.
+# Left alone: bin/rg (pi's own ripgrep download) and all user data under
+# $PI_CODING_AGENT_DIR.
+# {{ includeTemplate "nix-packages" . | sha256sum }}
+
+set -eufo pipefail
+
+PROFILE_BIN="{{ includeTemplate "nix-profile" . }}/bin"
+AGENT_DIR="${PI_CODING_AGENT_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/pi/agent}"
+
+[ -x "$PROFILE_BIN/pi" ] || { echo "nix profile has no pi, keeping installer-managed pi" >&2; exit 0; }
+
+# Only touch the symlink if it points at the installer's entrypoint.
+if [ -L "$HOME/.local/bin/pi" ] && [ "$(readlink "$HOME/.local/bin/pi")" = "../../.config/pi/agent/bin/pi" ]; then
+    rm -f "$HOME/.local/bin/pi"
+fi
+# Old chezmoi-managed shim from before the installer.
+if [ -f "$HOME/.local/bin/pi" ] && grep -q 'Shim for pi-coding-agent' "$HOME/.local/bin/pi"; then
+    rm -f "$HOME/.local/bin/pi"
+fi
+
+rm -f "$AGENT_DIR/bin/pi"
+rm -rf "$AGENT_DIR/install"
+
+echo "✅ installer-managed pi removed (Nix profile provides pi)"

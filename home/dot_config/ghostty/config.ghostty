@@ -1,0 +1,27 @@
+font-size = 12
+font-family = ""
+font-family = IosevkaTerm NFM
+quit-after-last-window-closed = true
+# Ghostty has no way to exempt just tmux/screen from this (open feature
+# request: https://github.com/ghostty-org/ghostty/discussions/2677) — it's
+# all-or-nothing, and every surface here always runs tmux (see
+# initial-command below), so disable it entirely rather than get prompted
+# on every close.
+confirm-close-surface = false
+
+# Disable ligatures
+font-feature = -calt
+macos-titlebar-style = hidden
+gtk-tabs-location = hidden
+
+# https://github.com/ghostty-org/ghostty/discussions/3836#discussioncomment-11688264
+cursor-style = block
+cursor-style-blink = true
+shell-integration-features = no-cursor
+
+initial-command = /bin/zsh --login -c "tmux attach -t 0 || tmux new -s 0"
+
+background-opacity-cells = true
+
+# Auto-switch theme based on macOS appearance
+theme = light:Quiet Light,dark:iTerm2 Solarized Dark

@@ -1,0 +1,22 @@
+#!/bin/bash
+# Make installed Homebrew packages match the declared Brewfile.
+#
+# The Brewfile is rendered by chezmoi from .chezmoidata/darwin/packages.yaml
+# (HOMEBREW_BUNDLE_FILE -> ~/.config/brew/Brewfile). Anything installed but not
+# declared there (formulae, casks, taps, and orphaned dependencies) is removed.
+#
+# Usage:
+#   brew-cleanup          dry run: list what would be uninstalled
+#   brew-cleanup --force  actually uninstall it
+#
+# To keep something, add it to packages.yaml and `chezmoi apply` first.
+set -euo pipefail
+
+BREWFILE="${HOMEBREW_BUNDLE_FILE:-$HOME/.config/brew/Brewfile}"
+[ -f "$BREWFILE" ] || { echo "Brewfile not found: $BREWFILE (run chezmoi apply)" >&2; exit 1; }
+
+case "${1:-}" in
+  "")      brew bundle cleanup --file="$BREWFILE" ;;
+  --force) brew bundle cleanup --force --file="$BREWFILE" ;;
+  *) echo "usage: brew-cleanup [--force]" >&2; exit 2 ;;
+esac

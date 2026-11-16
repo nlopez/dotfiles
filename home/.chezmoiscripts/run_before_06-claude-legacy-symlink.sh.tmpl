@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Replace ~/.claude (a real directory, recreated by tools that ignore
+# CLAUDE_CONFIG_DIR — e.g. `rex skill setup` writes its hook into
+# ~/.claude/settings.json) with a symlink to ~/.config/claude, so legacy
+# writes and XDG writes converge on the same files.
+#
+# Runs before file updates, after 05-claude-xdg-migrate (which handles the
+# original one-time move when ~/.config/claude does not yet exist). This
+# script handles the recurring case: ~/.config/claude exists AND ~/.claude
+# has been recreated as a directory.
+#
+# Merge policy: files already present in ~/.config/claude win (it is the
+# chezmoi-managed location; settings.json is managed by
+# dot_config/claude/modify_settings.json.tmpl, which declares the Rex hook).
+# Everything else in ~/.claude (sessions, telemetry, plugins, backups,
+# skills) is copied over, then ~/.claude is removed so chezmoi can create the
+# symlink declared by home/symlink_dot_claude.
+#
+# Idempotent: exits immediately once ~/.claude is a symlink. Aborts the apply
+# only if a live Claude instance actually holds files open under ~/.claude
+# (i.e. its state lives in the legacy path). A blanket `pgrep -x claude` guard
+# would be too broad: Dogpark spawns short-lived headless claude workers
+# constantly, and none of them keep the legacy dir open. If an interactive
+# session is affected, quit it and re-run `chezmoi apply`.
+
+set -eufo pipefail
+
+HOME_DIR="{{ .chezmoi.homeDir }}"
+OLD="$HOME_DIR/.claude"
+NEW="${XDG_CONFIG_HOME:-$HOME_DIR/.config}/claude"
+
+[ -e "$OLD" ] || [ -L "$OLD" ] || exit 0   # nothing there (fresh machine)
+[ -L "$OLD" ] && exit 0                     # already a symlink — done
+[ -d "$OLD" ] || exit 0                     # a file, not a dir — let chezmoi replace it
+
+if [ -n "$(lsof +D "$OLD" 2>/dev/null)" ]; then
+  echo "A Claude Code process has files open in $OLD; quit it and re-run chezmoi apply" >&2
+  exit 1
+fi
+
+mkdir -p "$NEW"
+
+# Copy legacy files that do not already exist in the XDG location.
+cd "$OLD"
+find . \( -type f -o -type l \) -print0 | while IFS= read -r -d '' f; do
+  if [ ! -e "$NEW/$f" ]; then
+    mkdir -p "$NEW/$(dirname "$f")"
+    cp -RP "$OLD/$f" "$NEW/$f"
+  fi
+done
+
+rm -rf "$OLD"
+exit 0

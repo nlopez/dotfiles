@@ -1,0 +1,231 @@
+[user]
+  useConfigOnly = true
+  name = Anonymous
+  email = noreply@example.org
+
+[push]
+  default = current
+  autoSetupRemote = true
+
+[core]
+  quotepath = false
+  autocrlf = input
+  safecrlf = false
+  symlinks = true
+  editor = vim
+
+[feature]
+  manyFiles = true
+
+[index]
+  threads = true
+  version = 4
+
+[credential]
+{{- if eq .chezmoi.os "darwin" }}
+  credentialStore = keychain
+{{- end }}
+{{- if .workspace }}
+
+{{- /* Workspaces only route work orgs over SSH; personal HTTPS remotes      */}}
+{{- /* (e.g. this repo) authenticate through gh. The empty helper clears any */}}
+{{- /* inherited helpers so gh is the only one consulted.                     */}}
+{{- /* Don't use `gh auth setup-git` / `git config --global` on workspaces:  */}}
+{{- /* they write into the workspaces-owned ~/.gitconfig. Declare it here.  */}}
+[credential "https://github.com"]
+  helper =
+  helper = !gh auth git-credential
+
+[credential "https://gist.github.com"]
+  helper =
+  helper = !gh auth git-credential
+{{- end }}
+
+[pull]
+  rebase = true
+  autoStash = true
+
+[checkout]
+  defaultRemote = origin
+
+[worktree]
+  guessRemote = true
+
+; Per-identity SSH keys are selected via core.sshCommand in each identity
+; include (see config_nlopez, config_work, config_silentshout42).
+; Both https:// and git@ github URLs are supported — the transport you type
+; is the transport that gets used.
+
+; Block pushing unsigned commits. Config-based hooks (git 2.54+) run in
+; addition to the repo's own .git/hooks/pre-push; older git ignores this.
+[hook "require-signed-push"]
+  event = pre-push
+  command = ~/.config/git/hooks/require-signed-push
+
+; Block creating unsigned commits, as early in the process as possible.
+; Same config-based hook mechanism as above; runs alongside any repo-local
+; .git/hooks/pre-commit. Verifies commit.gpgsign resolves to true (an
+; identity include sets it; the global default is false) — the commit object
+; does not exist yet, so the signature itself is checked at pre-push time.
+[hook "require-signed-commit"]
+  event = pre-commit
+  command = ~/.config/git/hooks/require-signed-commit
+
+[init]
+  defaultBranch = main
+
+[diff]
+  renameLimit = 10000
+
+{{- if not .workspace }}
+{{/* Workspaces: signing (key + program) comes from the host ~/.gitconfig. */}}
+
+[commit]
+  gpgsign = false
+
+[tag]
+  gpgsign = false
+
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  allowedSignersFile = ~/.config/git/allowed_signers
+  program = {{ .platform.gpg_op_path }}
+{{- end }}
+
+[alias]
+  # Current branch name (git 2.22+)
+  name = branch --show-current
+  current-branch = branch --show-current
+  # Default branch ref on origin (e.g. origin/main). If this fails, run: git remote set-head origin --auto
+  default-ref = rev-parse --abbrev-ref origin/HEAD
+  # Merge base with an origin branch (defaults to origin/HEAD)
+  mbase = "!f(){ git merge-base HEAD origin/${1:-HEAD}; }; f"
+  # Squash current branch relative to default branch
+  squash = "!f(){ git reset --soft $(git merge-base $(git default-ref) HEAD) && git commit -am \"${1}\"; }; f"
+  # Safer force push: --force-if-includes (git 2.30+) refuses to clobber remote commits not in your reflog
+  pushf = push --force-with-lease --force-if-includes
+  # subtree add/update (branch defaults to main; override via 3rd arg)
+  sba = "!f(){ git subtree add --prefix $2 $1 ${3:-main} --squash; }; f"
+  sbu = "!f(){ git subtree pull --prefix $2 $1 ${3:-main} --squash; }; f"
+  ls-subtrees = !git log | grep git-subtree-dir | awk '{ print $2 }' | sort -u
+  # Switch to branch, creating if it doesn't exist (git 2.23+)
+  cob = "!f(){ git switch \"$1\" 2>/dev/null || git switch -c \"$1\"; }; f"
+  upstream = !git config --get branch.$(git branch --show-current).remote || echo origin
+  # Set the current branch to track origin/<same-name> (optional arg overrides the remote branch)
+  track = "!f(){ b=$(git branch --show-current); git fetch origin \"${1:-$b}\" && git branch --set-upstream-to=origin/\"${1:-$b}\" \"$b\"; }; f"
+  hard-reset = !git reset --hard $(git upstream)/$(git branch --show-current)
+  pprune = fetch --prune
+  # Log/diff commits on current branch since diverging from default
+  branchlog = !git log $(git default-ref)..HEAD
+  branchdiff = !git diff $(git default-ref)...HEAD
+  root = rev-parse --show-toplevel
+  st = status --ignored
+  fcommit = commit --no-verify
+  default-branch = !gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'
+  branches = for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/heads
+  branchesr = for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/remotes
+  prettylog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short
+  whoami = "!\
+    ssh_cmd=$(git config --get core.sshCommand 2>/dev/null); \
+    printf 'name:       %s\\nemail:      %s\\nsigningkey: %s\\nssh:        ' \
+      \"$(git config user.name)\" \
+      \"$(git config user.email)\" \
+      \"$(git config user.signingkey)\"; \
+    ${ssh_cmd:-ssh} -T git@github.com 2>&1 | head -1 \
+  "
+
+; Automatically sign commits and tags (only active when an include sets
+; gpgsign = true), and add a DCO signoff line.
+[format]
+  signoff = true
+
+{{- if not .workspace }}
+{{/* Workspaces: identity, SSH keys, and credentials come from the host       */}}
+{{/* ~/.gitconfig (read after this file, so it wins). The chezmoi repo's      */}}
+{{/* noreply identity is set repo-locally by                                */}}
+{{/* run_onchange_after_40-workspace-git-identity.sh.                        */}}
+
+{{/* Per-identity includes go last so they override defaults above.       */}}
+{{/* Primary: gitdir-based (covers all URL variants for a given clone).   */}}
+{{/* `dolly` clones under ~/Projects when it exists, else ~/src, so both  */}}
+{{/* trees get gitdir rules here.                                        */}}
+
+; --- nlopez identity: nlopez personal repos, open-source, and chezmoi ---
+
+{{- range ((includeTemplate "private-data" . | fromYaml).git | default dict).nlopez_gitdirs }}
+[includeIf "gitdir/i:{{ . }}"]
+  path = config_nlopez
+{{ end }}
+[includeIf "gitdir/i:~/src/github.com/nlopez/**"]
+  path = config_nlopez
+
+[includeIf "gitdir/i:~/Projects/github.com/nlopez/**"]
+  path = config_nlopez
+
+[includeIf "gitdir/i:~/.local/share/chezmoi/.git"]
+  path = config_nlopez
+
+[includeIf "gitdir/i:~/.local/share/chezmoi/.git/worktrees/**"]
+  path = config_nlopez
+
+; --- work identity (routing + identity in age-encrypted config_work / config_work_id) ---
+{{- if .work }}
+
+[include]
+  path = config_work
+{{- end }}
+
+; --- silentshout42 identity: silentshout42 + kamotimestamps org repos ---
+{{- if .personal }}
+
+[includeIf "gitdir/i:~/src/github.com/silentshout42/**"]
+  path = config_silentshout42
+
+[includeIf "gitdir/i:~/Projects/github.com/silentshout42/**"]
+  path = config_silentshout42
+
+[includeIf "gitdir/i:~/src/github.com/kamotimestamps/**"]
+  path = config_silentshout42
+
+[includeIf "gitdir/i:~/Projects/github.com/kamotimestamps/**"]
+  path = config_silentshout42
+{{- end }}
+
+{{/* Fallback: hasconfig catches repos cloned outside the canonical      */}}
+{{/* directory tree. Case-insensitive via [Xx] character classes because  */}}
+{{/* hasconfig globs are case-sensitive (unlike gitdir/i). Both HTTPS     */}}
+{{/* and SSH SCP-style (git@host:path) URL formats are covered so that   */}}
+{{/* credential.username and core.sshCommand resolve for either transport.*/}}
+
+; --- nlopez identity fallbacks ---
+
+[includeIf "hasconfig:remote.*.url:https://github.com/[Dd]ata[Dd]og/**"]
+  path = config_nlopez
+
+[includeIf "hasconfig:remote.*.url:git@github.com:[Dd]ata[Dd]og/**"]
+  path = config_nlopez
+
+[includeIf "hasconfig:remote.*.url:https://github.com/[Nn][Ll]opez/**"]
+  path = config_nlopez
+
+[includeIf "hasconfig:remote.*.url:git@github.com:[Nn][Ll]opez/**"]
+  path = config_nlopez
+
+; --- silentshout42 identity fallbacks ---
+{{- if .personal }}
+
+[includeIf "hasconfig:remote.*.url:https://github.com/[Ss]ilent[Ss]hout42/**"]
+  path = config_silentshout42
+
+[includeIf "hasconfig:remote.*.url:git@github.com:[Ss]ilent[Ss]hout42/**"]
+  path = config_silentshout42
+
+[includeIf "hasconfig:remote.*.url:https://github.com/[Kk]amo[Tt]imestamps/**"]
+  path = config_silentshout42
+
+[includeIf "hasconfig:remote.*.url:git@github.com:[Kk]amo[Tt]imestamps/**"]
+  path = config_silentshout42
+{{- end }}
+{{- end }}

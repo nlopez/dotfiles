@@ -1,0 +1,9 @@
+{{- /* ~/.zshenv is a symlink to the real zshenv under ZDOTDIR. zsh always
+   reads $HOME/.zshenv first, before ZDOTDIR is known — the symlink makes
+   that first read execute the exact same content that ZDOTDIR/.zshenv
+   would, so ZDOTDIR only needs to be exported in one place (see
+   dot_config/zsh/dot_zshenv.tmpl) and every zsh invocation — login,
+   non-login, interactive, non-interactive, scripts — gets it, without
+   depending on ZDOTDIR being pre-exported by a parent shell.
+*/ -}}
+{{ joinPath .chezmoi.homeDir ".config/zsh/.zshenv" }}

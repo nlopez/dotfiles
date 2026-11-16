@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Replace ~/.codex (a real directory, recreated by tools that ignore
+# CODEX_HOME — the trajectory plugin's installer registered itself and the
+# codex CLI seeded sqlite state there without the env var) with a symlink to
+# ~/.config/codex, so legacy writes and XDG writes converge on the same files.
+#
+# Merge policy: files already present in ~/.config/codex win (the interactive
+# state dir; its config.toml is a superset of the legacy one). Legacy-only
+# files are copied, then ~/.codex is removed so chezmoi can create the symlink
+# declared by home/symlink_dot_codex.
+#
+# Note: dogpark-spawned codex workers use their own CODEX_HOME
+# (~/.local/share/dogpark/relay/codex-home-router), so a pgrep codex guard
+# would false-positive; the guard is lsof on the legacy dir only. Codex opens
+# its sqlite files per-transaction, so a clear lsof means no in-flight state.
+#
+# Idempotent: exits immediately once ~/.codex is a symlink.
+
+set -eufo pipefail
+
+HOME_DIR="{{ .chezmoi.homeDir }}"
+OLD="$HOME_DIR/.codex"
+NEW="${XDG_CONFIG_HOME:-$HOME_DIR/.config}/codex"
+
+[ -e "$OLD" ] || [ -L "$OLD" ] || exit 0   # nothing there (fresh machine)
+[ -L "$OLD" ] && exit 0                     # already a symlink — done
+[ -d "$OLD" ] || exit 0                     # a file, not a dir — let chezmoi replace it
+
+if [ -n "$(lsof +D "$OLD" 2>/dev/null)" ]; then
+  echo "A process has files open in $OLD; quit it and re-run chezmoi apply" >&2
+  exit 1
+fi
+
+mkdir -p "$NEW"
+
+# Copy legacy files that do not already exist in the XDG location.
+cd "$OLD"
+find . \( -type f -o -type l \) -print0 | while IFS= read -r -d '' f; do
+  if [ ! -e "$NEW/$f" ]; then
+    mkdir -p "$NEW/$(dirname "$f")"
+    cp -RP "$OLD/$f" "$NEW/$f"
+  fi
+done
+
+rm -rf "$OLD"
+exit 0

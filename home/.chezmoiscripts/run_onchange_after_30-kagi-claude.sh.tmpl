@@ -1,0 +1,30 @@
+{{- if not .headless -}}
+#!/bin/bash
+
+# Registers Kagi's official MCP server (kagimcp: kagi_search_fetch, kagi_summarizer)
+# with Claude Code at user scope. Pi gets the same server from
+# dot_config/pi/agent/modify_mcp.json.tmpl.
+#
+# The server is launched through `varlock run`, which resolves KAGI_API_KEY from
+# 1Password (dot_config/varlock/agents.env.tmpl) into that one process only: the
+# key is never in ~/.claude.json, Claude's environment, or its Bash tool's.
+# Runs via the Nix profile uvx, a stable path that survives uv upgrades.
+# Re-run by bumping the revision below.
+# kagi-mcp-revision: 2
+
+set -eufo pipefail
+
+export CLAUDE_CONFIG_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/claude"
+
+export PATH="{{ includeTemplate "nix-profile" . }}/bin:{{ if eq .chezmoi.os "linux" }}{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ end }}{{ .chezmoi.homeDir }}/.local/bin:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+command -v uvx >/dev/null 2>&1 || { echo "uvx not found, skipping" >&2; exit 0; }
+
+claude mcp remove kagi --scope user >/dev/null 2>&1 || true
+claude mcp add-json kagi --scope user '{
+  "type": "stdio",
+  "command": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/varlock",
+  "args": ["run", "-p", "{{ .chezmoi.homeDir }}/.config/varlock/agents.env", "--filter", "KAGI_API_KEY", "--inject", "vars", "--no-redact-stdout", "--", "{{ includeTemplate "nix-profile" . }}/bin/uvx", "kagimcp"]
+}'
+{{- end }}

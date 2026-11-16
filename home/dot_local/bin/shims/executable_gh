@@ -1,0 +1,107 @@
+#!/bin/sh
+# gh shim: picks the GitHub account for the target repo and always creates
+# pull requests as drafts.
+# Lives in ~/.local/bin/shims; drops its own dir and the work package
+# manager's /opt/*/shims (which route accounts their own way) from PATH, then
+# runs the next `gh` (the Nix profile's).
+dir=$(cd "$(dirname "$0")" && pwd -P)
+new=; IFS=:
+for d in $PATH; do
+  case $d in /opt/*/shims/*) continue ;; esac
+  [ "$(cd "$d" 2>/dev/null && pwd -P)" = "$dir" ] || new=${new:+$new:}$d
+done
+unset IFS; PATH=$new
+real=$(command -v gh) || { echo "gh: no real gh found on PATH" >&2; exit 127; }
+
+# Account routing: owners listed in ~/.config/gh/owner-accounts (generated
+# from the private data) use the account named there; every other owner uses
+# the personal one (nlopez).
+#
+# On Workspaces the host writes ~/.config/gh/hosts.yml with GitHub App tokens
+# that only reach the work orgs. A separate personal login in $personal
+# (`GH_CONFIG_DIR=<that dir> gh auth login`) is used for every unlisted owner.
+# Without that login, hosts.yml's nlopez token is used for everything.
+#
+# The owner comes from, in order: -R/--repo, $GH_REPO, an
+# argument that is a github.com URL (e.g. `gh pr view <url>`), then the origin
+# remote of the current directory. An explicit GH_TOKEN/GITHUB_TOKEN wins.
+owner_of() { # <repo spec or URL> -> owner, for github.com only
+  s=$1
+  case $s in
+    # Also matches SSH host aliases such as git@org.github.com:owner/repo.
+    *://*github.com/*|*@*github.com:*|github.com/*) s=${s#*github.com?} ;;
+    *://*|*@*:*) return 1 ;;
+  esac
+  case $s in */*) printf '%s\n' "${s%%/*}" ;; *) return 1 ;; esac
+}
+
+route=1 sub='' sub2='' owner='' next_is_repo=''
+for a in "$@"; do
+  if [ -n "$next_is_repo" ]; then owner=$(owner_of "$a"); next_is_repo=; continue; fi
+  case $a in
+    -R|--repo) [ -z "$owner" ] && next_is_repo=1 ;;
+    --repo=*) [ -z "$owner" ] && owner=$(owner_of "${a#--repo=}") ;;
+    -R?*) [ -z "$owner" ] && owner=$(owner_of "${a#-R}") ;;
+    -*) ;;
+    *)
+      if [ -z "$sub" ]; then sub=$a
+      elif [ -z "$sub2" ]; then sub2=$a
+      fi ;;
+  esac
+done
+# `gh auth` manages the stored accounts itself; only token lookups are routed.
+if [ "$sub" = auth ]; then
+  case $sub2 in token|git-credential) ;; *) route= ;; esac
+  for a in "$@"; do case $a in -u|--user|--user=*) route= ;; esac; done
+fi
+[ -n "${GH_TOKEN}${GITHUB_TOKEN}" ] && route=
+
+if [ -n "$route" ]; then
+  [ -z "$owner" ] && [ -n "${GH_REPO:-}" ] && owner=$(owner_of "$GH_REPO")
+  if [ -z "$owner" ]; then
+    for a in "$@"; do
+      case $a in
+        https://github.com/*|http://github.com/*|github.com/*)
+          owner=$(owner_of "$a") && break ;;
+      esac
+    done
+  fi
+  [ -z "$owner" ] && owner=$(owner_of "$(git remote get-url origin 2>/dev/null)")
+  personal=${XDG_STATE_HOME:-$HOME/.local/state}/gh/nlopez
+  tok=''
+  routes=${XDG_CONFIG_HOME:-$HOME/.config}/gh/owner-accounts
+  lower=$(printf '%s' "$owner" | tr '[:upper:]' '[:lower:]')
+  acct=$([ -n "$lower" ] && [ -f "$routes" ] && awk -v o="$lower" '$1 == o { print $2; exit }' "$routes")
+  if [ -z "$acct" ]; then
+    acct=nlopez
+    [ -f "$personal/hosts.yml" ] &&
+      tok=$(GH_CONFIG_DIR=$personal "$real" auth token 2>/dev/null)
+  fi
+  [ -n "$tok" ] || tok=$("$real" auth token --user "$acct" 2>/dev/null)
+  if [ -n "$tok" ]; then
+    GH_TOKEN=$tok; export GH_TOKEN
+  fi
+fi
+
+# Add --draft after `pr create` (global flags such as -R may come first),
+# unless a draft flag is already present.
+draft=
+for a in "$@"; do
+  case "$a" in
+    --draft|--draft=true) draft=1 ;;
+    --*) ;;
+    -*d*) draft=1 ;;
+  esac
+done
+if [ -z "$draft" ]; then
+  n=$#; i=0; prev=; done_=
+  while [ "$i" -lt "$n" ]; do
+    a=$1; shift; i=$((i + 1))
+    set -- "$@" "$a"
+    if [ -z "$done_" ] && [ "$prev" = pr ] && [ "$a" = create ]; then
+      set -- "$@" --draft; done_=1
+    fi
+    prev=$a
+  done
+fi
+exec "$real" "$@"

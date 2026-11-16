@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Build the package set declared in .chezmoidata/nix.yaml (rendered into
+# ~/.config/nix/packages/flake.nix) and point the dotfiles profile at it.
+# `nix build --profile` adds a new generation each time the set changes, so
+# `nix profile rollback --profile <profile>` undoes a bad bump.
+#
+# Re-run when the declared set or the flake template changes.
+# {{ list .nix (includeTemplate "nix-packages" .) | toJson | sha256sum }}
+# {{ include "dot_config/nix/packages/flake.nix.tmpl" | sha256sum }}
+
+set -eufo pipefail
+
+NIX=/nix/var/nix/profiles/default/bin/nix
+[ -x "$NIX" ] || NIX="$(command -v nix || true)"
+[ -n "$NIX" ] || { echo "nix not found, skipping (re-run chezmoi apply once Nix is installed)" >&2; exit 0; }
+
+PROFILE="{{ includeTemplate "nix-profile" . }}"
+FLAKE="{{ joinPath .chezmoi.homeDir ".config/nix/packages" }}"
+
+mkdir -p "$(dirname "$PROFILE")"
+"$NIX" --extra-experimental-features "nix-command flakes" \
+  build --no-link --print-build-logs --profile "$PROFILE" "path:${FLAKE}#default"

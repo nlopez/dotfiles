@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Copy custom tmux themes to tmux-theme plugin directory so the plugin can find them.
+# Reruns whenever any file under ~/.config/tmux/themes/ changes.
+# Checksums: {{ range (glob (joinPath .chezmoi.sourceDir "dot_config/tmux/themes/*.conf")) }}{{ . | include | sha256sum }} {{ end }}
+
+set -euo pipefail
+
+PLUGIN_DIR="$HOME/.config/tmux/plugins/tmux-theme"
+CUSTOM_THEMES_DIR="$HOME/.config/tmux/themes"
+
+if [ ! -d "$PLUGIN_DIR/themes" ]; then
+    echo "tmux-theme plugin not found at $PLUGIN_DIR — skipping (run 'prefix + I' to install plugins first)"
+    exit 0
+fi
+
+echo "Syncing custom themes to tmux-theme plugin..."
+for theme_file in "$CUSTOM_THEMES_DIR"/*.conf; do
+    [ -f "$theme_file" ] || continue
+    cp "$theme_file" "$PLUGIN_DIR/themes/"
+    echo "  installed: $(basename "$theme_file")"
+done
+
+echo "Available themes:"
+ls -1 "$PLUGIN_DIR/themes/" | sed 's/\.conf$//' | sort

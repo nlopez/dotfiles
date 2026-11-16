@@ -1,0 +1,38 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+# Wrapper: elevate via Privileges.app before privileged brew operations.
+# Mirrors the sudo alias pattern so both interactive and script use is covered.
+
+PRIVILEGES_CLI=/Applications/Privileges.app/Contents/MacOS/PrivilegesCLI
+
+# Drop this shim's dir from PATH, then find the real brew.
+dir=$(cd "$(dirname "$0")" && pwd -P)
+new=; IFS=:
+for d in $PATH; do
+  [[ "$(cd "$d" 2>/dev/null && pwd -P)" == "$dir" ]] || new=${new:+$new:}$d
+done
+unset IFS; PATH=$new
+REAL_BREW=$(command -v brew) || { echo "brew: no real brew found on PATH" >&2; exit 127; }
+
+priv_commands=(bundle install update upgrade uninstall cleanup reinstall doctor config)
+
+needs_priv=false
+for cmd in "${priv_commands[@]}"; do
+  if [[ "$1" == "$cmd" ]]; then
+    needs_priv=true
+    break
+  fi
+done
+
+if [[ "$needs_priv" == true ]]; then
+  if ! /usr/bin/groups | grep -q -E "\b(admin|wheel)\b"; then
+    "$PRIVILEGES_CLI" -a || {
+      echo "PrivilegesCLI failed to elevate. Aborting brew command." >&2
+      exit 1
+    }
+    sleep 1
+  fi
+fi
+
+exec "$REAL_BREW" "$@"
+{{ end -}}

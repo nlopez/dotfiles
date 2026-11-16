@@ -1,0 +1,8 @@
+{{- $routes := (includeTemplate "private-data" . | fromYaml).gh_routes | default dict -}}
+{{- if $routes -}}
+# GitHub owner -> gh account, read by ~/.local/bin/shims/gh. Owners not listed
+# use the personal account. Generated from the private data (gh_routes).
+{{- range $owner, $acct := $routes }}
+{{ $owner | lower }} {{ $acct }}
+{{- end }}
+{{ end -}}

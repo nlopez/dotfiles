@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+# Managed by chezmoi — source: home/dot_pi/agent/modify_settings.json.tmpl
+# ⚠️  DO NOT EDIT ~/.pi/agent/settings.json directly. It is overwritten
+#     by chezmoi on every `chezmoi apply`. Always edit the source tree.
+#
+# This is a chezmoi templated modify_ script. Chezmoi first renders the Go
+# template (injecting the package list from .chezmoidata/pi.yaml), then
+# executes the resulting Python script. The script receives the current
+# settings.json contents on stdin and writes the replacement JSON to stdout.
+#
+# Configures: theme, npmCommand, showHardwareCursor, compaction,
+#             and the declarative package list.
+# Default model: AI Gateway ai-gw-anthropic-1m /
+# anthropic/claude-opus-5-5 (work).
+# Personal machines use local models only: the local-models extension's
+# local-omlx / Qwen3.8-27B-4bit.
+import json
+import sys
+
+current_raw = sys.stdin.read()
+current = {}
+try:
+    if current_raw.strip():
+        current = json.loads(current_raw)
+except Exception:
+    pass
+
+
+# Theme: sensible default; auto-theme extension syncs with macOS appearance.
+current.setdefault("theme", "solarized-light")
+
+# Default model — declared here so it is identical on every machine.
+# Work machines use the work AI gateway; models.json is seeded by
+# modify_models.json.tmpl and refreshed with /refresh-models.
+levels = current.get("modelThinkingLevels", {})
+{{- if .work }}
+current["defaultProvider"] = "ai-gw-anthropic-1m"
+current["defaultModel"] = "anthropic/claude-opus-5-5"
+levels["ai-gw-anthropic-1m/anthropic/claude-opus-5-5"] = "medium"
+{{- else }}
+current["defaultProvider"] = "local-omlx"
+current["defaultModel"] = "Qwen3.8-27B-4bit"
+# Thinking off: the 27B model's reasoning takes minutes per turn locally
+# (keyed by exact provider/modelId).
+levels["local-omlx/Qwen3.8-27B-4bit"] = "off"
+# Personal machines run local models only, so no hosted-model level is kept.
+levels.pop("anthropic/claude-sonnet-5-5", None)
+{{- end }}
+current["modelThinkingLevels"] = levels
+current["defaultThinkingLevel"] = "medium"
+
+# Use npm for package operations. pnpm's strict linking breaks Pi's
+# extension loader which resolves modules from the literal symlink path,
+# not the realpath inside .pnpm/. npm hoists by default.
+current["npmCommand"] = ["npm"]
+
+# Hardware cursor — enabled on startup.
+current["showHardwareCursor"] = True
+
+# Fullscreen TUI mode (pi's default, set explicitly): runs on the alternate
+# screen, so the transcript is not in the terminal/tmux scrollback and tmux
+# copy-mode search won't find it. Use pi's own scrolling/search instead.
+current["tuiMode"] = "fullscreen"
+
+# Declarative package list — exactly and only these packages.
+# Source of truth: home/.chezmoidata/pi.yaml
+# personal_only_packages are excluded on work machines.
+# Private work packages (npm and local; see docs/private-data.md) are appended below.
+current["packages"] = [
+{{- range .pi.packages }}
+    "{{ . }}",
+{{- end }}
+{{- range .pi.git_packages }}
+    "{{ . }}",
+{{- end }}
+{{- if not .work }}
+{{- range .pi.personal_only_packages }}
+    "{{ . }}",
+{{- end }}
+{{- end }}
+{{- if .work }}
+{{- $pi := (includeTemplate "private-data" . | fromYaml).pi | default dict }}
+{{- range .pi.work_packages }}
+    "{{ . }}",
+{{- end }}
+{{- range $pi.packages }}
+    "{{ . }}",
+{{- end }}
+    # Local packages from the private work repo (cloned by
+    # run_after_clone-work-pi-packages.sh).
+{{- range $pi.local_packages }}
+    "{{ joinPath $.chezmoi.homeDir $pi.local_repo.dir "packages" . }}",
+{{- end }}
+{{- end }}
+]
+
+# Skills discovery paths:
+# - ~/.claude/skills: standard Claude Code skill location.
+# - ~/.config/pi/agent/skills: XDG-compliant Pi skills (matches PI_CODING_AGENT_DIR).
+skills = current.get("skills", [])
+for path in ["~/.claude/skills", "~/.config/pi/agent/skills"]:
+    if path not in skills:
+        skills.append(path)
+current["skills"] = skills
+
+# Enable /skill: slash commands in Pi sessions.
+current["enableSkillCommands"] = True
+
+# pi-powerline-footer layout: the default preset's left row with the
+# pi-session-prs status (key "pr") placed right after the git branch.
+powerline = current.get("powerline")
+if not isinstance(powerline, dict):
+    powerline = {}
+powerline.setdefault("preset", "default")
+powerline.setdefault("layout", {})["left"] = [
+    "model", "thinking", "shell_mode", "path", "git",
+    "custom:pr",
+    "queue", "context_pct", "cache_read", "cost",
+]
+items = [i for i in powerline.get("customItems", []) if i.get("id") != "pr"]
+items.append({"id": "pr", "statusKey": "pr", "position": "left", "selfColorize": True})
+powerline["customItems"] = items
+current["powerline"] = powerline
+
+# Compaction settings.
+current.setdefault("compaction", {
+    "enabled": True,
+    "reserveTokens": 32768,
+})
+
+print(json.dumps(current, indent=2))

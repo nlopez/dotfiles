@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# rustup (from the Nix profile) provides the cargo/rustc/rustfmt/clippy proxies,
+# but they only work once a toolchain exists. Ensure a default toolchain and the
+# clippy/rustfmt components; an already-installed default (e.g. a pinned
+# version) is left alone.
+# {{ list .nix (includeTemplate "nix-packages" .) | toJson | sha256sum }}
+
+set -eufo pipefail
+
+export PATH="{{ includeTemplate "nix-profile" . }}/bin:$PATH"
+command -v rustup >/dev/null || { echo "nix profile has no rustup yet, skipping" >&2; exit 0; }
+
+rustup which rustc >/dev/null 2>&1 || rustup default stable
+rustup component add clippy rustfmt

@@ -1,0 +1,60 @@
+#!/bin/sh
+# Merge chezmoi-managed keys into mcp.json, preserving runtime keys that pi
+# writes itself (e.g. exposure, enabled state). Uses jq's recursive-merge
+# operator so the chezmoi overlay wins on conflicts, but unrecognised keys
+# are kept as-is.
+#
+# Private MCP servers come from .chezmoitemplates/private-mcp-servers (see
+# docs/private-data.md). Per-machine OAuth sign-in happens afterwards via
+# /mcp; over SSH, paste the browser's redirected URL into the sign-in screen.
+#
+# Also migrates pi-mcp-adapter legacy fields to native pi 1.0 format:
+#   directTools: true  →  exposure: "direct"
+#   auth: "oauth"      →  removed (pi auto-detects OAuth from server response)
+#   settings.autoAuth  →  removed (not a native pi mcp.json field)
+
+{{- $servers := includeTemplate "private-mcp-servers" . | fromJson }}
+
+OVERLAY=$(cat << 'EOF'
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "{{ includeTemplate "nix-profile" . }}/bin/npx",
+      "args": ["-y", "{{ .mcp.playwright | trimPrefix "npm:" }}"]
+    }
+{{- if not .headless }}
+    ,"kagi": {
+      "command": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/varlock",
+      "args": ["run", "-p", "{{ .chezmoi.homeDir }}/.config/varlock/agents.env", "--filter", "KAGI_API_KEY", "--inject", "vars", "--no-redact-stdout", "--", "{{ includeTemplate "nix-profile" . }}/bin/uvx", "kagimcp"]
+    }
+{{- end }}
+{{- range $k, $v := $servers }}
+    ,"{{ $k }}": {{ $v | toJson }}
+{{- end }}
+  }
+}
+EOF
+)
+
+current=$(cat)
+
+if [ -z "$current" ]; then
+  printf '%s\n' "$OVERLAY"
+else
+  # Retired servers, plus private servers excluded on this machine (see
+  # .chezmoitemplates/private-mcp-servers), are removed.
+{{- $p := includeTemplate "private-data" . | fromYaml }}
+{{- $drop := concat (list "figma") ($p.mcp_retired | default list) }}
+{{- if .workspace }}{{ $drop = concat $drop ($p.mcp_workspace_exclude | default list) }}{{ end }}
+  printf '%s\n' "$current" | jq --argjson overlay "$OVERLAY" --argjson drop {{ $drop | toJson | squote }} '
+    . * $overlay |
+    del(.settings) |
+    .mcpServers |= with_entries(
+      .value |= (
+        (if .directTools == true then . + {"exposure": "direct"} else . end) |
+        del(.directTools, .auth)
+      )
+    ) |
+    reduce $drop[] as $k (.; del(.mcpServers[$k]))
+  '
+fi

@@ -1,0 +1,40 @@
+{{- /* YAML of this machine class's private values, merged over empty defaults so
+     every key below exists. Use: {{ $p := includeTemplate "private-data" . | fromYaml }}
+     Machines with age configured (.encryption) decrypt .private/<class>.yaml.age;
+     workspaces count once their identity secret has arrived. Others get only the
+     defaults. See docs/private-data.md. */ -}}
+{{- $defaults := `
+onepassword_account: ""
+mcp_servers: {}
+mcp_workspace_exclude: []
+mcp_retired: []
+pi:
+  packages: []
+  local_packages: []
+  local_repo: {}
+  gateway: {}
+trust_dirs: []
+git:
+  nlopez_gitdirs: []
+  allowed_signers: ""
+gh_routes: {}
+worktrunk_projects: []
+scan_patterns: []
+local_models:
+  omlx_api_key: ""
+workspace_secrets:
+  aws_vault_passphrase: ""
+claude:
+  plugins: []
+  remove_mcp: []
+` | fromYaml -}}
+{{- $raw := "{}" -}}
+{{- /* Configs from before `encryption` was a data key: age was on unless headless. */ -}}
+{{- $enc := not .headless -}}
+{{- if hasKey . "encryption" }}{{ $enc = .encryption }}{{ end -}}
+{{- if and .work $enc -}}
+{{-   $raw = include ".private/work.yaml.age" | decrypt -}}
+{{- else if and .personal $enc -}}
+{{-   $raw = include ".private/personal.yaml.age" | decrypt -}}
+{{- end -}}
+{{- mergeOverwrite $defaults ($raw | fromYaml) | toYaml -}}

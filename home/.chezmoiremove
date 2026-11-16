@@ -1,0 +1,165 @@
+.local/bin/aws
+.local/bin/docker
+.local/bin/git
+.local/bin/gitcache
+.local/bin/git-use-gitcache
+.local/bin/terragrunt
+.config/ghostty/themes/solarized-dark
+.config/ghostty/themes/solarized-light
+; Replaced by config.ghostty
+.config/ghostty/config
+.config/k9s/skins/solarized-dark.yaml
+.config/k9s/skins/solarized-light.yaml
+; Zed removed — clean up config dir and binary
+.config/zed
+.config/tmux/colors/solarized-dark.conf
+.config/tmux/colors/solarized-light.conf
+.config/tmux/scripts/auto-theme.sh
+.config/tmux/scripts/tmux-auto-theme-watcher.sh
+.config/tmux/theme-lock
+.config/tmux/theme-watcher.pid
+
+.local/share/gitcache
+.pi/agent/extensions/auto-theme.ts
+.npmrc
+.config/uv/uv.toml
+Library/LaunchAgents/com.user.dark-notify-tmux.plist
+.config/pnpm/rc
+
+; Renamed identity config files (old names from identity renames)
+.config/git/config_hobby
+
+; Rclone mounts removed — clean up generated runtime artefacts
+.local/bin/rclone-media-mount.sh
+Library/LaunchAgents/mount-media.plist
+Library/LaunchAgents/localuser.rclone-media-ro.mount.plist
+Library/LaunchAgents/localuser.rclone-media-rw.mount.plist
+.local/share/rclone-mounts
+
+; Workspace tunnels moved to ~/.local/bin/workspaces-rex — clean up old artefacts
+.local/bin/workspace-tunnels
+Library/LaunchAgents/com.local.workspace-tunnels.plist
+.local/state/workspace-tunnels
+.config/rex/workspaces.lua
+
+; WindowsPowerShell — Windows-only, removed
+Documents/WindowsPowerShell
+
+; ── XDG migrations: clean up old $HOME locations ─────────────────────────────
+
+; Oh My Zsh moved to ~/.local/share/oh-my-zsh (via export ZSH=)
+.oh-my-zsh
+
+; Terraform CLI config moved to ~/.config/terraform/terraformrc (via TF_CLI_CONFIG_FILE)
+.terraformrc
+
+; Atuin logs moved to ~/.local/state/atuin/logs (via [logs] path in config)
+; ~/.atuin/ contained only the logs/ subdirectory; data lives in ~/.local/share/atuin/
+.atuin
+
+; AeroSpace removed — clean up both the XDG config path and old ~/.aerospace.toml
+{{ if eq .chezmoi.os "darwin" }}
+.config/aerospace
+.aerospace.toml
+
+; Brewfile moved to ~/.config/brew/Brewfile (via HOMEBREW_BUNDLE_FILE)
+.Brewfile
+.Brewfile.lock.json
+{{ end }}
+
+; ── ZDOTDIR migration: zsh config moved to ~/.config/zsh/ ────────────────────
+; ZDOTDIR=~/.config/zsh in the plain ~/.zshenv bootstrap file.
+; Old template versions are ignored by .chezmoiignore.
+; Remove old standalone zsh files that zsh no longer reads.
+.zshrc.pre-oh-my-zsh
+.zshrc.pre-oh-my-zsh-*/
+.zshrc_pre-oh-my-zsh
+; ~/.zprofile and ~/.zshrc are managed symlinks (symlink_dot_zprofile.tmpl,
+; symlink_dot_zshrc.tmpl), not removed.
+
+; macOS Terminal.app session files — disabled via SHELL_SESSIONS_DISABLE=1
+.zsh_sessions/
+
+; Completion cache and dump files — managed via zstyle/compinit in zshenv
+.zcompcache/
+.zcompdump-*
+.zcompdump-local-*
+
+; shims moved to ~/.local/bin/shims (brew shim renders empty off Darwin, so chezmoi removes it there)
+.local/bin/gh
+.local/bin/shims/claude
+.local/bin/shims/pi
+.local/bin/brew
+
+; Config for the dropped pi-web-access plugin; nothing reads it
+.config/pi/web-search.json
+
+; ── Cleanup untracked runtime files ──────────────────────────────────────────
+
+; Oh My Zsh backup copies (left over from OMZ upgrades)
+.p10k.zsh
+
+; Codex config redirected via CODEX_HOME to ~/.config/codex; the legacy
+; ~/.codex dir is now converged by home/symlink_dot_codex (see
+; run_before_07-codex-legacy-symlink.sh.tmpl). This entry is REMOVED: through
+; the symlink it would delete live ~/.config/codex state on every apply.
+.colima
+
+.config/restic
+.config/resticprofile
+.config/resticprofile/profiles.toml
+
+; Workspaces owns these (its package manager hooks, persistent multiplexers PATH)
+{{ if not .workspace -}}
+.bashrc
+.bash_profile
+{{ end -}}
+
+; update-pi-agent removed — use `pi update`
+.local/bin/update-pi-agent.sh
+
+; model-name tracking removed (attribution hooks are gone)
+.local/bin/pi-model-name
+.local/state/pi/pane-models
+; window-switch hook was unused; emoji status now comes from tmux-agent-tabs
+.config/tmux/scripts/window-switch.sh
+
+; Claude Code pre-XDG cleanup (custom hooks/statusline, third-party agents,
+; skills, ECC rules/logs/plugins) — REMOVED: these cleanups ran when ~/.claude
+; was still a real directory. ~/.claude is now a symlink to ~/.config/claude
+; (home/symlink_dot_claude), so .claude/* removal entries alias live
+; ~/.config/claude content and would delete it on every apply
+; (.claude/hooks would remove context-mode's cache-heal script).
+; ~/.claude/skills/synced is Claude-managed and intentionally left alone.
+
+; Stray Engram store created when a process ran without ENGRAM_DATA_DIR (real
+; store is ~/.local/share/engram)
+.engram
+
+; tfenv shim and unused tmux helper scripts removed
+.local/bin/tfenv
+.config/tmux/scripts/prompt-rename-window.sh
+.config/tmux/scripts/reload-notify.sh
+
+; Claude Code moved to ~/.config/claude (CLAUDE_CONFIG_DIR); the dir and .claude.json are
+; moved by run_before_05-claude-xdg-migrate.sh
+.claude.json.backup
+
+; Stale home-root .claude.json (pre-symlink dogpark spawn) is now converged by
+; home/symlink_dot_claude.json (~/.claude.json -> ~/.config/claude/.claude.json).
+; Claude writes that file in-place (verified: a no-env `claude -p` run follows the
+; symlink; no atomic rename), so the symlink survives writes.
+
+; i-have-adhd skill was hand-copied here; Pi now gets it from the git package in
+; .chezmoidata/pi.yaml (a leftover copy would collide with the package's skill name)
+.config/pi/agent/skills/i-have-adhd
+
+; jj removed
+.config/jj
+
+; Oh My Zsh removed — zsh plugins now come from the Nix profile
+; (.chezmoidata/nix.yaml) and are sourced explicitly in .zshrc
+.local/share/oh-my-zsh
+
+; rex-session Pi extension removed
+.config/pi/agent/extensions/rex-session.ts

@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# webp — convert image files (or every recognized image found under a
+# directory) to lossless WebP using ffmpeg.
+#
+# Usage:
+#   webp [-f|--force] FILE...   convert each file to <name>.webp next to it
+#   webp [-f|--force] DIR...    recursively convert every recognized image
+#                                file found under DIR
+#
+# -f, --force   overwrite existing .webp outputs (default: skip them)
+#
+# Equivalent per file to:
+#   ffmpeg -i input.ext -c:v libwebp -lossless 1 -compression_level 6 input.webp
+
+set -euo pipefail
+
+usage() {
+  sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  echo "webp: ffmpeg not found in PATH" >&2
+  exit 1
+fi
+
+# Extensions treated as "images" when scanning a directory. Direct file
+# arguments are always attempted regardless of extension (except .webp
+# itself, which is skipped so re-running over a tree is a no-op).
+IMAGE_EXTS=(png jpg jpeg gif bmp tif tiff heic heif avif tga ppm pgm pbm pnm jxl exr dds psd)
+
+force=0
+targets=()
+
+for arg in "$@"; do
+  case "$arg" in
+    -f | --force) force=1 ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *) targets+=("$arg") ;;
+  esac
+done
+
+if [[ ${#targets[@]} -eq 0 ]]; then
+  usage >&2
+  exit 1
+fi
+
+is_image_ext() {
+  local ext="${1##*.}"
+  ext="${ext,,}"
+  local e
+  for e in "${IMAGE_EXTS[@]}"; do
+    [[ "$ext" == "$e" ]] && return 0
+  done
+  return 1
+}
+
+convert_one() {
+  local src="$1" out
+  [[ "$src" == *.webp ]] && return 0
+  out="${src%.*}.webp"
+
+  if [[ -e "$out" && "$force" -eq 0 ]]; then
+    echo "skip (exists): $out"
+    return 0
+  fi
+
+  echo "convert: $src -> $out"
+  ffmpeg -y -loglevel error -i "$src" -c:v libwebp -lossless 1 -compression_level 6 "$out"
+}
+
+process() {
+  local path="$1"
+  if [[ -d "$path" ]]; then
+    while IFS= read -r -d '' f; do
+      is_image_ext "$f" && convert_one "$f"
+    done < <(find "$path" -type f -print0)
+  elif [[ -f "$path" ]]; then
+    convert_one "$path"
+  else
+    echo "webp: not found: $path" >&2
+    return 1
+  fi
+}
+
+status=0
+for t in "${targets[@]}"; do
+  process "$t" || status=1
+done
+
+exit "$status"

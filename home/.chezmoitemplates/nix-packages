@@ -1,0 +1,14 @@
+{{- /* nixpkgs attribute paths for this host as a JSON list, from
+   .chezmoidata/nix.yaml: base/personal/work, plus darwin.* on macOS. */ -}}
+{{- $cfg := .nix.packages -}}
+{{- $groups := list "base" -}}
+{{- if .personal }}{{ $groups = append $groups "personal" }}{{ end -}}
+{{- if .work }}{{ $groups = append $groups "work" }}{{ end -}}
+{{- $pkgs := list -}}
+{{- range $g := $groups -}}
+{{-   $pkgs = concat $pkgs (index $cfg $g | default list) -}}
+{{-   if eq $.chezmoi.os "darwin" -}}
+{{-     $pkgs = concat $pkgs (index ($cfg.darwin | default dict) $g | default list) -}}
+{{-   end -}}
+{{- end -}}
+{{- $pkgs | sortAlpha | uniq | toJson -}}

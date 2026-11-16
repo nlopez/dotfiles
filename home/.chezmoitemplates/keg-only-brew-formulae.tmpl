@@ -1,0 +1,21 @@
+{{- /* Prepends bin/man/pkgconfig/lib/include paths for keg-only brew
+   formulae so they shadow the system (or non-keg-only brew) version.
+   Caller must pass the resolved Homebrew prefix as .prefix, e.g.:
+     {{ template "keg-only-brew-formulae.tmpl" (dict "prefix" $darwinBrewPrefix) }}
+   Safe to run more than once per shell session — every step is an
+   idempotent prepend (PATH is deduped separately via `typeset -U path`).
+*/ -}}
+{{- if .prefix }}
+for _keg_formula in \
+  curl \
+; do
+  _keg="{{ .prefix }}/opt/$_keg_formula"
+  [[ -d "$_keg/bin" ]]           && PATH="$_keg/bin:$PATH"
+  [[ -d "$_keg/share/man" ]]     && MANPATH="$_keg/share/man:$MANPATH"
+  [[ -d "$_keg/lib/pkgconfig" ]] && PKG_CONFIG_PATH="$_keg/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+  [[ -d "$_keg/lib" ]]           && LDFLAGS="-L$_keg/lib${LDFLAGS:+ $LDFLAGS}"
+  [[ -d "$_keg/include" ]]       && CPPFLAGS="-I$_keg/include${CPPFLAGS:+ $CPPFLAGS}"
+done
+unset _keg _keg_formula
+export MANPATH PKG_CONFIG_PATH LDFLAGS CPPFLAGS
+{{- end }}

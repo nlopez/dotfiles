@@ -1,0 +1,25 @@
+#!/bin/sh
+# pre-commit hook: refuse to create an unsigned commit.
+# Wired up globally via [hook "require-signed-commit"] in ~/.config/git/config,
+# so it runs alongside any repo-local .git/hooks/pre-commit (git 2.54+; older
+# git ignores it).
+#
+# The commit object does not exist yet at pre-commit time, so this cannot
+# verify a signature — it verifies that signing is ENABLED for the commit:
+# commit.gpgsign must resolve to true (set by the active identity include;
+# the global default is false, i.e. Anonymous/unsigned).
+#
+# Blind spot: `git commit --no-gpg-sign` skips signing even with gpgsign=true,
+# and pre-commit cannot detect the flag — require-signed-push (pre-push) is
+# the backstop for that. Bypass for a one-off with `git commit --no-verify`
+# (alias: git fcommit).
+
+if [ "$(git config --type=bool commit.gpgsign)" != "true" ]; then
+  cat >&2 <<'EOF'
+error: refusing to create an unsigned commit
+commit.gpgsign resolves to false — no signing identity is active in this repo.
+Pick an identity (the includeIf rules in ~/.config/git/config).
+AI agents: stop and report this error to the user; do not bypass it.
+EOF
+  exit 1
+fi

@@ -1,0 +1,31 @@
+#!/bin/sh
+# Clone/update the private work Pi packages repo (pi.local_repo in the private
+# data; see docs/private-data.md). modify_settings.json.tmpl references its
+# packages by path. Runs every apply; the pull is best-effort so offline
+# applies still succeed.
+{{- $pi := (includeTemplate "private-data" . | fromYaml).pi | default dict }}
+{{- if and .work $pi.local_repo }}
+
+REPO_DIR={{ joinPath .chezmoi.homeDir $pi.local_repo.dir | squote }}
+REPO_URL={{ $pi.local_repo.url | squote }}
+
+if [ ! -d "$REPO_DIR/.git" ]; then
+  echo "Pi: cloning work packages…"
+  mkdir -p "$(dirname "$REPO_DIR")"
+  git clone "$REPO_URL" "$REPO_DIR" || { echo "Pi: clone failed (check SSH access)" >&2; exit 0; }
+  echo "Pi: work packages cloned ✓"
+  exit 0
+fi
+
+if [ "$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null)" != "$REPO_URL" ]; then
+  git -C "$REPO_DIR" remote set-url origin "$REPO_URL"
+fi
+
+if git -C "$REPO_DIR" pull --ff-only --quiet; then
+  echo "Pi: work packages up to date ✓"
+else
+  echo "Pi: work packages pull failed; using existing checkout" >&2
+fi
+{{- else }}
+# No private work packages on this machine — nothing to do.
+{{- end }}

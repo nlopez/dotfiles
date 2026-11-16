@@ -1,0 +1,40 @@
+# Quiet Light — ported from the VSCode Quiet Light theme
+# https://github.com/microsoft/vscode/blob/main/extensions/theme-quietlight/themes/quietlight-color-theme.json
+
+background = #F5F5F5
+foreground = #333333
+cursor-color = #54494B
+selection-background = #C9D0D9
+selection-foreground = #333333
+
+# black / bright black (greys)
+palette = 0=#333333
+palette = 8=#777777
+
+# red / bright red
+palette = 1=#AA3731
+palette = 9=#CD3131
+
+# green / bright green
+palette = 2=#448C27
+palette = 10=#449A2F
+
+# yellow / bright yellow (amber)
+palette = 3=#9C5D27
+palette = 11=#C97A00
+
+# blue / bright blue
+palette = 4=#4B69C6
+palette = 12=#6078D4
+
+# magenta / bright magenta (purple)
+palette = 5=#7A3E9D
+palette = 13=#9769DC
+
+# cyan / bright cyan
+palette = 6=#91B3E0
+palette = 14=#4EC1E5
+
+# white / bright white
+palette = 7=#AAAAAA
+palette = 15=#F5F5F5

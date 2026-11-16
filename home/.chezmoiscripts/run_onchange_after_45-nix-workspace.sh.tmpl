@@ -1,0 +1,20 @@
+{{ if .workspace -}}
+#!/bin/sh
+# Workspaces: single-user Nix with the store kept under XDG data.
+# The store must live at /nix/store for the public binary cache to apply, and
+# Nix rejects a symlinked /nix, so bind-mount ~/.local/share/nix onto /nix.
+# There is no systemd here: ~/.config/shell/env re-mounts it on container start.
+# --no-modify-profile: the host owns ~/.bashrc/~/.profile; env sources nix.sh.
+set -eu
+# Images that ship a system multi-user Nix (nix-daemon under
+# /nix/var/nix/profiles/default) need nothing from this script.
+[ -x /nix/var/nix/profiles/default/bin/nix ] && exit 0
+store="${XDG_DATA_HOME:-$HOME/.local/share}/nix"
+mkdir -p "$store"
+[ -d /nix ] || sudo mkdir /nix
+mountpoint -q /nix || sudo mount --bind "$store" /nix
+
+if [ ! -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+  curl -fsSL https://nixos.org/nix/install | sh -s -- --no-daemon --no-modify-profile
+fi
+{{ end -}}

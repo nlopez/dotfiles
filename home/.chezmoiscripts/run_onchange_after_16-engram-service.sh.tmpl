@@ -1,0 +1,32 @@
+{{- if and (eq .chezmoi.os "darwin") .personal (not .headless) -}}
+#!/bin/bash
+
+# Supervises `engram serve` (the local HTTP daemon that runs Engram Cloud
+# autosync) with the LaunchAgent in Library/LaunchAgents/com.local.engram.plist,
+# so it starts at login and is relaunched after crashes and mise upgrades. Server URL + token come from cloud.json
+# (dot_local/share/private_engram/private_cloud.json.tmpl), so the plist holds
+# no secret. Reloads the job when the plist changes.
+# {{ include "Library/LaunchAgents/com.local.engram.plist.tmpl" | sha256sum }}
+
+set -eufo pipefail
+
+DOMAIN="gui/$(id -u)"
+PLIST="$HOME/Library/LaunchAgents/com.local.engram.plist"
+
+mkdir -p "${XDG_STATE_HOME:-$HOME/.local/state}/engram"
+
+launchctl bootout "$DOMAIN/com.local.engram" 2>/dev/null || true
+
+# An unsupervised daemon (started by a Claude/Pi hook or by hand) would keep
+# port 7437, and the supervised one would exit and respawn in a loop. Stop it.
+# The `$` anchor leaves `engram serve --session-owned` (Pi) alone.
+pkill -f 'engram serve$' 2>/dev/null || true
+
+# bootout returns before the old job is fully gone; bootstrap fails with
+# "Input/output error" (5) until it is, so retry briefly.
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  launchctl bootstrap "$DOMAIN" "$PLIST" && exit 0
+  sleep 1
+done
+launchctl bootstrap "$DOMAIN" "$PLIST"
+{{- end }}

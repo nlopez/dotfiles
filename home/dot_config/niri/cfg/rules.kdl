@@ -1,0 +1,130 @@
+// Window rules let you adjust behavior for individual windows.
+// Find more information on the wiki:
+// https://niri-wm.github.io/niri/Configuration:-Window-Rules
+
+// Work around WezTerm's initial configure bug by setting an empty
+// default-column-width.
+window-rule {
+    match app-id=r#"^org\.wezfurlong\.wezterm$"#
+    default-column-width {}
+}
+
+// Always open these windows as floating.
+window-rule {
+    // Firefox picture-in-picture player. This app-id regular expression
+    // will work for both:
+    // - host Firefox (app-id is "firefox")
+    // - Flatpak Firefox (app-id is "org.mozilla.firefox")
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    // Dolphin file manager.
+    match app-id=r#"^org\.kde\.dolphin$"#
+    // Nautilus file manager.
+    match app-id=r#"^org\.gnome\.Nautilus$"#
+    // GIMP's utility dialogs (they're not meant to be tiled).
+    match app-id=r#"^gimp"# title="^Preferences$"
+    match app-id=r#"^gimp"# title="^Configure Input Devices$"
+    match app-id=r#"^gimp"# title="^Configure Keyboard Shortcuts$"
+    match app-id=r#"^gimp"# title="^Module Manager$"
+    // Wine/Windows .exe windows.
+    match app-id=r#"\.exe$"#
+    // App launchers.
+    match app-id=r#"(?i)launcher"#
+    // Calculator apps.
+    match app-id=r#"(?i)calc"#
+    // KDE's "Open With" file type editor.
+    match app-id=r#"^org\.kde\.keditfiletype$"#
+    // Screenshot/image viewer utilities.
+    match app-id=r#"satty"# title="^Satty$"
+    match app-id=r#"phototonic"# title=r#".*Phototonic$"#
+    match app-id=r#"swayimg"# title="^Swayimg:.+$"
+    // Qt/theme/network utility windows.
+    match app-id=r#"^(kvantummanager|qt[56]ct|nwg-look)$"#
+    match app-id=r#"^(org\.pulseaudio\.pavucontrol|blueman-manager|nm-applet|nm-connection-editor)$"#
+    match title=r#"^(Winetricks.*|Protontricks.*)$"#
+    // Common file/save/auth dialogs.
+    match title=r#"^(Open|Authentication Required|Add Folder to Workspace|Choose Files|Save As|Confirm to replace files|File Operation Progress)$"#
+    match app-id=r#"^[Xx]dg-desktop-portal-gtk$"#
+    match title=r#"^(File Upload|Choose wallpaper|Library)(.*)$"#
+    match app-id=r#"(?i)dialog"#
+    match title=r#"(?i)dialog"#
+    // Steam's Friends List and "Launching..." windows. (The rest of the
+    // gaming-focused Steam rules this replaced routed to a "gaming"
+    // workspace, which isn't configured here, so only the plain float
+    // bits are kept.)
+    match app-id=r#"^steam$"# title="^Friends List$"
+    match app-id=r#"^steam$"# title=r#"^Launching\.\.\.$"#
+    open-floating true
+}
+
+// Steam's notification toasts: float, pinned to the bottom-right corner,
+// and don't steal focus.
+window-rule {
+    match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
+    default-floating-position x=10 y=10 relative-to="bottom-right"
+    open-focused false
+}
+
+// Noctalia settings window: float it at a fixed size instead of just
+// floating with whatever size it opens at.
+window-rule {
+    match app-id=r#"^dev\.noctalia\.Noctalia$"#
+    open-floating true
+    default-column-width { fixed 1080; }
+    default-window-height { fixed 920; }
+}
+
+// Example: block out two password managers from screen capture.
+// (This example rule is commented out with a "/-" in front.)
+/-window-rule {
+    match app-id=r#"^org\.keepassxc\.KeePassXC$"#
+    match app-id=r#"^org\.gnome\.World\.Secrets$"#
+
+    block-out-from "screen-capture"
+
+    // Use this instead if you want them visible on third-party screenshot tools.
+    // block-out-from "screencast"
+}
+
+// Rounded corners for all windows.
+window-rule {
+    geometry-corner-radius 20
+    clip-to-geometry true
+}
+
+// Blur every window, without xray, so it looks more realistic.
+window-rule {
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
+// window-rule {
+//     match is-active=true
+//     opacity 1.0
+// }
+
+// window-rule {
+//     match is-active=false
+//     opacity 0.95
+// }
+
+// Blur Noctalia's wallpaper behind windows/backdrop in the Overview,
+// per Noctalia's niri docs: https://docs.noctalia.dev/noctalia/compositor-settings/niri/
+layer-rule {
+    match namespace="^noctalia-backdrop"
+    place-within-backdrop true
+}
+
+layer-rule {
+    match namespace="^noctalia-wallpaper"
+    place-within-backdrop true
+}
+
+// Don't x-ray blur through Noctalia's bars/panels/dock/osd/notifications.
+layer-rule {
+    match namespace="^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd)$"
+    background-effect {
+        xray false
+    }
+}

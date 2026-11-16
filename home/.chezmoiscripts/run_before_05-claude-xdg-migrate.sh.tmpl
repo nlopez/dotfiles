@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# One-time move of Claude Code state from ~/.claude and ~/.claude.json to
+# $CLAUDE_CONFIG_DIR (~/.config/claude, exported in dot_config/shell/env.tmpl).
+# Runs before files are applied so the existing state is moved before chezmoi
+# creates the new directory. Does nothing once migrated (or on fresh machines).
+# Aborts the apply if Claude is running: moving its state out from under it
+# corrupts the session. Quit Claude and apply from a plain terminal.
+
+set -eufo pipefail
+
+HOME_DIR="{{ .chezmoi.homeDir }}"
+NEW="${XDG_CONFIG_HOME:-$HOME_DIR/.config}/claude"
+OLD="$HOME_DIR/.claude"
+
+pending=0
+{ [ -d "$OLD" ] && [ ! -e "$NEW" ]; } && pending=1
+{ [ -f "$HOME_DIR/.claude.json" ] && [ ! -e "$NEW/.claude.json" ]; } && pending=1
+[ "$pending" = 1 ] || exit 0
+
+if pgrep -x claude >/dev/null 2>&1; then
+  echo "Claude Code is running; quit it and re-run chezmoi apply to migrate ~/.claude to $NEW" >&2
+  exit 1
+fi
+
+mkdir -p "$(dirname "$NEW")"
+if [ -d "$OLD" ] && [ ! -e "$NEW" ]; then
+  mv "$OLD" "$NEW"
+fi
+mkdir -p "$NEW"
+if [ -f "$HOME_DIR/.claude.json" ] && [ ! -e "$NEW/.claude.json" ]; then
+  mv "$HOME_DIR/.claude.json" "$NEW/.claude.json"
+fi
+rm -f "$HOME_DIR"/.claude.json.tmp.*
+
+# Plugin metadata stores absolute install paths.
+for f in "$NEW/plugins/installed_plugins.json" "$NEW/plugins/known_marketplaces.json"; do
+  [ -f "$f" ] && sed -i.bak "s#$OLD/#$NEW/#g" "$f" && rm -f "$f.bak"
+done
+exit 0

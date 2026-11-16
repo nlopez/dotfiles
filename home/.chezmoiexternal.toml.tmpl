@@ -1,0 +1,85 @@
+{{- $miseVersion := "v2026.10.15" -}}
+{{- $miseOS := "linux" -}}{{- if eq .chezmoi.os "darwin" -}}{{- $miseOS = "macos" -}}{{- end -}}
+{{- $miseArch := .chezmoi.arch -}}{{- if eq .chezmoi.arch "amd64" -}}{{- $miseArch = "x64" -}}{{- end -}}
+
+{{- $ageVersion := "v1.3.1" -}}
+{{- $ageOS := .chezmoi.os -}}
+{{- $ageArch := .chezmoi.arch -}}
+
+{{- $zabrzeVersion := "v0.7.3" -}}
+{{- $zabrzeArch := "x86_64" -}}{{- if eq .chezmoi.arch "arm64" -}}{{- $zabrzeArch = "aarch64" -}}{{- end -}}
+{{- $zabrzeTarget := "unknown-linux-gnu" -}}{{- if eq .chezmoi.os "darwin" -}}{{- $zabrzeTarget = "apple-darwin" -}}{{- end -}}
+
+{{- /* renovate: datasource=github-releases depName=atuinsh/atuin */ -}}
+{{- $atuinVersion := "v18.24.5" -}}
+{{- $atuinArch := "x86_64" -}}{{- if eq .chezmoi.arch "arm64" -}}{{- $atuinArch = "aarch64" -}}{{- end -}}
+{{- $atuinTarget := "unknown-linux-gnu" -}}{{- if eq .chezmoi.os "darwin" -}}{{- $atuinTarget = "apple-darwin" -}}{{- end -}}
+
+# atuin — https://github.com/atuinsh/atuin
+# Declarative take on https://setup.atuin.sh: the same release binary its
+# cargo-dist installer fetches, without ~/.atuin/bin or rc-file edits. Shell
+# init lives in dot_config/zsh/dot_zshrc.tmpl; agent hooks (`atuin hook
+# install`) are declared in dot_config/claude/modify_settings.json.tmpl and
+# the pi extension below. History import and `atuin login` stay manual.
+[".local/bin/atuin"]
+    type = "archive-file"
+    url = "https://github.com/atuinsh/atuin/releases/download/{{ $atuinVersion }}/atuin-{{ $atuinArch }}-{{ $atuinTarget }}.tar.gz"
+    path = "atuin"
+    stripComponents = 1
+    executable = true
+
+# `atuin hook install pi` equivalent, pinned to the binary's release.
+[".config/pi/agent/extensions/atuin.ts"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/atuinsh/atuin/{{ $atuinVersion }}/crates/atuin-common/res/harnesstools/pi/atuin.ts"
+
+{{- if not .headless }}
+# age — https://github.com/FiloSottile/age
+[".local/bin/age"]
+    type = "archive-file"
+    # renovate: datasource=github-releases depName=FiloSottile/age
+    url = "https://github.com/FiloSottile/age/releases/download/{{ $ageVersion }}/age-{{ $ageVersion }}-{{ $ageOS }}-{{ $ageArch }}.tar.gz"
+    path = "age/age"
+    executable = true
+
+[".local/bin/age-keygen"]
+    type = "archive-file"
+    # renovate: datasource=github-releases depName=FiloSottile/age
+    url = "https://github.com/FiloSottile/age/releases/download/{{ $ageVersion }}/age-{{ $ageVersion }}-{{ $ageOS }}-{{ $ageArch }}.tar.gz"
+    path = "age/age-keygen"
+    executable = true
+{{- end }}
+
+
+# mise — https://github.com/jdx/mise (fallback for tools nixpkgs lacks)
+[".local/bin/mise"]
+    type = "archive-file"
+    # renovate: datasource=github-releases depName=jdx/mise
+    url = "https://github.com/jdx/mise/releases/download/{{ $miseVersion }}/mise-{{ $miseVersion }}-{{ $miseOS }}-{{ $miseArch }}.tar.gz"
+    path = "mise/bin/mise"
+    executable = true
+
+# zabrze — https://github.com/Ryooooooga/zabrze
+[".local/bin/zabrze"]
+    type = "archive-file"
+    # renovate: datasource=github-releases depName=Ryooooooga/zabrze
+    url = "https://github.com/Ryooooooga/zabrze/releases/download/{{ $zabrzeVersion }}/zabrze-{{ $zabrzeVersion }}-{{ $zabrzeArch }}-{{ $zabrzeTarget }}.tar.gz"
+    path = "zabrze"
+    executable = true
+
+{{- if eq .chezmoi.os "darwin" }}
+[".local/bin/rclone"]
+    type = "archive-file"
+    url = "https://github.com/rclone/rclone/releases/download/v1.74.2/rclone-v1.74.2-osx-arm64.zip"
+    path = "rclone"
+    stripComponents = 1
+    executable = true
+{{- end }}
+
+# Nerd Fonts (Iosevka) are intentionally NOT managed by chezmoi as externals:
+# the release zips are ~375MB each and chezmoi must fully decompress an
+# "archive" external into memory to compute its target state on every
+# apply/status/diff, even when excluded from application — this alone cost
+# several seconds and ~3GB of peak heap on every invocation. Install fonts
+# manually (e.g. via your package manager, or download once from
+# https://github.com/ryanoasis/nerd-fonts/releases) instead.

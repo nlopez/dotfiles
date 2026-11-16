@@ -1,0 +1,60 @@
+{{- if .work -}}
+#!/bin/bash
+
+# Registers the private work MCP servers with Claude Code at user scope, on
+# every work machine — workspaces included. Server definitions come from
+# .chezmoitemplates/private-mcp-servers (see docs/private-data.md); Pi gets the
+# same servers via dot_config/pi/agent/modify_mcp.json.tmpl. Servers that are
+# excluded on workspaces are also removed there.
+#
+# Re-running removes each server first, which also clears its OAuth login:
+# run /mcp in Claude Code afterwards to sign in again (on headless hosts, SSH-
+# forward the callback port or paste the redirected URL when prompted).
+#
+# Pi entry -> Claude entry:
+#   "auth": "oauth"                  -> dropped (Claude detects OAuth itself)
+#   no "type"                        -> "type": "http"
+#   oauth.callbackUrl (:PORT/...)    -> oauth.callbackPort PORT
+
+set -eufo pipefail
+
+export CLAUDE_CONFIG_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/claude"
+
+export PATH="{{ includeTemplate "nix-profile" . }}/bin:{{ if eq .chezmoi.os "linux" }}{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ end }}{{ .chezmoi.homeDir }}/.local/bin:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+command -v jq >/dev/null 2>&1 || { echo "jq not found, skipping" >&2; exit 0; }
+
+{{- $p := includeTemplate "private-data" . | fromYaml }}
+SERVERS={{ includeTemplate "private-mcp-servers" . | squote }}
+
+{{- if .workspace }}
+# Workspaces: make sure servers excluded here are gone.
+{{- range ($p.mcp_workspace_exclude | default list) }}
+claude mcp remove {{ . | squote }} --scope user >/dev/null 2>&1 || true
+{{- end }}
+{{- end }}
+
+printf '%s\n' "$SERVERS" | jq -c '
+  def port:
+    (.oauth.callbackUrl // "")
+    | (capture(":(?<p>[0-9]+)/")? // {p: null})
+    | if .p then (.p | tonumber) else null end;
+  to_entries[]
+  | {
+      name: .key,
+      json: (
+        {type: "http", url: .value.url}
+        + (if .value.oauth.clientId
+           then {oauth: ({clientId: .value.oauth.clientId, callbackPort: (.value | port)} | with_entries(select(.value != null)))}
+           else {} end)
+      )
+    }
+' | while IFS= read -r entry; do
+  name=$(jq -r '.name' <<<"$entry")
+  json=$(jq -c '.json' <<<"$entry")
+  claude mcp remove "$name" --scope user >/dev/null 2>&1 || true
+  claude mcp add-json "$name" --scope user "$json" >/dev/null
+  echo "claude mcp: registered $name"
+done
+{{- end }}

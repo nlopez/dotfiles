@@ -1,0 +1,3 @@
+{{- /* Absolute path of the Nix profile that holds the packages declared in
+   .chezmoidata/nix.yaml. Its bin/ goes on PATH ahead of Homebrew. */ -}}
+{{- joinPath .chezmoi.homeDir ".local/state/nix/profiles/dotfiles" -}}

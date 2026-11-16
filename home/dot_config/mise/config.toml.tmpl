@@ -1,0 +1,14 @@
+# mise global configuration — https://mise.jdx.dev/configuration.html
+# Fallback for tools nixpkgs lacks; declared in .chezmoitemplates/mise/*.toml.
+
+[settings]
+# Only install stable releases; no pre-releases or release candidates.
+experimental = false
+# Skip versions released less than 7 days ago (supply-chain cooldown).
+minimum_release_age = "7d"
+
+[tools]
+{{- $tools := includeTemplate "mise-tools" . | fromJson }}
+{{- range $name, $version := $tools }}
+{{ $name | quote }} = {{ $version | quote }}
+{{- end }}

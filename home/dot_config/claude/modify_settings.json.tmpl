@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+# Managed by chezmoi — source: home/dot_config/claude/modify_settings.json.tmpl
+# ⚠️  DO NOT EDIT ~/.config/claude/settings.json for these keys; they are reset on
+#     every `chezmoi apply`. All other keys are left untouched.
+#
+# Receives the current settings.json on stdin, writes the replacement to stdout.
+#
+# Configures: attribution (empty strings disable the Co-Authored-By trailer
+#             on commits and the "Generated with Claude Code" line on PRs),
+#             model (default = Sonnet 5.5),
+#             effortLevel (default thinking effort = medium),
+#             statusLine (pi-style bar, see statusline.py),
+#             hooks (atuin, no-chat-comments, agent-bypass-guard, Rex session-start, plus context-mode cache-heal if present).
+# Removes:    ECC env, and all plugin/marketplace entries
+#             except engram, context-mode, worktrunk and i-have-adhd (Claude is kept close to stock). Plugins themselves are
+#             uninstalled by .chezmoiscripts/run_onchange_after_20-claude-plugins-remove.sh.tmpl.
+import json
+import os
+import sys
+
+current_raw = sys.stdin.read()
+current = {}
+try:
+    if current_raw.strip():
+        current = json.loads(current_raw)
+except Exception:
+    pass
+
+current["attribution"] = {"commit": "", "pr": ""}
+
+# Default model and effort (thinking depth) at session start.
+current["model"] = "claude-sonnet-5-5[1m]"
+current["effortLevel"] = "medium"
+
+# Hooks: only atuin's (the `atuin hook install claude-code` equivalent), which
+# records Claude's Bash commands in atuin history. Replacing the whole key also
+# drops leftover hooks from the removed ECC plugin.
+atuin_hook = [{
+    "matcher": "^Bash$",
+    "hooks": [{
+        "type": "command",
+        "command": os.path.expanduser("~/.local/bin/atuin") + " hook claude-code",
+    }],
+}]
+previous_hooks = current.get("hooks") or {}
+current["hooks"] = {
+    event: atuin_hook for event in ("PreToolUse", "PostToolUse", "PostToolUseFailure")
+}
+
+# PreToolUse: block edits that add comments narrating the edit/chat history
+# (script managed in hooks/executable_no-chat-comments.sh).
+current["hooks"]["PreToolUse"] = atuin_hook + [{
+    "matcher": "Edit|Write|MultiEdit",
+    "hooks": [{
+        "type": "command",
+        "command": os.path.expanduser("~/.config/claude/hooks/no-chat-comments.sh"),
+    }],
+}, {
+    # Block shell commands that skip git hooks or disable commit signing
+    # (rules in ~/.config/git/agent-bypass-guard, shared with pi).
+    "matcher": "Bash",
+    "hooks": [{
+        "type": "command",
+        "command": os.path.expanduser("~/.config/git/agent-bypass-guard"),
+    }],
+}]
+
+# Keep third-party SessionStart hooks that are installed outside chezmoi and
+# re-register themselves at runtime, so they are preserved rather than declared:
+#   - context-mode's cache-heal hook (its MCP server re-registers it on every
+#     boot, start.mjs, with a command path built from the running node binary)
+#   - Rex's session-start hook (`rex skill setup` writes it into whichever
+#     settings file it finds; it is declared below, preserved copies are kept
+#     so re-running rex setup does not duplicate it)
+keep_session_start = [
+    h for h in previous_hooks.get("SessionStart") or []
+    if any(
+        ("context-mode-cache-heal" in (hh.get("command") or ""))
+        or ("rex __internal session-start" in (hh.get("command") or ""))
+        for hh in h.get("hooks") or []
+    )
+]
+# Rex session-start hook: lets the Rex server track agent sessions. The
+# command is wrapped in `|| true` so it is a no-op when rex is absent.
+rex_hook = [{
+    "hooks": [{
+        "type": "command",
+        "command": "/bin/sh -c 'rex __internal session-start --agent claude 2>/dev/null || true'",
+        "timeout": 5,
+    }],
+}]
+# Prefer the declared copy; dedupe preserved Rex entries against it by
+# command text so re-running `rex skill setup` never duplicates the hook.
+cache_heal = []
+surviving_rex = []
+for h in keep_session_start:
+    cmds = [hh.get("command") or "" for hh in h.get("hooks") or []]
+    if any("context-mode-cache-heal" in c for c in cmds):
+        cache_heal.append(h)
+    elif any("rex __internal session-start" in c for c in cmds):
+        if not set(cmds) <= {rex_hook[0]["hooks"][0]["command"]}:
+            surviving_rex.append(h)
+current["hooks"]["SessionStart"] = surviving_rex + rex_hook + cache_heal
+
+# Status line: pi-style bar (script managed in executable_statusline.py).
+current["statusLine"] = {
+    "type": "command",
+    "command": os.path.expanduser("~/.config/claude/statusline.py"),
+}
+for key in ("ECC_DISABLED_MCPS", "_ZO_DOCTOR"):
+    current.get("env", {}).pop(key, None)
+for plugin in (
+    "ecc@ecc",
+    "gopls-lsp@claude-plugins-official",
+    "pr-review-toolkit@claude-plugins-official",
+    "frontend-design@claude-plugins-official",
+):
+    current.get("enabledPlugins", {}).pop(plugin, None)
+for marketplace in ("ecc", "cloudflare"):
+    current.get("extraKnownMarketplaces", {}).pop(marketplace, None)
+
+# Engram: pin one data dir so hooks and the MCP server never fall back to ~/.engram
+# when Claude isn't launched from a shell that exports ENGRAM_DATA_DIR (see
+# dot_config/shell/env.tmpl), and drop permissions for the nonexistent
+# plugin-provided MCP server (`engram setup claude-code` registers a user-level
+# `engram` server, so only mcp__engram__* is real).
+xdg_data = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+current.setdefault("env", {})["ENGRAM_DATA_DIR"] = os.path.join(xdg_data, "engram")
+{{- if and .personal (not .headless) }}
+# Cloud autosync: the server URL and token come from <data dir>/cloud.json
+# (dot_local/share/engram/private_cloud.json.tmpl); only the opt-in flag is env.
+current["env"]["ENGRAM_CLOUD_AUTOSYNC"] = "1"
+{{- else }}
+current["env"].pop("ENGRAM_CLOUD_AUTOSYNC", None)
+{{- end }}
+
+# Context-mode: Claude's own state dir (shell env.tmpl exports pi's CONTEXT_MODE_DIR,
+# which Claude would otherwise inherit and share sessions/index with pi).
+xdg_state = os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state")
+current["env"]["CONTEXT_MODE_DIR"] = os.path.join(xdg_state, "claude", "context-mode")
+
+permissions = current.get("permissions", {})
+if "allow" in permissions:
+    permissions["allow"] = [
+        p for p in permissions["allow"] if not p.startswith("mcp__plugin_engram_engram__")
+    ]
+
+print(json.dumps(current, indent=2, ensure_ascii=False))

@@ -1,0 +1,128 @@
+{{/* boolean feature tags — set once at chezmoi init, persisted in local config */}}
+{{- $personal        := promptBoolOnce   . "personal"        "Is this a personal machine?"    -}}
+{{- $work            := promptBoolOnce   . "work"            "Is this a work machine?"        -}}
+{{- $headless        := promptBoolOnce   . "headless"        "Is this a headless machine?"    -}}
+
+{{/* work-specific identifiers — stored in local config, never in source tree */}}
+{{- $workemail := "" -}}
+{{- if $work -}}
+{{-   $workemail = promptStringOnce . "workemail" "Work email (for LLM observability tagging, e.g. you@example.com)" -}}
+{{- end -}}
+
+
+{{/* Cloud workspaces: the host manages ~/.ssh, ~/.gitconfig, ~/.bashrc, etc. (its package
+     manager, persistent multiplexers, commit signing), so chezmoi must leave those alone.
+     IN_WORKSPACES is not set in practice; the daemon socket and the host's git-hooks dir
+     are reliable signals. */}}
+{{- $workspace := or (env "IN_WORKSPACES") (env "WORKSPACES_DAEMON_SOCKET") (glob "/usr/local/lib/*-git-hooks") | not | not -}}
+
+{{/* Workspaces get the work age identity as a workspace secret (uploaded by
+     darwin/run_onchange_after_21-workspace-secrets.sh.tmpl). The CLI uploads
+     secrets after dotfiles install, so the first apply runs without it and the
+     zshrc first-login hook re-runs `chezmoi init --apply` once it appears. */}}
+{{- $workspaceAgeIdentity := printf "/run/user/%s/secrets/CHEZMOI_AGE_IDENTITY" .chezmoi.uid -}}
+{{- $encryption := or (not $headless) (and $workspace $work (stat $workspaceAgeIdentity)) | not | not -}}
+
+{{- $ephemeral := false -}}{{/* true if this machine is ephemeral, e.g.: a cloud or VM instance */}}
+
+{{/* work around unreliable hostname on darwin */}}
+{{- $hostname := .chezmoi.hostname -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
+{{- end -}}
+
+{{/* platform-specific values — templates reference .platform.* instead of
+     embedding .chezmoi.os conditionals themselves */}}
+{{- $platform := dict
+      "ssh_auth_sock" "~/.1password/agent.sock"
+      "gpg_op_path"   "/opt/1Password/op-ssh-sign"
+      "reload_path"   "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+-}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $platform = dict
+        "ssh_auth_sock" "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+        "gpg_op_path"   "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+        "reload_path"   "/usr/bin:/bin:/usr/sbin:/sbin"
+-}}
+{{- end -}}
+
+
+
+
+# ---------------------------------------------------------------------------
+# age post-quantum encryption
+# ---------------------------------------------------------------------------
+# useBuiltinAge = false forces use of the external age binary (v1.3+) which
+# has native ML-KEM-768 + X25519 hybrid (PQ) support.
+# Skipped on headless — no 1Password to fetch the identity key — except on
+# workspaces whose identity secret has arrived.
+{{- if $encryption }}
+encryption    = "age"
+useBuiltinAge = false
+
+[age]
+{{- if $headless }}
+  identity = "{{ $workspaceAgeIdentity }}"
+{{- else }}
+  identity = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/identity.txt"
+{{- end }}
+{{- if $work }}
+  recipientsFile = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/work-recipient.txt"
+{{- else if $personal }}
+  recipientsFile = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/personal-recipient.txt"
+{{- end }}
+{{- end }}
+
+{{- if not $headless }}
+[onepassword]
+  mode = "account"
+{{- if and $personal (not $work) (eq .chezmoi.os "darwin") }}
+  # Reads go through a wrapper that authenticates as a read-only service account
+  # (Automation vault), so they never prompt.
+  command = "{{ .chezmoi.homeDir }}/.local/bin/op-automation"
+{{- end }}
+
+[scriptEnv]
+# AGE_KEY_OP_URI is injected into the read-source-state.pre hook (fetch-age-key.sh)
+# so the age private key is on disk before chezmoi decrypts any source files.
+{{- if $personal }}
+  AGE_KEY_OP_URI = "op://evjh25ux2mnoufaut6qhvm2pdi/xrueqtieq2hj6qydr5m3urcoey/private-key"
+{{- else if $work }}
+  AGE_KEY_OP_URI = "op://ed52wahww5txzax6reg4me3bl4/fgtjfmintxb2nptvgsbspom7va/private-key"
+{{- end }}
+{{- end }}
+
+# Editor — use VS Code with --new-window so --wait actually blocks until the file is closed.
+# On headless machines fall back to $EDITOR / vi.
+{{- if not $headless }}
+[edit]
+  command = "code"
+  args    = ["--new-window", "--wait"]
+{{- end }}
+
+{{- if not $headless }}
+# Fetch the age identity from 1Password before chezmoi reads (decrypts) source state.
+[hooks.read-source-state.pre]
+  command = "bash"
+  args    = ["{{ .chezmoi.workingTree }}/scripts/fetch-age-key.sh"]
+{{- end }}
+
+# ---------------------------------------------------------------------------
+[data]
+name = "Nick Lopez"
+email = "20211302+nlopez@users.noreply.github.com"
+signingkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEvDNgTluafxfN++WnyRNqyVO7LfbvpTY5M6N24Kr9dI"
+hostname = {{ $hostname | quote }}
+personal = {{ $personal }}
+work = {{ $work }}
+workemail = {{ $workemail | quote }}
+
+ephemeral = {{ $ephemeral }}
+headless = {{ $headless }}
+workspace = {{ $workspace }}
+encryption = {{ $encryption }}
+
+[data.platform]
+ssh_auth_sock = {{ $platform.ssh_auth_sock | quote }}
+gpg_op_path   = {{ $platform.gpg_op_path | quote }}
+reload_path   = {{ $platform.reload_path | quote }}

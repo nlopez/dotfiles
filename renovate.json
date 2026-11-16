@@ -1,0 +1,62 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:best-practices"],
+  "timezone": "America/New_York",
+  "schedule": ["before 9am"],
+  "semanticCommits": "enabled",
+  "minimumReleaseAge": "7 days",
+  "internalChecksFilter": "strict",
+  "mise": {
+    "managerFilePatterns": ["/(^|/)home/\\.chezmoitemplates/mise/[^/]+\\.toml$/"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/(^|/)home/\\.chezmoiexternal\\.toml\\.tmpl$/"],
+      "matchStrings": [
+        "url = \"https://github\\.com/(?<packageName>[^/]+/[^/]+)/archive/(?<currentValue>v?\\d[^/]+)\\.tar\\.gz\"",
+        "url = \"https://raw\\.githubusercontent\\.com/(?<packageName>[^/]+/[^/]+)/(?<currentValue>v?\\d[^/]+)/[^\"]+\"",
+        "# renovate: datasource=(?<datasource>github-releases) depName=(?<depName>[^\\s]+)[\\s\\S]*?:= \"(?<currentValue>v?\\d[^\"]+)\"",
+        "url = \"https://github\\.com/(?<packageName>[^/]+/[^/]+)/releases/download/(?<currentValue>v?\\d[^/]+)\\.zip\""
+      ],
+      "datasourceTemplate": "github-tags"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/(^|/)home/\\.chezmoidata/(pi|mcp)\\.yaml$/"],
+      "matchStrings": ["npm:(?<packageName>(?:@[^/]+/)?[^@\\s\"]+)@(?<currentValue>[0-9][^\\s\",]+)"],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "description": "nixpkgs revision the Nix package set is built from",
+      "managerFilePatterns": ["/(^|/)home/\\.chezmoidata/nix\\.yaml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>git-refs) packageName=(?<packageName>\\S+) branch=(?<currentValue>\\S+)\\s+nixpkgs_rev: (?<currentDigest>[0-9a-f]{40})"
+      ],
+      "depNameTemplate": "nixpkgs"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["custom.regex"],
+      "matchFileNames": ["home/.chezmoiexternal.toml.tmpl"],
+      "groupName": "chezmoi externals",
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "matchManagers": ["custom.regex"],
+      "matchFileNames": ["home/.chezmoidata/pi.yaml", "home/.chezmoidata/mcp.yaml"],
+      "groupName": "pi packages"
+    },
+    {
+      "description": "nixpkgs-unstable is already gated by Hydra; git-refs digests have no release timestamp, so the global minimumReleaseAge would block every bump. Batch weekly instead.",
+      "matchManagers": ["custom.regex"],
+      "matchDepNames": ["nixpkgs"],
+      "minimumReleaseAge": null,
+      "schedule": ["before 9am on monday"]
+    }
+  ]
+}

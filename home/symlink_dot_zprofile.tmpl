@@ -1,0 +1,5 @@
+{{- /* ~/.zprofile is a symlink to the real zprofile under ZDOTDIR, for tools
+   that read $HOME/.zprofile directly instead of honoring ZDOTDIR. zsh itself
+   reads $ZDOTDIR/.zprofile, so this does not cause double sourcing.
+*/ -}}
+{{ joinPath .chezmoi.homeDir ".config/zsh/.zprofile" }}

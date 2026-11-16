@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+# Managed by chezmoi — source: home/dot_config/pi/agent/modify_models.json.tmpl
+# ⚠️  DO NOT EDIT ~/.config/pi/agent/models.json directly. It is managed by
+#     chezmoi on every `chezmoi apply`. Always edit the source tree.
+#
+# This is a chezmoi templated modify_ script. Chezmoi first renders the Go
+# template (injecting work/email from .chezmoi.toml.tmpl), then executes the
+# resulting Python script. The script receives the current models.json on
+# stdin and writes the replacement JSON to stdout.
+#
+# On work machines with a private AI gateway (pi.gateway in the private data;
+# see docs/private-data.md): seeds that provider (default model glm-5-3) and
+# removes legacy providers that point at the gateway's retired host. Provider
+# connection config (URL, auth, headers) is authoritative from the private
+# data; the model list and the per-user team header are preserved from the
+# existing file so /refresh-models selections survive. Run /refresh-models in
+# pi to add Claude, GPT, and other models.
+# On other machines: raises the built-in Anthropic Sonnet context window.
+#
+import json
+import sys
+
+current_raw = sys.stdin.read()
+current = {}
+try:
+    if current_raw.strip():
+        current = json.loads(current_raw)
+except Exception:
+    pass
+
+current.setdefault("providers", {})
+
+{{- $pi := (includeTemplate "private-data" . | fromYaml).pi | default dict }}
+GATEWAY = json.loads({{ if and .work $pi.gateway }}{{ $pi.gateway | toJson | quote }}{{ else }}"null"{{ end }})
+WORK_EMAIL = {{ .workemail | quote }}
+
+if GATEWAY:
+    # Drop legacy providers from the old gateway host (never touches the
+    # providers /refresh-models writes against the current host).
+    legacy_host = GATEWAY.get("legacy_host")
+    for key in list(current["providers"]):
+        legacy = current["providers"][key]
+        if legacy_host and isinstance(legacy, dict) and legacy_host in legacy.get("baseUrl", ""):
+            del current["providers"][key]
+
+    provider = GATEWAY["provider"]
+    existing = current["providers"].get(provider, {})
+    headers = dict(GATEWAY.get("headers", {}))
+    if GATEWAY.get("email_header"):
+        headers[GATEWAY["email_header"]] = WORK_EMAIL or "unknown"
+    if GATEWAY.get("team_header"):
+        headers[GATEWAY["team_header"]] = existing.get("headers", {}).get(GATEWAY["team_header"], "unknown")
+
+    glm_5_3 = {
+        "id": "glm-5-3",
+        "name": "GLM 5.3 (AI Gateway logical)",
+        "api": "openai-completions",
+        "reasoning": True,
+        "input": ["text"],
+        "contextWindow": 1048576,
+        "maxTokens": 131072,
+        "compat": {"supportsDeveloperRole": False},
+        "thinkingLevelMap": {
+            "off": None,
+            "minimal": None,
+            "low": "low",
+            "medium": None,
+            "high": "high",
+            "xhigh": None,
+            "max": "max",
+        },
+    }
+    current["providers"][provider] = {
+        "baseUrl": GATEWAY["base_url"],
+        "api": "openai-completions",
+        "apiKey": GATEWAY["api_key"],
+        "headers": headers,
+        "models": existing.get("models") or [glm_5_3],
+    }
+else:
+    # Built-in Anthropic provider: raise Sonnet to the 1M context window.
+    prov = current["providers"].setdefault("anthropic", {})
+    prov.setdefault("modelOverrides", {})["claude-sonnet-5-5"] = {"contextWindow": 1000000}
+
+print(json.dumps(current, indent=2))

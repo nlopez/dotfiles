@@ -1,0 +1,22 @@
+{{- if and .personal (not .work) (not .headless) (eq .chezmoi.os "darwin") -}}
+#!/bin/sh
+# op shim: authenticates as the read-only service account for the Automation
+# vault, so reads from it never prompt for app approval. Anything the service
+# account cannot do (other vaults, writes) needs app auth: run with OP_APP_AUTH=1.
+# Lives in ~/.local/bin/shims; drops its own dir from PATH, then runs the next
+# `op` (the Nix profile's).
+dir=$(cd "$(dirname "$0")" && pwd -P)
+new=; IFS=:
+for d in $PATH; do
+  [ "$(cd "$d" 2>/dev/null && pwd -P)" = "$dir" ] || new=${new:+$new:}$d
+done
+unset IFS; PATH=$new
+real=$(command -v op) || { echo "op: no real op found on PATH" >&2; exit 127; }
+
+if [ -z "${OP_SERVICE_ACCOUNT_TOKEN:-}" ] && [ -z "${OP_APP_AUTH:-}" ]; then
+  OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "$USER" -s op-service-account-automation -w 2>/dev/null) \
+    || { echo "op: Keychain item op-service-account-automation not found (OP_APP_AUTH=1 uses app auth)" >&2; exit 1; }
+  export OP_SERVICE_ACCOUNT_TOKEN
+fi
+exec "$real" "$@"
+{{- end }}

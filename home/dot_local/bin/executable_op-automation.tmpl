@@ -1,0 +1,14 @@
+{{- if and .personal (not .work) (not .headless) (eq .chezmoi.os "darwin") -}}
+#!/bin/bash
+# Runs `op` authenticated as the read-only service account for the Automation
+# vault, so reads never prompt. The token is scoped to this one process; other
+# `op` callers keep app auth for vaults a service account cannot reach.
+set -euo pipefail
+
+OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "$USER" -s op-service-account-automation -w) || {
+  echo "op-automation: Keychain item op-service-account-automation not found" >&2
+  exit 1
+}
+export OP_SERVICE_ACCOUNT_TOKEN
+exec op "$@"
+{{- end }}

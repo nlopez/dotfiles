@@ -1,0 +1,105 @@
+{{- /* ~/.config/zsh/zprofile — runs once per login shell, before zshrc.
+   PATH and env exports live here. Interactive-only setup (aliases, plugins,
+   prompts, zle bindings) stays in zshrc.
+*/ -}}
+
+typeset -U path
+
+# XDG Base Directory Specification — set early; everything below depends on them.
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+export XDG_CACHE_HOME="$HOME/.cache"
+
+export COLORTERM=truecolor
+
+{{- if not .headless }}
+export OP_ACCOUNT=my.1password.com
+export SSH_AUTH_SOCK="{{ .platform.ssh_auth_sock | replace "~" .chezmoi.homeDir }}"
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+{{- $brewPrefixes := list "/opt/homebrew" "/usr/local" -}}
+{{- $foundBrewPrefix := "" -}}
+{{- range $brewPrefix := $brewPrefixes -}}
+  {{- if and (not $foundBrewPrefix) (stat (printf "%s/bin/brew" $brewPrefix)) -}}
+    {{- $foundBrewPrefix = $brewPrefix -}}
+  {{- end -}}
+{{- end }}
+{{- if $foundBrewPrefix }}
+
+fpath+=("{{ $foundBrewPrefix }}/share/zsh/site-functions")
+eval "$({{ $foundBrewPrefix }}/bin/brew shellenv)"
+# brew shellenv exports FPATH. Exported, it is inherited by every child zsh
+# (and frozen into long-lived tmux servers), where it *replaces* that zsh's
+# built-in fpath — so a different/removed zsh can't find compinit, colors, ...
+typeset +x FPATH
+{{ end }}
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+{{- $darwinBrewPrefix := "" -}}
+{{- range (list "/opt/homebrew" "/usr/local") -}}
+  {{- if and (not $darwinBrewPrefix) (stat (printf "%s/bin/brew" .)) -}}
+    {{- $darwinBrewPrefix = . -}}
+  {{- end -}}
+{{- end }}
+{{- if $darwinBrewPrefix }}
+# keg-only brew formulae that need to shadow system versions. Also applied
+# in .zshenv (all zsh shells) since .zprofile only runs for login shells;
+# re-applying here re-prepends after path_helper -s rebuilds PATH below.
+{{ template "keg-only-brew-formulae.tmpl" (dict "prefix" $darwinBrewPrefix) }}
+{{- end }}
+{{- end }}
+{{- $homeDir := .chezmoi.homeDir }}
+
+# Dynamic PATH additions — also done in ~/.config/shell/env (all shell types);
+# repeated here so they re-prepend on macOS after path_helper -s rebuilds PATH
+# in a login shell. typeset -U path dedupes the overlap.
+for _d in \
+  "$HOME/go/bin" \
+  "$HOME/.cargo/bin" \
+; do
+  [[ -d "$_d" ]] && PATH="$_d:$PATH"
+done
+unset _d
+
+export PNPM_HOME="${XDG_DATA_HOME}/pnpm"
+PATH="$PNPM_HOME/bin:$PATH"
+
+# Nix profile (.chezmoidata/nix.yaml) — CLI tools, including the GNU userland
+# that shadows the BSD tools on macOS. Must sit ahead of Homebrew and, on
+# macOS, be re-prepended here after path_helper -s rebuilds PATH.
+PATH="{{ includeTemplate "nix-profile" . }}/bin:$PATH"
+fpath=("{{ includeTemplate "nix-profile" . }}/share/zsh/site-functions" $fpath)
+
+# mise shims — the few tools nixpkgs lacks; .zshrc runs `mise activate`.
+PATH="${XDG_DATA_HOME}/mise/shims:$PATH"
+
+# Work shims (e.g. gh) must beat Nix/mise installs, but sit behind ~/.local/bin/shims
+# so our shims run first and chain to them.
+{{ if .work -}}
+for _d in /opt/*/shims/bin(N); do PATH="$_d:$PATH"; done; unset _d
+{{ end -}}
+PATH="{{ joinPath $homeDir ".local/bin" }}:$PATH"
+# Prepend shims last so they take priority over everything else.
+PATH="{{ joinPath $homeDir ".local/bin/shims" }}:$PATH"
+
+typeset -U path
+export TENV_AUTO_INSTALL=true
+export TFENV_AUTO_INSTALL=true
+export GOPATH="${XDG_DATA_HOME}/go"
+export VISUAL="zed"
+export EDITOR="vim"
+
+{{- if .work }}
+# Source work-specific env vars (age-encrypted in source tree, decrypted on apply).
+[[ -r "${XDG_CONFIG_HOME}/work-secrets/env" ]] && source "${XDG_CONFIG_HOME}/work-secrets/env"
+{{- end }}
+
+{{- if and (not .headless) (not (env "CHEZMOI_SKIP_SECRETS")) }}
+{{- if .personal }}
+# Automation vault — personal machine secrets
+export HF_TOKEN={{ output (joinPath .chezmoi.homeDir ".local/bin/op-automation") "read" "--no-newline" "op://evjh25ux2mnoufaut6qhvm2pdi/rngar3p7k7q7uki2wrhmx4eb3e/credential" }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,13 @@
+# Every host: tools with no nixpkgs package. Everything else comes from Nix
+# (.chezmoidata/nix.yaml). Homebrew is the last resort (GUI apps and tools
+# mise cannot install). zabrze, also missing from nixpkgs, is a chezmoi external.
+#
+# Versions are pinned; Renovate bumps them (see renovate.json).
+
+[tools]
+"pypi:unique-namer" = "1.6.2"
+"github:Gentleman-Programming/engram" = "3.7.1"
+# nixpkgs' cf ships share/zsh/site-functions/_cf, which collides with the
+# zsh-completions package in the Nix profile.
+"npm:cf" = "1.0.0-beta.32"
+"github:dmno-dev/varlock" = "1.24.0"

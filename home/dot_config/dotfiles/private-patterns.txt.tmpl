@@ -1,0 +1,3 @@
+{{- range (includeTemplate "private-data" . | fromYaml).scan_patterns -}}
+{{ . }}
+{{ end -}}

@@ -1,0 +1,153 @@
+set -g focus-events on
+set -s extended-keys on
+set -g extended-keys-format csi-u
+set -g default-terminal "tmux-256color"
+set -ga terminal-overrides ",xterm-256color:RGB"
+set -ga terminal-overrides ",xterm-ghostty:RGB"
+set -ga terminal-overrides ',*256color*:smcup@:rmcup@'
+set -ga terminal-features 'xterm-256color:extkeys'
+set -ga terminal-features 'xterm-ghostty:extkeys'
+
+# explicitly set 'C-b' prefix
+set -g prefix C-b
+bind C-b send-prefix
+
+# use 'C-v' to send prefix to nested tmux
+bind-key -n C-v send-prefix
+
+set -g mouse on
+
+# Selection with mouse should copy to clipboard right away, in addition to the default action.
+unbind -n -T copy-mode-vi MouseDragEnd1Pane
+bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-selection
+
+# 1-based indexing for windows and panes
+set -g base-index 1
+set -g pane-base-index 1
+
+# don't leave gaps in window numbering after closes
+set -g renumber-windows on
+
+# faster command sequences
+set -s escape-time 50
+
+# reload tmux conf
+unbind R
+bind R source-file ~/.config/tmux/tmux.conf\; display "Reloaded tmux configuration!"
+
+bind-key m command-prompt -p "window name:" "run-shell \"~/.config/tmux/scripts/rename-window.sh '%%'\""
+
+# window movement binds
+bind , previous-window
+bind . next-window
+bind -n C-S-, previous-window
+bind -n C-S-. next-window
+
+# move windows left or right
+bind < swap-window -t -1\; select-window -t -1
+bind > swap-window -t +1\; select-window -t +1
+
+# pane split binds
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+
+# pane movement binds
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# status bar ------------------------------------------------------------------
+set-option -g status-position bottom
+# window labels: show index and name, with padding for spacing
+# #{agent_tab_icon} is substituted by the tmux-agent-tabs plugin (spinner /
+# done / question markers for claude, codex, pi).
+set-window-option -g window-status-format "  #{agent_tab_icon}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
+set-window-option -g window-status-current-format "  #{agent_tab_icon}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
+
+#### statusbar ####
+set -g status-justify centre # centre-align window list between status-left / status-right
+set -g status-left-length 48
+set -g status-left ''
+set -g status-right ''
+
+# ── Theme: Handled by tmux-contrib/tmux-theme plugin ──
+# The tmux-theme plugin automatically detects light/dark mode using
+# the same tmux 3.5+ client-dark-theme/client-light-theme hooks
+# and applies beautiful Catppuccin or Rose Pine themes
+
+# more spacing between tabs
+set -g window-status-separator '  '
+
+# window/pane titling for terminal emulator (off = don't change host terminal window title)
+set -g set-titles off
+set-option -g allow-rename off
+set-option -g automatic-rename off
+# new windows start with the name 'untitled' (including the first window on session creation)
+set-hook -g after-new-session 'rename-window untitled'
+set-hook -g after-new-window 'rename-window untitled'
+# clear the removed window-switch.sh hook from already-running servers (source-file doesn't unset hooks)
+set-hook -gu after-select-window
+
+# confirm before killing a window or the server
+bind-key K confirm kill-pane
+
+bind-key @ command-prompt -p "create pane from:" "join-pane -s ':%%'"
+
+bind-key \" list-windows
+
+# environment
+set -g update-environment "DISPLAY SSH_ASKPASS SSH_AUTH_SOCK SSH_AGENT_PID SSH_CONNECTION WINDOWID XAUTHORITY HYPRLAND_INSTANCE_SIGNATURE NIRI_SOCKET"
+
+# copy/paste and scrollback
+set -g history-limit 50000
+set-window-option -g mode-keys vi
+# bind-key -T copy-mode-vi y send-key copy-pipe
+# bind-key -T copy-mode-vi v send-key begin-selection
+
+# Enable pane border only when window has more than one pane
+set -g pane-border-status off
+# Heavy box-drawing glyphs on the active pane, thin on inactive (tmux >=3.2).
+set -g pane-border-lines heavy
+# Active pane border is set by the theme hook below; inactive borders
+# use the tmux default (no explicit dimming).
+# Colored arrows on the active pane's borders, on every side (3.2+).
+set -g pane-border-indicators both
+# Prefer push-updated @current_cmd (set via zsh preexec/precmd); fall back to ps
+# lookup when the option is empty (non-zsh shells, nested programs, idle prompts).
+set -g pane-border-format " #{pane_index} | #{?@current_cmd,#{@current_cmd},#(~/.config/tmux/scripts/pane-cmd.sh #{pane_pid})} "
+set -g status-interval 5
+set-hook -g pane-focus-in "set-option -Fw pane-border-status '#{?#{e|>:#{window_panes},1},bottom,off}'"
+set-hook -g window-layout-changed "set-option -Fw pane-border-status '#{?#{e|>:#{window_panes},1},bottom,off}'"
+
+unbind C-l
+bind -n C-l clear-history\; send-keys "clear" C-m
+
+set-option -g default-shell $SHELL
+
+set -g window-size latest
+setw -g aggressive-resize on
+
+# ── Plugin Management ──────────────────────────────────────────────────────
+# List of plugins
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-contrib/tmux-theme'
+set -g @plugin 'jhickner/tmux-agent-tabs'
+
+# tap: agent-aware pane picker (prefix + g). Binary comes from Homebrew (macOS) or mise (Linux).
+bind-key g display-popup -E -w 90% -h 80% "tap pick"
+
+# tmux-theme configuration
+# Auto-switches between light/dark based on system appearance
+set -g @theme-dark 'solarized-dark'
+set -g @theme-light 'quiet-light'
+
+# Optional: Path to custom status bar config (sourced after theme colors)
+set -g @theme-path "$HOME/.config/tmux/status.tmux"
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run '~/.config/tmux/plugins/tpm/tpm'
+{{ if stat (joinPath .chezmoi.homeDir ".config/tmux/themes/noctalia.conf") }}
+# Noctalia-generated theme override (sourced after tpm so it wins)
+source-file -q "$XDG_CONFIG_HOME/tmux/themes/noctalia.conf"
+{{ end -}}

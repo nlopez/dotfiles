@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# tfplan — run terraform plan and save output in binary (.bin), text (.txt),
+# and JSON (.json) formats. All extra arguments are forwarded to terraform plan.
+#
+# Output files are written to the current directory:
+#   tfplan.bin   binary plan (for terraform apply)
+#   tfplan.txt   human-readable text
+#   tfplan.json  machine-readable JSON
+
+set -eu
+
+trap 'trap - INT TERM; kill 0' INT TERM
+
+# Pull -chdir=... out of args so it can be placed right after 'terraform'
+chdir_arg=()
+rest_args=()
+for arg in "$@"; do
+    if [[ "$arg" == -chdir=* || "$arg" == --chdir=* ]]; then
+        chdir_arg=("-chdir=${arg#*=}")
+    else
+        rest_args+=("$arg")
+    fi
+done
+
+out_dir="${chdir_arg[0]:-}"
+out_dir="${out_dir#-chdir=}"
+redir_prefix="${out_dir:+${out_dir}/}tfplan"
+
+terraform ${chdir_arg[@]+"${chdir_arg[@]}"} plan -lock=false -out="tfplan.bin" ${rest_args[@]+"${rest_args[@]}"}
+
+terraform ${chdir_arg[@]+"${chdir_arg[@]}"} show -no-color "tfplan.bin" > "${redir_prefix}.txt"  & pid_txt=$!
+terraform ${chdir_arg[@]+"${chdir_arg[@]}"} show -json    "tfplan.bin" > "${redir_prefix}.json" & pid_json=$!
+
+wait $pid_txt $pid_json

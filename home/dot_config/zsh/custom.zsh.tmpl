@@ -1,0 +1,100 @@
+{{- if lookPath "atuin" }}
+# Disable zsh's history file in favor of atuin (atuin handles persistence).
+# Do NOT define a plain zshaddhistory() function here — atuin registers its
+# own _atuin_zshaddhistory via add-zsh-hook, and a pre-existing plain function
+# blocks that hook from ever being called (add-zsh-hook only installs its
+# wrapper when the function is undefined). Leaving it undefined means atuin
+# correctly captures comment lines and other commands that skip preexec.
+unset HISTFILE
+alias history="atuin history list"
+{{- end }}
+
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+
+cd() {
+  # If given a file path, cd to its parent directory. ${1:h} is zsh's :h modifier
+  # (borrowed from vi), which strips the trailing filename component — like dirname.
+  if [[ $# -eq 1 && -f "$1" ]]; then
+    set -- "${1:h}"
+  fi
+  if (( $+functions[z] )); then
+    z "$@"
+  else
+    builtin cd "$@"
+  fi
+}
+
+# Rebuild PATH from scratch on reload: hand .zprofile a clean slate so
+# added/removed paths are accurate rather than carried over from the old shell.
+clear() { stty sane; command clear }
+
+# Make Ctrl+L also run stty sane (clear-screen widget bypasses the function above)
+_clear_screen_sane() { stty sane; zle clear-screen }
+zle -N _clear_screen_sane
+bindkey '^L' _clear_screen_sane
+
+function reload {
+  stty sane
+  exec env -i PATH={{ .platform.reload_path }} TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX TMUX_PANE=$TMUX_PANE zsh --login
+}
+
+###############################################################################
+# AWS profile fzf picker — ZLE widget that intercepts Tab after --profile / -p
+###############################################################################
+_aws_profile_fzf() {
+  # Only activate when the command on the line starts with `aws`.
+  [[ "$BUFFER" != aws\ * ]] && { zle expand-or-complete; return }
+
+  # When Tab is pressed mid-word, zsh may have split the buffer so that the
+  # partial word sits in RBUFFER. Reconstruct the full left context by appending
+  # the current partial word (everything in RBUFFER up to the next space).
+  local full_left="$LBUFFER"
+  local partial_word="${RBUFFER%%[[:space:]]*}"
+  [[ -n "$partial_word" && "$partial_word" != -* ]] && full_left+="$partial_word"
+
+  # Only activate when the cursor is directly after --profile or -p (with optional partial).
+  if [[ ! "$full_left" =~ '(--profile[[:space:]]+|--profile=|-p[[:space:]]+)([-a-zA-Z0-9_.]*)$' ]]; then
+    zle expand-or-complete
+    return
+  fi
+
+  local query="${match[2]}" # partial already typed, may be empty
+
+  # Strip the partial from LBUFFER so we can splice the chosen value in cleanly.
+  local lbuffer_base="${LBUFFER%${query}}"
+
+  local config="${AWS_CONFIG_FILE:-$HOME/.aws/config}"
+  [[ -f "$config" ]] || { zle expand-or-complete; return }
+
+  local profiles
+  profiles=$(grep -E '^\[(profile [^]]+|default)\]' "$config" \
+    | sed -E 's/^\[profile ([^]]+)\]$/\1/; s/^\[default\]$/default/')
+  [[ -z "$profiles" ]] && { zle expand-or-complete; return }
+
+  local aws_bin
+  aws_bin=$(whence -p aws)
+
+  local chosen
+  chosen=$(printf '%s\n' "$profiles" | fzf \
+    --height=40% \
+    --layout=reverse \
+    --border \
+    --prompt='AWS profile> ' \
+    --query="$query" \
+    --preview="$aws_bin configure list --profile {} 2>/dev/null || echo '(no details)'" \
+    --preview-window='right:50%:wrap' \
+  )
+
+  # Esc / Ctrl-C — leave the buffer untouched.
+  [[ -z "$chosen" ]] && zle redisplay && return 0
+
+  LBUFFER="${lbuffer_base}${chosen}"
+  zle redisplay
+}
+zle -N _aws_profile_fzf
+bindkey '^I' _aws_profile_fzf  # ^I is Tab
+
+
+{{- if .work }}
+alias sudo="/Applications/Privileges.app/Contents/MacOS/PrivilegesCLI -a && /usr/bin/sudo"
+{{- end }}

@@ -1,0 +1,34 @@
+# Pi — single source of truth for user packages.
+# modify_settings.json.tmpl and run_onchange_after_pi-packages.py.tmpl
+# read .pi.packages at template render time.
+# Renovate scans this file for npm:pkg@version patterns.
+# The Pi coding agent itself is installed out of band, not via chezmoi.
+pi:
+  packages:
+  - "npm:pi-auto-theme@1.1.1"
+  - "npm:pi-subagents@0.88.0"
+  - "npm:context-mode@2.1.8"
+  - "npm:pi-intercom@0.18.1"
+  - "npm:pi-powerline@0.11.2"
+  - "npm:pi-btw@0.8.1"
+  - "npm:pi-markdown-preview@0.26.4"
+  - "npm:pi-powerline-footer@0.22.0"
+  - "npm:@juicesharp/rpiv-ask-user-question@2.15.0"
+  - "npm:pi-interrupt-steer@0.1.0"
+  - "npm:gentle-engram@0.7.1"
+  - "npm:@tmustier/pi-session-recap@0.6.1"
+  - "npm:pi-session-prs@1.1.2"
+  # Git-sourced packages; pi clones and reconciles these itself, so they are
+  # written to settings.json only (not handled by the npm reconcile script).
+  git_packages:
+  - "git:github.com/ayghri/i-have-adhd@v0.4.1"
+  # Installed only on work machines, together with the private work packages
+  # (pi.packages and pi.local_packages in the private data; see
+  # docs/private-data.md). Skipped on purpose: pi-mcp-adapter and
+  # mcp-port-forward (pi >= 0.99 has built-in MCP), pi-npm-guard and
+  # npm-update-cooldown (chezmoi/Renovate pin npm versions).
+  work_packages:
+  - "npm:@getpipher/vision@0.5.3"
+  # Installed only on personal (non-work) machines.
+  personal_only_packages:
+  - "npm:pi-lmstudio@1.5.0"

@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+"""Reconcile Pi user packages with the declarative package list.
+
+Ensures ~/.pi/agent/npm/ contains exactly the declared packages by writing
+the correct package.json and running `pnpm install` to reconcile.
+
+Hash trigger (chezmoi run_onchange):
+{{ .pi.packages | toJson | sha256sum }}
+{{ .pi.personal_only_packages | toJson | sha256sum }}
+{{ .pi.work_packages | toJson | sha256sum }}
+{{ .work }}
+"""
+import json
+import os
+import shutil
+import subprocess
+import sys
+
+# Declared packages (injected by chezmoi template from .chezmoidata/pi.yaml).
+# personal_only_packages are excluded on work machines.
+DECLARED = [
+{{- range .pi.packages }}
+    "{{ . }}",
+{{- end }}
+{{- if not .work }}
+{{- range .pi.personal_only_packages }}
+    "{{ . }}",
+{{- end }}
+{{- end }}
+{{- if .work }}
+{{- range .pi.work_packages }}
+    "{{ . }}",
+{{- end }}
+{{- range ((includeTemplate "private-data" . | fromYaml).pi | default dict).packages }}
+    "{{ . }}",
+{{- end }}
+{{- end }}
+]
+
+NPM_DIR = os.path.expanduser("~/.pi/agent/npm")
+
+
+def parse_npm_spec(spec: str) -> tuple[str, str]:
+    """Parse 'npm:[@scope/]name@version' → (name, version)."""
+    s = spec[4:] if spec.startswith("npm:") else spec
+    if s.startswith("@"):
+        at = s.rfind("@")
+        if at > 0:
+            return s[:at], s[at + 1 :]
+        return s, "*"
+    parts = s.split("@", 1)
+    return parts[0], parts[1] if len(parts) > 1 else "*"
+
+
+def ensure_file(path: str, content: str) -> bool:
+    """Write file if missing or stale. Returns True if written."""
+    try:
+        if os.path.isfile(path) and open(path).read() == content:
+            return False
+    except Exception:
+        pass
+    with open(path, "w") as f:
+        f.write(content)
+    return True
+
+
+# --- Pre-flight checks ---
+
+# pnpm is provided by the Nix profile; make it visible to this script.
+os.environ["PATH"] = (
+    "{{ includeTemplate "nix-profile" . }}/bin" + os.pathsep + os.environ["PATH"]
+)
+
+if not shutil.which("pnpm"):
+    print("pnpm not found, skipping Pi package reconciliation", file=sys.stderr)
+    sys.exit(0)
+
+# --- Build target state ---
+
+target_deps: dict[str, str] = {}
+for spec in DECLARED:
+    name, version = parse_npm_spec(spec)
+    target_deps[name] = version
+
+# --- Ensure workspace structure ---
+
+os.makedirs(NPM_DIR, exist_ok=True)
+
+ensure_file(
+    os.path.join(NPM_DIR, ".gitignore"),
+    "node_modules\n",
+)
+
+# --- Clean up stale node_modules ---
+# Ensure a clean slate before pnpm install.
+pnpm_store = os.path.join(NPM_DIR, "node_modules", ".pnpm")
+if os.path.isdir(pnpm_store):
+    print("Pi packages: removing stale pnpm virtual store", file=sys.stderr)
+    shutil.rmtree(os.path.join(NPM_DIR, "node_modules"))
+
+# --- Read current state and diff ---
+
+pkg_path = os.path.join(NPM_DIR, "package.json")
+current_deps: dict[str, str] = {}
+if os.path.isfile(pkg_path):
+    try:
+        with open(pkg_path) as f:
+            current_deps = json.load(f).get("dependencies", {})
+    except Exception:
+        pass
+
+node_modules_dir = os.path.join(NPM_DIR, "node_modules")
+deps_changed = current_deps != target_deps or not os.path.isdir(node_modules_dir)
+if not deps_changed:
+    print("Pi packages: already in sync ✓")
+    sys.exit(0)
+
+added = sorted(set(target_deps) - set(current_deps))
+removed = sorted(set(current_deps) - set(target_deps))
+changed = sorted(
+    k
+    for k in set(target_deps) & set(current_deps)
+    if target_deps[k] != current_deps[k]
+)
+
+for name in added:
+    print(f"  + {name}@{target_deps[name]}")
+for name in removed:
+    print(f"  - {name}@{current_deps[name]}")
+for name in changed:
+    print(f"  ↑ {name} {current_deps[name]} → {target_deps[name]}")
+# --- Write target package.json ---
+
+with open(pkg_path, "w") as f:
+    json.dump(
+        {"name": "pi-extensions", "private": True, "dependencies": target_deps},
+        f,
+        indent=2,
+    )
+    f.write("\n")
+
+# --- Reconcile with pnpm install ---
+
+result = subprocess.run(["pnpm", "install"], cwd=NPM_DIR)
+if result.returncode != 0:
+    print("Pi packages: pnpm install failed", file=sys.stderr)
+    sys.exit(1)
+
+print(
+    f"Pi packages: {len(added)} added, {len(removed)} removed, {len(changed)} updated ✓"
+)

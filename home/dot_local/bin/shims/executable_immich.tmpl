@@ -1,0 +1,19 @@
+{{- if and .personal (not .work) (not .headless) (eq .chezmoi.os "darwin") -}}
+#!/bin/sh
+# immich shim: runs the real immich CLI under `varlock run` so IMMICH_API_KEY
+# and IMMICH_INSTANCE_URL (dot_config/varlock/agents.env.tmpl, from 1Password)
+# exist only in that process, never in the shell environment.
+# Lives in ~/.local/bin/shims; drops its own dir from PATH, then runs the next
+# `immich` (the Nix profile's).
+dir=$(cd "$(dirname "$0")" && pwd -P)
+new=; IFS=:
+for d in $PATH; do
+  [ "$(cd "$d" 2>/dev/null && pwd -P)" = "$dir" ] || new=${new:+$new:}$d
+done
+unset IFS; PATH=$new
+real=$(command -v immich) || { echo "immich: no real immich found on PATH" >&2; exit 127; }
+
+exec "${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims/varlock" run \
+  -p "${XDG_CONFIG_HOME:-$HOME/.config}/varlock/agents.env" \
+  --filter 'IMMICH_*' --inject vars --no-redact-stdout -- "$real" "$@"
+{{- end }}

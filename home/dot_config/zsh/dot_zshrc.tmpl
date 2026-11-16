@@ -1,0 +1,365 @@
+# Load shared POSIX env (Nix profile PATH, etc.) for all shell types.
+. "${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
+
+# Skip interactive-only config when running under Pi.
+[[ -n "${PI_CODING_AGENT:-}" ]] && return
+
+###############################################################################
+# Completion + plugins (all from the Nix profile — no framework)
+###############################################################################
+_zdir="${ZDOTDIR:-${XDG_CONFIG_HOME:-$HOME/.config}/zsh}"
+_nix_profile="{{ includeTemplate "nix-profile" . }}"
+
+# fpath: our completions, then the profile's (zsh-completions, tool-provided
+# completions, and pure's prompt_pure_setup/async). Must precede compinit.
+typeset -U fpath
+fpath=("${XDG_DATA_HOME:-$HOME/.local/share}/zsh/completions" "$_nix_profile/share/zsh/site-functions" $fpath)
+{{- if .workspace }}
+# Workspaces: the host package manager's zsh completions (its init.zsh also
+# re-prepends PATH, which shell/env already covers).
+for _f in /opt/*/share/etc/*/init.zsh(N); do source "$_f"; done; unset _f
+{{- end }}
+
+source "$_zdir/defaults.zsh"   # options, completion styles, key bindings, aliases
+
+autoload -Uz compinit
+[[ -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh" ]] || mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION"
+compdef _dirs d
+setopt completealiases
+
+# Generic coverage, in layers (most specific wins):
+#  1. Completions shipped by packages (fpath above).
+#  2. carapace: ~1000 built-in completers; its bridges borrow zsh/fish/bash
+#     completions for tools it lacks. Registers via compdef, so it follows compinit.
+#  3. Fallback for anything left: parse `--help` (zsh's _gnu_generic). Skipped for
+#     path-qualified commands (./script) so tab never executes arbitrary files.
+if (( $+commands[carapace] )); then
+  export CARAPACE_BRIDGES='zsh,fish,bash'
+  source <(carapace _carapace zsh)
+fi
+# _gnu_generic hands whatever it scraped to _arguments, which errors on help text
+# it can't escape (e.g. engram's trailing `\`); swallow that and fall back to files.
+_help_fallback() {
+  if [[ $words[1] == */* ]]; then _default; else _gnu_generic 2>/dev/null || _default; fi
+}
+compdef _help_fallback -default-
+
+# Plugin order matters: fast-syntax-highlighting wraps widgets, so it loads last.
+source "$_nix_profile/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source <(fzf --zsh)
+source "$_nix_profile/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
+
+# Personal widgets/overrides — after the plugins so they can rebind their keys.
+source "$_zdir/custom.zsh"
+source "$_zdir/git-worktree.zsh"
+
+# Prompt: pure. Prevent it from setting window/terminal titles.
+zstyle ':prompt:pure:title' show no
+autoload -U promptinit && promptinit
+prompt pure
+
+unset _zdir _nix_profile
+
+###############################################################################
+# Interactive config
+###############################################################################
+
+function _source() {
+  [[ -f $1 ]] && source "$@"
+}
+
+# Reload: replace the current shell process with a fresh login shell so
+# .zprofile and .zshrc are re-read with no stale state.
+function reload {  exec env -i PATH=$PATH TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX TMUX_PANE=$TMUX_PANE zsh --login }
+
+function _command() {
+  command -v $1 >/dev/null 2>&1
+}
+
+# shellcheck source=~/.zshrc_local
+_source ~/.zshrc_local
+
+{{- if lookPath "zabrze" }}
+eval "$(zabrze init --bind-keys)"
+# zsh-autosuggestions skips every widget whose name starts with '_', which
+# includes all __zabrze::* widgets — so ZSH_AUTOSUGGEST_CLEAR_WIDGETS can
+# never wrap them directly. Create a non-underscore shim for Space that
+# zsh-autosuggestions CAN see, add it to CLEAR_WIDGETS so the stale
+# pre-expansion suggestion is dropped instead of bleeding into the new buffer.
+zabrze-expand-and-self-insert() { zle __zabrze::expand-and-self-insert }
+zle -N zabrze-expand-and-self-insert
+bindkey " " zabrze-expand-and-self-insert
+ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(zabrze-expand-and-self-insert)
+# groot: after zabrze expands 'groot' → '"$(git rev-parse --show-toplevel)"',
+# this hook immediately evaluates it and replaces it with the actual path so
+# the buffer shows the resolved path, not the shell-expansion expression.
+function _groot_inline_expand() {
+  local pattern='"$(git rev-parse --show-toplevel)"'
+  [[ "$BUFFER" == *"$pattern"* ]] || return
+  local root
+  root=$(git rev-parse --show-toplevel 2>/dev/null) || return
+  local quoted=${(q)root}
+  local before="${BUFFER%%"$pattern"*}"
+  BUFFER="${BUFFER//"$pattern"/$quoted}"
+  CURSOR=$(( ${#before} + ${#quoted} ))
+  # zsh-syntax-highlighting registers its zle-line-pre-redraw hook before ours
+  # (plugins load near the top of this file, our hook below), so its highlights are already
+  # stale by the time we swap the buffer. Re-run it now with the new buffer.
+  (( ${+functions[_zsh_highlight]} )) && _zsh_highlight
+}
+add-zle-hook-widget zle-line-pre-redraw _groot_inline_expand
+{{- end }}
+# mise: the few tools nixpkgs lacks (engram, unique-namer, ...).
+(( $+commands[mise] )) && eval "$(mise activate zsh)"
+
+# Keep our shims first on every prompt and directory change: `mise activate`
+# and the work package manager's init re-prepend their own dirs, which would put
+# real binaries (e.g. gh) ahead of our shims. Hooks registered after theirs
+# run after them, so shims always win.
+# ~/.local/bin/shims goes first (each shim strips its own dir from PATH to find
+# the real binary), then ~/.local/bin, then /opt/*/shims/bin (work shims).
+_local_bin_first() {
+{{- if .work }}
+  local _d
+  for _d in /opt/*/shims/bin(N); do path=($_d ${path:#$_d}); done
+{{- end }}
+  path=("$HOME/.local/bin" ${path:#"$HOME/.local/bin"})
+  # Inside a nix dev shell, its pinned tools (e.g. aws-vault) beat the
+  # wrappers in ~/.local/bin and the work shims.
+  if [[ -n $IN_NIX_SHELL ]]; then
+    path=(${(M)path:#/nix/store/*} ${path:#/nix/store/*})
+  fi
+  path=("$HOME/.local/bin/shims" ${path:#"$HOME/.local/bin/shims"})
+}
+precmd_functions+=(_local_bin_first)
+chpwd_functions+=(_local_bin_first)
+_local_bin_first
+eval "$(atuin init zsh)"
+
+# Prevent pasted newlines from ever executing a command.
+# bracketed-paste-magic intercepts terminal paste events, converts embedded
+# newlines to spaces, and strips any trailing newline so the Enter key must
+# be pressed deliberately to run a command.
+autoload -Uz bracketed-paste-magic
+# '.self-*' forces the builtin self-insert widgets during a paste, bypassing
+# url-quote-magic so pasted URLs / special chars ($ ? & = space) are inserted
+# literally instead of being backslash-escaped. Newline handling above is
+# unaffected.
+zstyle ':bracketed-paste-magic' active-widgets '.self-*'
+zle -N bracketed-paste bracketed-paste-magic
+
+autoload -U edit-command-line
+zle -N edit-command-line
+function _edit_command_line() { VISUAL="code --wait" zle edit-command-line }
+zle -N _edit_command_line
+bindkey '^xe' _edit_command_line
+bindkey '^x^e' _edit_command_line
+
+# Home/End: some terminals don't have these bound by default, leaving Home a
+# no-op and End inserting a literal '~'. Bind via terminfo so the actual
+# sequence for $TERM is used rather than hardcoding one terminal's codes.
+zmodload zsh/terminfo
+[[ -n "${terminfo[khome]}" ]] && bindkey "${terminfo[khome]}" beginning-of-line
+[[ -n "${terminfo[kend]}" ]] && bindkey "${terminfo[kend]}" end-of-line
+
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
+alias e="code --add"
+
+# Fast-iteration chezmoi: skips every 1Password (`op`) read, which otherwise
+# dominates apply/status/diff time (~1-1.5s per secret, ~30 secrets on a work
+# machine). Use for routine dotfile changes that don't touch secrets.
+alias chezmoi-fast="CHEZMOI_SKIP_SECRETS=1 chezmoi"
+
+###############################################################################
+# AWS profile in preprompt when typing aws/terraform commands
+###############################################################################
+# _pure_path: smart path string, updated each precmd. In git repos keeps
+# everything from the repo root downward unabbreviated and abbreviates above it
+# (last 3 components shown). Outside git repos abbreviates at ≥4 dirs after ~.
+typeset -g _pure_path=""
+
+function _smart_path_precmd() {
+  local git_prefix git_rel repo_root p i au s d r
+  local -a parts
+
+  p="${PWD/#$HOME/~}"
+
+  # Abbreviate path parts: keep last 3 full, shorten earlier ones to
+  # leading-dots + first-non-dot char. Result in global _abbrev_result.
+  _abbrev_parts() {
+    local -a pp=("$@")
+    local res="~" i au s d r
+    au=$(( ${#pp} - 3 ))
+    for (( i = 1; i <= ${#pp}; i++ )); do
+      s="${pp[$i]}"
+      if (( i <= au )); then
+        d="" r="$s"
+        while [[ "$r" == .* ]]; do d="${d}."; r="${r:1}"; done
+        res="${res}/${d}${r:0:1}"
+      else
+        res="${res}/${s}"
+      fi
+    done
+    _abbrev_result="$res"
+  }
+
+  if git_prefix=$(git rev-parse --show-prefix 2>/dev/null); then
+    # --show-prefix: path from repo root to CWD with trailing slash, empty at root
+    if [[ -n "$git_prefix" ]]; then
+      git_rel="${git_prefix%/}"
+      repo_root="${p%/$git_rel}"
+    else
+      git_rel=""
+      repo_root="$p"
+    fi
+    # Abbreviate the pre-root portion; \~/ escapes ~ for EXTENDED_GLOB safety
+    if [[ "$repo_root" == "~/"* ]]; then
+      parts=("${(@s:/:)${repo_root#\~/}}")
+      if (( ${#parts} >= 4 )); then
+        _abbrev_parts "${parts[@]}"
+        repo_root="$_abbrev_result"
+      fi
+    fi
+    _pure_path="${repo_root}${git_rel:+/$git_rel}"
+  else
+    if [[ "$p" == "~/"* ]]; then
+      parts=("${(@s:/:)${p#\~/}}")
+      if (( ${#parts} >= 4 )); then
+        _abbrev_parts "${parts[@]}"
+        _pure_path="$_abbrev_result"
+      else
+        _pure_path="$p"
+      fi
+    else
+      _pure_path="$p"
+    fi
+  fi
+}
+add-zsh-hook precmd _smart_path_precmd
+_smart_path_precmd  # prime before first prompt
+
+###############################################################################
+# ── Tmux pane border: push current command via @current_cmd ──────────────────
+# Sets the @current_cmd pane option on preexec (command running) and clears it
+# on precmd (back at prompt), feeding the pane-border-format in tmux.conf.
+# When cleared the border falls back to "---" via the format's else branch.
+###############################################################################
+if [[ -n "$TMUX" ]]; then
+  function _tmux_cmd_preexec() {
+    tmux set-option -p @current_cmd "$1" 2>/dev/null
+  }
+  function _tmux_cmd_precmd() {
+    tmux set-option -pu @current_cmd 2>/dev/null
+  }
+  add-zsh-hook preexec _tmux_cmd_preexec
+  add-zsh-hook precmd  _tmux_cmd_precmd
+fi
+
+{{- if eq .chezmoi.os "darwin" }}
+###############################################################################
+# ── Long-running command notifications (terminal-notifier) ────────────────────
+# Fires a macOS notification whenever a tmux command runs for longer than 5 s.
+# Skips the notification when the tmux window is currently active (the user is
+# already looking at the output).
+###############################################################################
+if command -v terminal-notifier &>/dev/null; then
+  _notif_cmd_start=0
+  _notif_cmd_name=""
+
+  function _notif_preexec() {
+    _notif_cmd_start=$EPOCHSECONDS
+    _notif_cmd_name="${${1## }%% *}"   # first word of command, strip leading spaces
+  }
+
+  function _notif_precmd() {
+    local _exit=$?
+    [[ $_notif_cmd_start -eq 0 ]] && return
+    local _elapsed=$(( EPOCHSECONDS - _notif_cmd_start ))
+    _notif_cmd_start=0
+    # Only care about tmux windows and commands that actually took a while.
+    [[ -z "$TMUX" || $_elapsed -lt 5 ]] && return
+    # Skip when the user is still looking at this window.
+    local _active
+    _active=$(tmux display-message -p '#{window_active}' 2>/dev/null) || return
+    [[ "$_active" == "1" ]] && return
+
+    local _win
+    _win=$(tmux display-message -p '#W' 2>/dev/null) || _win="tmux"
+
+    if [[ $_exit -eq 0 ]]; then
+      terminal-notifier \
+        -title "✅ ${_notif_cmd_name} (${_elapsed}s)" \
+        -subtitle "$_win" \
+        -message "Finished successfully" \
+        -sound "default" \
+        &>/dev/null &!
+    else
+      terminal-notifier \
+        -title "❌ ${_notif_cmd_name} (${_elapsed}s)" \
+        -subtitle "$_win" \
+        -message "Exited ${_exit}" \
+        -sound "Basso" \
+        &>/dev/null &!
+    fi
+  }
+
+  add-zsh-hook preexec _notif_preexec
+  add-zsh-hook precmd _notif_precmd
+fi
+{{- end }}
+
+# Inject psvar[24] into PROMPT before pure's exec-time segment (%(19V.)).
+# Uses psvar[24] to avoid colliding with pure's psvar[12-23] range.
+# psvar[24] = AWS profile (shown when typing aws/terraform/tf commands).
+# Runs once after pure has initialized PROMPT.
+function _aws_prompt_setup() {
+  # Replace all %~ with ${_pure_path} (expanded by PROMPT_SUBST at render time)
+  local _path_var='${_pure_path}'
+  PROMPT="${PROMPT//\%\~/$_path_var}"
+  # Inject psvar[24] (AWS profile) before pure's exec-time segment
+  local before="${PROMPT%%\%[(]19V.*}"
+  local after="${PROMPT#*\%[(]19V.}"
+  [[ "$before" != "$PROMPT" ]] && PROMPT="${before}%(24V. %F{yellow}%24v%f.)%(19V.${after}"
+}
+_aws_prompt_setup
+unfunction _aws_prompt_setup
+
+function _aws_profile_prompt() {
+  local first_word="${${BUFFER##[[:space:]]#}%% *}"
+  if [[ -n "$AWS_PROFILE" && "$first_word" == (aws|terraform|tfplan|tf) ]]; then
+    psvar[24]="$AWS_PROFILE"
+  else
+    psvar[24]=""
+  fi
+}
+add-zle-hook-widget zle-line-pre-redraw _aws_profile_prompt
+
+###############################################################################
+# Restic profile shortcuts — reads ~/.config/resticprofile/profiles.toml
+# https://creativeprojects.github.io/resticprofile/
+alias resticprofile='resticprofile -n default -c ${XDG_CONFIG_HOME:-$HOME/.config}/resticprofile/profiles.toml'
+alias restic-snapshots='resticprofile snapshots'
+alias restic-ls='resticprofile ls --snapshot latest'
+alias restic-restore='resticprofile restore --target ~/restic-restore/'
+###############################################################################
+eval "$(direnv hook zsh)"
+eval "$(zoxide init zsh)"
+command -v wt >/dev/null && eval "$(wt config shell init zsh)"
+{{- if and .workspace .work (not (index . "encryption")) }}
+
+# Workspaces: dotfiles install before the CLI uploads workspace secrets, so the
+# first apply ran without the age identity and skipped the private data. Once
+# the identity secret is here, re-run init (which turns on encryption) and
+# apply, once, in the background. The re-rendered .zshrc drops this block.
+if [[ -s /run/user/$UID/secrets/CHEZMOI_AGE_IDENTITY ]] && mkdir "${XDG_CACHE_HOME:-$HOME/.cache}/chezmoi-first-login.lock" 2>/dev/null; then
+  print -P "%F{blue}chezmoi:%f age identity found; applying private dotfiles in the background"
+  (
+    _log="${XDG_STATE_HOME:-$HOME/.local/state}/chezmoi-first-login.log"
+    mkdir -p "${_log:h}"
+    chezmoi init --apply --no-tty </dev/null >"$_log" 2>&1
+    rmdir "${XDG_CACHE_HOME:-$HOME/.cache}/chezmoi-first-login.lock"
+  ) &!
+fi
+{{- end }}

@@ -1,0 +1,14 @@
+// ────────────── Startup Applications ──────────────
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Miscellaneous#spawn-sh-at-startup
+
+// noctalia-shell is started via its own XDG autostart entry
+// (~/.config/autostart/dev.noctalia.Noctalia.desktop), not from here, so
+// there's no "spawn-at-startup noctalia" line to avoid launching it twice.
+
+// niri's IPC socket path embeds its PID, so NIRI_SOCKET changes on every
+// login and goes stale in long-lived shells (tmux, background services)
+// across a logout/login cycle. Point a stable symlink at the current
+// socket on every startup; ~/.config/zsh/zshenv.tmpl points NIRI_SOCKET
+// at this symlink instead of trusting an inherited env var.
+// https://github.com/niri-wm/niri/discussions/2634
+spawn-sh-at-startup "ln -sf \"$NIRI_SOCKET\" \"$XDG_RUNTIME_DIR/niri.sock\""

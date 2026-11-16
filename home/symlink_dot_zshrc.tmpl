@@ -1,0 +1,5 @@
+{{- /* ~/.zshrc is a symlink to the real zshrc under ZDOTDIR, for tools that
+   read $HOME/.zshrc directly instead of honoring ZDOTDIR. zsh itself reads
+   $ZDOTDIR/.zshrc, so this does not cause double sourcing.
+*/ -}}
+{{ joinPath .chezmoi.homeDir ".config/zsh/.zshrc" }}

@@ -1,0 +1,10 @@
+{{- /* ~/.local/share/engram/cloud.json — Engram Cloud client config (self-hosted
+   in k8s_home, apps/engram). Engram reads server_url + token from here; with
+   ENGRAM_CLOUD_AUTOSYNC=1 (env.tmpl, Claude's modify_settings.json.tmpl) it
+   then syncs in the background. Mode 0600 via the private_ prefix. Personal,
+   non-headless machines only (see .chezmoiignore): the server is private-gateway
+   only and the token comes from 1Password. */ -}}
+{
+  "server_url": "https://mau.desertbluffs.com",
+  "token": {{ output (joinPath .chezmoi.homeDir ".local/bin/op-automation") "read" "--no-newline" "op://evjh25ux2mnoufaut6qhvm2pdi/cq5a2vtrj5kuthd5q5vo6qxhha/token" | toJson }}
+}

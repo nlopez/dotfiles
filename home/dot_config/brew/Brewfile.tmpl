@@ -1,0 +1,47 @@
+{{- $darwin     := .packages.darwin -}}
+{{- $brewConfig := $darwin.brew -}}
+{{- $opts       := $brewConfig.brew_options | default dict -}}
+{{- $unsignedCfg := index $brewConfig "casks_unsigned" | default dict -}}
+
+{{- /* Package groups that apply to this machine. */ -}}
+{{- $groups := list "base" -}}
+{{- if .personal }}{{ $groups = append $groups "personal" }}{{ end -}}
+{{- if .work }}{{ $groups = append $groups "work" }}{{ end -}}
+
+{{- $uvCfg      := index $brewConfig "uv" | default dict -}}
+{{- $brews := list -}}
+{{- $casks := list -}}
+{{- $uvTools := list -}}
+{{- $unsigned := list -}}
+{{- $masApps := list -}}
+{{- range $g := $groups -}}
+{{-   $brews    = concat $brews    (index $brewConfig.brews $g  | default list) -}}
+{{-   $casks    = concat $casks    (index $brewConfig.casks $g  | default list) -}}
+{{-   $unsigned = concat $unsigned (index $unsignedCfg $g       | default list) -}}
+{{-   $uvTools  = concat $uvTools  (index $uvCfg $g             | default list) -}}
+{{-   $masApps  = concat $masApps  (index ($darwin.mas | default dict) $g | default list) -}}
+{{- end -}}
+
+# Taps (custom repos) — trusted: true so brew bundle handles tap trust declaratively
+{{ range $key, $url := ($brewConfig.taps | default dict) -}}
+tap {{ $key | quote }}, {{ $url | quote }}, trusted: true
+{{ end }}
+
+{{ range ($brews | sortAlpha | uniq) }}
+{{- $formulaOpts := index $opts . -}}
+brew {{ . | quote }}
+{{- if $formulaOpts }}, args: [{{ range $i, $o := $formulaOpts }}{{ if $i }}, {{ end }}{{ $o | quote }}{{ end }}]{{ end }}
+{{- if contains "/" . }}, trusted: true{{ end }}
+{{ end }}
+{{ range ($casks | sortAlpha | uniq) -}}
+cask {{ . | quote }}{{ if contains "/" . }}, trusted: true{{ end }}
+{{ end -}}
+{{ range ($unsigned | sortAlpha | uniq) -}}
+cask {{ . | quote }}
+{{ end -}}
+{{ range ($uvTools | sortAlpha | uniq) -}}
+uv {{ . | quote }}
+{{ end -}}
+{{ range $masApps -}}
+mas {{ .name | quote }}, id: {{ .id }}
+{{ end -}}

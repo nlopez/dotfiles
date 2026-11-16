@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+# Managed by chezmoi — source: home/dot_config/pi/agent/modify_trust.json.tmpl
+# Target: ~/.config/pi/agent/trust.json (PI_CODING_AGENT_DIR).
+#
+# Saves a "trusted" decision for the directories in .chezmoidata/trust.yaml.
+# Pi applies the nearest saved decision to the cwd or one of its parents, so
+# every repo and worktree beneath them is trusted. Decisions for other paths
+# (made via /trust) are left untouched.
+import json
+import sys
+
+TRUSTED = {{ includeTemplate "trusted-dirs.tmpl" . }}
+
+raw = sys.stdin.read()
+try:
+    current = json.loads(raw) if raw.strip() else {}
+except Exception:
+    sys.stdout.write(raw)
+    sys.exit(0)
+
+for path in TRUSTED:
+    current[path] = True
+
+print(json.dumps(dict(sorted(current.items())), indent=2))

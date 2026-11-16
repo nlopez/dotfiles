@@ -1,0 +1,26 @@
+{{- if and (eq .chezmoi.os "darwin") (not .headless) -}}
+#!/bin/bash
+
+# Publishes CLAUDE_CONFIG_DIR, CODEX_HOME and ENGRAM_DATA_DIR into the launchd
+# session (launchctl setenv) at login via
+# Library/LaunchAgents/com.local.env-vars.plist, so GUI apps and
+# launchd-spawned daemons inherit them — shell dotfiles are not read in that
+# context, which is how no-env claude/codex/engram invocations kept writing to
+# the legacy ~/.claude, ~/.codex and ~/.engram paths (now also converged by
+# symlinks; this is the belt to their braces).
+#
+# Caveat: launchctl setenv only affects processes started after it runs, and
+# login-time RunAtLoad ordering between agents is not guaranteed — a daemon
+# that starts first still lacks the vars until restarted. The symlinks remain
+# the reliable layer; this fixes GUI-launched apps (IDE terminals, Spotlight)
+# for the whole session.
+# {{ include "Library/LaunchAgents/com.local.env-vars.plist.tmpl" | sha256sum }}
+
+set -eufo pipefail
+
+DOMAIN="gui/$(id -u)"
+PLIST="$HOME/Library/LaunchAgents/com.local.env-vars.plist"
+
+launchctl bootout "$DOMAIN/com.local.env-vars" 2>/dev/null || true
+launchctl bootstrap "$DOMAIN" "$PLIST"
+{{- end }}

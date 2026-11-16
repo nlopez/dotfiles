@@ -1,0 +1,48 @@
+# ~/.config/zabrze/config.toml
+# Simple snippets are generated from .chezmoidata/aliases.yaml.
+# Complex snippets using shell expansion are kept as static TOML below.
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+
+[[snippets]]
+name = "awk '{print $1}'"
+trigger = ".1"
+snippet = "awk '{print $1}'"
+
+# ── From .chezmoidata/aliases.yaml ───────────────────────────────────────────
+{{ range .aliases -}}
+[[snippets]]
+name = "{{ .name }}"
+trigger = "{{ .name }}"
+snippet = {{ .cmd | toToml }}
+{{ if index . "global" -}}
+global = true
+{{ end -}}
+{{ if index . "cursor" -}}
+cursor = {{ .cursor | toToml }}
+{{ end }}
+{{ end -}}
+# ── Complex snippets (shell expansion, zsh only) ──────────────────────────────
+
+[[snippets]]
+name = "gcd"
+trigger = "gcd"
+snippet = 'git checkout "$(git remote show origin | sed -n "s/.*HEAD branch: \(.*\)/\1/p")"'
+
+[[snippets]]
+name = "I am git root"
+trigger = "groot"
+snippet = "\"$(git rev-parse --show-toplevel)\""
+global = true
+
+# ── Misc (tool/OS-specific, not portable to PowerShell) ───────────────────────
+
+
+
+{{ if eq .chezmoi.os "linux" }}
+# https://www.kernel.org/doc/html/latest/admin-guide/sysrq.html
+[[snippets]]
+name = "rebootrq"
+trigger = "rebootrq"
+snippet = "sudo sh -c 'echo \"_sb\" > /proc/sysrq-trigger'"
+{{- end }}

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Checksum to trigger when brew packages change
+# {{ .packages.darwin | toJson | sha256sum }}
+
+# run_onchange: triggers brew bundle only when packages.yaml brew section changes
+# Removes undeclared packages only when packages.darwin.brew.cleanup is true;
+# otherwise installed packages are preserved (preview with `brew-cleanup`).
+#
+# Trust is handled declaratively via `trusted: true` in the Brewfile itself
+# (Brew Bundle format: https://docs.brew.sh/Brew-Bundle-and-Brewfile#trusted).
+# No imperative `brew trust` calls are needed here.
+
+set -eufo pipefail
+
+# `mas` and `uv` (for the Brewfile's mas/uv entries) come from the Nix profile;
+# put it first so brew bundle doesn't install its own copies.
+export PATH="{{ includeTemplate "nix-profile" . }}/bin:$PATH"
+
+# HOMEBREW_BUNDLE_FILE is exported in .zprofile → ~/.config/brew/Brewfile
+BREWFILE="${HOMEBREW_BUNDLE_FILE:-{{ .chezmoi.homeDir }}/.config/brew/Brewfile}"
+brew bundle{{ if .packages.darwin.brew.cleanup }} --cleanup --force{{ end }} --file="${BREWFILE}"

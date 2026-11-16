@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# chezmoi modify script for ~/.ssh/config
+#
+# Preserves any external # BEGIN...# END blocks (e.g. injected by the
+# Workspaces CLI) and re-emits the chezmoi-managed content below them.
+
+set -eufo pipefail
+
+# Capture every # BEGIN...# END block from the current file (stdin).
+# On work hosts the Workspaces CLI block is declared below, so the existing
+# copy is dropped instead of preserved (avoids emitting it twice).
+blocks=""
+in_block=""
+skip_block=""
+while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" =~ \#.*BEGIN ]]; then
+        in_block=1
+{{- if .work }}
+        if [[ "$line" == *"workspaces cli"* ]]; then
+            skip_block=1
+        fi
+{{- end }}
+    fi
+    if [[ -n "$in_block" && -z "$skip_block" ]]; then
+        blocks+="${line}"$'\n'
+    fi
+    if [[ "$line" =~ \#.*END ]]; then
+        in_block=""
+        skip_block=""
+    fi
+done
+{{- if .work }}
+
+# Workspaces CLI block, declared so new work hosts get it on first apply.
+# Markers match the CLI's, so `workspaces` updates it in place; any drift
+# then shows up in `chezmoi diff`.
+cat <<'WORKSPACES_SSH_CONFIG'
+## BEGIN -- workspaces cli
+## Generated content -- do not remove
+# NOTE: This is at the top to ensure that other user or generated settings do
+# not affect workspace connections.
+# If you'd like to make changes that apply to all workspaces, see the comments
+# in 00-common.conf alongside the included files below
+Include {{ .chezmoi.homeDir }}/.ssh/workspaces/*
+
+# Classic ECS workspaces resume on connect. Per-workspace settings above can
+# select a direct destination or proxy before this fallback is considered.
+# Keep this in the same parsing pass: requesting a final pass changes unrelated
+# hosts too. Local devcontainers have no remote workspace to resume.
+Match host "workspace-*,*.workspace.infra.dog"
+    ProxyCommand workspaces resume-if-paused '%n' '%h' '%p'
+Match all
+## END -- workspaces cli
+WORKSPACES_SSH_CONFIG
+{{- end }}
+
+# Re-emit preserved blocks first, separated from the managed config by a
+# blank line so the two sections are visually distinct.
+if [[ -n "$blocks" ]]; then
+    printf '%s\n' "$blocks"
+fi
+
+# Emit the chezmoi-managed config.
+cat <<'CHEZMOI_SSH_CONFIG'
+Host *
+  Compression yes
+  ServerAliveInterval 240
+  ServerAliveCountMax 2
+  HostKeyAlgorithms -ssh-rsa
+  ForwardAgent no
+  IdentityFile none
+  StrictHostKeyChecking accept-new
+  User nlopez
+  IdentityAgent "{{ .platform.ssh_auth_sock | replace "~" .chezmoi.homeDir }}"
+
+# Direct github.com connections are anonymous — git uses core.sshCommand
+# (set per-repo by the identity includes) to authenticate instead.
+Host github.com
+  User git
+  IdentitiesOnly yes
+
+# SSH aliases below are not used by git (core.sshCommand handles that), but
+# are kept as named shortcuts for testing: ssh -T git@github.com-nlopez
+# Each alias pins exactly one public key so the 1Password agent offers the
+# right identity without attempting others.
+
+# nlopez GitHub identity: nlopez personal repos and open-source.
+Host github.com-nlopez
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_nlopez.pub
+  IdentitiesOnly yes
+{{- if .work }}
+
+# Work GitHub identity — employer org repos.
+Host github.com-work
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_work.pub
+  IdentitiesOnly yes
+{{- end }}
+{{- if .personal }}
+
+# SilentShout42 GitHub identity: silentshout42 + kamotimestamps org repos.
+Host github.com-silentshout42
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_silentshout42.pub
+  IdentitiesOnly yes
+{{- end }}
+CHEZMOI_SSH_CONFIG

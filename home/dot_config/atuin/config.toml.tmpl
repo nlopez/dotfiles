@@ -1,0 +1,29 @@
+db_path = "${XDG_DATA_HOME}/atuin/history.db"
+key_path = "${XDG_DATA_HOME}/atuin/key"
+session_path = "${XDG_DATA_HOME}/atuin/session"
+sync_address = "https://pyrin.desertbluffs.com"
+sync_frequency = "30m"
+
+auto_sync = true
+update_check = false
+
+filter_mode = "global"
+filter_mode_shell_up_key_binding = "global"
+keymap_mode = "emacs"
+prefers_reduced_motion = true
+show_numeric_shortcuts = false
+
+store_failed = true
+
+history_filter = [
+  "^(echo|printf)([^|><]|$)*$",
+]
+
+[sync]
+records = true # enable sync v2
+
+[ai]
+enabled = false
+
+[logs]
+dir = "${XDG_STATE_HOME}/atuin/logs"

@@ -1,0 +1,10 @@
+# Ignore all chezmoi modify_ files (scripts and modify-templates)
+**/modify_*
+
+# Handled by yamlfmt
+**/*.yaml
+**/*.yml
+
+# chezmoi remove_ and symlink_ entries: not real source files
+**/remove_*
+**/symlink_*
