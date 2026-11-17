@@ -37,7 +37,7 @@ packages:
         - visual-studio-code
         - jordanbaird-ice
         - rectangle
-        - little-snitch
+        - lulu
         - smittytone/smittytone/utitool
         personal:
         - macfuse
