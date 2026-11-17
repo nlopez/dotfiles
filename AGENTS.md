@@ -196,7 +196,7 @@ These tools have no XDG support and no env-var workaround. Do not attempt to mov
 - For chezmoi `modify_` files, follow target-type semantics: plain `modify_*` files are
   scripts; only use `chezmoi:modify-template` when rendered template output should become
   the final file contents; modify templates must not have a `.tmpl` suffix
-- Add Pi plugins by declaring them in `.chezmoidata/pi.yaml` → `pi.packages`, then running `chezmoi apply` (the `run_onchange_after_pi-packages.py.tmpl` script reconciles the install automatically)
+- Add Pi plugins by declaring them in `.chezmoidata/pi.yaml` → `pi.packages`, then running `chezmoi apply` (the `run_after_pi-packages.py.tmpl` script reconciles the install automatically)
 
 ### ⚠️ Ask first
 

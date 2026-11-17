@@ -1,5 +1,5 @@
 # Pi — single source of truth for user packages.
-# modify_settings.json.tmpl and run_onchange_after_pi-packages.py.tmpl
+# modify_settings.json.tmpl and run_after_pi-packages.py.tmpl
 # read .pi.packages at template render time.
 # Renovate scans this file for npm:pkg@version patterns.
 # The Pi coding agent itself is installed out of band, not via chezmoi.

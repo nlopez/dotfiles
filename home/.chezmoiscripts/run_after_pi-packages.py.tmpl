@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+"""Make installed Pi packages match the packages declared in .chezmoidata/pi.yaml.
+
+chezmoi writes the declared packages to settings.json (modify_settings.json.tmpl).
+Pi installs declared packages at startup but never removes undeclared ones, so
+this script owns both install trees under $PI_CODING_AGENT_DIR:
+
+1. npm/: writes package.json with exactly the declared npm packages and runs
+   `npm install` with the flags Pi uses. npm removes every package that is not
+   declared, whoever installed it.
+2. git/: deletes clones of undeclared git packages, then runs
+   `pi update --extensions` when a declared clone is missing or not at its ref.
+
+Runs on every apply, so packages installed by hand (`pi install`) are removed
+on the next apply.
+"""
+import json
+import os
+import shutil
+import subprocess
+import sys
+
+sys.stdout.reconfigure(line_buffering=True)
+
+# Declared packages (injected by chezmoi template from .chezmoidata/pi.yaml).
+# personal_only_packages are excluded on work machines.
+DECLARED = [
+{{- range .pi.packages }}
+    "{{ . }}",
+{{- end }}
+{{- range .pi.git_packages }}
+    "{{ . }}",
+{{- end }}
+{{- if not .work }}
+{{- range .pi.personal_only_packages }}
+    "{{ . }}",
+{{- end }}
+{{- end }}
+{{- if .work }}
+{{- range .pi.work_packages }}
+    "{{ . }}",
+{{- end }}
+{{- range ((includeTemplate "private-data" . | fromYaml).pi | default dict).packages }}
+    "{{ . }}",
+{{- end }}
+{{- end }}
+]
+
+AGENT_DIR = os.environ.get("PI_CODING_AGENT_DIR") or os.path.join(
+    os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"), "pi", "agent"
+)
+NPM_DIR = os.path.join(AGENT_DIR, "npm")
+
+
+def npm_spec(spec: str) -> tuple[str, str] | None:
+    """'npm:[@scope/]name@version' → ('[@scope/]name', 'version')."""
+    if not spec.startswith("npm:"):
+        return None
+    s = spec[4:]
+    at = s.rfind("@")
+    return (s[:at], s[at + 1 :]) if at > 0 else (s, "*")
+
+
+def git_path(spec: str) -> str | None:
+    """'git:host/owner/repo@ref' → 'host/owner/repo' (Pi's clone path under git/)."""
+    if not spec.startswith("git:"):
+        return None
+    return spec[4:].split("@", 1)[0].removesuffix(".git")
+
+
+# pi and npm come from the Nix profile; make them visible to this script.
+os.environ["PATH"] = (
+    "{{ includeTemplate "nix-profile" . }}/bin" + os.pathsep + os.environ["PATH"]
+)
+os.environ["PI_CODING_AGENT_DIR"] = AGENT_DIR
+
+if not shutil.which("npm"):
+    print("Pi packages: npm not found; cannot reconcile", file=sys.stderr)
+    sys.exit(1)
+
+npm_deps = dict(filter(None, map(npm_spec, DECLARED)))
+git_paths = set(filter(None, map(git_path, DECLARED)))
+
+# --- npm: the declared list is the whole manifest ---
+
+os.makedirs(NPM_DIR, exist_ok=True)
+pkg_path = os.path.join(NPM_DIR, "package.json")
+try:
+    with open(pkg_path) as f:
+        before = set(json.load(f).get("dependencies", {}))
+except (OSError, ValueError):
+    before = set()
+for name in sorted(before - set(npm_deps)):
+    print(f"  - {name}")
+
+manifest = {"name": "pi-extensions", "private": True, "dependencies": npm_deps}
+node_modules = os.path.join(NPM_DIR, "node_modules")
+try:
+    with open(pkg_path) as f:
+        in_sync = json.load(f) == manifest and all(
+            os.path.isdir(os.path.join(node_modules, n)) for n in npm_deps
+        )
+except (OSError, ValueError):
+    in_sync = False
+
+if not in_sync:
+    with open(pkg_path, "w") as f:
+        json.dump(manifest, f, indent=2)
+        f.write("\n")
+    # Same flags Pi's package manager passes to `npm install`.
+    result = subprocess.run(
+        [
+            "npm", "install", "--omit=dev", "--legacy-peer-deps",
+            "--no-audit", "--no-fund", "--loglevel=warn",
+        ],
+        cwd=NPM_DIR,
+    )
+    if result.returncode != 0:
+        print("Pi packages: npm install failed", file=sys.stderr)
+        sys.exit(1)
+
+# --- git: delete undeclared clones (host/owner/repo under git/) ---
+
+git_root = os.path.join(AGENT_DIR, "git")
+
+
+def subdirs(path: str) -> list[str]:
+    return sorted(d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d)))
+
+
+if os.path.isdir(git_root):
+    for host in subdirs(git_root):
+        for owner in subdirs(os.path.join(git_root, host)):
+            for repo in subdirs(os.path.join(git_root, host, owner)):
+                rel = f"{host}/{owner}/{repo}"
+                if rel not in git_paths:
+                    print(f"  - git:{rel}")
+                    shutil.rmtree(os.path.join(git_root, rel))
+            if not os.listdir(os.path.join(git_root, host, owner)):
+                os.rmdir(os.path.join(git_root, host, owner))
+
+
+def at_ref(spec: str) -> bool:
+    """True when the clone for `spec` exists and HEAD is the commit its ref names."""
+    path = os.path.join(git_root, git_path(spec))
+    ref = spec.split("@", 1)[1] if "@" in spec else "HEAD"
+
+    def rev(r: str) -> str | None:
+        out = subprocess.run(
+            ["git", "-C", path, "rev-parse", "--verify", "--quiet", r + "^{commit}"],
+            capture_output=True,
+            text=True,
+        )
+        return out.stdout.strip() if out.returncode == 0 else None
+
+    return os.path.isdir(path) and rev("HEAD") is not None and rev("HEAD") == rev(ref)
+
+
+stale = [s for s in DECLARED if git_path(s) and not at_ref(s)]
+if not stale:
+    print("Pi packages: in sync with pi.yaml ✓")
+    sys.exit(0)
+
+if not shutil.which("pi"):
+    print("Pi packages: pi not found; Pi clones git packages at next start", file=sys.stderr)
+    sys.exit(0)
+
+# Run from $HOME so Pi does not read project-local settings of the current directory.
+result = subprocess.run(
+    ["pi", "update", "--extensions", "--no-approve"], cwd=os.path.expanduser("~")
+)
+if result.returncode != 0:
+    print("Pi packages: pi update --extensions failed", file=sys.stderr)
+    sys.exit(1)
+
+print("Pi packages: in sync with pi.yaml ✓")

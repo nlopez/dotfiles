@@ -23,6 +23,9 @@
 .pi/agent/extensions/auto-theme.ts
 ; Pi packages install into $PI_CODING_AGENT_DIR/npm — clean up the pre-XDG copy
 .pi/agent/npm
+; State of removed Pi packages (pi-intercom, pi-subagents)
+.config/pi/agent/intercom
+.config/pi/agent/pi-subagents
 .npmrc
 .config/uv/uv.toml
 Library/LaunchAgents/com.user.dark-notify-tmux.plist
