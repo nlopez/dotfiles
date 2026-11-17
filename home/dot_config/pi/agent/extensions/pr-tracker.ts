@@ -5,7 +5,8 @@
  * GitHub MCP create-PR tool) and shows their live status in a widget below the
  * editor, plus a one-line summary in the footer.
  *
- * Polling: one batched GraphQL request per GitHub host covers every tracked PR.
+ * Polling: one batched GraphQL request per host and owner covers every tracked
+ * PR. Each request sets GH_REPO so the gh shim picks that owner's account.
  * The interval adapts: 30s while any check is running, 2m while PRs are open
  * and settled, stopped once every PR is merged or closed. Errors back off
  * exponentially up to 10m. A refresh also runs when a PR is added, after
@@ -193,10 +194,11 @@ export default function (pi: ExtensionAPI) {
     if (delay !== undefined) timer = setTimeout(() => void refresh(), delay);
   }
 
-  async function fetchHost(host: string, group: Tracked[]) {
-    const args = ["api", "graphql", "-f", `query=${buildQuery(group)}`];
+  async function fetchGroup(group: Tracked[]) {
+    const { host, owner, repo } = group[0];
+    const args = [`GH_REPO=${host}/${owner}/${repo}`, "gh", "api", "graphql", "-f", `query=${buildQuery(group)}`];
     if (host !== "github.com") args.push("--hostname", host);
-    const res = await pi.exec("gh", args, { timeout: 30_000 });
+    const res = await pi.exec("env", args, { timeout: 30_000 });
     let body: any;
     try {
       body = JSON.parse(res.stdout);
@@ -247,12 +249,20 @@ export default function (pi: ExtensionAPI) {
     lastRefresh = Date.now();
     try {
       const active = prs.filter((p) => !p.status || p.status.state === "OPEN" || force);
-      const byHost = new Map<string, Tracked[]>();
-      for (const p of active) byHost.set(p.host, [...(byHost.get(p.host) ?? []), p]);
-      const results = await Promise.allSettled([...byHost].map(([h, g]) => fetchHost(h, g)));
-      const failed = results.find((r): r is PromiseRejectedResult => r.status === "rejected");
+      const groups = new Map<string, Tracked[]>();
+      for (const p of active) {
+        const key = `${p.host}/${p.owner.toLowerCase()}`;
+        groups.set(key, [...(groups.get(key) ?? []), p]);
+      }
+      const batches = [...groups.values()];
+      const results = await Promise.allSettled(batches.map(fetchGroup));
+      let failed = false;
+      results.forEach((r, i) => {
+        if (r.status !== "rejected") return;
+        failed = true;
+        for (const p of batches[i]) p.error = String(r.reason?.message ?? r.reason);
+      });
       failures = failed ? failures + 1 : 0;
-      if (failed) for (const p of active) p.error ??= String(failed.reason?.message ?? failed.reason);
     } finally {
       inFlight = false;
       render();
