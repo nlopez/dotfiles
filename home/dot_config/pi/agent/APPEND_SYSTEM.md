@@ -62,6 +62,10 @@ Never use `pip`, `python -m pip`, `npm`, or `yarn` directly. If `uv` or `pnpm` a
 
 Before running any command or writing any config that references a profile, check that the profile name ends with `read-only`. If the desired profile does not end in `read-only`, **stop and tell the user** rather than proceeding.
 
+## MCP Tool Discovery
+
+MCP servers (for example Slack or Atlassian) are not in your declared tool list. Their tools load through `tool_search` or are callable from `codemode` (`searchTools()`, `ALL_TOOLS`). Before you tell the user that you have no access to a service, run `tool_search` with the service name. Say that you have no access only when that search finds nothing.
+
 ## Research and Uncertainty Protocol
 
 When you are uncertain about something, or when official documentation and best practices would help you make a better decision, **you must search for authoritative sources before guessing**.

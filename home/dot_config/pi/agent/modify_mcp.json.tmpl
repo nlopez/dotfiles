@@ -1,6 +1,6 @@
 #!/bin/sh
 # Merge chezmoi-managed keys into mcp.json, preserving runtime keys that pi
-# writes itself (e.g. exposure, enabled state). Uses jq's recursive-merge
+# writes itself (e.g. enabled state). Uses jq's recursive-merge
 # operator so the chezmoi overlay wins on conflicts, but unrecognised keys
 # are kept as-is.
 #
@@ -9,9 +9,14 @@
 # /mcp; over SSH, paste the browser's redirected URL into the sign-in screen.
 #
 # Also migrates pi-mcp-adapter legacy fields to native pi 1.0 format:
-#   directTools: true  →  exposure: "direct"
+#   directTools        →  removed (exposure is forced below)
 #   auth: "oauth"      →  removed (pi auto-detects OAuth from server response)
 #   settings.autoAuth  →  removed (not a native pi mcp.json field)
+#
+# Every server gets exposure "deferred": pi's default ("codemode") hides
+# their tools from the model unless it calls searchTools(), while deferred
+# servers are found through the declared tool_search tool. Exposure changes
+# made through /mcp are reset on the next apply.
 
 {{- $servers := includeTemplate "private-mcp-servers" . | fromJson }}
 
@@ -51,7 +56,7 @@ else
     del(.settings) |
     .mcpServers |= with_entries(
       .value |= (
-        (if .directTools == true then . + {"exposure": "direct"} else . end) |
+        . + {"exposure": "deferred"} |
         del(.directTools, .auth)
       )
     ) |
