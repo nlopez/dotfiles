@@ -23,8 +23,9 @@ real=$(command -v gh) || { echo "gh: no real gh found on PATH" >&2; exit 127; }
 # Without that login, hosts.yml's nlopez token is used for everything.
 #
 # The owner comes from, in order: -R/--repo, $GH_REPO, an
-# argument that is a github.com URL (e.g. `gh pr view <url>`), then the origin
-# remote of the current directory. An explicit GH_TOKEN/GITHUB_TOKEN wins.
+# argument that is a github.com URL (e.g. `gh pr view <url>`), the endpoint or
+# GraphQL owner of `gh api`, then the origin remote of the current directory.
+# An explicit GH_TOKEN/GITHUB_TOKEN wins.
 owner_of() { # <repo spec or URL> -> owner, for github.com only
   s=$1
   case $s in
@@ -33,6 +34,25 @@ owner_of() { # <repo spec or URL> -> owner, for github.com only
     *://*|*@*:*) return 1 ;;
   esac
   case $s in */*) printf '%s\n' "${s%%/*}" ;; *) return 1 ;; esac
+}
+
+# Owner of a `gh api` call: a repos/<owner>/... or orgs/<owner>/... endpoint, a
+# `-f owner=<owner>` field, or an owner:"<owner>" argument in a GraphQL query.
+# {owner} placeholders are left to gh, which reads them from the repo context.
+api_owner() {
+  for a in "$@"; do
+    case $a in
+      repos/*/*|/repos/*/*|orgs/*|/orgs/*)
+        s=${a#/}; s=${s#*/}; s=${s%%[/?]*}
+        case $s in ''|'{'*) ;; *) printf '%s\n' "$s"; return 0 ;; esac ;;
+      owner=*)
+        printf '%s\n' "${a#owner=}"; return 0 ;;
+      *owner:*)
+        s=$(printf '%s' "$a" | sed -n 's/.*owner:[[:space:]]*\\\{0,1\}"\([^"\\]*\).*/\1/p')
+        [ -n "$s" ] && { printf '%s\n' "$s"; return 0; } ;;
+    esac
+  done
+  return 1
 }
 
 route=1 sub='' sub2='' owner='' next_is_repo=''
@@ -66,6 +86,7 @@ if [ -n "$route" ]; then
       esac
     done
   fi
+  [ -z "$owner" ] && [ "$sub" = api ] && owner=$(api_owner "$@")
   [ -z "$owner" ] && owner=$(owner_of "$(git remote get-url origin 2>/dev/null)")
   personal=${XDG_STATE_HOME:-$HOME/.local/state}/gh/nlopez
   tok=''
