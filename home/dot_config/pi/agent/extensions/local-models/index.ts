@@ -4,7 +4,7 @@
  * Auto-discovers local model servers by probing known endpoints
  * and registers them as Pi providers using their documented APIs.
  *
- * Configuration: ~/.pi/agent/settings.json → localModels key
+ * Configuration: ~/.config/pi/agent/settings.json → localModels key
  *
  * Usage:
  *   - Automatically probes on startup

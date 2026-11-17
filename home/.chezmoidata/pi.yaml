@@ -6,19 +6,15 @@
 pi:
   packages:
   - "npm:pi-auto-theme@1.1.1"
-  - "npm:pi-subagents@0.88.0"
-  - "npm:context-mode@2.1.8"
-  - "npm:pi-intercom@0.18.1"
-  - "npm:pi-powerline@0.11.2"
-  - "npm:pi-btw@0.8.1"
+  - "npm:context-mode@2.2.1"
   - "npm:pi-markdown-preview@0.26.4"
   - "npm:pi-powerline-footer@0.22.0"
   - "npm:@juicesharp/rpiv-ask-user-question@2.15.0"
   - "npm:pi-interrupt-steer@0.1.0"
   - "npm:gentle-engram@0.7.1"
   - "npm:@tmustier/pi-session-recap@0.6.1"
-  # Git-sourced packages; pi clones and reconciles these itself, so they are
-  # written to settings.json only (not handled by the npm reconcile script).
+  # Git-sourced packages; pi clones these itself. The reconcile script's
+  # `pi update --extensions` installs or updates them; it prunes npm packages only.
   git_packages:
   - "git:github.com/ayghri/i-have-adhd@v0.4.1"
   # Installed only on work machines, together with the private work packages

@@ -31,8 +31,8 @@ Clone with **`ghq get <owner>/<repo>`** (or a full URL). It clones to
 `ghq list -p` lists local clones.
 
 Worktrees come from **worktrunk (`wt`)** only; never run `git worktree add` directly.
-They live under `~/src/.worktrees/<owner>/<repo>.<branch>`. Claude Code (`claude -w`) and
-pi-subagents (`worktree: true`) create theirs through `wt` too.
+They live under `~/src/.worktrees/<owner>/<repo>.<branch>`. Claude Code (`claude -w`)
+creates its worktrees through `wt` too.
 
 ```sh
 wt switch --create <branch>   # new worktree + branch
@@ -61,10 +61,6 @@ Never use `pip`, `python -m pip`, `npm`, or `yarn` directly. If `uv` or `pnpm` a
 - Any other CLI tool (`awsume`, `awsv`, `awsx`, `yawsso`, etc.) that accepts an AWS or cloud profile name
 
 Before running any command or writing any config that references a profile, check that the profile name ends with `read-only`. If the desired profile does not end in `read-only`, **stop and tell the user** rather than proceeding.
-
-## MCP Tool Discovery
-
-MCP servers (for example Slack or Atlassian) are not in your declared tool list. Their tools load through `tool_search` or are callable from `codemode` (`searchTools()`, `ALL_TOOLS`). Before you tell the user that you have no access to a service, run `tool_search` with the service name. Say that you have no access only when that search finds nothing.
 
 ## Research and Uncertainty Protocol
 

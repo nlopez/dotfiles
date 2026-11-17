@@ -24,11 +24,14 @@ Pi npm packages (extensions, skills, adapters) are declared in `pi.packages` in
 **To add or update a Pi npm package:**
 
 1. Add `"npm:<package>@<version>"` to `pi.packages` in `home/.chezmoidata/pi.yaml`.
-2. Run `chezmoi apply` — the `run_onchange_after_pi-packages.py.tmpl` hook reconciles the install.
+2. Run `chezmoi apply`. chezmoi writes the declaration to `settings.json`, then the
+   `run_onchange_after_pi-packages.py.tmpl` hook reconciles the install: it uninstalls
+   npm packages that are no longer declared and runs `pi update --extensions`.
 3. Commit the source change.
 
-Pi npm packages are managed by `pi install`, not `pnpm add -g`. Nothing is installed
-as a pnpm global in this repo — chezmoi does not run `pnpm add -g` for anything.
+`settings.json` is the declaration and Pi is the installer. Pi installs packages into
+`$PI_CODING_AGENT_DIR/npm` with its `npmCommand`. Do not run `pi install`, `pi remove`,
+`npm install`, or `pnpm add -g` by hand.
 
 ## ⚠️ Boundaries
 

@@ -21,6 +21,8 @@
 
 .local/share/gitcache
 .pi/agent/extensions/auto-theme.ts
+; Pi packages install into $PI_CODING_AGENT_DIR/npm — clean up the pre-XDG copy
+.pi/agent/npm
 .npmrc
 .config/uv/uv.toml
 Library/LaunchAgents/com.user.dark-notify-tmux.plist
