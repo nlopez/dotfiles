@@ -131,6 +131,9 @@ current["hooks"]["SessionStart"] = surviving_rex + rex_hook + track_prs_resume +
 current["statusLine"] = {
     "type": "command",
     "command": os.path.expanduser("~/.config/claude/statusline.py"),
+    # PR status is fetched in the background after a render, so re-render on a
+    # timer to show it without waiting for the next conversation event.
+    "refreshInterval": 10,
 }
 for key in ("ECC_DISABLED_MCPS", "_ZO_DOCTOR"):
     current.get("env", {}).pop(key, None)
