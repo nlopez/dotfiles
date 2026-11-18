@@ -1,0 +1,8 @@
+# Linux work hosts only: tools with no working nixpkgs package (see base.toml).
+#
+# Versions are pinned; Renovate bumps them (see renovate.json).
+
+[tools]
+# nixpkgs' azure-cli depends on python3Packages.fabric, which is marked
+# broken. macOS gets the Homebrew cask instead (.chezmoidata/darwin/packages.yaml).
+azure-cli = "2.91.0"

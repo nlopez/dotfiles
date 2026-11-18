@@ -90,8 +90,9 @@ nix:
     work:
     - aws-vault
     - awscli2
-    # azure-cli: Homebrew on macOS (.chezmoidata/darwin/packages.yaml); its
-    # nixpkgs build depends on python3Packages.fabric, which is marked broken.
+    # azure-cli: Homebrew on macOS (.chezmoidata/darwin/packages.yaml), mise on
+    # Linux (.chezmoitemplates/mise/linux-work.toml); its nixpkgs build depends
+    # on python3Packages.fabric, which is marked broken.
     - glab
     - google-cloud-sdk
     - vault-bin

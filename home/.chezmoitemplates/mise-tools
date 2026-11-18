@@ -1,6 +1,10 @@
-{{- /* mise [tools] for this host as JSON: base.toml, plus darwin-personal.toml on personal Macs. */ -}}
+{{- /* mise [tools] for this host as JSON: base.toml, plus darwin-personal.toml on
+   personal Macs and linux-work.toml on Linux work hosts. */ -}}
 {{- $tools := (include ".chezmoitemplates/mise/base.toml" | fromToml).tools -}}
 {{- if and (eq .chezmoi.os "darwin") .personal -}}
 {{-   $tools = merge (include ".chezmoitemplates/mise/darwin-personal.toml" | fromToml).tools $tools -}}
+{{- end -}}
+{{- if and (eq .chezmoi.os "linux") .work -}}
+{{-   $tools = merge (include ".chezmoitemplates/mise/linux-work.toml" | fromToml).tools $tools -}}
 {{- end -}}
 {{- $tools | toJson -}}
