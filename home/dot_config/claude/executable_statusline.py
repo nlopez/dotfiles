@@ -4,6 +4,7 @@
 #   model | think:<effort> | dir <name> | ⎇ <branch> | PR #12 ✓ approved | PRs #9 ✗ · repo#4 merged
 #   | ▥ used/size (pct%) AC | (sub) | 🧠 <project> · ready · ● ADHD ON
 # PR data comes from pr_tracking.py (cached `gh pr view`, refreshed in the background).
+# PR labels are OSC 8 hyperlinks to the PR.
 # Claude pipes a JSON blob on stdin; whatever we print is the status line.
 import contextlib
 import json
@@ -76,7 +77,12 @@ def pr_label(pr, prefix=""):
         review = REVIEW.get(pr.get("reviewDecision"))
         if review:
             bits.append(c(*review))
-    return " ".join(bits)
+    return link(pr.get("url"), " ".join(bits))
+
+
+def link(url, text):
+    """OSC 8 hyperlink, so the label opens the PR on click."""
+    return f"\033]8;;{url}\033\\{text}\033]8;;\033\\" if url else text
 
 
 def pr_parts(data, cwd, common, branch):
@@ -90,7 +96,7 @@ def pr_parts(data, cwd, common, branch):
     others = [u for u in pr_tracking.session_prs(data.get("session_id")) if u != (current or {}).get("url")]
     labels = []
     for url in others[-3:]:
-        pr = pr_tracking.url_pr(url) or {"number": url.rsplit("/", 1)[-1]}
+        pr = {"number": url.rsplit("/", 1)[-1], **(pr_tracking.url_pr(url) or {}), "url": url}
         repo = pr_tracking.repo_of(url)
         labels.append(pr_label(pr, "" if repo == here else repo))
     if labels:
