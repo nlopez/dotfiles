@@ -1,7 +1,8 @@
 # Managed by chezmoi — source: home/dot_config/claude/pr_tracking.py
 # PR tracking shared by statusline.py and hooks/track-prs.py.
 #
-# Session PRs: hooks/track-prs.py appends PR URLs to sessions/<session_id>.json.
+# Session PRs: hooks/track-prs.py appends PR URLs to sessions/<session_id>.json,
+# and on resume backfills them from the session transcript.
 # PR status: `gh pr view` results are cached per PR (or per repo+branch) and
 # refreshed by a detached `python3 pr_tracking.py refresh ...` so the status
 # line never waits on the network.
@@ -137,6 +138,61 @@ def repo_of(url):
     return m.group(1) if m else ""
 
 
+PR_COMMAND = re.compile(r"\bgh\s+pr\s+(create|ready|edit|merge)\b")
+PUSH_COMMAND = re.compile(r"\bgit\b[^;&|]*\bpush\b")
+
+
+def command_prs(command, output):
+    """PR URLs a gh pr create/ready/edit/merge command printed."""
+    return list(dict.fromkeys(PR_URL.findall(output))) if PR_COMMAND.search(command) else []
+
+
+def spawn_resolve(session_id, cwd):
+    subprocess.Popen(
+        [sys.executable, os.path.abspath(__file__), "resolve", session_id, cwd],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+
+
+def backfill(session_id, transcript_path):
+    """Record PRs from a transcript's Bash calls, as the PostToolUse hook would have.
+
+    Pushes resolve each pushed directory's current branch PR, which may differ
+    from the branch pushed at the time if the directory has since switched.
+    """
+    commands, push_dirs = {}, []
+    with open(transcript_path) as f:
+        for line in f:
+            try:
+                entry = json.loads(line)
+            except ValueError:
+                continue
+            content = (entry.get("message") or {}).get("content")
+            if not isinstance(content, list):
+                continue
+            for block in content:
+                if not isinstance(block, dict):
+                    continue
+                if block.get("type") == "tool_use" and block.get("name") == "Bash":
+                    commands[block.get("id")] = (block.get("input") or {}).get("command") or ""
+                elif block.get("type") == "tool_result" and block.get("tool_use_id") in commands:
+                    command = commands.pop(block["tool_use_id"])
+                    output = block.get("content")
+                    output = output if isinstance(output, str) else json.dumps(output)
+                    for url in command_prs(command, output):
+                        record(session_id, url)
+                    cwd = entry.get("cwd")
+                    if PUSH_COMMAND.search(command) and cwd and cwd not in push_dirs:
+                        push_dirs.append(cwd)
+    for cwd in push_dirs:
+        if os.path.isdir(cwd):
+            with contextlib.suppress(Exception):
+                resolve_branch_pr(session_id, cwd)
+
+
 def resolve_branch_pr(session_id, cwd):
     """Record the current branch's PR in cwd, if it has one (runs detached)."""
     out = subprocess.run(
@@ -156,3 +212,5 @@ if __name__ == "__main__":
         refresh(*sys.argv[2:5])
     elif sys.argv[1:2] == ["resolve"]:
         resolve_branch_pr(*sys.argv[2:4])
+    elif sys.argv[1:2] == ["backfill"]:
+        backfill(*sys.argv[2:4])

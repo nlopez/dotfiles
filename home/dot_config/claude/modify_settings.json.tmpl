@@ -116,7 +116,16 @@ for h in keep_session_start:
     elif any("rex __internal session-start" in c for c in cmds):
         if not set(cmds) <= {rex_hook[0]["hooks"][0]["command"]}:
             surviving_rex.append(h)
-current["hooks"]["SessionStart"] = surviving_rex + rex_hook + cache_heal
+# Backfill session PRs from the transcript when a session is resumed.
+track_prs_resume = [{
+    "matcher": "resume",
+    "hooks": [{
+        "type": "command",
+        "command": os.path.expanduser("~/.config/claude/hooks/track-prs.py"),
+        "timeout": 5,
+    }],
+}]
+current["hooks"]["SessionStart"] = surviving_rex + rex_hook + track_prs_resume + cache_heal
 
 # Status line: pi-style bar (script managed in executable_statusline.py).
 current["statusLine"] = {
