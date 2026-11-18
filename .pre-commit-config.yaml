@@ -17,12 +17,6 @@ repos:
     language_version: system
 - repo: local
   hooks:
-  - id: private-data-sync
-    name: private-data-sync
-    language: script
-    entry: scripts/private-data-sync.sh --check
-    pass_filenames: false
-    always_run: true
   - id: private-patterns
     name: private-patterns
     language: script

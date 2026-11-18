@@ -1,4 +1,1 @@
 .venv
-# Plaintext private data, synced with home/.private/*.yaml.age (docs/private-data.md)
-home/.private/*.yaml
-home/.private/.*.yaml.base
