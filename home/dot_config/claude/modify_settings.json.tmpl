@@ -11,7 +11,7 @@
 #             effortLevel (default thinking effort = medium),
 #             theme (auto = match the terminal's light/dark background),
 #             statusLine (pi-style bar, see statusline.py),
-#             hooks (atuin, no-chat-comments, agent-bypass-guard, Rex session-start, plus context-mode cache-heal if present).
+#             hooks (atuin, no-chat-comments, agent-bypass-guard, track-prs, Rex session-start, plus context-mode cache-heal if present).
 # Removes:    ECC env, and all plugin/marketplace entries
 #             except engram, context-mode, worktrunk and i-have-adhd (Claude is kept close to stock). Plugins themselves are
 #             uninstalled by .chezmoiscripts/run_onchange_after_20-claude-plugins-remove.sh.tmpl.
@@ -67,6 +67,17 @@ current["hooks"]["PreToolUse"] = atuin_hook + [{
     "hooks": [{
         "type": "command",
         "command": os.path.expanduser("~/.config/git/agent-bypass-guard"),
+    }],
+}]
+
+# PostToolUse: record PRs this session opens or pushes to, for the status line
+# (script managed in hooks/executable_track-prs.py).
+current["hooks"]["PostToolUse"] = atuin_hook + [{
+    "matcher": "^Bash$",
+    "hooks": [{
+        "type": "command",
+        "command": os.path.expanduser("~/.config/claude/hooks/track-prs.py"),
+        "timeout": 5,
     }],
 }]
 

@@ -1,13 +1,19 @@
 #!/usr/bin/env python3
 # Managed by chezmoi — source: home/dot_config/claude/executable_statusline.py
 # Claude Code status line modelled on pi's powerline footer:
-#   model | think:<effort> | dir <name> | ⎇ <branch> | ▥ used/size (pct%) AC | (sub) | 🧠 <project> · ready · ● ADHD ON
+#   model | think:<effort> | dir <name> | ⎇ <branch> | PR #12 ✓ approved | PRs #9 ✗ · repo#4 merged
+#   | ▥ used/size (pct%) AC | (sub) | 🧠 <project> · ready · ● ADHD ON
+# PR data comes from pr_tracking.py (cached `gh pr view`, refreshed in the background).
 # Claude pipes a JSON blob on stdin; whatever we print is the status line.
+import contextlib
 import json
 import os
 import subprocess
 import sys
 import urllib.request
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pr_tracking  # noqa: E402
 
 RESET = "\033[0m"
 
@@ -49,6 +55,50 @@ def engram_ready():
         return False
 
 
+CHECK_GLYPH = {"pass": (GREEN, "✓"), "fail": (RED, "✗"), "pending": (YELLOW, "…")}
+REVIEW = {"APPROVED": (GREEN, "approved"), "CHANGES_REQUESTED": (RED, "changes")}
+
+
+def pr_label(pr, prefix=""):
+    """'#12 draft ✓ approved'-style label; state and review only when notable."""
+    bits = [c(GREEN, f"{prefix}#{pr.get('number')}")]
+    state = pr.get("state")
+    if state == "MERGED":
+        bits.append(c(MAGENTA, "merged"))
+    elif state == "CLOSED":
+        bits.append(c(RED, "closed"))
+    else:
+        if pr.get("isDraft"):
+            bits.append(c(DIM, "draft"))
+        glyph = CHECK_GLYPH.get(pr_tracking.checks(pr))
+        if glyph:
+            bits.append(c(*glyph))
+        review = REVIEW.get(pr.get("reviewDecision"))
+        if review:
+            bits.append(c(*review))
+    return " ".join(bits)
+
+
+def pr_parts(data, cwd, common, branch):
+    parts = []
+    current = None
+    if common and branch and branch not in ("main", "master"):
+        current = pr_tracking.branch_pr(cwd, common, branch)
+        if current:
+            parts.append(f"{c(WHITE, 'PR')} {pr_label(current)}")
+    here = os.path.basename(os.path.dirname(common)) if common else ""
+    others = [u for u in pr_tracking.session_prs(data.get("session_id")) if u != (current or {}).get("url")]
+    labels = []
+    for url in others[-3:]:
+        pr = pr_tracking.url_pr(url) or {"number": url.rsplit("/", 1)[-1]}
+        repo = pr_tracking.repo_of(url)
+        labels.append(pr_label(pr, "" if repo == here else repo))
+    if labels:
+        more = c(DIM, f" +{len(others) - 3}") if len(others) > 3 else ""
+        parts.append(f"{c(WHITE, 'PRs')} " + c(DIM, " · ").join(labels) + more)
+    return parts
+
+
 def auto_compact_on(config_dir):
     try:
         with open(os.path.join(config_dir, ".claude.json")) as f:
@@ -84,6 +134,10 @@ def main():
     if branch:
         parts.append(c(GREEN, f"⎇ {branch}"))
 
+    common = git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir")
+    with contextlib.suppress(Exception):
+        parts.extend(pr_parts(data, cwd, common, branch))
+
     ctx = data.get("context_window") or {}
     size = ctx.get("context_window_size")
     if size:
@@ -101,7 +155,6 @@ def main():
             parts.append(c(WHITE, f"${cost:.2f}"))
 
     # Engram: project = repo name (worktree-safe via the common git dir), health = local server.
-    common = git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir")
     project = os.path.basename(os.path.dirname(common)) if common else ""
     if project:
         state = c(YELLOW, "ready") if engram_ready() else c(RED, "offline")
