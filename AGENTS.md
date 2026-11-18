@@ -74,8 +74,7 @@ there, the secret-backed content must actually be materialized to verify the cha
 │   ├── dotfile-workflows.md       # Adding/removing dotfiles, re-apply guarantee
 │   ├── age-encryption.md          # Post-quantum age encryption workflows
 │   ├── tools-and-validation.md    # Linting, Pi plugins, validation
-│   ├── quick-reference.md         # Commands, repo navigation, path disambiguation
-│   └── workspaces-rex.md          # Rex server on workspaces + tunnels from work Macs
+│   └── quick-reference.md         # Commands, repo navigation, path disambiguation
 ├── home/                          # Chezmoi source tree (see .chezmoiroot)
 │   └── .chezmoiscripts/           # Post-apply and setup scripts
 ├── scripts/                       # Project scripts (linting, not chezmoi-managed)
@@ -126,7 +125,6 @@ Files with the `run_` prefix in the source directory execute every `chezmoi appl
 | [docs/age-encryption.md](docs/age-encryption.md)             | Age post-quantum encryption, key setup, secrets workflows      |
 | [docs/tools-and-validation.md](docs/tools-and-validation.md) | Linting, Pi plugin management, validation rules                |
 | [docs/quick-reference.md](docs/quick-reference.md)           | Commands, repo navigation, path disambiguation                 |
-| [docs/workspaces-rex.md](docs/workspaces-rex.md)             | Rex servers on workspaces and tunnels from work Macs           |
 
 ## XDG Base Directory Compliance
 
