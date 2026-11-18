@@ -227,6 +227,19 @@ def ensure(session_id, cwd, pid=""):
         _spawn("wait", block)
 
 
+def reopen():
+    """Start a waiter for this pane from its recorded session (the /pr-float command)."""
+    block = os.environ.get("REX_BLOCK")
+    state = _state(block) if block else {}
+    if not state.get("session_id"):
+        print("No PR box state for this pane: not running in Rex, or the session hasn't started.")
+    elif running(block):
+        print("PR box is already open.")
+    else:
+        ensure(state["session_id"], state.get("cwd") or os.getcwd(), state.get("claude_pid") or "")
+        print("Reopening the PR box; it appears once the session has a PR.")
+
+
 def wait(claude_block):
     _claim(claude_block, "wait")
     while True:
@@ -268,6 +281,44 @@ def wait(claude_block):
         time.sleep(1)
 
 
+def settled_size(block, timeout=1.0):
+    """The block's size once Rex has applied a resize: two equal reads in a row."""
+    last, deadline = None, time.time() + timeout
+    while time.time() < deadline:
+        cur = block_size(block)
+        if all(cur) and cur == last:
+            return cur
+        last = cur
+        time.sleep(0.05)
+    return last
+
+
+def displaced(actual, target, win):
+    """Whether a layer's bounds are more than half a cell away from target."""
+    if not actual or len(actual) != 4:
+        return True
+    scale = (win[0], win[1], win[0], win[1])
+    return any(abs(a - b) * n > 0.5 for a, b, n in zip(actual, target, scale, strict=True))
+
+
+def draw(body):
+    """Paint body in place: each row at an absolute position, clipped to the box.
+
+    Nothing is ever written below the last row or past the last column, so the
+    terminal has nothing to scroll or wrap, and rows are overwritten rather than
+    cleared first, so redraws do not flicker.
+    """
+    size = shutil.get_terminal_size()
+    rows = body[: size.lines]
+    # Clear the row before writing it: with wrap off the cursor stays on the
+    # last column, so erasing to end of line afterwards would eat the last cell.
+    out = "".join(f"\033[{i};1H\033[2K{row}" for i, row in enumerate(rows, 1))
+    if len(rows) < size.lines:
+        out += f"\033[{len(rows) + 1};1H\033[J"
+    sys.stdout.write(out)
+    sys.stdout.flush()
+
+
 def mute_input():
     """Stop the terminal echoing typed keys into the box; returns the old settings.
 
@@ -292,10 +343,12 @@ def watch(claude_block):
     me = os.environ.get("REX_BLOCK", "")
     _claim(claude_block, "watch")
     signal.signal(signal.SIGHUP, lambda *_: sys.exit(0))
-    sys.stdout.write("\033[?25l")
+    # Alternate screen (no scrollback), no line wrap, no wheel-to-arrow-keys, no cursor.
+    sys.stdout.write("\033[?1049h\033[?7l\033[?1007l\033[?25l")
     saved = mute_input()
     frame = list(FRAME)
-    drawn, placed, asked = None, None, None
+    placed, measured = None, False
+    target, win = None, (1, 1)
     try:
         while True:
             state = _state(claude_block)
@@ -309,26 +362,48 @@ def watch(claude_block):
             if not body:
                 _spawn("wait", claude_block)
                 return
-            if body != drawn:
-                sys.stdout.write("\033[H\033[2J" + "\r\n".join(body))
-                sys.stdout.flush()
-                drawn = body
-            # Learn the frame from the last resize once Rex has applied it.
-            if asked:
-                have = block_size(me)
-                if all(have) and have != asked[2:]:
-                    frame = [asked[0] - have[0], asked[1] - have[1]]
-            fit = bounds(claude_block, rect, body, frame)
-            if fit:
+            # Rex cannot lock a floating layer, so enforce the fit: a box that
+            # was resized or moved by hand is put back. Everything settles
+            # within this tick, and the content is drawn only once the box is
+            # its final size, so there is no intermediate cut-off frame.
+            displaced_now = target is not None and displaced(layer.get("bounds"), target, win)
+            inner = (max(visible(line) for line in body), len(body))
+            # When the box is shrinking, the new content already fits it, so
+            # paint it before the resize rather than squeezing the old rows.
+            current = shutil.get_terminal_size()
+            if inner[0] <= current.columns and inner[1] <= current.lines:
+                draw(body)
+            for _ in range(3):
+                fit = bounds(claude_block, rect, body, frame)
+                if not fit:
+                    break
                 (bx, by, bw, bh), (win_cols, win_rows) = fit
-                if [bx, by, bw, bh] != placed:
-                    rex("session.resize_layer", {"layer_id": layer["layer_id"], "bounds": [bx, by, bw, bh]})
-                    placed = [bx, by, bw, bh]
-                    inner = (max(len(ANSI.sub("", line)) for line in body), len(body))
-                    asked = (round(bw * win_cols), round(bh * win_rows), *inner)
+                # Compare in whole cells so fraction rounding never triggers a resize.
+                key = (round(bw * win_cols), round(bh * win_rows), round(win_cols), round(win_rows))
+                if key == placed and not displaced_now:
+                    break
+                rex("session.resize_layer", {"layer_id": layer["layer_id"], "bounds": [bx, by, bw, bh]})
+                target, win, placed, displaced_now = [bx, by, bw, bh], (win_cols, win_rows), key, False
+                have = settled_size(me)
+                if not have or not all(have):
+                    break
+                # Measure the frame once, then only grow it if content stops
+                # fitting. Re-deriving it on every resize makes the box flip
+                # between sizes a cell apart.
+                if not measured:
+                    frame = [max(key[0] - have[0], 0), max(key[1] - have[1], 0)]
+                    measured = True
+                elif have[0] < inner[0] or have[1] < inner[1]:
+                    frame = [frame[0] + max(inner[0] - have[0], 0), frame[1] + max(inner[1] - have[1], 0)]
+                else:
+                    break
+            draw(body)
             time.sleep(TICK)
             discard_input()
     finally:
+        with contextlib.suppress(Exception):
+            sys.stdout.write("\033[?1049l\033[?7h\033[?25h")
+            sys.stdout.flush()
         with contextlib.suppress(Exception):
             if saved:
                 termios.tcsetattr(sys.stdin, termios.TCSANOW, saved)
@@ -343,6 +418,8 @@ if __name__ == "__main__":
     with contextlib.suppress(Exception):
         if mode == ["ensure"]:
             ensure(*args[:3])
+        elif mode == ["reopen"]:
+            reopen()
         elif mode == ["wait"]:
             wait(args[0])
     if mode == ["watch"]:
