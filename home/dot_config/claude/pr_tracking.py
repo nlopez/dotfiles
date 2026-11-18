@@ -117,12 +117,28 @@ def refresh(path, cwd, target):
             os.remove(path + ".pending")
 
 
+# Merge-readiness gates that stay pending until the PR merges, and the roll-up
+# that mirrors them; neither says anything about the code.
+GATE_CHECKS = {"devflow/mergegate", "ensure-ci-success"}
+
+
+def real_checks(pr):
+    return [i for i in pr.get("statusCheckRollup") or [] if (i.get("name") or i.get("context")) not in GATE_CHECKS]
+
+
+def check_counts(pr):
+    """(passed, total) over the checks that matter."""
+    rollup = real_checks(pr)
+    ok = {"SUCCESS", "NEUTRAL", "SKIPPED"}
+    return sum(1 for i in rollup if (i.get("conclusion") or i.get("state") or "") in ok), len(rollup)
+
+
 def checks(pr):
     """'pass', 'fail', 'pending' or '' from a statusCheckRollup."""
-    rollup = pr.get("statusCheckRollup") or []
+    rollup = real_checks(pr)
     if not rollup:
         return ""
-    failed = {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED", "STARTUP_FAILURE"}
+    failed ={"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED", "STARTUP_FAILURE"}
     pending = False
     for item in rollup:
         result = item.get("conclusion") or item.get("state") or ""
@@ -163,6 +179,7 @@ def prs(session_id, cwd, common, branch):
 RESET = "\033[0m"
 # Basic ANSI SGR codes (30-37 / 90-97) so colours follow the terminal theme.
 MAGENTA, BLUE, CYAN, GREEN, YELLOW, RED, WHITE, DIM = 35, 34, 36, 32, 33, 31, 37, 90
+BOLD = 1
 CHECK_GLYPH = {"pass": (GREEN, "✓"), "fail": (RED, "✗"), "pending": (YELLOW, "…")}
 REVIEW = {"APPROVED": (GREEN, "approved"), "CHANGES_REQUESTED": (RED, "changes")}
 

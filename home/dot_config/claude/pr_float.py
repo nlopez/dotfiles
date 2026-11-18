@@ -136,16 +136,61 @@ def lines(state):
     common = pr_tracking.git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir")
     branch = pr_tracking.git(cwd, "branch", "--show-current")
     here = os.path.basename(os.path.dirname(common)) if common else ""
-    out = []
+    rows = []
     for pr, current in pr_tracking.prs(session_id, cwd, common, branch):
         repo = pr_tracking.repo_of(pr.get("url"))
         prefix = "" if repo == here else repo
-        mark = pr_tracking.c(pr_tracking.GREEN, "⎇ ") if current else "  "
-        out.append(mark + pr_tracking.label(pr, prefix))
+        rows.append((current, *cells(pr, prefix)))
+    if not rows:
+        return []
+    t = pr_tracking
+    mark = {True: t.c(t.GREEN, "⎇ "), False: "  "}
+    header = [t.c(t.BOLD, "PR"), t.c(t.BOLD, "CI"), t.c(t.BOLD, "Review")]
+    body = [[mark[current] + pr_cell, ci, review] for current, pr_cell, ci, review in rows]
+    widths = [max(visible(row[i]) for row in [header, *body]) for i in range(3)]
+    border = lambda left, mid, right: t.c(t.DIM, left + mid.join("─" * (w + 2) for w in widths) + right)  # noqa: E731
+    bar = t.c(t.DIM, "│")
+
+    def row(cols):
+        return bar + bar.join(" " + pad(col, w) + " " for col, w in zip(cols, widths, strict=True)) + bar
+
+    out = [border("┌", "┬", "┐"), row(header), border("├", "┼", "┤")]
+    out += [row(cols) for cols in body]
+    out.append(border("└", "┴", "┘"))
     return out
 
 
+def cells(pr, prefix):
+    """(PR, CI, Review) cells for one PR."""
+    t = pr_tracking
+    name = t.c(t.GREEN, f"{prefix}#{pr.get('number')}")
+    state = pr.get("state")
+    if state in ("MERGED", "CLOSED"):
+        tag = t.c(t.MAGENTA, "merged") if state == "MERGED" else t.c(t.RED, "closed")
+        return t.link(pr.get("url"), f"{name} {tag}"), t.c(t.DIM, "–"), t.c(t.DIM, "–")
+    if pr.get("isDraft"):
+        name += " " + t.c(t.DIM, "draft")
+    status = t.checks(pr)
+    if status:
+        color, glyph = t.CHECK_GLYPH[status]
+        passed, total = t.check_counts(pr)
+        ci = t.c(color, f"{glyph} {passed}/{total}")
+    else:
+        ci = t.c(t.DIM, "–")
+    decision = pr.get("reviewDecision")
+    review = t.REVIEW.get(decision) or ((t.YELLOW, "needed") if decision else (t.DIM, "–"))
+    return t.link(pr.get("url"), name), ci, t.c(*review)
+
+
 ANSI = re.compile(r"\033\[[\d;]*m|\033\]8;;.*?\033\\")
+
+
+def visible(text):
+    return len(ANSI.sub("", text))
+
+
+def pad(text, width):
+    return text + " " * (width - visible(text))
 
 
 def bounds(claude_block, rect, body, frame):
