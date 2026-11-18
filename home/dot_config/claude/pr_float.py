@@ -21,6 +21,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import termios
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -267,11 +268,32 @@ def wait(claude_block):
         time.sleep(1)
 
 
+def mute_input():
+    """Stop the terminal echoing typed keys into the box; returns the old settings.
+
+    Ctrl-C still works, and closes the box.
+    """
+    try:
+        saved = termios.tcgetattr(sys.stdin)
+        muted = termios.tcgetattr(sys.stdin)
+        muted[3] &= ~(termios.ECHO | termios.ICANON | termios.IEXTEN)
+        termios.tcsetattr(sys.stdin, termios.TCSANOW, muted)
+        return saved
+    except Exception:
+        return None
+
+
+def discard_input():
+    with contextlib.suppress(Exception):
+        termios.tcflush(sys.stdin, termios.TCIFLUSH)
+
+
 def watch(claude_block):
     me = os.environ.get("REX_BLOCK", "")
     _claim(claude_block, "watch")
     signal.signal(signal.SIGHUP, lambda *_: sys.exit(0))
     sys.stdout.write("\033[?25l")
+    saved = mute_input()
     frame = list(FRAME)
     drawn, placed, asked = None, None, None
     try:
@@ -305,7 +327,11 @@ def watch(claude_block):
                     inner = (max(len(ANSI.sub("", line)) for line in body), len(body))
                     asked = (round(bw * win_cols), round(bh * win_rows), *inner)
             time.sleep(TICK)
+            discard_input()
     finally:
+        with contextlib.suppress(Exception):
+            if saved:
+                termios.tcsetattr(sys.stdin, termios.TCSANOW, saved)
         with contextlib.suppress(Exception):
             _, _, layer = locate(rex("session.view", {}), me)
             if layer:
