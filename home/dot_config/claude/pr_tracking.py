@@ -1,5 +1,5 @@
 # Managed by chezmoi — source: home/dot_config/claude/pr_tracking.py
-# PR tracking shared by statusline.py and hooks/track-prs.py.
+# PR tracking shared by statusline.py, pr_float.py and hooks/track-prs.py.
 #
 # Session PRs: hooks/track-prs.py appends PR URLs to sessions/<session_id>.json,
 # and on resume backfills them from the session transcript.
@@ -136,6 +136,64 @@ def checks(pr):
 def repo_of(url):
     m = re.match(r"https://github\.com/[\w.-]+/([\w.-]+)/pull/", url or "")
     return m.group(1) if m else ""
+
+
+def git(cwd, *args):
+    try:
+        out = subprocess.run(["git", "-C", cwd, *args], capture_output=True, text=True, timeout=1)
+        return out.stdout.strip() if out.returncode == 0 else ""
+    except Exception:
+        return ""
+
+
+def prs(session_id, cwd, common, branch):
+    """[(pr, is_current_branch)]: the branch's PR first, then the session's others."""
+    out = []
+    current = None
+    if common and branch and branch not in ("main", "master"):
+        current = branch_pr(cwd, common, branch)
+        if current:
+            out.append((current, True))
+    for url in session_prs(session_id):
+        if url != (current or {}).get("url"):
+            out.append(({"number": url.rsplit("/", 1)[-1], **(url_pr(url) or {}), "url": url}, False))
+    return out
+
+
+RESET = "\033[0m"
+# Basic ANSI SGR codes (30-37 / 90-97) so colours follow the terminal theme.
+MAGENTA, BLUE, CYAN, GREEN, YELLOW, RED, WHITE, DIM = 35, 34, 36, 32, 33, 31, 37, 90
+CHECK_GLYPH = {"pass": (GREEN, "✓"), "fail": (RED, "✗"), "pending": (YELLOW, "…")}
+REVIEW = {"APPROVED": (GREEN, "approved"), "CHANGES_REQUESTED": (RED, "changes")}
+
+
+def c(code, text):
+    return f"\033[{code}m{text}{RESET}"
+
+
+def link(url, text):
+    """OSC 8 hyperlink, so the label opens the PR on click."""
+    return f"\033]8;;{url}\033\\{text}\033]8;;\033\\" if url else text
+
+
+def label(pr, prefix=""):
+    """'#12 draft ✓ approved'-style label; state and review only when notable."""
+    bits = [c(GREEN, f"{prefix}#{pr.get('number')}")]
+    state = pr.get("state")
+    if state == "MERGED":
+        bits.append(c(MAGENTA, "merged"))
+    elif state == "CLOSED":
+        bits.append(c(RED, "closed"))
+    else:
+        if pr.get("isDraft"):
+            bits.append(c(DIM, "draft"))
+        glyph = CHECK_GLYPH.get(checks(pr))
+        if glyph:
+            bits.append(c(*glyph))
+        review = REVIEW.get(pr.get("reviewDecision"))
+        if review:
+            bits.append(c(*review))
+    return link(pr.get("url"), " ".join(bits))
 
 
 PR_COMMAND = re.compile(r"\bgh\s+pr\s+(create|ready|edit|merge)\b")

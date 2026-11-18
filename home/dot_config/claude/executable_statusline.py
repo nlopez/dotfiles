@@ -4,27 +4,19 @@
 #   model | think:<effort> | dir <name> | ⎇ <branch> | PR #12 ✓ approved | PRs #9 ✗ · repo#4 merged
 #   | ▥ used/size (pct%) AC | (sub) | 🧠 <project> · ready · ● ADHD ON
 # PR data comes from pr_tracking.py (cached `gh pr view`, refreshed in the background).
-# PR labels are OSC 8 hyperlinks to the PR.
+# PR labels are OSC 8 hyperlinks to the PR. In Rex they move to a floating
+# box at the top right of Claude's pane (pr_float.py).
 # Claude pipes a JSON blob on stdin; whatever we print is the status line.
 import contextlib
 import json
 import os
-import subprocess
 import sys
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pr_float  # noqa: E402
 import pr_tracking  # noqa: E402
-
-RESET = "\033[0m"
-
-
-# Basic ANSI SGR codes (30-37 / 90-97) so colours follow the terminal theme.
-MAGENTA, BLUE, CYAN, GREEN, YELLOW, RED, WHITE, DIM = 35, 34, 36, 32, 33, 31, 37, 90
-
-
-def c(code, text):
-    return f"\033[{code}m{text}{RESET}"
+from pr_tracking import BLUE, CYAN, DIM, GREEN, MAGENTA, RED, WHITE, YELLOW, c, git  # noqa: E402
 
 
 def tokens(n):
@@ -35,19 +27,6 @@ def tokens(n):
     return str(n)
 
 
-def git(cwd, *args):
-    try:
-        out = subprocess.run(
-            ["git", "-C", cwd, *args],
-            capture_output=True,
-            text=True,
-            timeout=1,
-        )
-        return out.stdout.strip() if out.returncode == 0 else ""
-    except Exception:
-        return ""
-
-
 def engram_ready():
     try:
         with urllib.request.urlopen("http://127.0.0.1:7437/health", timeout=0.3) as r:
@@ -56,49 +35,19 @@ def engram_ready():
         return False
 
 
-CHECK_GLYPH = {"pass": (GREEN, "✓"), "fail": (RED, "✗"), "pending": (YELLOW, "…")}
-REVIEW = {"APPROVED": (GREEN, "approved"), "CHANGES_REQUESTED": (RED, "changes")}
-
-
-def pr_label(pr, prefix=""):
-    """'#12 draft ✓ approved'-style label; state and review only when notable."""
-    bits = [c(GREEN, f"{prefix}#{pr.get('number')}")]
-    state = pr.get("state")
-    if state == "MERGED":
-        bits.append(c(MAGENTA, "merged"))
-    elif state == "CLOSED":
-        bits.append(c(RED, "closed"))
-    else:
-        if pr.get("isDraft"):
-            bits.append(c(DIM, "draft"))
-        glyph = CHECK_GLYPH.get(pr_tracking.checks(pr))
-        if glyph:
-            bits.append(c(*glyph))
-        review = REVIEW.get(pr.get("reviewDecision"))
-        if review:
-            bits.append(c(*review))
-    return link(pr.get("url"), " ".join(bits))
-
-
-def link(url, text):
-    """OSC 8 hyperlink, so the label opens the PR on click."""
-    return f"\033]8;;{url}\033\\{text}\033]8;;\033\\" if url else text
-
-
 def pr_parts(data, cwd, common, branch):
-    parts = []
-    current = None
-    if common and branch and branch not in ("main", "master"):
-        current = pr_tracking.branch_pr(cwd, common, branch)
-        if current:
-            parts.append(f"{c(WHITE, 'PR')} {pr_label(current)}")
+    # In Rex, pr_float.py shows the PRs in a floating box instead.
+    block = os.environ.get("REX_BLOCK")
+    if block and pr_float.running(block):
+        return []
     here = os.path.basename(os.path.dirname(common)) if common else ""
-    others = [u for u in pr_tracking.session_prs(data.get("session_id")) if u != (current or {}).get("url")]
+    found = pr_tracking.prs(data.get("session_id"), cwd, common, branch)
+    parts = [f"{c(WHITE, 'PR')} {pr_tracking.label(pr)}" for pr, current in found if current]
+    others = [pr for pr, current in found if not current]
     labels = []
-    for url in others[-3:]:
-        pr = {"number": url.rsplit("/", 1)[-1], **(pr_tracking.url_pr(url) or {}), "url": url}
-        repo = pr_tracking.repo_of(url)
-        labels.append(pr_label(pr, "" if repo == here else repo))
+    for pr in others[-3:]:
+        repo = pr_tracking.repo_of(pr["url"])
+        labels.append(pr_tracking.label(pr, "" if repo == here else repo))
     if labels:
         more = c(DIM, f" +{len(others) - 3}") if len(others) > 3 else ""
         parts.append(f"{c(WHITE, 'PRs')} " + c(DIM, " · ").join(labels) + more)

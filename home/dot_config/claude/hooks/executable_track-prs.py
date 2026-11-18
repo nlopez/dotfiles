@@ -5,6 +5,8 @@
 #   PostToolUse (Bash):
 #     gh pr create|ready|edit|merge -> PR URLs printed in the command output
 #     git push                      -> the pushed branch's PR, looked up in the background
+#   SessionStart:
+#     in Rex, open the floating PR box for this pane or point it at this session
 #   SessionStart (resume):
 #     the same rules applied to the transcript's Bash calls, in the background,
 #     so PRs from before the hook ran or from a forked parent session are found
@@ -14,6 +16,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import pr_float  # noqa: E402
 import pr_tracking  # noqa: E402
 
 try:
@@ -23,8 +26,15 @@ try:
     if not session_id:
         sys.exit(0)
     if data.get("hook_event_name") == "SessionStart":
+        subprocess.Popen(
+            [sys.executable, pr_float.__file__, "ensure", session_id, cwd, str(pr_float.claude_pid() or "")],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
         transcript = data.get("transcript_path") or ""
-        if os.path.isfile(transcript):
+        if data.get("source") == "resume" and os.path.isfile(transcript):
             subprocess.Popen(
                 [sys.executable, pr_tracking.__file__, "backfill", session_id, transcript],
                 stdin=subprocess.DEVNULL,
