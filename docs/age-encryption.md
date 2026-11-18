@@ -7,7 +7,13 @@ This repo uses [age](https://age-encryption.org/) with hybrid ML-KEM-768 + X2551
 - **Work secrets** → `~/.config/work-secrets/` — encrypted to the work age recipient, deployed only on work machines.
 - **Personal secrets** → `~/.config/personal-secrets/` — encrypted to the personal age recipient, deployed only on personal machines.
 - **Same-path / different-value secrets** (e.g. `~/.env` with machine-specific tokens) → use `.tmpl` files that read from 1Password instead of age encryption.
-- The age private key (identity) is fetched from 1Password automatically via `hooks.read-source-state.pre` and written to `~/.local/share/chezmoi-age/identity.txt` before any decryption happens.
+- The age private key (identity) is fetched from 1Password automatically via `hooks.read-source-state.pre` before any decryption happens. See [Where the identity lives](#where-the-identity-lives).
+
+## Where the identity lives
+
+- **macOS:** the login Keychain, service `chezmoi-age-identity`. `scripts/fetch-age-key.sh` stores it there from 1Password, and moves an existing `~/.local/share/chezmoi-age/identity.txt` into it and deletes the file. chezmoi's `[age] command` is `scripts/age-keychain.sh`, which reads the key through `varlock run` (`scripts/chezmoi-age.env`, an `exec()` of `security find-generic-password`) and hands it to `age` over an anonymous pipe, so it never touches the disk. Until mise has installed varlock on a new Mac, the wrapper reads the Keychain directly.
+- **Other machines with 1Password:** `~/.local/share/chezmoi-age/identity.txt` (mode 600).
+- **Workspaces:** the workspace secret `CHEZMOI_AGE_IDENTITY`, uploaded from the Keychain (see [docs/private-data.md](private-data.md)).
 
 ## Initial setup on a new machine (one-time)
 
@@ -103,8 +109,9 @@ Verify with: `chezmoi cat ~/.config/sometool/.env`
 for dest in ~/.config/work-secrets/*; do
   chezmoi add --encrypt "${dest}"
 done
-# 4. Delete the old identity file so the hook fetches the new one:
-rm ~/.local/share/chezmoi-age/identity.txt
+# 4. Delete the old identity so the hook fetches the new one:
+security delete-generic-password -s chezmoi-age-identity   # macOS
+rm -f ~/.local/share/chezmoi-age/identity.txt               # other platforms
 # 5. Run chezmoi apply --dry-run to confirm everything decrypts cleanly.
 # 6. Commit and push.
 ```
@@ -122,14 +129,17 @@ home/
     private_personal-secrets/ # → ~/.config/personal-secrets/ (mode 700, personal machines only)
       encrypted_*             # age-encrypted files
 scripts/
-  fetch-age-key.sh            # hook: fetches identity from 1Password → ~/.local/share/chezmoi-age/identity.txt
+  fetch-age-key.sh            # hook: fetches identity from 1Password → Keychain (macOS) or identity.txt
+  age-keychain.sh             # macOS [age] command: runs age with the Keychain identity via varlock
+  chezmoi-age.env             # varlock schema for age-keychain.sh
 ```
 
 ## Files that are never in the repo
 
 | Path                                      | What it is                                                         |
 | ----------------------------------------- | ------------------------------------------------------------------ |
-| `~/.local/share/chezmoi-age/identity.txt` | age private key — written by hook, never committed                 |
+| Keychain item `chezmoi-age-identity`      | age private key on macOS — stored by hook, never committed         |
+| `~/.local/share/chezmoi-age/identity.txt` | age private key on other platforms — written by hook               |
 | 1Password item `age-key/private-key`      | Source of truth for the private key (personal: `Automation` vault) |
 
 ## ⚠️ Boundaries

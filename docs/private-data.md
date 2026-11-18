@@ -16,7 +16,8 @@ decrypts `home/.private/work.yaml.age` or `home/.private/personal.yaml.age`
 
 | Machine                 | Age identity                                                          |
 | ----------------------- | --------------------------------------------------------------------- |
-| Not headless            | `~/.local/share/chezmoi-age/identity.txt`, fetched from 1Password     |
+| macOS, not headless     | Keychain item `chezmoi-age-identity`, fetched from 1Password          |
+| Linux, not headless     | `~/.local/share/chezmoi-age/identity.txt`, fetched from 1Password     |
 | Workspace               | workspace secret `CHEZMOI_AGE_IDENTITY`, at `/run/user/$UID/secrets/` |
 | Other headless machines | none: defaults only                                                   |
 

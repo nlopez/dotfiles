@@ -69,6 +69,9 @@ useBuiltinAge = false
 {{- if $headless }}
   command  = "{{ $ageCommand }}"
   identity = "{{ $workspaceAgeIdentity }}"
+{{- else if eq .chezmoi.os "darwin" }}
+  # Supplies the identity from the Keychain via varlock; it is never on disk.
+  command  = "{{ .chezmoi.workingTree }}/scripts/age-keychain.sh"
 {{- else }}
   identity = "{{ .chezmoi.homeDir }}/.local/share/chezmoi-age/identity.txt"
 {{- end }}
@@ -107,7 +110,8 @@ useBuiltinAge = false
 {{- end }}
 
 {{- if not $headless }}
-# Fetch the age identity from 1Password before chezmoi reads (decrypts) source state.
+# Fetch the age identity from 1Password (into the Keychain on macOS) before chezmoi
+# reads (decrypts) source state.
 [hooks.read-source-state.pre]
   command = "bash"
   args    = ["{{ .chezmoi.workingTree }}/scripts/fetch-age-key.sh"]
