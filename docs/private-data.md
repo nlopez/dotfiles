@@ -60,20 +60,28 @@ Add a new key to the defaults in `.chezmoitemplates/private-data` too.
 
 ## Edit
 
-On a work machine (the identity there decrypts only the work file):
+Machines with age configured keep a gitignored plaintext copy of their own
+class's file next to the ciphertext: `home/.private/work.yaml` on work machines
+and workspaces, `home/.private/personal.yaml` on personal machines. Read and
+edit it directly; no decrypt step is needed.
 
-```sh
-cd ~/.local/share/chezmoi
-chezmoi decrypt home/.private/work.yaml.age > /tmp/work.yaml
-$EDITOR /tmp/work.yaml
-chezmoi encrypt /tmp/work.yaml > home/.private/work.yaml.age
-```
+`scripts/private-data-sync.sh` keeps the two in sync. It runs from chezmoi's
+`read-source-state.pre` hook (so before every chezmoi command) and from the
+`private-data-sync` pre-commit hook. It compares both sides against the last
+synced content (a hash in `home/.private/.<class>.yaml.base`):
 
-Then delete `/tmp/work.yaml`.
+| Plaintext | Ciphertext | Result                                                                     |
+| --------- | ---------- | -------------------------------------------------------------------------- |
+| unchanged | changed    | plaintext is rewritten from the ciphertext (e.g. after `git pull`)         |
+| edited    | unchanged  | ciphertext is re-encrypted; commit the `.age` file                         |
+| edited    | changed    | conflict: nothing is touched, and the pre-commit hook fails until resolved |
 
-The personal file works the same way on a personal machine. From another
-machine, encrypt to the personal recipient with
-`age -a -R ~/.local/share/chezmoi-age/personal-recipient.txt`.
+The pre-commit hook also fails when it re-encrypts the file, so the new
+ciphertext can be staged. To resolve a conflict, merge the changes into the
+plaintext and encrypt it with the command the script prints.
+
+From a machine of the other class, encrypt to that class's recipient with
+`age -a -R ~/.local/share/chezmoi-age/<class>-recipient.txt`.
 
 ## Keep it clean
 

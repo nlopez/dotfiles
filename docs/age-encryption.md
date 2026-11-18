@@ -7,7 +7,7 @@ This repo uses [age](https://age-encryption.org/) with hybrid ML-KEM-768 + X2551
 - **Work secrets** → `~/.config/work-secrets/` — encrypted to the work age recipient, deployed only on work machines.
 - **Personal secrets** → `~/.config/personal-secrets/` — encrypted to the personal age recipient, deployed only on personal machines.
 - **Same-path / different-value secrets** (e.g. `~/.env` with machine-specific tokens) → use `.tmpl` files that read from 1Password instead of age encryption.
-- The age private key (identity) is fetched from 1Password automatically via `hooks.read-source-state.pre` and written to `~/.local/share/chezmoi-age/identity.txt` before any decryption happens.
+- The age private key (identity) is fetched from 1Password automatically via `hooks.read-source-state.pre` (`scripts/read-source-state-pre.sh`) and written to `~/.local/share/chezmoi-age/identity.txt` before any decryption happens.
 
 ## Initial setup on a new machine (one-time)
 
@@ -123,6 +123,7 @@ home/
       encrypted_*             # age-encrypted files
 scripts/
   fetch-age-key.sh            # hook: fetches identity from 1Password → ~/.local/share/chezmoi-age/identity.txt
+  private-data-sync.sh        # hook: syncs home/.private/<class>.yaml with its .age (docs/private-data.md)
 ```
 
 ## Files that are never in the repo

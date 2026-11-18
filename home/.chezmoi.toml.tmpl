@@ -106,11 +106,12 @@ useBuiltinAge = false
   args    = ["--new-window", "--wait"]
 {{- end }}
 
-{{- if not $headless }}
-# Fetch the age identity from 1Password before chezmoi reads (decrypts) source state.
+{{- if $encryption }}
+# Before chezmoi reads (decrypts) source state: fetch the age identity from
+# 1Password, then sync the plaintext copy of the private data (docs/private-data.md).
 [hooks.read-source-state.pre]
   command = "bash"
-  args    = ["{{ .chezmoi.workingTree }}/scripts/fetch-age-key.sh"]
+  args    = ["{{ .chezmoi.workingTree }}/scripts/read-source-state-pre.sh"]
 {{- end }}
 
 # ---------------------------------------------------------------------------
