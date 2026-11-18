@@ -141,14 +141,14 @@
 [format]
   signoff = true
 
+[ghq]
+  root = ~/src
+
 {{- if not .workspace }}
 {{/* Workspaces: identity, SSH keys, and credentials come from the host       */}}
 {{/* ~/.gitconfig (read after this file, so it wins). The chezmoi repo's      */}}
 {{/* noreply identity is set repo-locally by                                */}}
 {{/* run_onchange_after_40-workspace-git-identity.sh.                        */}}
-
-[ghq]
-  root = ~/src
 
 {{/* Per-identity includes go last so they override defaults above.       */}}
 {{/* Primary: gitdir-based (covers all URL variants for a given clone).   */}}
