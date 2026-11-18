@@ -1,11 +1,13 @@
-# Managed by chezmoi — source: home/dot_config/claude/pr_float.py
-# Session PR tracker as a Rex floating box at the top right of Claude's pane.
+# Managed by chezmoi — source: home/dot_config/pr-box/pr_float.py
+# Session PR tracker as a Rex floating box at the top right of the coding
+# agent's pane. Agent-neutral: adapters (see pr_box.py) supply the session ID, the
+# working directory and, when known, the agent's pid.
 #
 #   ensure <session_id> <cwd> <pid>  (SessionStart hook) record the session for
 #                                    this Rex block and start a waiter if
 #                                    nothing is running for it
-#   wait <claude_block>              detached: open the box once there is a PR
-#   watch <claude_block>             the box's own program: draw the PRs and
+#   wait <agent_block>              detached: open the box once there is a PR
+#   watch <agent_block>             the box's own program: draw the PRs and
 #                                    resize the box to fit; with no PRs left it
 #                                    hands back to a waiter and closes
 #
@@ -28,6 +30,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pr_tracking  # noqa: E402
 
 TICK = 2
+# A waiter only needs to notice the first PR; nothing is on screen to keep fresh.
+WAIT_TICK = 5
+# How long git facts and the agent pane's size are reused between ticks.
+GIT_TTL = 10
+SIZE_TTL = 6
 # Cells the floating layer's frame takes, until measured.
 FRAME = (3, 3)
 # How long a waiter that opened the box waits for the box to take over.
@@ -46,15 +53,15 @@ def _alive(pid):
         return False
 
 
-def claude_pid():
-    """The nearest ancestor process named claude."""
+def ancestor_pid(*names):
+    """The nearest ancestor process whose command is one of names, if any."""
     pid = os.getppid()
     for _ in range(10):
         out = subprocess.run(["ps", "-o", "ppid=,comm=", "-p", str(pid)], capture_output=True, text=True)
         fields = out.stdout.split(None, 1)
         if len(fields) < 2:
             return None
-        if os.path.basename(fields[1].strip()) == "claude":
+        if os.path.basename(fields[1].strip()) in names:
             return pid
         pid = int(fields[0])
         if pid <= 1:
@@ -76,7 +83,7 @@ def _claim(block, mode):
 def _mine(state):
     if state.get("watcher_pid") != os.getpid():
         return False
-    return not state.get("claude_pid") or _alive(state["claude_pid"])
+    return not state.get("agent_pid") or _alive(state["agent_pid"])
 
 
 def running(block):
@@ -132,10 +139,25 @@ def locate(view, block):
     return None, None, None
 
 
+_cache = {}
+
+
+def _cached(key, ttl, fn, ok=bool):
+    """fn()'s result, reused for ttl seconds; failed results (per ok) are not kept."""
+    now = time.time()
+    hit = _cache.get(key)
+    if hit and now - hit[0] < ttl:
+        return hit[1]
+    value = fn()
+    if ok(value):
+        _cache[key] = (now, value)
+    return value
+
+
 def lines(state):
     session_id, cwd = state.get("session_id"), state.get("cwd") or os.path.expanduser("~")
-    common = pr_tracking.git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir")
-    branch = pr_tracking.git(cwd, "branch", "--show-current")
+    common = _cached(("common", cwd), GIT_TTL, lambda: pr_tracking.git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir"))
+    branch = _cached(("branch", cwd), GIT_TTL, lambda: pr_tracking.git(cwd, "branch", "--show-current"))
     here = os.path.basename(os.path.dirname(common)) if common else ""
     rows = []
     for pr, current in pr_tracking.prs(session_id, cwd, common, branch):
@@ -194,9 +216,9 @@ def pad(text, width):
     return text + " " * (width - visible(text))
 
 
-def bounds(claude_block, rect, body, frame):
+def bounds(agent_block, rect, body, frame):
     """[x, y, w, h] for a box holding body at the top right of rect, or None."""
-    cols, rows = block_size(claude_block)
+    cols, rows = _cached(("size", agent_block), SIZE_TTL, lambda: block_size(agent_block), ok=lambda v: all(v))
     if not cols or not rows:
         return None
     x, y, w, h = rect
@@ -206,9 +228,9 @@ def bounds(claude_block, rect, body, frame):
     return [round(x + w - bw, 4), round(y, 4), round(bw, 4), round(bh, 4)], (win_cols, win_rows)
 
 
-def _spawn(mode, claude_block):
+def _spawn(mode, agent_block):
     subprocess.Popen(
-        [sys.executable, os.path.abspath(__file__), mode, claude_block],
+        [sys.executable, os.path.abspath(__file__), mode, agent_block],
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
@@ -221,7 +243,7 @@ def ensure(session_id, cwd, pid=""):
     if not block or not os.environ.get("REX_SESSION") or not shutil.which("rex"):
         return
     state = _state(block)
-    state.update(session_id=session_id, cwd=cwd, claude_pid=int(pid) if pid else None)
+    state.update(session_id=session_id, cwd=cwd, agent_pid=int(pid) if pid else None)
     pr_tracking._write_json(_state_path(block), state)
     if not _alive(state.get("watcher_pid")):
         _spawn("wait", block)
@@ -236,25 +258,25 @@ def reopen():
     elif running(block):
         print("PR box is already open.")
     else:
-        ensure(state["session_id"], state.get("cwd") or os.getcwd(), state.get("claude_pid") or "")
+        ensure(state["session_id"], state.get("cwd") or os.getcwd(), state.get("agent_pid") or "")
         print("Reopening the PR box; it appears once the session has a PR.")
 
 
-def wait(claude_block):
-    _claim(claude_block, "wait")
+def wait(agent_block):
+    _claim(agent_block, "wait")
     while True:
-        state = _state(claude_block)
+        state = _state(agent_block)
         if not _mine(state):
             return
         body = lines(state)
         if body:
-            window, rect, _ = locate(rex("session.view", {}), claude_block)
+            window, rect, _ = locate(rex("session.view", {}), agent_block)
             if not rect:
                 return
-            placed = bounds(claude_block, rect, body, FRAME)
+            placed = bounds(agent_block, rect, body, FRAME)
             if placed:
                 break
-        time.sleep(TICK)
+        time.sleep(WAIT_TICK)
     rex(
         "session.new_layer",
         {
@@ -265,7 +287,7 @@ def wait(claude_block):
                     "flavor": "com.superlogical.terminal.shell",
                     "label": "PRs",
                     "options": {
-                        "command": [sys.executable, os.path.abspath(__file__), "watch", claude_block],
+                        "command": [sys.executable, os.path.abspath(__file__), "watch", agent_block],
                         "exit": {"on_completion": True},
                     },
                 }
@@ -276,7 +298,7 @@ def wait(claude_block):
     # Stay the block's owner until the box starts, so a SessionStart in the
     # meantime does not start a second waiter.
     for _ in range(HANDOFF):
-        if _state(claude_block).get("watcher_pid") != os.getpid():
+        if _state(agent_block).get("watcher_pid") != os.getpid():
             return
         time.sleep(1)
 
@@ -339,9 +361,9 @@ def discard_input():
         termios.tcflush(sys.stdin, termios.TCIFLUSH)
 
 
-def watch(claude_block):
+def watch(agent_block):
     me = os.environ.get("REX_BLOCK", "")
-    _claim(claude_block, "watch")
+    _claim(agent_block, "watch")
     signal.signal(signal.SIGHUP, lambda *_: sys.exit(0))
     # Alternate screen (no scrollback), no line wrap, no wheel-to-arrow-keys, no cursor.
     sys.stdout.write("\033[?1049h\033[?7l\033[?1007l\033[?25l")
@@ -351,16 +373,16 @@ def watch(claude_block):
     target, win = None, (1, 1)
     try:
         while True:
-            state = _state(claude_block)
+            state = _state(agent_block)
             if not _mine(state):
                 return
-            _, rect, _ = locate(view := rex("session.view", {}), claude_block)
+            _, rect, _ = locate(view := rex("session.view", {}), agent_block)
             _, _, layer = locate(view, me)
             if not rect or not layer:
                 return
             body = lines(state)
             if not body:
-                _spawn("wait", claude_block)
+                _spawn("wait", agent_block)
                 return
             # Rex cannot lock a floating layer, so enforce the fit: a box that
             # was resized or moved by hand is put back. Everything settles
@@ -374,7 +396,7 @@ def watch(claude_block):
             if inner[0] <= current.columns and inner[1] <= current.lines:
                 draw(body)
             for _ in range(3):
-                fit = bounds(claude_block, rect, body, frame)
+                fit = bounds(agent_block, rect, body, frame)
                 if not fit:
                     break
                 (bx, by, bw, bh), (win_cols, win_rows) = fit

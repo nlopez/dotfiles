@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # Managed by chezmoi — source: home/dot_config/claude/hooks/executable_track-prs.py
-# Remember the PRs this session opens or pushes to, for the status line's
-# session PR list.
+# Claude Code adapter for the shared session PR box (~/.config/pr-box/pr_box.py).
 #   PostToolUse (Bash):
 #     gh pr create|ready|edit|merge -> PR URLs printed in the command output
 #     git push                      -> the pushed branch's PR, looked up in the background
@@ -15,7 +14,8 @@ import os
 import subprocess
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.expanduser("~/.config/pr-box"))
+import pr_box  # noqa: E402
 import pr_float  # noqa: E402
 import pr_tracking  # noqa: E402
 
@@ -26,13 +26,7 @@ try:
     if not session_id:
         sys.exit(0)
     if data.get("hook_event_name") == "SessionStart":
-        subprocess.Popen(
-            [sys.executable, pr_float.__file__, "ensure", session_id, cwd, str(pr_float.claude_pid() or "")],
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True,
-        )
+        pr_box.attach(session_id, cwd, pr_float.ancestor_pid("claude") or "")
         transcript = data.get("transcript_path") or ""
         if data.get("source") == "resume" and os.path.isfile(transcript):
             subprocess.Popen(
@@ -46,9 +40,6 @@ try:
     command = (data.get("tool_input") or {}).get("command") or ""
     response = data.get("tool_response")
     output = json.dumps(response) if not isinstance(response, str) else response
-    for url in pr_tracking.command_prs(command, output):
-        pr_tracking.record(session_id, url)
-    if pr_tracking.PUSH_COMMAND.search(command):
-        pr_tracking.spawn_resolve(session_id, cwd)
+    pr_box.record_command(session_id, cwd, command, output)
 except Exception:
     pass

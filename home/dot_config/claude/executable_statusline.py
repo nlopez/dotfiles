@@ -3,9 +3,9 @@
 # Claude Code status line modelled on pi's powerline footer:
 #   model | think:<effort> | dir <name> | ⎇ <branch> | PR #12 ✓ approved | PRs #9 ✗ · repo#4 merged
 #   | ▥ used/size (pct%) AC | (sub) | 🧠 <project> · ready · ● ADHD ON
-# PR data comes from pr_tracking.py (cached `gh pr view`, refreshed in the background).
+# PR data comes from ~/.config/pr-box/pr_tracking.py (cached `gh pr view`, refreshed in the background).
 # PR labels are OSC 8 hyperlinks to the PR. In Rex they move to a floating
-# box at the top right of Claude's pane (pr_float.py).
+# box at the top right of Claude's pane (~/.config/pr-box/pr_float.py).
 # Claude pipes a JSON blob on stdin; whatever we print is the status line.
 import contextlib
 import json
@@ -13,7 +13,7 @@ import os
 import sys
 import urllib.request
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.expanduser("~/.config/pr-box"))
 import pr_float  # noqa: E402
 import pr_tracking  # noqa: E402
 from pr_tracking import BLUE, CYAN, DIM, GREEN, MAGENTA, RED, WHITE, YELLOW, c, git  # noqa: E402

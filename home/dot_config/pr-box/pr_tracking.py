@@ -1,8 +1,10 @@
-# Managed by chezmoi — source: home/dot_config/claude/pr_tracking.py
-# PR tracking shared by statusline.py, pr_float.py and hooks/track-prs.py.
+# Managed by chezmoi — source: home/dot_config/pr-box/pr_tracking.py
+# PR tracking for coding-agent sessions, shared by every agent adapter (Claude
+# Code hooks, the pi extension), pr_float.py and the Claude status line.
 #
-# Session PRs: hooks/track-prs.py appends PR URLs to sessions/<session_id>.json,
-# and on resume backfills them from the session transcript.
+# Session PRs: adapters append PR URLs to sessions/<session_id>.json (or replace
+# the list, see set_session); Claude's adapter also backfills them from the
+# session transcript on resume.
 # PR status: `gh pr view` results are cached per PR (or per repo+branch) and
 # refreshed by a detached `python3 pr_tracking.py refresh ...` so the status
 # line never waits on the network.
@@ -17,13 +19,17 @@ import time
 
 CACHE = os.path.join(
     os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache"),
-    "claude",
-    "pr-tracking",
+    "pr-box",
 )
-PR_URL = re.compile(r"https://github\.com/[\w.-]+/[\w.-]+/pull/\d+")
+PR_URL = re.compile(r"https://[\w.-]+/[\w.-]+/[\w.-]+/pull/\d+")
 FIELDS = "number,url,state,isDraft,reviewDecision,statusCheckRollup"
-OPEN_TTL = 60
-CLOSED_TTL = 3600
+# Status refresh intervals, in seconds.
+ACTIVE_TTL = 30  # checks running, failing or not reported yet
+SETTLED_TTL = 300  # open with every check green: only review state can change
+NO_PR_TTL = 120  # a branch without a PR yet
+CLOSED_TTL = 3600  # merged or closed
+HOT_TTL = 20  # right after a push or gh pr command
+HOT_WINDOW = 180
 # A refresh that has not finished within this window is assumed dead.
 PENDING_TTL = 30
 
@@ -59,6 +65,11 @@ def record(session_id, url):
         _write_json(path, urls + [url])
 
 
+def set_session(session_id, urls):
+    """Replace the session's PR list, for agents whose history can be rewound."""
+    _write_json(_session_path(session_id), list(dict.fromkeys(urls)))
+
+
 def session_prs(session_id):
     return _read_json(_session_path(session_id), []) if session_id else []
 
@@ -67,15 +78,51 @@ def _key(*parts):
     return hashlib.sha1("\0".join(parts).encode()).hexdigest()[:16]
 
 
+def _ttl(cached):
+    """How long a cached status stays fresh: short while CI is moving, long once settled."""
+    if cached is None:
+        return 0
+    state = cached.get("state")
+    if not cached:
+        return NO_PR_TTL
+    if state in ("MERGED", "CLOSED"):
+        return CLOSED_TTL
+    return ACTIVE_TTL if checks(cached) in ("pending", "fail", "") else SETTLED_TTL
+
+
 def _status(cache_name, cwd, target):
     """Cached PR dict, {} when there is no PR, None when not fetched yet."""
     path = _path("status", cache_name + ".json")
     cached = _read_json(path)
     age = time.time() - os.path.getmtime(path) if cached is not None else None
-    ttl = OPEN_TTL if (cached or {}).get("state") in (None, "OPEN") else CLOSED_TTL
+    ttl = _ttl(cached)
+    if cached is not None and time.time() - _mtime(_path("status", ".hot")) < HOT_WINDOW:
+        ttl = min(ttl, HOT_TTL)
     if age is None or age > ttl:
         _spawn_refresh(path, cwd, target)
     return cached
+
+
+def _mtime(path):
+    try:
+        return os.path.getmtime(path)
+    except OSError:
+        return 0
+
+
+def invalidate():
+    """A push or gh pr command probably changed PR state: re-poll soon, fast for a while.
+
+    CI starts a few seconds after a push, so statuses are marked stale and polled
+    at HOT_TTL for HOT_WINDOW instead of waiting out the long settled interval.
+    """
+    os.makedirs(_path("status"), exist_ok=True)
+    with open(_path("status", ".hot"), "w"):
+        pass
+    for name in os.listdir(_path("status")):
+        if name.endswith(".json"):
+            with contextlib.suppress(OSError):
+                os.utime(_path("status", name), (0, 0))
 
 
 def _spawn_refresh(path, cwd, target):
@@ -106,8 +153,13 @@ def url_pr(url):
 
 def refresh(path, cwd, target):
     args = ["gh", "pr", "view", *([target] if target else []), "--json", FIELDS]
+    env = dict(os.environ)
+    m = re.match(r"https://([\w.-]+/[\w.-]+/[\w.-]+)/pull/", target or "")
+    if m:
+        # Lets a multi-account gh wrapper pick the account that owns the repo.
+        env["GH_REPO"] = m.group(1)
     try:
-        out = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=15)
+        out = subprocess.run(args, cwd=cwd, env=env, capture_output=True, text=True, timeout=15)
         if out.returncode == 0:
             _write_json(path, json.loads(out.stdout))
         elif "no pull requests found" in out.stderr.lower():
@@ -150,7 +202,7 @@ def checks(pr):
 
 
 def repo_of(url):
-    m = re.match(r"https://github\.com/[\w.-]+/([\w.-]+)/pull/", url or "")
+    m = re.match(r"https://[\w.-]+/[\w.-]+/([\w.-]+)/pull/", url or "")
     return m.group(1) if m else ""
 
 
