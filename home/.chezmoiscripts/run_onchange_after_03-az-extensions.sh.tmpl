@@ -1,0 +1,22 @@
+{{- if .work -}}
+#!/bin/bash
+
+# Installs Azure CLI extensions. azure-cli comes from the Homebrew cask on macOS
+# (.chezmoidata/darwin/packages.yaml) and mise on Linux
+# (.chezmoitemplates/mise/linux-work.toml), so this runs after 02-mise-install.
+# Re-runs when the extension list changes; `--upgrade` makes it idempotent.
+
+set -eufo pipefail
+
+export PATH="{{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin:{{ else }}{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ end }}$PATH"
+
+command -v az >/dev/null 2>&1 || { echo "az not found, skipping" >&2; exit 0; }
+
+extensions=(
+  resource-graph
+)
+
+for ext in "${extensions[@]}"; do
+  az extension add --name "$ext" --upgrade --yes --only-show-errors
+done
+{{- end }}
