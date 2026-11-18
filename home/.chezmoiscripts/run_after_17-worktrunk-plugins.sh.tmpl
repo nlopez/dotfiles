@@ -33,6 +33,25 @@ if command -v claude >/dev/null 2>&1; then
   fi
   claude plugin list 2>/dev/null | grep -q 'worktrunk@worktrunk' \
     || claude plugin install worktrunk@worktrunk
+
+  # Plugin <= 0.80's WorktreeCreate hook always runs `wt switch --create`, which
+  # fails when the branch exists (e.g. `claude --worktree X --resume ...`). Drop
+  # --create for existing branches; `wt switch` then reuses or creates the
+  # branch's worktree. Newer plugins route through `wt config plugins claude
+  # hook` instead, so the match below no longer applies to them.
+  installed="$CLAUDE_CONFIG_DIR/plugins/installed_plugins.json"
+  jq -r '.plugins["worktrunk@worktrunk"][]?.installPath' "$installed" 2>/dev/null | sort -u |
+    while IFS= read -r root; do
+      hooks="$root/hooks/hooks.json"
+      grep -q 'switch --create \\"\$name\\"' "$hooks" 2>/dev/null || continue
+      tmp="$(mktemp)"
+      jq '(.hooks.WorktreeCreate[].hooks[].command) |= sub(
+            "switch --create \"\\$name\""; "switch $create \"$name\"")
+          | (.hooks.WorktreeCreate[].hooks[].command) |= sub(
+            "bash \"\\$CLAUDE_PLUGIN_ROOT/hooks/wt.sh\" switch";
+            "create=--create; git show-ref --verify --quiet \"refs/heads/$name\" \u0026\u0026 create=; bash \"$CLAUDE_PLUGIN_ROOT/hooks/wt.sh\" switch")' \
+        "$hooks" >"$tmp" && mv "$tmp" "$hooks"
+    done
 else
   echo "claude not found, skipping worktrunk Claude plugin" >&2
 fi
