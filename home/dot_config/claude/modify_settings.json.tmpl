@@ -9,6 +9,7 @@
 #             on commits and the "Generated with Claude Code" line on PRs),
 #             model (default = Sonnet 5.5),
 #             effortLevel (default thinking effort = medium),
+#             theme (auto = match the terminal's light/dark background),
 #             statusLine (pi-style bar, see statusline.py),
 #             hooks (atuin, no-chat-comments, agent-bypass-guard, Rex session-start, plus context-mode cache-heal if present).
 # Removes:    ECC env, and all plugin/marketplace entries
@@ -31,6 +32,10 @@ current["attribution"] = {"commit": "", "pr": ""}
 # Default model and effort (thinking depth) at session start.
 current["model"] = "claude-sonnet-5-5[1m]"
 current["effortLevel"] = "medium"
+
+# Follow the terminal's light/dark background, so diffs and the changes
+# sidebar use the light palette on a light terminal theme.
+current["theme"] = "auto"
 
 # Hooks: only atuin's (the `atuin hook install claude-code` equivalent), which
 # records Claude's Bash commands in atuin history. Replacing the whole key also
