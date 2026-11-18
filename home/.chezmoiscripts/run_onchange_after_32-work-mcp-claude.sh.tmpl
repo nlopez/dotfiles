@@ -4,8 +4,9 @@
 # Registers the private work MCP servers with Claude Code at user scope, on
 # every work machine — workspaces included. Server definitions come from
 # .chezmoitemplates/private-mcp-servers (see docs/private-data.md); Pi gets the
-# same servers via dot_config/pi/agent/modify_mcp.json.tmpl. Servers that are
-# excluded on workspaces are also removed there.
+# same servers via dot_config/pi/agent/modify_mcp.json.tmpl. Servers listed in
+# mcp_retired are removed everywhere; servers excluded on workspaces are also
+# removed there.
 #
 # Re-running removes each server first, which also clears its OAuth login:
 # run /mcp in Claude Code afterwards to sign in again (on headless hosts, SSH-
@@ -27,6 +28,11 @@ command -v jq >/dev/null 2>&1 || { echo "jq not found, skipping" >&2; exit 0; }
 
 {{- $p := includeTemplate "private-data" . | fromYaml }}
 SERVERS={{ includeTemplate "private-mcp-servers" . | squote }}
+
+# Retired or renamed servers.
+{{- range ($p.mcp_retired | default list) }}
+claude mcp remove {{ . | squote }} --scope user >/dev/null 2>&1 || true
+{{- end }}
 
 {{- if .workspace }}
 # Workspaces: make sure servers excluded here are gone.
