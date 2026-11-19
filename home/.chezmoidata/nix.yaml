@@ -79,6 +79,7 @@ nix:
     personal:
     - argocd
     - cilium-cli
+    - cmctl
     - doctl
     - hubble
     - immich-cli
