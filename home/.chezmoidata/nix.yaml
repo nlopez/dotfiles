@@ -23,6 +23,7 @@ nix:
     # atuin: release binary via .chezmoiexternal.toml.tmpl (mirrors setup.atuin.sh)
     - bat
     - bazel_9
+    - btop
     - carapace
     - chezmoi
     - claude-code
@@ -51,6 +52,7 @@ nix:
     - kubernetes-helm
     - lazygit
     - lima
+    - ncdu
     - neovim
     - nodejs
     - pi-coding-agent
@@ -100,7 +102,6 @@ nix:
     # macOS only (formerly Homebrew formulae, plus mac-only tools).
     darwin:
       base:
-      - btop
       - duti
       - flock
       - git-credential-manager
@@ -108,7 +109,6 @@ nix:
       - krunkit
       - kubevirt
       - mas
-      - ncdu
       - pass
       - pv
       - qemu
