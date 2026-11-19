@@ -54,14 +54,6 @@ current["defaultThinkingLevel"] = "medium"
 # not the realpath inside .pnpm/. npm hoists by default.
 current["npmCommand"] = ["npm"]
 
-# Hardware cursor — enabled on startup.
-current["showHardwareCursor"] = True
-
-# Fullscreen TUI mode (pi's default, set explicitly): runs on the alternate
-# screen, so the transcript is not in the terminal/tmux scrollback and tmux
-# copy-mode search won't find it. Use pi's own scrolling/search instead.
-current["tuiMode"] = "fullscreen"
-
 # Declarative package list — exactly and only these packages.
 # Source of truth: home/.chezmoidata/pi.yaml
 # personal_only_packages are excluded on work machines.
@@ -124,10 +116,6 @@ items.append({"id": "pr", "statusKey": "pr", "position": "left", "selfColorize":
 powerline["customItems"] = items
 current["powerline"] = powerline
 
-# Compaction settings.
-current.setdefault("compaction", {
-    "enabled": True,
-    "reserveTokens": 32768,
-})
+current["defaultTools"] = ["+codemode"]
 
 print(json.dumps(current, indent=2))
