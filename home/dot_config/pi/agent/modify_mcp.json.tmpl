@@ -27,10 +27,15 @@ OVERLAY=$(cat << 'EOF'
       "command": "{{ includeTemplate "nix-profile" . }}/bin/npx",
       "args": ["-y", "{{ .mcp.playwright | trimPrefix "npm:" }}"]
     }
-{{- if not .headless }}
+{{- if or (not .headless) .workspace }}
     ,"kagi": {
+{{- if .workspace }}
+      "command": "{{ includeTemplate "nix-profile" . }}/bin/uvx",
+      "args": ["kagimcp"]
+{{- else }}
       "command": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/varlock",
       "args": ["run", "-p", "{{ .chezmoi.homeDir }}/.config/varlock/agents.env", "--filter", "KAGI_API_KEY", "--inject", "vars", "--no-redact-stdout", "--", "{{ includeTemplate "nix-profile" . }}/bin/uvx", "kagimcp"]
+{{- end }}
     }
 {{- end }}
 {{- range $k, $v := $servers }}

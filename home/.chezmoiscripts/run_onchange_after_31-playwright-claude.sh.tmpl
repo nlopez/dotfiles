@@ -1,4 +1,3 @@
-{{- if not .headless -}}
 #!/bin/bash
 
 # Registers the Playwright MCP server (@playwright/mcp) with Claude Code at user
@@ -21,4 +20,3 @@ claude mcp add-json playwright --scope user '{
   "command": "{{ includeTemplate "nix-profile" . }}/bin/npx",
   "args": ["-y", "{{ .mcp.playwright | trimPrefix "npm:" }}"]
 }'
-{{- end }}

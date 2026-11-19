@@ -8,7 +8,9 @@
 # mcp_retired are removed everywhere; servers excluded on workspaces are also
 # removed there.
 #
-# Re-running removes each server first, which also clears its OAuth login:
+# A server is only re-registered when it is missing or its user-scope entry in
+# .claude.json differs from the definition, so a re-run leaves existing OAuth
+# logins alone. Re-registering removes the server first, which clears its login:
 # run /mcp in Claude Code afterwards to sign in again (on headless hosts, SSH-
 # forward the callback port or paste the redirected URL when prompted).
 #
@@ -41,6 +43,8 @@ claude mcp remove {{ . | squote }} --scope user >/dev/null 2>&1 || true
 {{- end }}
 {{- end }}
 
+CLAUDE_JSON="$CLAUDE_CONFIG_DIR/.claude.json"
+
 printf '%s\n' "$SERVERS" | jq -c '
   def port:
     (.oauth.callbackUrl // "")
@@ -59,6 +63,11 @@ printf '%s\n' "$SERVERS" | jq -c '
 ' | while IFS= read -r entry; do
   name=$(jq -r '.name' <<<"$entry")
   json=$(jq -c '.json' <<<"$entry")
+  if [ -f "$CLAUDE_JSON" ] && jq -e --arg n "$name" --argjson want "$json" \
+    '(.mcpServers[$n] // null) == $want' "$CLAUDE_JSON" >/dev/null 2>&1; then
+    echo "claude mcp: $name up to date"
+    continue
+  fi
   claude mcp remove "$name" --scope user >/dev/null 2>&1 || true
   claude mcp add-json "$name" --scope user "$json" >/dev/null
   echo "claude mcp: registered $name"
