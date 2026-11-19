@@ -4,7 +4,7 @@
 
 [[ssh-keys]]
 item = "GitHub - nlopez"
-vault = "Private"
+vault = {{ if .work }}"Employee"{{ else }}"Private"{{ end }}
 {{ if .work }}
 [[ssh-keys]]
 # Rename your work SSH key item in 1Password to "GitHub - work" to match.

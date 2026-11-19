@@ -14,7 +14,11 @@ export XDG_CACHE_HOME="$HOME/.cache"
 export COLORTERM=truecolor
 
 {{- if not .headless }}
+{{- if .work }}
+export OP_ACCOUNT={{ (includeTemplate "private-data" . | fromYaml).onepassword_account }}
+{{- else }}
 export OP_ACCOUNT=my.1password.com
+{{- end }}
 export SSH_AUTH_SOCK="{{ .platform.ssh_auth_sock | replace "~" .chezmoi.homeDir }}"
 {{- end }}
 
