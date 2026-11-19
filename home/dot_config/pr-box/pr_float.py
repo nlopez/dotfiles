@@ -47,7 +47,7 @@ FRAME_MAX = (8, 6)
 HANDOFF = 15
 # Shown in the box's title so a box still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 2
+VERSION = 3
 
 
 def _state_path(block):
@@ -288,7 +288,7 @@ def ensure(session_id, cwd, pid=""):
 
 
 def reopen():
-    """Open this pane's box from its recorded session (the /pr-float command).
+    """Open this pane's box from its recorded session (the /pr-box command).
 
     An open box is closed first and opened fresh.
     """

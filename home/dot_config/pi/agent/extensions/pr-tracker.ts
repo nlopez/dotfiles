@@ -8,15 +8,15 @@
  *
  * On session start and on /tree, the active branch is replayed: PRs opened by
  * earlier tool calls are found (including sessions that predate this
- * extension), and add/remove entries from /pr-float apply in order. The list
+ * extension), and add/remove entries from /pr-box apply in order. The list
  * follows /tree branches.
  *
  * When a tracked PR's CI fails, or it is approved or has changes requested, the
  * box queues a notification and this extension hands it to the agent.
  *
- * /pr-float              reopen the box if it was closed
- * /pr-float add <url>    track an existing PR
- * /pr-float rm <url|#n>  stop tracking a PR
+ * /pr-box             reopen the box if it was closed
+ * /pr-box add <url>   track an existing PR
+ * /pr-box rm <url|#n> stop tracking a PR
  */
 
 import { execFile, spawn } from "node:child_process";
@@ -140,14 +140,14 @@ export default function (pi: ExtensionAPI) {
     }
   });
 
-  pi.registerCommand("pr-float", {
+  pi.registerCommand("pr-box", {
     description: "Session PR box: reopen it, or add <url> | rm <url|#n>",
     handler: async (args, c) => {
       const [sub, arg] = args.trim().split(/\s+/);
       if (!sub) return box(["reopen"]);
       if (sub === "add") {
         if (!arg || !extractUrls(arg).length || urls.includes(arg)) {
-          return c.ui.notify("Usage: /pr-float add <PR url> (not already tracked)", "error");
+          return c.ui.notify("Usage: /pr-box add <PR url> (not already tracked)", "error");
         }
         urls.push(arg);
         pi.appendEntry(ENTRY, { action: "add", url: arg });
@@ -161,7 +161,7 @@ export default function (pi: ExtensionAPI) {
         pi.appendEntry(ENTRY, { action: "remove", url });
         return box(["set", SESSION, ...urls]);
       }
-      c.ui.notify("Usage: /pr-float [add <url> | rm <url|#n>]", "error");
+      c.ui.notify("Usage: /pr-box [add <url> | rm <url|#n>]", "error");
     },
   });
 }
