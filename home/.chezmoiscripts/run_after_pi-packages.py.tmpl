@@ -14,6 +14,8 @@ this script owns both install trees under $PI_CODING_AGENT_DIR:
 Runs on every apply, so packages installed by hand (`pi install`) are removed
 on the next apply.
 """
+from __future__ import annotations
+
 import json
 import os
 import shutil
