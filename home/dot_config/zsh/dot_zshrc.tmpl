@@ -59,6 +59,15 @@ autoload -U promptinit && promptinit
 prompt pure
 
 unset _zdir _nix_profile
+{{- if .workspace }}
+
+# Tint the terminal background (OSC 11) so workspace panes stand out from local
+# ones. Re-sent before each prompt because full-screen apps and `reset` restore
+# the default. Override the color with REX_WORKSPACE_BG in ~/.zshrc_local.
+_workspace_bg() { printf '\e]11;%s\a' "${REX_WORKSPACE_BG:-#24142e}" }
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _workspace_bg
+{{- end }}
 
 ###############################################################################
 # Interactive config
