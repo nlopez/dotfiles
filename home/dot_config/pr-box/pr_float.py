@@ -45,6 +45,9 @@ FRAME = (3, 3)
 FRAME_MAX = (8, 6)
 # How long a waiter that opened the box waits for the box to take over.
 HANDOFF = 15
+# Shown in the box's title so a box still running older code is easy to spot.
+# Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
+VERSION = 2
 
 
 def _state_path(block):
@@ -331,7 +334,7 @@ def wait(agent_block):
             "layout": {
                 "block": {
                     "flavor": "com.superlogical.terminal.shell",
-                    "label": "PRs",
+                    "label": f"PR Box v{VERSION}",
                     "options": {
                         "command": [sys.executable, os.path.abspath(__file__), "watch", agent_block],
                         "exit": {"on_completion": True},
