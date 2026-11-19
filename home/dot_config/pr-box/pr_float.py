@@ -40,8 +40,9 @@ WAIT_TICK = 5
 # How long git facts and the agent pane's size are reused between ticks.
 GIT_TTL = 10
 SIZE_TTL = 6
-# Cells the floating layer's frame takes, until measured.
+# Cells the floating layer's frame takes, until measured, and the most it can be.
 FRAME = (3, 3)
+FRAME_MAX = (8, 6)
 # How long a waiter that opened the box waits for the box to take over.
 HANDOFF = 15
 
@@ -110,6 +111,11 @@ def rex(method, args):
 
 
 def block_size(block):
+    return block_report(block)[:2]
+
+
+def block_report(block):
+    """(columns, rows, when a client last reported that size)."""
     out = subprocess.run(
         ["rex", "block", "call", "-s", os.environ.get("REX_SESSION", ""), "-b", block, "size", "{}"],
         capture_output=True,
@@ -117,7 +123,8 @@ def block_size(block):
         timeout=10,
     )
     data = json.loads(out.stdout) if out.returncode == 0 else {}
-    return data.get("columns"), data.get("rows")
+    stamp = max((d.get("updated_at") or "" for d in data.get("desired") or []), default="")
+    return data.get("columns"), data.get("rows"), stamp
 
 
 def _find(layout, block):
@@ -342,16 +349,20 @@ def wait(agent_block):
         time.sleep(1)
 
 
-def settled_size(block, timeout=1.0):
-    """The block's size once Rex has applied a resize: two equal reads in a row."""
-    last, deadline = None, time.time() + timeout
+def settled_size(block, before, timeout=1.0):
+    """The block's size once a client has drawn it after a resize, or None.
+
+    before is the block's report from just before the resize. Until a client
+    reports the new size (none does while the session is not on screen), Rex
+    returns the old one, which must not be taken as the result.
+    """
+    deadline = time.time() + timeout
     while time.time() < deadline:
-        cur = block_size(block)
-        if all(cur) and cur == last:
-            return cur
-        last = cur
+        cols, rows, stamp = block_report(block)
+        if cols and rows and stamp and stamp != before[2]:
+            return cols, rows
         time.sleep(0.05)
-    return last
+    return None
 
 
 def displaced(actual, target, win):
@@ -454,21 +465,23 @@ def watch(agent_block):
                 key = (round(target[2] * win[0]), round(target[3] * win[1]), round(win[0]), round(win[1]))
                 if key == placed and not displaced(actual, target, win):
                     break
+                before = block_report(me)
                 rex("session.resize_layer", {"layer_id": layer["layer_id"], "bounds": target})
                 actual, placed = target, key
-                have = settled_size(me)
-                if not have or not all(have):
+                have = settled_size(me, before)
+                if not have:
                     break
                 # Measure the frame once, then only grow it if content stops
                 # fitting. Re-deriving it on every resize makes the box flip
                 # between sizes a cell apart.
                 if not measured:
-                    frame = [max(key[0] - have[0], 0), max(key[1] - have[1], 0)]
+                    frame = [key[0] - have[0], key[1] - have[1]]
                     measured = True
                 elif have[0] < inner[0] or have[1] < inner[1]:
                     frame = [frame[0] + max(inner[0] - have[0], 0), frame[1] + max(inner[1] - have[1], 0)]
                 else:
                     break
+                frame = [min(max(f, 0), m) for f, m in zip(frame, FRAME_MAX, strict=True)]
             draw(body)
             time.sleep(TICK)
             discard_input()
