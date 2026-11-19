@@ -127,7 +127,7 @@ track_prs_resume = [{
 }]
 current["hooks"]["SessionStart"] = surviving_rex + rex_hook + track_prs_resume + cache_heal
 
-# PR notifications from the Rex PR box (CI failed, PR approved), script managed
+# PR notifications from the Rex PR box (CI failed, approved, changes requested), script managed
 # in hooks/executable_pr-notify.py. The Stop hook waits in the background and
 # wakes Claude when one arrives; its timeout bounds how long it waits.
 pr_notify = os.path.expanduser("~/.config/claude/hooks/pr-notify.py")

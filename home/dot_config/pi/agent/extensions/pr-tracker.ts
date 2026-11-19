@@ -11,8 +11,8 @@
  * extension), and add/remove entries from /pr-float apply in order. The list
  * follows /tree branches.
  *
- * When a tracked PR's CI fails or it is approved, the box queues a notification
- * and this extension hands it to the agent.
+ * When a tracked PR's CI fails, or it is approved or has changes requested, the
+ * box queues a notification and this extension hands it to the agent.
  *
  * /pr-float              reopen the box if it was closed
  * /pr-float add <url>    track an existing PR
@@ -104,7 +104,7 @@ export default function (pi: ExtensionAPI) {
   pi.on("session_start", async (_e, c) => start(c));
   pi.on("session_tree", async (_e, c) => start(c));
 
-  // Deliver the box's notifications (CI failed, PR approved): start a turn when
+  // Deliver the box's notifications (CI failed, approved, changes requested): start a turn when
   // idle, or queue a follow-up when the agent is working.
   let draining = false;
   const inbox = setInterval(() => {

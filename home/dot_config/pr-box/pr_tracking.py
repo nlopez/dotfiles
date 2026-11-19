@@ -9,7 +9,7 @@
 # refreshed by a detached `python3 pr_tracking.py refresh ...` so the status
 # line never waits on the network.
 # PR notifications: while the box is open, pr_float.py calls notice_changes on
-# every tick; a CI failure or approval is queued in inbox/<session_id>.jsonl,
+# every tick; a CI failure, approval or change request is queued in inbox/<session_id>.jsonl,
 # and each agent's adapter delivers it with drain (Claude: hooks/pr-notify.py,
 # pi: the pr-tracker extension).
 import contextlib
@@ -205,10 +205,12 @@ def checks(pr):
 
 
 FAILED = {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED", "STARTUP_FAILURE"}
+REVIEW_EVENTS = {"APPROVED": "approved", "CHANGES_REQUESTED": "changes requested"}
 
 
 def notice_changes(session_id, prs):
-    """Queue a notification for each open PR whose CI just failed or that was just approved.
+    """Queue a notification for each open PR whose CI just failed, or that was just
+    approved or had changes requested.
 
     Each PR's last seen CI and review state is kept per session; a PR seen for
     the first time only sets that baseline, so tracking an already-approved PR
@@ -234,8 +236,8 @@ def notice_changes(session_id, prs):
             failed = [i for i in real_checks(pr) if (i.get("conclusion") or i.get("state")) in FAILED]
             names = [i.get("name") or i.get("context") or "?" for i in failed]
             events.append(f"{url}: CI failed ({', '.join(names)})")
-        if cur["review"] == "APPROVED" and before.get("review") != "APPROVED":
-            events.append(f"{url}: approved")
+        if cur["review"] != before.get("review") and cur["review"] in REVIEW_EVENTS:
+            events.append(f"{url}: {REVIEW_EVENTS[cur['review']]}")
     if now != seen:
         _write_json(path, now)
     if events:
