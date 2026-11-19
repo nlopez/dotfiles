@@ -278,16 +278,28 @@ def ensure(session_id, cwd, pid=""):
 
 
 def reopen():
-    """Start a waiter for this pane from its recorded session (the /pr-float command)."""
+    """Open this pane's box from its recorded session (the /pr-float command).
+
+    An open box is closed first and opened fresh.
+    """
     block = os.environ.get("REX_BLOCK")
     state = _state(block) if block else {}
     if not state.get("session_id"):
         print("No PR box state for this pane: not running in Rex, or the session hasn't started.")
-    elif running(block):
-        print("PR box is already open.")
-    else:
-        ensure(state["session_id"], state.get("cwd") or os.getcwd(), state.get("agent_pid") or "")
-        print("Reopening the PR box.")
+        return
+    if running(block):
+        # SIGHUP makes watch exit through its cleanup, which closes the layer.
+        pid = state["watcher_pid"]
+        with contextlib.suppress(OSError):
+            os.kill(pid, signal.SIGHUP)
+        deadline = time.time() + 5
+        while _alive(pid) and time.time() < deadline:
+            time.sleep(0.1)
+        if _alive(pid):
+            print("Could not close the open PR box.")
+            return
+    ensure(state["session_id"], state.get("cwd") or os.getcwd(), state.get("agent_pid") or "")
+    print("Reopening the PR box.")
 
 
 def wait(agent_block):
