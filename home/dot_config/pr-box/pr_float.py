@@ -6,12 +6,15 @@
 #   ensure <session_id> <cwd> <pid>  (SessionStart hook) record the session for
 #                                    this Rex block and start a waiter if
 #                                    nothing is running for it
-#   wait <agent_block>              detached: open the box once there is a PR
-#   watch <agent_block>             the box's own program: draw the PRs and
-#                                    resize the box to fit; with no PRs left it
-#                                    hands back to a waiter and closes. It also
-#                                    queues PR notifications for the agent
-#                                    (pr_tracking.notice_changes)
+#   wait <agent_block>              detached: open the box once the agent's
+#                                    pane is tiled in a window
+#   watch <agent_block>             the box's own program: draw the PRs (or a
+#                                    short message when there are none) and keep
+#                                    the box sized to fit at the top right of
+#                                    the agent's pane; if the pane leaves its
+#                                    window's layout it hands back to a waiter
+#                                    and closes. It also queues PR notifications
+#                                    for the agent (pr_tracking.notice_changes)
 #
 # One of wait or watch runs per Rex block, its pid in the block's state file;
 # either exits when Claude does. The box is a Rex floating layer sized in
@@ -175,9 +178,14 @@ def lines(found, here):
         repo = pr_tracking.repo_of(pr.get("url"))
         prefix = "" if repo == here else repo
         rows.append((current, *cells(pr, prefix)))
-    if not rows:
-        return []
     t = pr_tracking
+    if not rows:
+        message = "No PRs yet"
+        return [
+            t.c(t.DIM, "┌" + "─" * (len(message) + 2) + "┐"),
+            t.c(t.DIM, "│") + " " + t.c(t.DIM, message) + " " + t.c(t.DIM, "│"),
+            t.c(t.DIM, "└" + "─" * (len(message) + 2) + "┘"),
+        ]
     mark = {True: t.c(t.GREEN, "⎇ "), False: "  "}
     header = [t.c(t.BOLD, "PR"), t.c(t.BOLD, "CI"), t.c(t.BOLD, "Review")]
     body = [[mark[current] + pr_cell, ci, review] for current, pr_cell, ci, review in rows]
@@ -227,9 +235,18 @@ def pad(text, width):
     return text + " " * (width - visible(text))
 
 
-def bounds(agent_block, rect, body, frame):
-    """[x, y, w, h] for a box holding body at the top right of rect, or None."""
-    cols, rows = _cached(("size", agent_block), SIZE_TTL, lambda: block_size(agent_block), ok=lambda v: all(v))
+def bounds(agent_block, rect, body, frame, stable=True):
+    """[x, y, w, h] for a box holding body at the top right of rect, or None.
+
+    The agent pane's size is cached per rect. Right after a split the pane's
+    size can still be the old one, so it is only cached once rect is stable.
+    """
+    cols, rows = _cached(
+        ("size", agent_block, tuple(rect)),
+        SIZE_TTL,
+        lambda: block_size(agent_block),
+        ok=lambda v: stable and all(v),
+    )
     if not cols or not rows:
         return None
     x, y, w, h = rect
@@ -270,7 +287,7 @@ def reopen():
         print("PR box is already open.")
     else:
         ensure(state["session_id"], state.get("cwd") or os.getcwd(), state.get("agent_pid") or "")
-        print("Reopening the PR box; it appears once the session has a PR.")
+        print("Reopening the PR box.")
 
 
 def wait(agent_block):
@@ -279,12 +296,11 @@ def wait(agent_block):
         state = _state(agent_block)
         if not _mine(state):
             return
-        body = lines(*session_prs(state))
-        if body:
-            window, rect, _ = locate(rex("session.view", {}), agent_block)
-            if not rect:
-                return
-            placed = bounds(agent_block, rect, body, FRAME)
+        # Wait while the agent's pane is not tiled (floated, detached, or
+        # between windows); the box opens once it is back in a layout.
+        window, rect, _ = locate(rex("session.view", {}), agent_block)
+        if rect:
+            placed = bounds(agent_block, rect, lines(*session_prs(state)), FRAME)
             if placed:
                 break
         time.sleep(WAIT_TICK)
@@ -381,45 +397,53 @@ def watch(agent_block):
     saved = mute_input()
     frame = list(FRAME)
     placed, measured = None, False
-    target, win = None, (1, 1)
+    last_rect = None
     try:
         while True:
             state = _state(agent_block)
             if not _mine(state):
                 return
-            _, rect, _ = locate(view := rex("session.view", {}), agent_block)
-            _, _, layer = locate(view, me)
-            if not rect or not layer:
+            view = rex("session.view", {})
+            agent_window, rect, _ = locate(view, agent_block)
+            my_window, _, layer = locate(view, me)
+            if not layer:
+                return
+            # The agent's pane left this window or its layout: a waiter
+            # reopens the box beside it once it is tiled again.
+            if not rect or agent_window != my_window:
+                _spawn("wait", agent_block)
                 return
             found, here = session_prs(state)
             with contextlib.suppress(Exception):
                 pr_tracking.notice_changes(state.get("session_id"), [pr for pr, _ in found])
             body = lines(found, here)
-            if not body:
-                _spawn("wait", agent_block)
-                return
-            # Rex cannot lock a floating layer, so enforce the fit: a box that
-            # was resized or moved by hand is put back. Everything settles
-            # within this tick, and the content is drawn only once the box is
-            # its final size, so there is no intermediate cut-off frame.
-            displaced_now = target is not None and displaced(layer.get("bounds"), target, win)
             inner = (max(visible(line) for line in body), len(body))
             # When the box is shrinking, the new content already fits it, so
             # paint it before the resize rather than squeezing the old rows.
             current = shutil.get_terminal_size()
             if inner[0] <= current.columns and inner[1] <= current.lines:
                 draw(body)
-            for _ in range(3):
-                fit = bounds(agent_block, rect, body, frame)
+            # Pane sizes in a window that is not on screen are stale, so the
+            # box is only placed while its window is the active one.
+            visible_now = view.get("active_window_id") in (None, my_window)
+            stable, last_rect = rect == last_rect, rect
+            # Rex cannot pin a floating layer to a pane, so the box follows the
+            # agent's pane on every tick: after a split, a resized window, or a
+            # move or resize by hand. Everything settles within this tick, and
+            # the content is drawn only once the box is its final size, so
+            # there is no intermediate cut-off frame.
+            actual = layer.get("bounds")
+            for _ in range(3 if visible_now else 0):
+                fit = bounds(agent_block, rect, body, frame, stable)
                 if not fit:
                     break
-                (bx, by, bw, bh), (win_cols, win_rows) = fit
+                target, win = fit
                 # Compare in whole cells so fraction rounding never triggers a resize.
-                key = (round(bw * win_cols), round(bh * win_rows), round(win_cols), round(win_rows))
-                if key == placed and not displaced_now:
+                key = (round(target[2] * win[0]), round(target[3] * win[1]), round(win[0]), round(win[1]))
+                if key == placed and not displaced(actual, target, win):
                     break
-                rex("session.resize_layer", {"layer_id": layer["layer_id"], "bounds": [bx, by, bw, bh]})
-                target, win, placed, displaced_now = [bx, by, bw, bh], (win_cols, win_rows), key, False
+                rex("session.resize_layer", {"layer_id": layer["layer_id"], "bounds": target})
+                actual, placed = target, key
                 have = settled_size(me)
                 if not have or not all(have):
                     break
