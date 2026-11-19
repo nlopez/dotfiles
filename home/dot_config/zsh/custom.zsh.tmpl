@@ -24,19 +24,12 @@ cd() {
   fi
 }
 
-# Rebuild PATH from scratch on reload: hand .zprofile a clean slate so
-# added/removed paths are accurate rather than carried over from the old shell.
 clear() { stty sane; command clear }
 
 # Make Ctrl+L also run stty sane (clear-screen widget bypasses the function above)
 _clear_screen_sane() { stty sane; zle clear-screen }
 zle -N _clear_screen_sane
 bindkey '^L' _clear_screen_sane
-
-function reload {
-  stty sane
-  exec env -i PATH={{ .platform.reload_path }} TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX TMUX_PANE=$TMUX_PANE zsh --login
-}
 
 ###############################################################################
 # AWS profile fzf picker — ZLE widget that intercepts Tab after --profile / -p

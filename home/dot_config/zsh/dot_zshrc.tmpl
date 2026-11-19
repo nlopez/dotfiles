@@ -102,7 +102,15 @@ function _source() {
 
 # Reload: replace the current shell process with a fresh login shell so
 # .zprofile and .zshrc are re-read with no stale state.
-function reload {  exec env -i PATH=$PATH TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL TMUX=$TMUX TMUX_PANE=$TMUX_PANE zsh --login }
+# The environment is cleared on purpose, so only these variables survive. The
+# REX_* IDs are passed through when set: dropping them breaks every Rex-aware
+# tool (agent hooks, the PR box) in the new shell and in anything launched from it.
+function reload {
+  exec env -i PATH=$PATH TERMINFO=$TERMINFO TERM=$TERM USER=$USER HOME=$HOME SHELL=$SHELL \
+    TMUX=$TMUX TMUX_PANE=$TMUX_PANE \
+    ${REX_SERVER:+REX_SERVER=$REX_SERVER} ${REX_SESSION:+REX_SESSION=$REX_SESSION} ${REX_BLOCK:+REX_BLOCK=$REX_BLOCK} \
+    zsh --login
+}
 
 function _command() {
   command -v $1 >/dev/null 2>&1
