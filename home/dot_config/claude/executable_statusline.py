@@ -2,7 +2,7 @@
 # Managed by chezmoi — source: home/dot_config/claude/executable_statusline.py
 # Claude Code status line modelled on pi's powerline footer:
 #   model | think:<effort> | dir <name> | ⎇ <branch> | PR #12 ✓ approved | PRs #9 ✗ · repo#4 merged
-#   | ▥ used/size (pct%) AC | (sub) | 🧠 <project> · ready · ● ADHD ON
+#   | ▥ used/size (pct%) AC | (sub)
 # PR data comes from ~/.config/pr-box/pr_tracking.py (cached `gh pr view`, refreshed in the background).
 # PR labels are OSC 8 hyperlinks to the PR. In Rex they move to a floating
 # box at the top right of Claude's pane (~/.config/pr-box/pr_float.py).
@@ -11,12 +11,11 @@ import contextlib
 import json
 import os
 import sys
-import urllib.request
 
 sys.path.insert(0, os.path.expanduser("~/.config/pr-box"))
 import pr_float  # noqa: E402
 import pr_tracking  # noqa: E402
-from pr_tracking import BLUE, CYAN, DIM, GREEN, MAGENTA, RED, WHITE, YELLOW, c, git  # noqa: E402
+from pr_tracking import BLUE, CYAN, DIM, GREEN, MAGENTA, WHITE, c, git  # noqa: E402
 
 
 def tokens(n):
@@ -25,14 +24,6 @@ def tokens(n):
     if n >= 1000:
         return f"{n / 1000:.1f}".removesuffix(".0") + "k"
     return str(n)
-
-
-def engram_ready():
-    try:
-        with urllib.request.urlopen("http://127.0.0.1:7437/health", timeout=0.3) as r:
-            return r.status == 200
-    except Exception:
-        return False
 
 
 def pr_parts(data, cwd, common, branch):
@@ -109,17 +100,7 @@ def main():
         if cost is not None:
             parts.append(c(WHITE, f"${cost:.2f}"))
 
-    # Engram: project = repo name (worktree-safe via the common git dir), health = local server.
-    project = os.path.basename(os.path.dirname(common)) if common else ""
-    if project:
-        state = c(YELLOW, "ready") if engram_ready() else c(RED, "offline")
-        parts.append(f"🧠 {c(YELLOW, project)} {c(DIM, '·')} {state}")
-
-    adhd = ""
-    if os.path.exists(os.path.join(config_dir, ".i-have-adhd-always")):
-        adhd = f" {c(DIM, '·')} {c(GREEN, '●')} {c(MAGENTA, 'ADHD ON')}"
-
-    print(sep.join(parts) + adhd)
+    print(sep.join(parts))
 
 
 if __name__ == "__main__":
