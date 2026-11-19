@@ -8,15 +8,19 @@
  *
  * On session start and on /tree, the active branch is replayed: PRs opened by
  * earlier tool calls are found (including sessions that predate this
- * extension), and add/remove entries from /prs apply in order. The list follows
- * /tree branches.
+ * extension), and add/remove entries from /pr-float apply in order. The list
+ * follows /tree branches.
  *
- * /prs                 reopen the box if it was closed
- * /prs add <url>       track an existing PR
- * /prs rm <url|#n>     stop tracking a PR
+ * When a tracked PR's CI fails or it is approved, the box queues a notification
+ * and this extension hands it to the agent.
+ *
+ * /pr-float              reopen the box if it was closed
+ * /pr-float add <url>    track an existing PR
+ * /pr-float rm <url|#n>  stop tracking a PR
  */
 
-import { spawn } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
@@ -24,13 +28,18 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 const ENTRY = "pr-tracker";
 const BOX = join(homedir(), ".config/pr-box/pr_box.py");
 const SESSION = `pi-${process.pid}`;
+// Mirrors pr_tracking.inbox_path: PR notifications the box queued for this session.
+const INBOX = join(process.env.XDG_CACHE_HOME || join(homedir(), ".cache"), "pr-box", "inbox", `${SESSION}.jsonl`);
+const INBOX_TICK = 3000;
 const PR_URL = /https?:\/\/[\w.-]+\/[\w.-]+\/[\w.-]+\/pull\/\d+/g;
 // Mirrors pr_tracking.PR_COMMAND and PUSH_COMMAND.
 const PR_COMMAND = /\bgh\s+pr\s+(create|ready|edit|merge)\b/;
 const PUSH_COMMAND = /\bgit\b[^;&|]*\bpush\b/;
 
 function box(args: string[], input?: unknown) {
-  const child = spawn("python3", [BOX, ...args], { stdio: [input === undefined ? "ignore" : "pipe", "ignore", "ignore"] });
+  const child = spawn("python3", [BOX, ...args], {
+    stdio: [input === undefined ? "ignore" : "pipe", "ignore", "ignore"],
+  });
   child.on("error", () => {});
   if (input !== undefined) child.stdin?.end(JSON.stringify(input));
   child.unref();
@@ -95,6 +104,25 @@ export default function (pi: ExtensionAPI) {
   pi.on("session_start", async (_e, c) => start(c));
   pi.on("session_tree", async (_e, c) => start(c));
 
+  // Deliver the box's notifications (CI failed, PR approved): start a turn when
+  // idle, or queue a follow-up when the agent is working.
+  let draining = false;
+  const inbox = setInterval(() => {
+    if (draining || !existsSync(INBOX)) return;
+    draining = true;
+    execFile("python3", [BOX, "drain", SESSION], (err, stdout) => {
+      draining = false;
+      const text = String(stdout ?? "").trim();
+      if (err || !text) return;
+      pi.sendMessage(
+        { customType: "pr-notify", content: text, display: true },
+        { triggerTurn: true, deliverAs: "followUp" },
+      );
+    });
+  }, INBOX_TICK);
+  inbox.unref();
+  pi.on("session_shutdown", async () => clearInterval(inbox));
+
   pi.on("tool_result", async (event, c) => {
     const text = resultText(event.content);
     const found = prUrls(event.toolName, event.input, text, event.isError);
@@ -112,14 +140,14 @@ export default function (pi: ExtensionAPI) {
     }
   });
 
-  pi.registerCommand("prs", {
+  pi.registerCommand("pr-float", {
     description: "Session PR box: reopen it, or add <url> | rm <url|#n>",
     handler: async (args, c) => {
       const [sub, arg] = args.trim().split(/\s+/);
       if (!sub) return box(["reopen"]);
       if (sub === "add") {
         if (!arg || !extractUrls(arg).length || urls.includes(arg)) {
-          return c.ui.notify("Usage: /prs add <PR url> (not already tracked)", "error");
+          return c.ui.notify("Usage: /pr-float add <PR url> (not already tracked)", "error");
         }
         urls.push(arg);
         pi.appendEntry(ENTRY, { action: "add", url: arg });
@@ -133,7 +161,7 @@ export default function (pi: ExtensionAPI) {
         pi.appendEntry(ENTRY, { action: "remove", url });
         return box(["set", SESSION, ...urls]);
       }
-      c.ui.notify("Usage: /prs [add <url> | rm <url|#n>]", "error");
+      c.ui.notify("Usage: /pr-float [add <url> | rm <url|#n>]", "error");
     },
   });
 }

@@ -9,7 +9,9 @@
 #   wait <agent_block>              detached: open the box once there is a PR
 #   watch <agent_block>             the box's own program: draw the PRs and
 #                                    resize the box to fit; with no PRs left it
-#                                    hands back to a waiter and closes
+#                                    hands back to a waiter and closes. It also
+#                                    queues PR notifications for the agent
+#                                    (pr_tracking.notice_changes)
 #
 # One of wait or watch runs per Rex block, its pid in the block's state file;
 # either exits when Claude does. The box is a Rex floating layer sized in
@@ -154,13 +156,22 @@ def _cached(key, ttl, fn, ok=bool):
     return value
 
 
-def lines(state):
+def session_prs(state):
+    """([(pr, is_current_branch)], name of the repo the agent is in)."""
     session_id, cwd = state.get("session_id"), state.get("cwd") or os.path.expanduser("~")
-    common = _cached(("common", cwd), GIT_TTL, lambda: pr_tracking.git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir"))
+    common = _cached(
+        ("common", cwd),
+        GIT_TTL,
+        lambda: pr_tracking.git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir"),
+    )
     branch = _cached(("branch", cwd), GIT_TTL, lambda: pr_tracking.git(cwd, "branch", "--show-current"))
     here = os.path.basename(os.path.dirname(common)) if common else ""
+    return pr_tracking.prs(session_id, cwd, common, branch), here
+
+
+def lines(found, here):
     rows = []
-    for pr, current in pr_tracking.prs(session_id, cwd, common, branch):
+    for pr, current in found:
         repo = pr_tracking.repo_of(pr.get("url"))
         prefix = "" if repo == here else repo
         rows.append((current, *cells(pr, prefix)))
@@ -268,7 +279,7 @@ def wait(agent_block):
         state = _state(agent_block)
         if not _mine(state):
             return
-        body = lines(state)
+        body = lines(*session_prs(state))
         if body:
             window, rect, _ = locate(rex("session.view", {}), agent_block)
             if not rect:
@@ -380,7 +391,10 @@ def watch(agent_block):
             _, _, layer = locate(view, me)
             if not rect or not layer:
                 return
-            body = lines(state)
+            found, here = session_prs(state)
+            with contextlib.suppress(Exception):
+                pr_tracking.notice_changes(state.get("session_id"), [pr for pr, _ in found])
+            body = lines(found, here)
             if not body:
                 _spawn("wait", agent_block)
                 return

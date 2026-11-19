@@ -11,7 +11,7 @@
 #             effortLevel (default thinking effort = medium),
 #             theme (auto = match the terminal's light/dark background),
 #             statusLine (pi-style bar, see statusline.py),
-#             hooks (atuin, no-chat-comments, agent-bypass-guard, track-prs, Rex session-start, plus context-mode cache-heal if present).
+#             hooks (atuin, no-chat-comments, agent-bypass-guard, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
 # Removes:    ECC env, and all plugin/marketplace entries
 #             except engram, context-mode, worktrunk and i-have-adhd (Claude is kept close to stock). Plugins themselves are
 #             uninstalled by .chezmoiscripts/run_onchange_after_20-claude-plugins-remove.sh.tmpl.
@@ -126,6 +126,17 @@ track_prs_resume = [{
     }],
 }]
 current["hooks"]["SessionStart"] = surviving_rex + rex_hook + track_prs_resume + cache_heal
+
+# PR notifications from the Rex PR box (CI failed, PR approved), script managed
+# in hooks/executable_pr-notify.py. The Stop hook waits in the background and
+# wakes Claude when one arrives; its timeout bounds how long it waits.
+pr_notify = os.path.expanduser("~/.config/claude/hooks/pr-notify.py")
+current["hooks"]["Stop"] = [{
+    "hooks": [{"type": "command", "command": pr_notify, "asyncRewake": True, "timeout": 6 * 3600}],
+}]
+current["hooks"]["UserPromptSubmit"] = [{
+    "hooks": [{"type": "command", "command": pr_notify, "timeout": 5}],
+}]
 
 # Status line: pi-style bar (script managed in executable_statusline.py).
 current["statusLine"] = {

@@ -8,6 +8,10 @@
 # PR status: `gh pr view` results are cached per PR (or per repo+branch) and
 # refreshed by a detached `python3 pr_tracking.py refresh ...` so the status
 # line never waits on the network.
+# PR notifications: while the box is open, pr_float.py calls notice_changes on
+# every tick; a CI failure or approval is queued in inbox/<session_id>.jsonl,
+# and each agent's adapter delivers it with drain (Claude: hooks/pr-notify.py,
+# pi: the pr-tracker extension).
 import contextlib
 import hashlib
 import json
@@ -54,8 +58,8 @@ def _write_json(path, value):
     os.replace(tmp, path)
 
 
-def _session_path(session_id):
-    return _path("sessions", re.sub(r"[^\w.-]", "_", session_id) + ".json")
+def _session_path(session_id, kind="sessions", ext=".json"):
+    return _path(kind, re.sub(r"[^\w.-]", "_", session_id) + ext)
 
 
 def record(session_id, url):
@@ -190,15 +194,79 @@ def checks(pr):
     rollup = real_checks(pr)
     if not rollup:
         return ""
-    failed ={"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED", "STARTUP_FAILURE"}
     pending = False
     for item in rollup:
         result = item.get("conclusion") or item.get("state") or ""
-        if result in failed:
+        if result in FAILED:
             return "fail"
         if item.get("status", "COMPLETED") != "COMPLETED" or result in ("PENDING", "EXPECTED", ""):
             pending = True
     return "pending" if pending else "pass"
+
+
+FAILED = {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED", "STARTUP_FAILURE"}
+
+
+def notice_changes(session_id, prs):
+    """Queue a notification for each open PR whose CI just failed or that was just approved.
+
+    Each PR's last seen CI and review state is kept per session; a PR seen for
+    the first time only sets that baseline, so tracking an already-approved PR
+    is not reported. PRs whose status has not been fetched yet are skipped.
+    """
+    if not session_id:
+        return
+    path = _session_path(session_id, "seen")
+    seen = _read_json(path, {})
+    now, events = {}, []
+    for pr in prs:
+        url = pr.get("url")
+        if not url or "state" not in pr:
+            if url in seen:
+                now[url] = seen[url]
+            continue
+        cur = {"checks": checks(pr), "review": pr.get("reviewDecision") or ""}
+        now[url] = cur
+        before = seen.get(url)
+        if before is None or pr.get("state") != "OPEN":
+            continue
+        if cur["checks"] == "fail" and before.get("checks") != "fail":
+            failed = [i for i in real_checks(pr) if (i.get("conclusion") or i.get("state")) in FAILED]
+            names = [i.get("name") or i.get("context") or "?" for i in failed]
+            events.append(f"{url}: CI failed ({', '.join(names)})")
+        if cur["review"] == "APPROVED" and before.get("review") != "APPROVED":
+            events.append(f"{url}: approved")
+    if now != seen:
+        _write_json(path, now)
+    if events:
+        os.makedirs(_path("inbox"), exist_ok=True)
+        with open(inbox_path(session_id), "a") as f:
+            f.write("".join(json.dumps({"time": time.time(), "text": e}) + "\n" for e in events))
+
+
+def inbox_path(session_id):
+    return _session_path(session_id, "inbox", ".jsonl")
+
+
+def drain(session_id):
+    """Take the session's queued PR notifications as one message, or '' if none."""
+    path = inbox_path(session_id)
+    taken = f"{path}.{os.getpid()}.taken"
+    try:
+        os.rename(path, taken)
+    except OSError:
+        return ""
+    try:
+        with open(taken) as f:
+            events = [json.loads(line)["text"] for line in f if line.strip()]
+    except Exception:
+        events = []
+    finally:
+        with contextlib.suppress(OSError):
+            os.remove(taken)
+    if not events:
+        return ""
+    return "PR status update from the PR box:\n" + "\n".join(f"- {e}" for e in events)
 
 
 def repo_of(url):

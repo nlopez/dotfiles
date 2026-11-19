@@ -14,6 +14,8 @@ floating box (pr_tracking.py, pr_float.py) are the same for all of them.
   add <session_id> <url>                 track one PR
   set <session_id> [url...]              replace the session's PR list
   reopen                                 reopen a closed box for this pane
+  drain <session_id>                     print and clear the session's queued
+                                         PR notifications
 """
 
 import json
@@ -62,6 +64,8 @@ def main(argv):
         pr_tracking.set_session(args[0], args[1:])
     elif cmd == "reopen":
         pr_float.reopen()
+    elif cmd == "drain" and len(args) == 1:
+        print(pr_tracking.drain(args[0]))
     else:
         sys.exit(__doc__)
 
