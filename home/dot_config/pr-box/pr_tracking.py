@@ -12,6 +12,9 @@
 # every tick; a CI failure, approval or change request is queued in inbox/<session_id>.jsonl,
 # and each agent's adapter delivers it with drain (Claude: hooks/pr-notify.py,
 # pi: the pr-tracker extension).
+# Event log: every session's watches (PRs starting or stopping being tracked)
+# and status events are appended to $XDG_STATE_HOME/pr-box/events.jsonl
+# (`pr_box.py log` prints it).
 import contextlib
 import hashlib
 import json
@@ -62,16 +65,60 @@ def _session_path(session_id, kind="sessions", ext=".json"):
     return _path(kind, re.sub(r"[^\w.-]", "_", session_id) + ext)
 
 
+LOG = os.path.join(
+    os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
+    "pr-box",
+    "events.jsonl",
+)
+
+
+def log(kind, session_id, url, text=""):
+    """Append one watch or event to the cross-session log; never fails the caller."""
+    entry = {"time": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "kind": kind, "session": session_id, "url": url}
+    if text:
+        entry["text"] = text
+    with contextlib.suppress(OSError):
+        os.makedirs(os.path.dirname(LOG), exist_ok=True)
+        with open(LOG, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+
+
+def read_log(limit=50):
+    """The last limit log lines, formatted one per line."""
+    try:
+        with open(LOG) as f:
+            tail = f.readlines()[-limit:]
+    except OSError:
+        return ""
+    out = []
+    for line in tail:
+        with contextlib.suppress(ValueError):
+            e = json.loads(line)
+            detail = f"  {e['text']}" if e.get("text") else ""
+            out.append(f"{e.get('time')}  {e.get('kind'):<7}  {e.get('session')}  {e.get('url')}{detail}")
+    return "\n".join(out)
+
+
 def record(session_id, url):
     path = _session_path(session_id)
     urls = _read_json(path, [])
     if url not in urls:
         _write_json(path, urls + [url])
+        log("watch", session_id, url)
 
 
 def set_session(session_id, urls):
     """Replace the session's PR list, for agents whose history can be rewound."""
-    _write_json(_session_path(session_id), list(dict.fromkeys(urls)))
+    path = _session_path(session_id)
+    before = _read_json(path, [])
+    urls = list(dict.fromkeys(urls))
+    _write_json(path, urls)
+    for url in urls:
+        if url not in before:
+            log("watch", session_id, url)
+    for url in before:
+        if url not in urls:
+            log("unwatch", session_id, url)
 
 
 def session_prs(session_id):
@@ -235,15 +282,17 @@ def notice_changes(session_id, prs):
         if cur["checks"] == "fail" and before.get("checks") != "fail":
             failed = [i for i in real_checks(pr) if (i.get("conclusion") or i.get("state")) in FAILED]
             names = [i.get("name") or i.get("context") or "?" for i in failed]
-            events.append(f"{url}: CI failed ({', '.join(names)})")
+            events.append((url, f"CI failed ({', '.join(names)})"))
         if cur["review"] != before.get("review") and cur["review"] in REVIEW_EVENTS:
-            events.append(f"{url}: {REVIEW_EVENTS[cur['review']]}")
+            events.append((url, REVIEW_EVENTS[cur["review"]]))
     if now != seen:
         _write_json(path, now)
     if events:
+        for url, text in events:
+            log("event", session_id, url, text)
         os.makedirs(_path("inbox"), exist_ok=True)
         with open(inbox_path(session_id), "a") as f:
-            f.write("".join(json.dumps({"time": time.time(), "text": e}) + "\n" for e in events))
+            f.write("".join(json.dumps({"time": time.time(), "text": f"{u}: {t}"}) + "\n" for u, t in events))
 
 
 def inbox_path(session_id):
@@ -268,7 +317,12 @@ def drain(session_id):
             os.remove(taken)
     if not events:
         return ""
-    return "PR status update from the PR box:\n" + "\n".join(f"- {e}" for e in events)
+    return (
+        "[PR box] A PR this session tracks changed status. This is an automated notice, not a message"
+        ' from the user. Begin your reply with one line that starts with "PR update:" and names the'
+        " PR and the change, so the user can see you are reacting to it, then handle it.\n"
+        + "\n".join(f"- {e}" for e in events)
+    )
 
 
 def repo_of(url):

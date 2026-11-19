@@ -16,6 +16,8 @@ floating box (pr_tracking.py, pr_float.py) are the same for all of them.
   reopen                                 reopen a closed box for this pane
   drain <session_id>                     print and clear the session's queued
                                          PR notifications
+  log [n]                                print the last n (default 50) watches
+                                         and events across all sessions
 """
 
 import json
@@ -66,6 +68,8 @@ def main(argv):
         pr_float.reopen()
     elif cmd == "drain" and len(args) == 1:
         print(pr_tracking.drain(args[0]))
+    elif cmd == "log" and len(args) <= 1 and all(a.isdigit() for a in args):
+        print(pr_tracking.read_log(int(args[0]) if args else 50))
     else:
         sys.exit(__doc__)
 
