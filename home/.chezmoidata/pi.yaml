@@ -6,10 +6,7 @@
 pi:
   packages:
   - "npm:pi-auto-theme@1.1.1"
-  - "npm:context-mode@2.2.1"
-  - "npm:pi-markdown-preview@0.26.4"
   - "npm:pi-powerline-footer@0.22.0"
-  - "npm:@juicesharp/rpiv-ask-user-question@2.15.0"
   - "npm:pi-interrupt-steer@0.1.0"
   - "npm:gentle-engram@0.7.1"
   - "npm:@tmustier/pi-session-recap@0.6.1"
@@ -22,8 +19,6 @@ pi:
   # docs/private-data.md). Skipped on purpose: pi-mcp-adapter and
   # mcp-port-forward (pi >= 0.99 has built-in MCP), pi-npm-guard and
   # npm-update-cooldown (chezmoi/Renovate pin npm versions).
-  work_packages:
-  - "npm:@getpipher/vision@0.5.3"
+  work_packages: []
   # Installed only on personal (non-work) machines.
-  personal_only_packages:
-  - "npm:pi-lmstudio@1.5.0"
+  personal_only_packages: []
