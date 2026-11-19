@@ -1,0 +1,46 @@
+#!/bin/sh
+# Print the GitHub login that git's SSH transport authenticates as for a
+# remote of the current repo, by asking the server (`ssh -T`, "Hi <login>!").
+#
+# Usage: gh-remote-login [--fresh] [remote]    (remote defaults to origin)
+#
+# The push URL is used as git resolves it, after insteadOf/pushInsteadOf
+# rewrites, and the SSH command is core.sshCommand when set. Results are cached
+# per (ssh command, user@host) for a day; --fresh skips the cache. Exits 1 with
+# no output for non-SSH remotes or when the server doesn't answer.
+set -u
+
+fresh=
+[ "${1:-}" = --fresh ] && { fresh=1; shift; }
+remote=${1:-origin}
+
+url=$(git remote get-url --push "$remote" 2>/dev/null) || exit 1
+case $url in
+  ssh://*)
+    dest=${url#ssh://}; dest=${dest%%/*}; dest=${dest%%:*} ;;
+  *://*) exit 1 ;;
+  *@*:*)
+    dest=${url%%:*} ;;
+  *) exit 1 ;;
+esac
+case $dest in *@*) ;; *) dest=git@$dest ;; esac
+case ${dest#*@} in *github.com) ;; *) exit 1 ;; esac
+
+ssh_cmd=$(git config --get core.sshCommand 2>/dev/null) || ssh_cmd=ssh
+
+cache_dir=${XDG_CACHE_HOME:-$HOME/.cache}/gh-remote-login
+key=$(printf '%s|%s' "$ssh_cmd" "$dest" | cksum | cut -d' ' -f1)
+cache=$cache_dir/$key
+if [ -z "$fresh" ] && [ -s "$cache" ] &&
+  [ -n "$(find "$cache" -mmin -1440 2>/dev/null)" ]; then
+  cat "$cache"
+  exit 0
+fi
+
+# shellcheck disable=SC2086 # core.sshCommand is a command line, like git runs it
+login=$($ssh_cmd -T -o BatchMode=yes -o ConnectTimeout=5 "$dest" </dev/null 2>&1 |
+  sed -n 's/^Hi \([^!/]*\)!.*/\1/p' | head -n 1)
+[ -n "$login" ] || exit 1
+
+mkdir -p "$cache_dir" && printf '%s\n' "$login" >"$cache"
+printf '%s\n' "$login"

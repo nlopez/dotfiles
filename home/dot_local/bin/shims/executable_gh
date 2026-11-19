@@ -26,6 +26,12 @@ real=$(command -v gh) || { echo "gh: no real gh found on PATH" >&2; exit 127; }
 # argument that is a github.com URL (e.g. `gh pr view <url>`), the endpoint or
 # GraphQL owner of `gh api`, then the origin remote of the current directory.
 # An explicit GH_TOKEN/GITHUB_TOKEN wins.
+#
+# Before the owner table: when the owner is the origin remote's, the account
+# is the login git's SSH transport authenticates as for that remote
+# (gh-remote-login), so gh follows whatever insteadOf/SSH alias git uses. That
+# login is used only when it isn't the personal account and has a stored gh
+# token; otherwise the owner table decides as above.
 owner_of() { # <repo spec or URL> -> owner, for github.com only
   s=$1
   case $s in
@@ -87,12 +93,22 @@ if [ -n "$route" ]; then
     done
   fi
   [ -z "$owner" ] && [ "$sub" = api ] && owner=$(api_owner "$@")
-  [ -z "$owner" ] && owner=$(owner_of "$(git remote get-url origin 2>/dev/null)")
+  origin_owner=$(owner_of "$(git remote get-url origin 2>/dev/null)")
+  [ -z "$owner" ] && owner=$origin_owner
   personal=${XDG_STATE_HOME:-$HOME/.local/state}/gh/nlopez
   tok=''
   routes=${XDG_CONFIG_HOME:-$HOME/.config}/gh/owner-accounts
   lower=$(printf '%s' "$owner" | tr '[:upper:]' '[:lower:]')
-  acct=$([ -n "$lower" ] && [ -f "$routes" ] && awk -v o="$lower" '$1 == o { print $2; exit }' "$routes")
+  acct=
+  if [ -n "$owner" ] && [ "$lower" = "$(printf '%s' "$origin_owner" | tr '[:upper:]' '[:lower:]')" ] &&
+    command -v gh-remote-login >/dev/null 2>&1; then
+    login=$(gh-remote-login origin 2>/dev/null) &&
+      [ "$login" != nlopez ] &&
+      tok=$("$real" auth token --user "$login" 2>/dev/null) &&
+      acct=$login
+  fi
+  [ -n "$acct" ] ||
+    acct=$([ -n "$lower" ] && [ -f "$routes" ] && awk -v o="$lower" '$1 == o { print $2; exit }' "$routes")
   if [ -z "$acct" ]; then
     acct=nlopez
     [ -f "$personal/hosts.yml" ] &&

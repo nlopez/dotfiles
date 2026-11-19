@@ -127,13 +127,16 @@
   branches = for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/heads
   branchesr = for-each-ref --sort='-authordate:iso8601' --format='%(color:red)%(authordate:short)%(color:default) %(color:blue)%(authorname)%(color:default) %(color:green)%(refname:short)%(color:default)' refs/remotes
   prettylog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short
+  # Identity for this repo: commit author, signing key, the push URL after
+  # insteadOf rewrites, and the GitHub logins git (SSH) and gh act as for it.
   whoami = "!\
-    ssh_cmd=$(git config --get core.sshCommand 2>/dev/null); \
-    printf 'name:       %s\\nemail:      %s\\nsigningkey: %s\\nssh:        ' \
+    printf 'name:       %s\\nemail:      %s\\nsigningkey: %s\\npush url:   %s\\nssh login:  %s\\ngh login:   %s\\n' \
       \"$(git config user.name)\" \
       \"$(git config user.email)\" \
-      \"$(git config user.signingkey)\"; \
-    ${ssh_cmd:-ssh} -T git@github.com 2>&1 | head -1 \
+      \"$(git config user.signingkey)\" \
+      \"$(git remote get-url --push origin 2>/dev/null || echo '(no origin)')\" \
+      \"$(gh-remote-login --fresh origin 2>/dev/null || echo '(not SSH, or no answer)')\" \
+      \"$(gh api user -q .login 2>/dev/null || echo '(gh failed)')\" \
   "
 
 ; Automatically sign commits and tags (only active when an include sets
