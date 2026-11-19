@@ -1,5 +1,10 @@
 {{- /* .chezmoiignore is always interpreted as a template — no .tmpl suffix needed. */ -}}
 
+# ── Python bytecode ────────────────────────────────────────────────────────────
+# Importing a source module (tests, linters) writes __pycache__ next to it.
+**/__pycache__
+**/__pycache__/**
+
 # ── Work-only files ────────────────────────────────────────────────────────────
 {{- if or (not .work) .headless }}
 .zshrc_local
