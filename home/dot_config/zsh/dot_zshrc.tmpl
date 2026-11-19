@@ -76,7 +76,19 @@ _workspace_bg() {
   [[ $_workspace_scheme == light ]] && c=${REX_WORKSPACE_BG_LIGHT:-#ebdff7}
   printf '\e]11;%s\a' "$c"
 }
-_workspace_precmd() { _workspace_bg; printf '\e[?2031h\e[?996n' }
+# Read the theme once at startup so the first prompt is tinted correctly instead
+# of flashing the dark default until the first reply arrives.
+if [[ -t 0 && -t 1 ]]; then
+  printf '\e[?996n'
+  _r=
+  read -rsk 9 -t 0.2 _r 2>/dev/null
+  [[ $_r == $'\e[?997;2n' ]] && _workspace_scheme=light
+  unset _r
+fi
+_workspace_precmd() { _workspace_bg }
+# Sent from line-init, once zle has the tty in raw mode. From precmd the reply
+# can land while the tty still echoes, which prints it as ^[[?997;2n.
+_workspace_line_init() { printf '\e[?2031h\e[?996n' }
 _workspace_preexec() { printf '\e[?2031l' }
 _workspace_scheme_dark() { _workspace_scheme=dark; _workspace_bg }
 _workspace_scheme_light() { _workspace_scheme=light; _workspace_bg }
@@ -88,7 +100,9 @@ for _km in emacs viins vicmd; do
 done
 unset _km
 autoload -Uz add-zsh-hook
+autoload -Uz add-zle-hook-widget
 add-zsh-hook precmd _workspace_precmd
+add-zle-hook-widget line-init _workspace_line_init
 add-zsh-hook preexec _workspace_preexec
 {{- end }}
 
