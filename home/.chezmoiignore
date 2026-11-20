@@ -102,6 +102,7 @@ Library/*
 .config/work-secrets
 .config/git/config_work
 .config/git/config_work_id
+.local/bin/aws-config-workspaces
 {{ end -}}
 
 # ── Age encryption: exclude the other machine class's secrets directory ────────
@@ -116,6 +117,7 @@ Library/*
 
 # ── ~/.local/bin: conditional scripts ─────────────────────────────────────────
 {{ if or (not .work) (ne .chezmoi.os "darwin") -}}
+.local/bin/aws-config-workspaces
 .local/bin/brew
 .local/bin/shims/open
 {{ end -}}

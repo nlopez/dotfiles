@@ -1,0 +1,11 @@
+{{- $cfg := joinPath .chezmoi.homeDir ".aws/config" -}}
+{{- if and .work (not .headless) (not .workspace) (not (env "CHEZMOI_SKIP_SECRETS")) (stat $cfg) -}}
+#!/bin/bash
+
+# Push ~/.aws/config to running workspaces through the encrypted
+# ~/.local/bin/aws-config-workspaces. Re-runs when the config changes:
+# {{ output "shasum" "-a" "256" $cfg | trim }}
+
+set -euo pipefail
+"$HOME/.local/bin/aws-config-workspaces" || echo "workspace-aws-config: sync failed" >&2
+{{- end }}
