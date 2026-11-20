@@ -3,6 +3,10 @@
 # data; see docs/private-data.md). modify_settings.json.tmpl references its
 # packages by path. Runs every apply; the pull is best-effort so offline
 # applies still succeed.
+#
+# Pi does not install dependencies for local packages, so this runs the repo's
+# own installer (`npm ci` from the committed lockfile) for each declared package
+# with runtime dependencies, whenever its lockfile is newer than node_modules.
 {{- $pi := (includeTemplate "private-data" . | fromYaml).pi | default dict }}
 {{- if and .work $pi.local_repo }}
 
@@ -14,17 +18,30 @@ if [ ! -d "$REPO_DIR/.git" ]; then
   mkdir -p "$(dirname "$REPO_DIR")"
   git clone "$REPO_URL" "$REPO_DIR" || { echo "Pi: clone failed (check SSH access)" >&2; exit 0; }
   echo "Pi: work packages cloned ✓"
-  exit 0
-fi
-
-if [ "$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null)" != "$REPO_URL" ]; then
-  git -C "$REPO_DIR" remote set-url origin "$REPO_URL"
-fi
-
-if git -C "$REPO_DIR" pull --ff-only --quiet; then
-  echo "Pi: work packages up to date ✓"
 else
-  echo "Pi: work packages pull failed; using existing checkout" >&2
+  if [ "$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null)" != "$REPO_URL" ]; then
+    git -C "$REPO_DIR" remote set-url origin "$REPO_URL"
+  fi
+
+  if git -C "$REPO_DIR" pull --ff-only --quiet; then
+    echo "Pi: work packages up to date ✓"
+  else
+    echo "Pi: work packages pull failed; using existing checkout" >&2
+  fi
+fi
+
+export PATH={{ includeTemplate "agent-path" . | squote }}:"$PATH"
+INSTALLER="$REPO_DIR/scripts/install-package-dependencies.mjs"
+if [ -f "$INSTALLER" ] && command -v node >/dev/null 2>&1; then
+  for pkg in {{ range $pi.local_packages }}{{ . | squote }} {{ end }}; do
+    # npm ci --prefix rejects the lockfile when the path runs through a
+    # symlink, so resolve it first.
+    dir=$(cd "$REPO_DIR/packages/$pkg" 2>/dev/null && pwd -P) || continue
+    [ -f "$dir/package-lock.json" ] || continue
+    [ -f "$dir/node_modules/.package-lock.json" ] && \
+      [ ! "$dir/package-lock.json" -nt "$dir/node_modules/.package-lock.json" ] && continue
+    node "$INSTALLER" "$dir" >/dev/null || echo "Pi: dependency install failed for $pkg" >&2
+  done
 fi
 {{- else }}
 # No private work packages on this machine — nothing to do.

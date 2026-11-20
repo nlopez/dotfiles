@@ -19,6 +19,7 @@ pi:
   # docs/private-data.md). Skipped on purpose: pi-mcp-adapter and
   # mcp-port-forward (pi >= 0.99 has built-in MCP), pi-npm-guard and
   # npm-update-cooldown (chezmoi/Renovate pin npm versions).
-  work_packages: []
+  work_packages:
+  - "npm:@getpipher/vision@0.5.3"
   # Installed only on personal (non-work) machines.
   personal_only_packages: []
