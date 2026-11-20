@@ -9,7 +9,7 @@
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { createBashTool, isToolCallEventType } from "@earendil-works/pi-coding-agent";
+import { isToolCallEventType } from "@earendil-works/pi-coding-agent";
 
 // Matches a `gh pr create` invocation, including:
 //   gh pr create ...            /opt/tools/shims/bin/gh pr create ...
@@ -43,20 +43,6 @@ export function injectDraft(command: string): string | undefined {
 }
 
 export default function (pi: ExtensionAPI) {
-  // Backstop: rewrite the command at spawn time, after every other hook has
-  // run. This also covers bash calls that never pass through `tool_call`.
-  const bashTool = createBashTool(process.cwd(), {
-    spawnHook: ({ command, cwd, env }) => ({
-      command: injectDraft(command) ?? command,
-      cwd,
-      env,
-    }),
-  });
-  pi.registerTool({
-    ...bashTool,
-    execute: async (id, params, signal, onUpdate, _ctx) => bashTool.execute(id, params, signal, onUpdate),
-  });
-
   pi.on("tool_call", async (event, ctx) => {
     if (!isToolCallEventType("bash", event)) return;
 
