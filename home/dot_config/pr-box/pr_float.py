@@ -4,8 +4,9 @@
 # working directory and, when known, the agent's pid.
 #
 #   ensure <session_id> <cwd> <pid>  (SessionStart hook) record the session for
-#                                    this Rex block and start a waiter if
-#                                    nothing is running for it
+#                                    this Rex block, start a waiter if nothing
+#                                    is running for it, and prune the state of
+#                                    closed panes
 #   wait <agent_block>              detached: open the box once the agent's
 #                                    pane is tiled in a window; exit, removing
 #                                    the pane's state, if Rex no longer has
@@ -50,7 +51,7 @@ FRAME_MAX = (8, 6)
 HANDOFF = 15
 # Shown in the box's title so a box still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 7
+VERSION = 8
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
 
@@ -331,18 +332,45 @@ def ensure(session_id, cwd, pid=""):
     pr_tracking._write_json(_state_path(block), state)
     if not _alive(state.get("watcher_pid")):
         _spawn("wait", block)
+    prune()
 
 
-def live_blocks():
-    """{block_id: Rex session_id} for every block on the Rex server."""
+def live_blocks(complete=False):
+    """{block_id: Rex session_id} for every block on the Rex server, detached ones
+    included. With complete, raise rather than leave out a session Rex did not list."""
     out = subprocess.run(["rex", "session", "list", "--json"], capture_output=True, text=True, timeout=10)
+    if complete and out.returncode != 0:
+        raise RuntimeError(out.stderr.strip() or "rex session list failed")
     found = {}
     for session in json.loads(out.stdout or "{}").get("sessions") or []:
         sid = session.get("session_id")
-        with contextlib.suppress(Exception):
-            for block in set(re.findall(r"block:[0-9a-f-]{36}", json.dumps(rex("session.view", {}, sid)))):
-                found[block] = sid
+        try:
+            for block in rex("session.list_blocks", {}, sid).get("blocks") or []:
+                found[block["block_id"]] = sid
+        except Exception:
+            if complete:
+                raise
     return found
+
+
+def prune():
+    """Remove the state of panes Rex no longer has whose box or waiter has exited.
+
+    Only after a complete listing of Rex's blocks, so a failed call never removes
+    a live pane's state.
+    """
+    try:
+        live = live_blocks(complete=True)
+    except Exception:
+        return
+    directory = os.path.dirname(_state_path("x"))
+    with contextlib.suppress(OSError):
+        for name in os.listdir(directory):
+            block = name.removesuffix(".json").replace("block_", "block:", 1)
+            if not name.endswith(".json") or block in live or _alive(_state(block).get("watcher_pid")):
+                continue
+            with contextlib.suppress(OSError):
+                os.remove(os.path.join(directory, name))
 
 
 def _lineage_block(session_ids, live):
