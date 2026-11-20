@@ -11,10 +11,10 @@
 
 set -eufo pipefail
 
-export CLAUDE_CONFIG_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/claude"
+export CLAUDE_CONFIG_DIR="{{ includeTemplate "claude-config-dir" . }}"
 export PI_CODING_AGENT_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/pi/agent"
 
-export PATH="{{ includeTemplate "nix-profile" . }}/bin:{{ if eq .chezmoi.os "linux" }}{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ end }}{{ .chezmoi.homeDir }}/.local/bin:$PATH"
+export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
 
 command -v wt >/dev/null 2>&1 || { echo "wt not found, skipping" >&2; exit 0; }
 
