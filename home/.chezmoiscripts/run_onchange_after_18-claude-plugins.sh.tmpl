@@ -1,0 +1,44 @@
+{{- $p := includeTemplate "private-data" . | fromYaml -}}
+{{- $private := and .personal (not .work) (not .headless) -}}
+#!/bin/bash
+
+# Installs the Claude Code plugins in .chezmoidata/claude.yaml at user scope,
+# plus the private ones (claude.plugins in the private data) on personal
+# machines. Pi gets the same tools from pi.yaml.
+# Re-runs when the plugin lists change. A manually registered MCP server can
+# conflict with a plugin that ships the same server, so the user-scope servers
+# in the private claude.remove_mcp are removed first. Work machines register
+# their MCP servers in run_onchange_after_32-work-mcp-claude.sh.tmpl.
+
+set -eufo pipefail
+
+export CLAUDE_CONFIG_DIR="{{ includeTemplate "claude-config-dir" . }}"
+
+export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+{{- if $private }}
+{{ range ($p.claude.remove_mcp | default list) }}
+claude mcp remove {{ . | squote }} --scope user >/dev/null 2>&1 || true
+{{- end }}
+{{- end }}
+
+marketplaces="$(claude plugin marketplace list 2>/dev/null || true)"
+plugins="$(claude plugin list 2>/dev/null || true)"
+{{- range .claude.plugins }}
+{{- $marketplace := splitList "@" .name | last }}
+
+if ! printf '%s\n' "$marketplaces" | grep -qE {{ printf "^\\s*❯ %s\\s*$" $marketplace | squote }}; then
+  claude plugin marketplace add {{ .repo | squote }}
+fi
+if ! printf '%s\n' "$plugins" | grep -qF {{ .name | squote }}; then
+  claude plugin install {{ .name | squote }} --scope user
+fi
+{{- end }}
+{{- if $private }}
+{{ range ($p.claude.plugins | default list) }}
+if ! printf '%s\n' "$plugins" | grep -qF {{ . | squote }}; then
+  claude plugin install {{ . | squote }} --scope user
+fi
+{{- end }}
+{{- end }}

@@ -1,0 +1,11 @@
+# Claude Code plugins installed at user scope by
+# .chezmoiscripts/run_onchange_after_18-claude-plugins.sh.tmpl. Each entry is
+# `<plugin>@<marketplace>` plus the GitHub repo that hosts the marketplace.
+# Engram and worktrunk have their own scripts (version-dependent setup).
+# Private plugins live in the encrypted private data (claude.plugins).
+claude:
+  plugins:
+  - name: context-mode@context-mode
+    repo: mksglu/context-mode
+  - name: i-have-adhd@i-have-adhd
+    repo: ayghri/i-have-adhd
