@@ -1,3 +1,4 @@
+{{ if or (not .work) (ne .chezmoi.os "darwin") -}}
 #!/bin/sh
 # gh shim: picks the GitHub account for the target repo and always creates
 # pull requests as drafts.
@@ -151,3 +152,4 @@ if [ -z "$draft" ]; then
   done
 fi
 exec "$real" "$@"
+{{ end -}}
