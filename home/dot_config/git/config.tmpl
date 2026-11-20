@@ -47,13 +47,6 @@
 [credential "https://gist.github.com"]
   helper =
   helper = !gh auth git-credential
-
-{{- /* wmux rewrites personal SSH remotes to HTTPS, where the only available
-credential (the workspace-managed gh token) is read-only. Route pushes to
-personal repos back over SSH, where the forwarded agent authenticates; fetch
-keeps using HTTPS. */}}
-[url "git@github.com:nlopez/"]
-  pushInsteadOf = https://github.com/nlopez/
 {{- end }}
 
 [pull]
