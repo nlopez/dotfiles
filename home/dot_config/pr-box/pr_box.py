@@ -13,7 +13,9 @@ floating box (pr_tracking.py, pr_float.py) are the same for all of them.
                                          and, after a git push, the branch's PR.
   add <session_id> <url>                 track one PR
   set <session_id> [url...]              replace the session's PR list
-  reopen                                 reopen a closed box for this pane
+  reopen                                 reopen the agent's box: in this pane,
+                                         or in the pane of the session it was
+                                         resumed or forked from
   status <session_id>                    print one line per tracked PR: state,
                                          head commit, checks, failing checks and
                                          review, from the cached status
@@ -52,7 +54,7 @@ def record_command(session_id, cwd, command, output):
         pr_tracking.record(session_id, url)
     if pr_tracking.PUSH_COMMAND.search(command):
         pr_tracking.note_push(session_id)
-        pr_tracking.spawn_resolve(session_id, cwd)
+        pr_tracking.spawn_resolve(session_id, pr_tracking.push_dir(command, cwd))
     if pr_tracking.PUSH_COMMAND.search(command) or pr_tracking.PR_COMMAND.search(command):
         pr_tracking.invalidate()
 
@@ -69,7 +71,7 @@ def main(argv):
     elif cmd == "set" and args:
         pr_tracking.set_session(args[0], args[1:])
     elif cmd == "reopen":
-        pr_float.reopen()
+        pr_float.reopen(pr_tracking.agent_session_ids())
     elif cmd == "status" and len(args) == 1:
         print(pr_tracking.status_lines(args[0]))
     elif cmd == "drain" and len(args) == 1:

@@ -9,14 +9,17 @@
 # refreshed by a detached `python3 pr_tracking.py refresh ...` so the status
 # line never waits on the network.
 # PR notifications: while the box is open, pr_float.py calls notice_changes on
-# every tick; a CI failure, approval, change request, merge or close, or a commit
-# pushed from outside the session is queued in inbox/<session_id>.jsonl,
+# every tick; CI failing or passing, an approval or change request, a merge or
+# close, CI on the merge commit failing or passing, or a commit pushed from
+# outside the session is queued in inbox/<session_id>.jsonl,
 # and each agent's adapter delivers it with drain (Claude: hooks/pr-notify.py,
 # pi: the pr-tracker extension).
 # Event log: every session's watches (PRs starting or stopping being tracked)
 # and status events are appended to $XDG_STATE_HOME/pr-box/events.jsonl
 # (`pr_box.py log` prints it).
+import calendar
 import contextlib
+import glob
 import hashlib
 import json
 import os
@@ -30,7 +33,7 @@ CACHE = os.path.join(
     "pr-box",
 )
 PR_URL = re.compile(r"https://[\w.-]+/[\w.-]+/[\w.-]+/pull/\d+")
-FIELDS = "number,url,state,isDraft,reviewDecision,statusCheckRollup,headRefOid"
+FIELDS = "number,url,state,isDraft,reviewDecision,statusCheckRollup,headRefOid,mergeCommit,mergedAt"
 # Status refresh intervals, in seconds.
 ACTIVE_TTL = 30  # checks running, failing or not reported yet
 SETTLED_TTL = 300  # open with every check green: only review state can change
@@ -43,6 +46,9 @@ PENDING_TTL = 30
 # A PR head change seen within this window after the session's own git push is
 # taken to be that push, not a commit from someone else.
 OWN_PUSH_WINDOW = 600
+# How long after a merge the merge commit's checks (post-merge CI, such as
+# Terraform applies) are fetched and reported.
+POST_MERGE_WINDOW = 6 * 3600
 
 
 def _path(*parts):
@@ -140,6 +146,8 @@ def _ttl(cached):
     state = cached.get("state")
     if not cached:
         return NO_PR_TTL
+    if state == "MERGED" and _recently_merged(cached):
+        return ACTIVE_TTL if merge_checks(cached) in ("pending", "") else SETTLED_TTL
     if state in ("MERGED", "CLOSED"):
         return CLOSED_TTL
     return ACTIVE_TTL if checks(cached) in ("pending", "fail", "") else SETTLED_TTL
@@ -216,7 +224,11 @@ def refresh(path, cwd, target):
     try:
         out = subprocess.run(args, cwd=cwd, env=env, capture_output=True, text=True, timeout=15)
         if out.returncode == 0:
-            _write_json(path, json.loads(out.stdout))
+            pr = json.loads(out.stdout)
+            if pr.get("state") == "MERGED" and _recently_merged(pr):
+                with contextlib.suppress(Exception):
+                    pr["mergeChecks"] = _commit_checks(pr, env, cwd)
+            _write_json(path, pr)
         elif "no pull requests found" in out.stderr.lower():
             _write_json(path, {})
     finally:
@@ -229,20 +241,59 @@ def refresh(path, cwd, target):
 GATE_CHECKS = {"devflow/mergegate", "ensure-ci-success"}
 
 
-def real_checks(pr):
-    return [i for i in pr.get("statusCheckRollup") or [] if (i.get("name") or i.get("context")) not in GATE_CHECKS]
+def _recently_merged(pr):
+    merged = pr.get("mergedAt") or ""
+    try:
+        when = calendar.timegm(time.strptime(merged[:19], "%Y-%m-%dT%H:%M:%S"))
+    except ValueError:
+        return False
+    return time.time() - when < POST_MERGE_WINDOW
 
 
-def check_counts(pr):
+def _commit_checks(pr, env, cwd):
+    """The merge commit's statuses and check runs, shaped like statusCheckRollup."""
+    sha = (pr.get("mergeCommit") or {}).get("oid") or ""
+    m = re.match(r"https://[\w.-]+/([\w.-]+/[\w.-]+)/pull/", pr.get("url") or "")
+    if not sha or not m:
+        return []
+    items = []
+    for endpoint, key in (("status", "statuses"), ("check-runs", "check_runs")):
+        out = subprocess.run(
+            ["gh", "api", f"repos/{m.group(1)}/commits/{sha}/{endpoint}?per_page=100", "--jq", f".{key}"],
+            cwd=cwd,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        for item in json.loads(out.stdout or "[]") if out.returncode == 0 else []:
+            if key == "statuses":
+                items.append({"context": item.get("context"), "state": (item.get("state") or "").upper()})
+            else:
+                items.append(
+                    {
+                        "name": item.get("name"),
+                        "status": (item.get("status") or "").upper(),
+                        "conclusion": (item.get("conclusion") or "").upper(),
+                    }
+                )
+    return items
+
+
+def real_checks(pr, key="statusCheckRollup"):
+    return [i for i in pr.get(key) or [] if (i.get("name") or i.get("context")) not in GATE_CHECKS]
+
+
+def check_counts(pr, key="statusCheckRollup"):
     """(passed, total) over the checks that matter."""
-    rollup = real_checks(pr)
+    rollup = real_checks(pr, key)
     ok = {"SUCCESS", "NEUTRAL", "SKIPPED"}
     return sum(1 for i in rollup if (i.get("conclusion") or i.get("state") or "") in ok), len(rollup)
 
 
-def checks(pr):
+def checks(pr, key="statusCheckRollup"):
     """'pass', 'fail', 'pending' or '' from a statusCheckRollup."""
-    rollup = real_checks(pr)
+    rollup = real_checks(pr, key)
     if not rollup:
         return ""
     pending = False
@@ -253,6 +304,19 @@ def checks(pr):
         if item.get("status", "COMPLETED") != "COMPLETED" or result in ("PENDING", "EXPECTED", ""):
             pending = True
     return "pending" if pending else "pass"
+
+
+def merge_checks(pr):
+    """checks() over the merge commit's checks, fetched for a while after a merge."""
+    return checks(pr, "mergeChecks")
+
+
+def _failed_names(pr, key="statusCheckRollup"):
+    return [
+        i.get("name") or i.get("context") or "?"
+        for i in real_checks(pr, key)
+        if (i.get("conclusion") or i.get("state")) in FAILED
+    ]
 
 
 FAILED = {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED", "STARTUP_FAILURE"}
@@ -293,21 +357,34 @@ def notice_changes(session_id, prs):
             continue
         state = pr.get("state") or ""
         head = pr.get("headRefOid") or ""
-        cur = {"checks": checks(pr), "review": pr.get("reviewDecision") or "", "state": state, "head": head}
+        cur = {
+            "checks": checks(pr),
+            "review": pr.get("reviewDecision") or "",
+            "state": state,
+            "head": head,
+            "merge_checks": merge_checks(pr),
+        }
         now[url] = cur
         before = seen.get(url)
         if before is None:
             continue
         if before.get("state") == "OPEN" and state in ("MERGED", "CLOSED"):
             events.append((url, state.lower()))
+        if state == "MERGED" and "merge_checks" in before:
+            passed, total = check_counts(pr, "mergeChecks")
+            if cur["merge_checks"] == "fail" and before["merge_checks"] != "fail":
+                events.append((url, f"post-merge CI failed ({', '.join(_failed_names(pr, 'mergeChecks'))})"))
+            elif cur["merge_checks"] == "pass" and before["merge_checks"] != "pass":
+                events.append((url, f"post-merge CI passed ({passed}/{total})"))
         if state != "OPEN":
             continue
+        if cur["checks"] == "pass" and before.get("checks") != "pass":
+            passed, total = check_counts(pr)
+            events.append((url, f"CI passed ({passed}/{total})"))
         if head and before.get("head") and head != before["head"] and not _pushed_recently(session_id):
             events.append((url, f"new commit {head[:10]} pushed from outside this session"))
         if cur["checks"] == "fail" and before.get("checks") != "fail":
-            failed = [i for i in real_checks(pr) if (i.get("conclusion") or i.get("state")) in FAILED]
-            names = [i.get("name") or i.get("context") or "?" for i in failed]
-            events.append((url, f"CI failed ({', '.join(names)})"))
+            events.append((url, f"CI failed ({', '.join(_failed_names(pr))})"))
         if cur["review"] != before.get("review") and cur["review"] in REVIEW_EVENTS:
             events.append((url, REVIEW_EVENTS[cur["review"]]))
     if now != seen:
@@ -366,11 +443,7 @@ def status_lines(session_id):
             state = "DRAFT"
         passed, total = check_counts(pr)
         result = checks(pr) or "none"
-        failed = [
-            i.get("name") or i.get("context") or "?"
-            for i in real_checks(pr)
-            if (i.get("conclusion") or i.get("state")) in FAILED
-        ]
+        failed = _failed_names(pr)
         parts = [
             url,
             state,
@@ -381,6 +454,12 @@ def status_lines(session_id):
             parts.append(f"failing: {', '.join(failed)}")
         if pr.get("reviewDecision"):
             parts.append(f"review {pr['reviewDecision'].lower()}")
+        if pr.get("mergeChecks"):
+            m_passed, m_total = check_counts(pr, "mergeChecks")
+            parts.append(f"post-merge checks {merge_checks(pr) or 'none'} {m_passed}/{m_total}")
+            m_failed = _failed_names(pr, "mergeChecks")
+            if m_failed:
+                parts.append(f"post-merge failing: {', '.join(m_failed)}")
         out.append("  ".join(parts))
     return "\n".join(out) or "no PRs tracked"
 
@@ -453,6 +532,32 @@ PR_COMMAND = re.compile(r"\bgh\s+pr\s+(create|ready|edit|merge)\b")
 PUSH_COMMAND = re.compile(r"\bgit\b[^;&|]*\bpush\b")
 
 
+_PATH = r"(\"[^\"]+\"|'[^']+'|[^\s;&|()]+)"
+CD_COMMAND = re.compile(r"(?:^|[;&|(]\s*)cd\s+" + _PATH)
+GIT_C_PUSH = re.compile(r"\bgit\s+-C\s+" + _PATH + r"[^;&|]*\bpush\b")
+
+
+def push_dir(command, cwd):
+    """The directory a git push in command ran in: its git -C, else the last cd before
+    it, else cwd."""
+    push = PUSH_COMMAND.search(command)
+    if not push:
+        return cwd
+    path = None
+    git_c = GIT_C_PUSH.search(command)
+    if git_c and git_c.start() == push.start():
+        path = git_c.group(1)
+    else:
+        cds = [m for m in CD_COMMAND.finditer(command) if m.end() <= push.start()]
+        if cds:
+            path = cds[-1].group(1)
+    if not path:
+        return cwd
+    path = os.path.expandvars(os.path.expanduser(path.strip("\"'")))
+    path = os.path.normpath(os.path.join(cwd, path))
+    return path if os.path.isdir(path) else cwd
+
+
 def command_prs(command, output):
     """PR URLs a gh pr create/ready/edit/merge command printed."""
     return list(dict.fromkeys(PR_URL.findall(output))) if PR_COMMAND.search(command) else []
@@ -496,12 +601,30 @@ def backfill(session_id, transcript_path):
                     for url in command_prs(command, output):
                         record(session_id, url)
                     cwd = entry.get("cwd")
-                    if PUSH_COMMAND.search(command) and cwd and cwd not in push_dirs:
-                        push_dirs.append(cwd)
+                    if PUSH_COMMAND.search(command) and cwd:
+                        cwd = push_dir(command, cwd)
+                        if cwd not in push_dirs:
+                            push_dirs.append(cwd)
     for cwd in push_dirs:
         if os.path.isdir(cwd):
             with contextlib.suppress(Exception):
                 resolve_branch_pr(session_id, cwd)
+
+
+def agent_session_ids():
+    """The calling Claude session's ID, then the sessions it was resumed or forked from
+    (nearest first), read from its transcript. [] outside Claude."""
+    session_id = os.environ.get("CLAUDE_CODE_SESSION_ID") or ""
+    if not session_id:
+        return []
+    parents = []
+    config = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.expanduser("~/.claude")
+    for path in glob.glob(os.path.join(config, "projects", "*", session_id + ".jsonl")):
+        with contextlib.suppress(OSError), open(path) as f:
+            for sid in re.findall(r'"session_?[iI]d":"([0-9a-f-]{36})"', f.read()):
+                if sid != session_id and sid not in parents:
+                    parents.append(sid)
+    return [session_id, *reversed(parents)]
 
 
 def resolve_branch_pr(session_id, cwd):

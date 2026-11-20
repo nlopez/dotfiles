@@ -48,7 +48,7 @@ FRAME_MAX = (8, 6)
 HANDOFF = 15
 # Shown in the box's title so a box still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 5
+VERSION = 6
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
 
@@ -145,9 +145,9 @@ def running(block):
     return state.get("mode") == "watch" and _alive(state.get("watcher_pid"))
 
 
-def rex(method, args):
+def rex(method, args, session=None):
     out = subprocess.run(
-        ["rex", "api", "call", "-s", os.environ.get("REX_SESSION", ""), method, json.dumps(args)],
+        ["rex", "api", "call", "-s", session or os.environ.get("REX_SESSION", ""), method, json.dumps(args)],
         capture_output=True,
         text=True,
         timeout=10,
@@ -331,16 +331,56 @@ def ensure(session_id, cwd, pid=""):
         _spawn("wait", block)
 
 
-def reopen():
-    """Open this pane's box from its recorded session (the /pr-box command).
+def live_blocks():
+    """{block_id: Rex session_id} for every block on the Rex server."""
+    out = subprocess.run(["rex", "session", "list", "--json"], capture_output=True, text=True, timeout=10)
+    found = {}
+    for session in json.loads(out.stdout or "{}").get("sessions") or []:
+        sid = session.get("session_id")
+        with contextlib.suppress(Exception):
+            for block in set(re.findall(r"block:[0-9a-f-]{36}", json.dumps(rex("session.view", {}, sid)))):
+                found[block] = sid
+    return found
 
-    An open box is closed first and opened fresh.
+
+def _lineage_block(session_ids, live):
+    """The live block whose box state belongs to one of session_ids, preferring the
+    earliest of session_ids (the agent's own session) and then the newest state."""
+    directory = os.path.dirname(_state_path("x"))
+    best = None
+    with contextlib.suppress(OSError):
+        for name in os.listdir(directory):
+            block = name.removesuffix(".json").replace("block_", "block:", 1)
+            if not name.endswith(".json") or block not in live:
+                continue
+            sid = _state(block).get("session_id")
+            if sid not in session_ids:
+                continue
+            rank = (-session_ids.index(sid), os.path.getmtime(os.path.join(directory, name)))
+            if best is None or rank > best[0]:
+                best = (rank, block)
+    return best[1] if best else None
+
+
+def reopen(session_ids=()):
+    """Open the agent's box (the /pr-box command). An open box is closed first and
+    opened fresh.
+
+    The pane is REX_BLOCK when Rex still has it. A resumed or forked agent can carry
+    the REX_BLOCK of a pane that no longer exists, so otherwise it is the live pane
+    whose box belongs to one of session_ids: the agent's session, then the sessions
+    it was forked from. The box then tracks session_ids[0], when given.
     """
+    session_ids = list(session_ids)
+    live = live_blocks()
     block = os.environ.get("REX_BLOCK")
+    if block not in live or not _state(block).get("session_id"):
+        block = _lineage_block(session_ids, live)
     state = _state(block) if block else {}
     if not state.get("session_id"):
         print("No PR box state for this pane: not running in Rex, or the session hasn't started.")
         return
+    os.environ.update(REX_BLOCK=block, REX_SESSION=live[block])
     if running(block):
         # SIGHUP makes watch exit through its cleanup, which closes the layer.
         pid = state["watcher_pid"]
@@ -352,7 +392,8 @@ def reopen():
         if _alive(pid):
             print("Could not close the open PR box.")
             return
-    ensure(state["session_id"], state.get("cwd") or os.getcwd(), state.get("agent_pid") or "")
+    session_id = session_ids[0] if session_ids else state["session_id"]
+    ensure(session_id, state.get("cwd") or os.getcwd(), state.get("agent_pid") or "")
     print("Reopening the PR box.")
 
 
