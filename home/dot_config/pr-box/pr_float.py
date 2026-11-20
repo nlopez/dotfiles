@@ -47,7 +47,7 @@ FRAME_MAX = (8, 6)
 HANDOFF = 15
 # Shown in the box's title so a box still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 3
+VERSION = 4
 
 
 def _state_path(block):

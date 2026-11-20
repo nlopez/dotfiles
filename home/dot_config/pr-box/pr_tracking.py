@@ -9,7 +9,8 @@
 # refreshed by a detached `python3 pr_tracking.py refresh ...` so the status
 # line never waits on the network.
 # PR notifications: while the box is open, pr_float.py calls notice_changes on
-# every tick; a CI failure, approval or change request is queued in inbox/<session_id>.jsonl,
+# every tick; a CI failure, approval, change request, merge or close, or a commit
+# pushed from outside the session is queued in inbox/<session_id>.jsonl,
 # and each agent's adapter delivers it with drain (Claude: hooks/pr-notify.py,
 # pi: the pr-tracker extension).
 # Event log: every session's watches (PRs starting or stopping being tracked)
@@ -29,7 +30,7 @@ CACHE = os.path.join(
     "pr-box",
 )
 PR_URL = re.compile(r"https://[\w.-]+/[\w.-]+/[\w.-]+/pull/\d+")
-FIELDS = "number,url,state,isDraft,reviewDecision,statusCheckRollup"
+FIELDS = "number,url,state,isDraft,reviewDecision,statusCheckRollup,headRefOid"
 # Status refresh intervals, in seconds.
 ACTIVE_TTL = 30  # checks running, failing or not reported yet
 SETTLED_TTL = 300  # open with every check green: only review state can change
@@ -39,6 +40,9 @@ HOT_TTL = 20  # right after a push or gh pr command
 HOT_WINDOW = 180
 # A refresh that has not finished within this window is assumed dead.
 PENDING_TTL = 30
+# A PR head change seen within this window after the session's own git push is
+# taken to be that push, not a commit from someone else.
+OWN_PUSH_WINDOW = 600
 
 
 def _path(*parts):
@@ -255,13 +259,26 @@ FAILED = {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED", "STAR
 REVIEW_EVENTS = {"APPROVED": "approved", "CHANGES_REQUESTED": "changes requested"}
 
 
-def notice_changes(session_id, prs):
-    """Queue a notification for each open PR whose CI just failed, or that was just
-    approved or had changes requested.
+def note_push(session_id):
+    """Record that the session just ran git push, so the head change it causes is not
+    reported as a commit from outside the session."""
+    if session_id:
+        _write_json(_session_path(session_id, "pushes"), {"time": time.time()})
 
-    Each PR's last seen CI and review state is kept per session; a PR seen for
-    the first time only sets that baseline, so tracking an already-approved PR
-    is not reported. PRs whose status has not been fetched yet are skipped.
+
+def _pushed_recently(session_id):
+    last = (_read_json(_session_path(session_id, "pushes"), {}) or {}).get("time", 0)
+    return time.time() - last < OWN_PUSH_WINDOW
+
+
+def notice_changes(session_id, prs):
+    """Queue a notification for each PR that was just merged or closed, and for each
+    open PR whose CI just failed, that was just approved or had changes requested,
+    or whose head moved to a commit the session did not push.
+
+    Each PR's last seen state, head, CI and review state is kept per session; a PR
+    seen for the first time only sets that baseline, so tracking an already-approved
+    PR is not reported. PRs whose status has not been fetched yet are skipped.
     """
     if not session_id:
         return
@@ -274,11 +291,19 @@ def notice_changes(session_id, prs):
             if url in seen:
                 now[url] = seen[url]
             continue
-        cur = {"checks": checks(pr), "review": pr.get("reviewDecision") or ""}
+        state = pr.get("state") or ""
+        head = pr.get("headRefOid") or ""
+        cur = {"checks": checks(pr), "review": pr.get("reviewDecision") or "", "state": state, "head": head}
         now[url] = cur
         before = seen.get(url)
-        if before is None or pr.get("state") != "OPEN":
+        if before is None:
             continue
+        if before.get("state") == "OPEN" and state in ("MERGED", "CLOSED"):
+            events.append((url, state.lower()))
+        if state != "OPEN":
+            continue
+        if head and before.get("head") and head != before["head"] and not _pushed_recently(session_id):
+            events.append((url, f"new commit {head[:10]} pushed from outside this session"))
         if cur["checks"] == "fail" and before.get("checks") != "fail":
             failed = [i for i in real_checks(pr) if (i.get("conclusion") or i.get("state")) in FAILED]
             names = [i.get("name") or i.get("context") or "?" for i in failed]
@@ -323,6 +348,41 @@ def drain(session_id):
         " PR and the change, so the user can see you are reacting to it, then handle it.\n"
         + "\n".join(f"- {e}" for e in events)
     )
+
+
+def status_lines(session_id):
+    """One line per PR the session tracks, from the cached status, for agents to read."""
+    out = []
+    for url in session_prs(session_id):
+        pr = url_pr(url)
+        if pr is None:
+            out.append(f"{url}  status not fetched yet")
+            continue
+        if not pr:
+            out.append(f"{url}  not found")
+            continue
+        state = pr.get("state") or "?"
+        if state == "OPEN" and pr.get("isDraft"):
+            state = "DRAFT"
+        passed, total = check_counts(pr)
+        result = checks(pr) or "none"
+        failed = [
+            i.get("name") or i.get("context") or "?"
+            for i in real_checks(pr)
+            if (i.get("conclusion") or i.get("state")) in FAILED
+        ]
+        parts = [
+            url,
+            state,
+            f"head {(pr.get('headRefOid') or '?')[:10]}",
+            f"checks {result} {passed}/{total}",
+        ]
+        if failed:
+            parts.append(f"failing: {', '.join(failed)}")
+        if pr.get("reviewDecision"):
+            parts.append(f"review {pr['reviewDecision'].lower()}")
+        out.append("  ".join(parts))
+    return "\n".join(out) or "no PRs tracked"
 
 
 def repo_of(url):
