@@ -119,6 +119,10 @@ Library/*
 .local/bin/brew
 .local/bin/shims/open
 {{ end -}}
+{{ if and .work (eq .chezmoi.os "darwin") -}}
+# Work macOS machines use the work package manager's /opt/*/shims/bin/gh instead
+.local/bin/shims/gh
+{{ end -}}
 {{ if ne .chezmoi.os "darwin" -}}
 .local/bin/gitcache
 {{ end -}}
