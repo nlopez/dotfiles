@@ -21,5 +21,11 @@
 - A worktree's directory and its checked-out branch must always match. Never `git switch`/`checkout` (including `checkout -b`) to a different branch inside any worktree. `main`/`default` is shared by other sessions, but the rule applies everywhere.
 - To work on another branch, use or create that branch's own worktree (`wt switch --create <branch>`).
 - Before every commit or push, run `git branch --show-current` and confirm it matches the worktree directory name.
+
+### Shell history (atuin)
+
+- Every command run on this user's machines, by the user or by agents, is in atuin history with exit code, directory, duration, host, and author, synced across machines.
+- Before guessing how to build, test, deploy, or run something, search it: `atuin search --cwd . --exit 0 --limit 20 <keyword>`. Results print oldest first; the last line is the newest.
+- Useful filters: `--author '$all-user'` (only the user's commands), `--author '$all-agent'`, `--exclude-exit 0` (failures), `--format '{time} {exit} {directory} {command}'`. Never pass `-i` (interactive TUI).
 {{- includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "agents-work") }}
 {{- if .workspace }}{{ includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "agents-workspace") }}{{- end }}
