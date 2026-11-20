@@ -1,0 +1,46 @@
+{{ if .workspace -}}
+#!/bin/sh
+# Workspaces clone every repo into ~/go/src/github.com/DataDog/<repo>, whatever
+# its GitHub org, and their tooling (re-sync, --delete-extra-repos, IDE connect)
+# depends on that path. Link each clone into the ghq root under the owner from
+# its origin remote, so `ghq list`/`ghq get` see ddoghq repos under ddoghq/.
+# Run by the ghq shim before every ghq command and by chezmoi apply.
+set -eu
+
+base="$HOME/go/src/github.com/DataDog"
+root=$(git config --global --path --get ghq.root || echo "$HOME/src")
+[ -d "$base" ] || exit 0
+
+for repo in "$base"/*; do
+  [ -e "$repo/.git" ] || continue
+  case $repo in *-worktrees) continue ;; esac
+
+  url=$(git -C "$repo" remote get-url origin 2>/dev/null) || continue
+  # git@host:owner/repo.git, ssh://git@host/owner/repo.git, https://host/owner/repo
+  path=${url%.git}
+  path=${path#*://}
+  path=${path#*@}
+  path=$(printf '%s' "$path" | sed 's|^[^:/]*[:/]||')
+  owner=${path%%/*}
+  name=${path#*/}
+  case $name in "" | */*) continue ;; esac
+  [ "$owner" != "$path" ] || continue
+
+  link="$root/github.com/$owner/$name"
+  if [ -L "$link" ]; then
+    [ "$(readlink "$link")" = "$repo" ] && continue
+  elif [ -e "$link" ]; then
+    echo "ghq-links: $link exists and is not a link; leaving it" >&2
+    continue
+  fi
+  mkdir -p "${link%/*}"
+  ln -sfn "$repo" "$link"
+done
+
+# Drop links whose workspace clone has been deleted.
+[ -d "$root/github.com" ] || exit 0
+find "$root/github.com" -mindepth 2 -maxdepth 2 -type l | while read -r link; do
+  target=$(readlink "$link")
+  case $target in "$base"/*) [ -e "$target" ] || rm -f "$link" ;; esac
+done
+{{ end -}}

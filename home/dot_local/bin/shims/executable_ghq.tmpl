@@ -1,0 +1,18 @@
+{{ if .workspace -}}
+#!/bin/sh
+# Wrapper: link workspace clones into the ghq root before ghq reads it, so
+# repos cloned by Workspaces show up without a chezmoi apply.
+
+"$HOME/.local/bin/ghq-workspace-links" || true
+
+# Drop this shim's dir from PATH, then find the real ghq.
+dir=$(cd "$(dirname "$0")" && pwd -P)
+new=; IFS=:
+for d in $PATH; do
+  [ "$(cd "$d" 2>/dev/null && pwd -P)" = "$dir" ] || new=${new:+$new:}$d
+done
+unset IFS; PATH=$new
+real=$(command -v ghq) || { echo "ghq: no real ghq found on PATH" >&2; exit 127; }
+
+exec "$real" "$@"
+{{ end -}}
