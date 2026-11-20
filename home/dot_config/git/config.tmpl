@@ -77,8 +77,8 @@
 [diff]
   renameLimit = 10000
 
-{{- if not .workspace }}
-{{/* Workspaces: signing (key + program) comes from the host ~/.gitconfig. */}}
+{{- if not .externalgit }}
+{{/* Work machines and workspaces: signing comes from ~/.gitconfig. */}}
 
 [commit]
   gpgsign = false
@@ -147,8 +147,8 @@
 [ghq]
   root = ~/src
 
-{{- if not .workspace }}
-{{/* Workspaces: identity, SSH keys, and credentials come from the host       */}}
+{{- if not .externalgit }}
+{{/* Work machines and workspaces: identity and SSH keys come from            */}}
 {{/* ~/.gitconfig (read after this file, so it wins). The chezmoi repo's      */}}
 {{/* noreply identity is set repo-locally by                                */}}
 {{/* run_onchange_after_40-workspace-git-identity.sh.                        */}}

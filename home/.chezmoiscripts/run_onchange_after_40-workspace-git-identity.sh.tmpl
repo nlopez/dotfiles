@@ -1,9 +1,9 @@
-{{ if .workspace -}}
+{{ if .externalgit -}}
 #!/bin/sh
-# Workspaces: the host ~/.gitconfig includes a work [user] block that
+# Work machines and workspaces: ~/.gitconfig includes a work [user] block that
 # is read after ~/.config/git/config, so a global include can't override it.
 # Set the personal noreply identity repo-locally on the chezmoi source repo
-# (shared by its worktrees). Signing still uses the Workspaces key.
+# (shared by its worktrees). Signing still uses the managed key.
 set -eu
 repo={{ .chezmoi.workingTree | quote }}
 git -C "$repo" config --local user.name {{ .name | quote }}

@@ -20,6 +20,10 @@
      darwin/run_onchange_after_21-workspace-secrets.sh.tmpl). The CLI uploads
      secrets after dotfiles install, so the first apply runs without it and the
      zshrc first-login hook re-runs `chezmoi init --apply` once it appears. */}}
+{{/* Work machines and workspaces leave GitHub SSH keys, identity, and signing to
+     the employer's git setup tool (via ~/.gitconfig and ~/.ssh/config includes). */}}
+{{- $externalgit := or $workspace $work -}}
+
 {{- $workspaceAgeIdentity := printf "/run/user/%s/secrets/CHEZMOI_AGE_IDENTITY" .chezmoi.uid -}}
 {{/* External age (PQ keys need v1.3+) comes from the Nix profile, which the first
      apply installs, so a workspace also waits for the binary. */}}
@@ -130,6 +134,7 @@ workemail = {{ $workemail | quote }}
 ephemeral = {{ $ephemeral }}
 headless = {{ $headless }}
 workspace = {{ $workspace }}
+externalgit = {{ $externalgit }}
 encryption = {{ $encryption }}
 
 [data.platform]

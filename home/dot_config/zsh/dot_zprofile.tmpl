@@ -19,7 +19,9 @@ export OP_ACCOUNT={{ (includeTemplate "private-data" . | fromYaml).onepassword_a
 {{- else }}
 export OP_ACCOUNT=my.1password.com
 {{- end }}
+{{- if not .work }}
 export SSH_AUTH_SOCK="{{ .platform.ssh_auth_sock | replace "~" .chezmoi.homeDir }}"
+{{- end }}
 {{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
