@@ -9,8 +9,8 @@ pi:
   - "npm:pi-powerline-footer@0.22.0"
   - "npm:pi-interrupt-steer@0.1.0"
   - "npm:@tmustier/pi-session-recap@0.6.1"
-  - "npm:pi-better-background-tasks@0.19.0"
-  - "npm:pi-prompt-suggestion@0.1.3"
+  - "npm:pi-cc-monitor@0.13.1"
+  - "npm:@mrclrchtr/supi-prompt-suggestions@14.0.0"
   - "npm:@dietrichgebert/ponytail@5.3.3"
   - "npm:billion-context@0.1.216"
   # Git-sourced packages; pi clones these itself. The reconcile script's
