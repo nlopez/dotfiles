@@ -1,0 +1,22 @@
+{{- /* macOS links /etc/localtime to /var/db/timezone/zoneinfo/<Area>/<City>. */ -}}
+{{- $tz := regexReplaceAll "^.*/zoneinfo/" (output "readlink" "/etc/localtime" | trim) "" -}}
+{{- if and .work (not .headless) (not .workspace) $tz -}}
+#!/bin/bash
+
+# Export this Mac's timezone to every workspace shell as TZ, through the
+# workspaces secret store (sourced by /etc/profile.d/00-workspace-env.sh).
+# Workspaces run in UTC. The zone is rendered into this script, so changing
+# it on the Mac re-runs the script on the next apply: {{ $tz }}
+
+set -euo pipefail
+
+WORKSPACES=$(PATH="$PATH:$(printf '%s:' /opt/*/bin)" command -v workspaces) || {
+  echo "workspace-timezone: workspaces CLI not found, skipping" >&2
+  exit 0
+}
+
+printf '%s' {{ $tz | squote }} | "$WORKSPACES" secrets set --export TZ=-
+
+# New workspaces pick it up at creation.
+"$WORKSPACES" secrets sync || echo "workspace-timezone: sync skipped (no running workspace?)" >&2
+{{- end }}
