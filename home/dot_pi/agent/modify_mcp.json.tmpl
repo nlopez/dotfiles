@@ -56,8 +56,16 @@ else
 {{- $p := includeTemplate "private-data" . | fromYaml }}
 {{- $drop := concat (list "figma") ($p.mcp_retired | default list) }}
 {{- if .workspace }}{{ $drop = concat $drop ($p.mcp_workspace_exclude | default list) }}{{ end }}
+  # On workspaces, wmux owns the servers it marks wmuxManaged (it points
+  # them at its local auth proxy), so their entries are kept as wmux wrote them.
   printf '%s\n' "$current" | jq --argjson overlay "$OVERLAY" --argjson drop {{ $drop | toJson | squote }} '
+    . as $cur |
     . * $overlay |
+{{- if .workspace }}
+    .mcpServers |= with_entries(
+      if $cur.mcpServers[.key].wmuxManaged then .value = $cur.mcpServers[.key] else . end
+    ) |
+{{- end }}
     del(.settings) |
     .mcpServers |= with_entries(
       .value |= (

@@ -1,7 +1,15 @@
+{{- if .workspace -}}
+{{- /* wmux writes the workspace commit identity here and adds this include   */ -}}
+{{- /* at the top of the file; declaring it keeps wmux and chezmoi in sync.   */ -}}
+[include]
+	path = "{{ .chezmoi.homeDir }}/.config/wmux/git-auth/gitconfig-identity"
+{{ end -}}
 [user]
   useConfigOnly = true
+{{- if not .workspace }}
   name = Anonymous
   email = noreply@example.org
+{{- end }}
 
 [push]
   default = current
@@ -148,8 +156,9 @@
   root = ~/src
 
 {{- if not .externalgit }}
-{{/* Work machines and workspaces: identity and SSH keys come from            */}}
-{{/* ~/.gitconfig (read after this file, so it wins). The chezmoi repo's      */}}
+{{/* Work machines and workspaces: identity and SSH keys come from ~/.gitconfig */}}
+{{/* (read after this file, so it wins) or, on workspaces, the wmux include at */}}
+{{/* the top of this file. The chezmoi repo's                                 */}}
 {{/* noreply identity is set repo-locally by                                */}}
 {{/* run_onchange_after_40-workspace-git-identity.sh.                        */}}
 
