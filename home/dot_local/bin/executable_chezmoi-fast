@@ -1,0 +1,3 @@
+#!/bin/sh
+# Run chezmoi without 1Password (`op`) reads.
+exec env CHEZMOI_SKIP_SECRETS=1 chezmoi "$@"
