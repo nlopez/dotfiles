@@ -5,13 +5,13 @@
 # PATH, so the installer's symlink would shadow the Nix binary until it's gone.
 # Runs after 00-nix-packages and only once the profile has `pi`.
 # Left alone: bin/rg (pi's own ripgrep download) and all user data under
-# $PI_CODING_AGENT_DIR.
+# ~/.pi/agent.
 # {{ includeTemplate "nix-packages" . | sha256sum }}
 
 set -eufo pipefail
 
 PROFILE_BIN="{{ includeTemplate "nix-profile" . }}/bin"
-AGENT_DIR="${PI_CODING_AGENT_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/pi/agent}"
+AGENT_DIR="$HOME/.pi/agent"
 
 [ -x "$PROFILE_BIN/pi" ] || { echo "nix profile has no pi, keeping installer-managed pi" >&2; exit 0; }
 

@@ -166,21 +166,20 @@ All new tool configurations **must** follow the [XDG Base Directory Specificatio
 | zabrze                 | `~/.config/zabrze/`                               | Native XDG support                                                            |
 | Zed                    | `~/.config/zed/`                                  | Native XDG support                                                            |
 | zsh startup files      | `~/.config/zsh/{zshenv,zprofile,zshrc}`           | `ZDOTDIR` in bootstrap `~/.zshenv`                                            |
-| Pi agent               | `~/.config/pi/agent/`                             | `PI_CODING_AGENT_DIR` env var                                                 |
-| Context-mode           | `~/.local/state/pi/context-mode/`                 | `CONTEXT_MODE_DIR` env var                                                    |
 | Engram memory          | `~/.local/share/engram/`                          | `ENGRAM_DATA_DIR` env var                                                     |
 
 ### Intentionally non-XDG
 
 These tools have no XDG support, or only a partial env-var workaround. Do not attempt to move them.
 
-| Tool            | Location                        | Reason                                                                                                     |
-| --------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| SSH             | `~/.ssh/`                       | OpenSSH does not support XDG                                                                               |
-| bash/sh startup | `~/.profile`, `~/.bash_profile` | POSIX startup files; `.bash_profile` delegates to `.profile`; actual config in `~/.config/shell/env` (XDG) |
-| omlx root       | `~/.omlx/`                      | Root dir hardcoded; only `model_dirs` is redirected to `~/.local/share/omlx/models`                        |
-| Terraform data  | `~/.terraform.d/`               | `TF_DATA_DIR` is per-workspace only; not safe to set globally                                              |
-| Claude Code     | `~/.claude/`, `~/.claude.json`  | Other tools (e.g. Rex) hard-code `~/.claude`, so `CLAUDE_CONFIG_DIR` splits state                          |
+| Tool            | Location                              | Reason                                                                                                     |
+| --------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| SSH             | `~/.ssh/`                             | OpenSSH does not support XDG                                                                               |
+| bash/sh startup | `~/.profile`, `~/.bash_profile`       | POSIX startup files; `.bash_profile` delegates to `.profile`; actual config in `~/.config/shell/env` (XDG) |
+| omlx root       | `~/.omlx/`                            | Root dir hardcoded; only `model_dirs` is redirected to `~/.local/share/omlx/models`                        |
+| Terraform data  | `~/.terraform.d/`                     | `TF_DATA_DIR` is per-workspace only; not safe to set globally                                              |
+| Claude Code     | `~/.claude/`, `~/.claude.json`        | Other tools (e.g. Rex) hard-code `~/.claude`, so `CLAUDE_CONFIG_DIR` splits state                          |
+| Pi agent        | `~/.pi/agent/`, `~/.pi/context-mode/` | Extensions hard-code `~/.pi`, so `PI_CODING_AGENT_DIR` splits state                                        |
 
 ## ⚠️ Boundaries
 

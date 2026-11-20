@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Moves Pi state from the XDG locations back to Pi's defaults before files are
+# applied into ~/.pi:
+#   ~/.config/pi/agent            -> ~/.pi/agent
+#   ~/.local/state/pi/context-mode -> ~/.pi/context-mode
+# Some extensions hard-code ~/.pi, so ~/.pi/agent usually exists already. The
+# move merges into it; where both sides have the same file, the XDG copy wins
+# and the ~/.pi copy is kept under ~/.pi/<name>.pre-migrate/.
+#
+# Processes started before the move may still carry PI_CODING_AGENT_DIR or
+# CONTEXT_MODE_DIR with the old paths (shells, Rex, launchd jobs). Links at the
+# old paths keep them on the same state until they restart; remove them once
+# every machine has logged out and back in.
+# Does nothing on machines that already use the default layout.
+
+set -euo pipefail
+
+HOME_DIR="{{ .chezmoi.homeDir }}"
+
+# merge SRC DST BACKUP: move everything in SRC into DST, recursing into
+# directories present on both sides. A DST entry that SRC replaces goes to BACKUP.
+merge() {
+  local src="$1" dst="$2" backup="$3" entry name
+  mkdir -p "$dst"
+  for entry in "$src"/* "$src"/.[!.]* "$src"/..?*; do
+    [ -e "$entry" ] || [ -L "$entry" ] || continue
+    name="${entry##*/}"
+    if [ ! -e "$dst/$name" ] && [ ! -L "$dst/$name" ]; then
+      mv "$entry" "$dst/$name"
+    elif [ -d "$entry" ] && [ ! -L "$entry" ] && [ -d "$dst/$name" ] && [ ! -L "$dst/$name" ]; then
+      merge "$entry" "$dst/$name" "$backup/$name"
+    else
+      mkdir -p "$backup"
+      mv "$dst/$name" "$backup/$name"
+      mv "$entry" "$dst/$name"
+    fi
+  done
+  rmdir "$src"
+}
+
+# migrate OLD NEW: merge OLD into NEW and leave a link at OLD.
+migrate() {
+  local old="$1" new="$2"
+  # Migrated (or fresh) once OLD is not a real directory.
+  { [ -d "$old" ] && [ ! -L "$old" ]; } || return 0
+  merge "$old" "$new" "$new.pre-migrate"
+  ln -s "$new" "$old"
+  echo "pi-home-migrate: moved $old to $new"
+}
+
+migrate "${XDG_CONFIG_HOME:-$HOME_DIR/.config}/pi/agent" "$HOME_DIR/.pi/agent"
+migrate "${XDG_STATE_HOME:-$HOME_DIR/.local/state}/pi/context-mode" "$HOME_DIR/.pi/context-mode"

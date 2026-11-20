@@ -3,7 +3,7 @@
 
 chezmoi writes the declared packages to settings.json (modify_settings.json.tmpl).
 Pi installs declared packages at startup but never removes undeclared ones, so
-this script owns both install trees under $PI_CODING_AGENT_DIR:
+this script owns both install trees under ~/.pi/agent:
 
 1. npm/: writes package.json with exactly the declared npm packages and runs
    `npm install` with the flags Pi uses. npm removes every package that is not
@@ -48,9 +48,7 @@ DECLARED = [
 {{- end }}
 ]
 
-AGENT_DIR = os.environ.get("PI_CODING_AGENT_DIR") or os.path.join(
-    os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"), "pi", "agent"
-)
+AGENT_DIR = os.path.expanduser("~/.pi/agent")
 NPM_DIR = os.path.join(AGENT_DIR, "npm")
 
 

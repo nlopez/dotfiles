@@ -173,8 +173,7 @@ current["env"]["ENGRAM_CLOUD_AUTOSYNC"] = "1"
 current["env"].pop("ENGRAM_CLOUD_AUTOSYNC", None)
 {{- end }}
 
-# Context-mode: Claude's own state dir (shell env.tmpl exports pi's CONTEXT_MODE_DIR,
-# which Claude would otherwise inherit and share sessions/index with pi).
+# Context-mode: Claude's own state dir, under XDG state home.
 xdg_state = os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state")
 current["env"]["CONTEXT_MODE_DIR"] = os.path.join(xdg_state, "claude", "context-mode")
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Managed by chezmoi — source: home/dot_config/pi/agent/modify_settings.json.tmpl
-# ⚠️  DO NOT EDIT ~/.config/pi/agent/settings.json directly. It is overwritten
+# Managed by chezmoi — source: home/dot_pi/agent/modify_settings.json.tmpl
+# ⚠️  DO NOT EDIT ~/.pi/agent/settings.json directly. It is overwritten
 #     by chezmoi on every `chezmoi apply`. Always edit the source tree.
 #
 # This is a chezmoi templated modify_ script. Chezmoi first renders the Go
@@ -86,13 +86,12 @@ current["packages"] = [
 {{- end }}
 ]
 
-# Skills discovery paths:
+# Skills discovery paths (Pi finds ~/.pi/agent/skills on its own):
 # - ~/.claude/skills: standard Claude Code skill location.
-# - ~/.config/pi/agent/skills: XDG-compliant Pi skills (matches PI_CODING_AGENT_DIR).
 # - -~/.claude/skills/rex: `rex skill setup` writes the same skill to
 #   ~/.agents/skills/rex for Pi, which Pi discovers by default.
-skills = current.get("skills", [])
-for path in ["~/.claude/skills", "~/.config/pi/agent/skills", "-~/.claude/skills/rex"]:
+skills = [s for s in current.get("skills", []) if s != "~/.config/pi/agent/skills"]
+for path in ["~/.claude/skills", "-~/.claude/skills/rex"]:
     if path not in skills:
         skills.append(path)
 current["skills"] = skills
