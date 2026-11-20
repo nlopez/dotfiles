@@ -1,12 +1,20 @@
+{{- $projects := list -}}
 {{- if and .personal (not .headless) -}}
+{{-   $projects = .engram.cloud_projects -}}
+{{- else if .work -}}
+{{-   $p := includeTemplate "private-data" . | fromYaml -}}
+{{-   $projects = $p.engram_cloud.projects -}}
+{{- end -}}
+{{- if $projects -}}
 #!/bin/bash
 
-# Enrolls the projects in .chezmoidata/engram.yaml for Engram Cloud autosync.
+# Enrolls projects for Engram Cloud autosync (personal: .chezmoidata/engram.yaml;
+# work: engram_cloud.projects in .private/work.yaml.age).
 # Enrollment lives in each host's local store (not on the server), and autosync
 # only replicates enrolled projects. Server URL + token come from cloud.json
 # (dot_local/share/private_engram/private_cloud.json.tmpl).
-# Re-runs when the project list below changes; `cloud enroll` is idempotent.
-# Projects: {{ join ", " .engram.cloud_projects }}
+# Re-runs when the project list changes; `cloud enroll` is idempotent.
+# Projects: {{ join ", " $projects }}
 
 set -eufo pipefail
 
@@ -15,7 +23,7 @@ export ENGRAM_DATA_DIR="${XDG_DATA_HOME:-{{ .chezmoi.homeDir }}/.local/share}/en
 
 command -v engram >/dev/null 2>&1 || { echo "engram not found, skipping" >&2; exit 0; }
 
-{{ range .engram.cloud_projects -}}
+{{ range $projects -}}
 engram cloud enroll {{ . | quote }}
 {{ end -}}
 {{ end -}}
