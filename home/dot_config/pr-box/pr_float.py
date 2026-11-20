@@ -17,7 +17,8 @@
 #                                    for the agent (pr_tracking.notice_changes)
 #
 # One of wait or watch runs per Rex block, its pid in the block's state file;
-# either exits when Claude does. The box is a Rex floating layer sized in
+# either exits when Claude does. Both re-exec themselves, keeping their pid and
+# the box's layer, when pr_float.py or pr_tracking.py changes on disk. The box is a Rex floating layer sized in
 # fractions of the window, so its size is recomputed from the window's cell
 # size on every tick.
 import contextlib
@@ -47,7 +48,50 @@ FRAME_MAX = (8, 6)
 HANDOFF = 15
 # Shown in the box's title so a box still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 4
+VERSION = 5
+# The code a running wait or watch reloads when it changes on disk.
+CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
+
+
+def _code_signature():
+    sig = []
+    for path in CODE:
+        try:
+            st = os.stat(path)
+            sig.append((st.st_mtime_ns, st.st_size))
+        except OSError:
+            sig.append(None)
+    return sig
+
+
+class Reloader:
+    """Tells a long-running wait or watch when to re-exec itself with new code.
+
+    A change must look the same on two consecutive checks, so a file still being
+    written is not loaded, and the new code must compile; code that does not is
+    skipped until the files change again.
+    """
+
+    def __init__(self):
+        self.loaded = self.last = _code_signature()
+
+    def due(self):
+        sig = _code_signature()
+        settled, self.last = sig == self.last, sig
+        if sig == self.loaded or not settled:
+            return False
+        try:
+            for path in CODE:
+                with open(path) as f:
+                    compile(f.read(), path, "exec")
+        except Exception:
+            self.loaded = sig
+            return False
+        return True
+
+
+def _reexec(mode, agent_block):
+    os.execv(sys.executable, [sys.executable, os.path.abspath(__file__), mode, agent_block])
 
 
 def _state_path(block):
@@ -314,7 +358,10 @@ def reopen():
 
 def wait(agent_block):
     _claim(agent_block, "wait")
+    reloader = Reloader()
     while True:
+        if reloader.due():
+            _reexec("wait", agent_block)
         state = _state(agent_block)
         if not _mine(state):
             return
@@ -418,6 +465,14 @@ def watch(agent_block):
     me = os.environ.get("REX_BLOCK", "")
     _claim(agent_block, "watch")
     signal.signal(signal.SIGHUP, lambda *_: sys.exit(0))
+    reloader, reloading = Reloader(), False
+    # The layer's label is set when it opens; after a reload it names the old version.
+    with contextlib.suppress(Exception):
+        subprocess.run(
+            ["rex", "block", "rename", "-s", os.environ.get("REX_SESSION", ""), me, f"PR Box v{VERSION}"],
+            capture_output=True,
+            timeout=10,
+        )
     # Alternate screen (no scrollback), no line wrap, no wheel-to-arrow-keys, no cursor.
     sys.stdout.write("\033[?1049h\033[?7l\033[?1007l\033[?25l")
     saved = mute_input()
@@ -488,6 +543,9 @@ def watch(agent_block):
             draw(body)
             time.sleep(TICK)
             discard_input()
+            if reloader.due():
+                reloading = True
+                break
     finally:
         with contextlib.suppress(Exception):
             sys.stdout.write("\033[?1049l\033[?7h\033[?25h")
@@ -495,10 +553,13 @@ def watch(agent_block):
         with contextlib.suppress(Exception):
             if saved:
                 termios.tcsetattr(sys.stdin, termios.TCSANOW, saved)
-        with contextlib.suppress(Exception):
-            _, _, layer = locate(rex("session.view", {}), me)
-            if layer:
-                rex("session.close_layer", {"layer_id": layer["layer_id"]})
+        if not reloading:
+            with contextlib.suppress(Exception):
+                _, _, layer = locate(rex("session.view", {}), me)
+                if layer:
+                    rex("session.close_layer", {"layer_id": layer["layer_id"]})
+    if reloading:
+        _reexec("watch", agent_block)
 
 
 if __name__ == "__main__":
