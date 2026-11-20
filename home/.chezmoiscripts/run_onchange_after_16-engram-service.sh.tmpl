@@ -1,4 +1,4 @@
-{{- if and (eq .chezmoi.os "darwin") .personal (not .headless) -}}
+{{- if and (eq .chezmoi.os "darwin") (or .personal .work) (not .headless) -}}
 #!/bin/bash
 
 # Supervises `engram serve` (the local HTTP daemon that runs Engram Cloud

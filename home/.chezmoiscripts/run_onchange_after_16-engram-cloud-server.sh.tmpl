@@ -1,0 +1,51 @@
+{{- if and (eq .chezmoi.os "darwin") .work (not .headless) -}}
+#!/bin/bash
+
+# Initializes the local Postgres cluster and supervises both Postgres and
+# `engram cloud serve` on the work Mac (127.0.0.1:18080, forwarded to
+# workspaces over SSH). Reloads when either plist changes.
+# {{ include "Library/LaunchAgents/com.local.engram-postgres.plist.tmpl" | sha256sum }}
+# {{ include "Library/LaunchAgents/com.local.engram-cloud.plist.tmpl" | sha256sum }}
+
+set -eufo pipefail
+
+export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
+
+command -v initdb >/dev/null 2>&1 || { echo "postgresql not found, skipping" >&2; exit 0; }
+command -v engram >/dev/null 2>&1 || { echo "engram not found, skipping" >&2; exit 0; }
+
+DOMAIN="gui/$(id -u)"
+PGDATA="$HOME/.local/share/engram/pgdata"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/engram"
+PG_PLIST="$HOME/Library/LaunchAgents/com.local.engram-postgres.plist"
+CLOUD_PLIST="$HOME/Library/LaunchAgents/com.local.engram-cloud.plist"
+
+mkdir -p "$STATE_DIR" "$(dirname "$PGDATA")"
+
+if [ ! -f "$PGDATA/PG_VERSION" ]; then
+  initdb --pgdata="$PGDATA" --auth=trust --encoding=UTF8 --no-locale
+fi
+
+reload_agent() {
+  local label="$1" plist="$2"
+  launchctl bootout "$DOMAIN/$label" 2>/dev/null || true
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    launchctl bootstrap "$DOMAIN" "$plist" && return 0
+    sleep 1
+  done
+  launchctl bootstrap "$DOMAIN" "$plist"
+}
+
+reload_agent "com.local.engram-postgres" "$PG_PLIST"
+
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  pg_isready -h 127.0.0.1 -p 5439 -q && break
+  sleep 1
+done
+
+if ! psql -h 127.0.0.1 -p 5439 -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='engram_cloud'" | grep -qx 1; then
+  createdb -h 127.0.0.1 -p 5439 engram_cloud
+fi
+
+reload_agent "com.local.engram-cloud" "$CLOUD_PLIST"
+{{- end }}

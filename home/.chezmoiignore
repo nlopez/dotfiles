@@ -82,16 +82,24 @@ Library/*
 {{ if not .personal -}}
 .config/rclone/rclone.conf
 {{ end -}}
-# Engram Cloud client config: personal, non-headless (1Password token)
-{{ if or (not .personal) .headless -}}
+# Engram Cloud client config:
+# - personal, non-headless (1Password token; skipped under CHEZMOI_SKIP_SECRETS)
+# - work (age-encrypted token in .private/work.yaml.age, when encryption is active)
+{{ if not (or (and .personal (not .headless)) (and .work .encryption)) -}}
 .local/share/engram/cloud.json
+{{ end -}}
+# Engram Cloud server secrets (work macOS only; age-encrypted)
+{{ if not (and (eq .chezmoi.os "darwin") .work (not .headless) .encryption) -}}
+.local/share/engram/cloud-server.env
 {{ end -}}
 
 # ── Fast iteration: CHEZMOI_SKIP_SECRETS=1 skips files built entirely from
 #    1Password reads so routine applies don't pay the `op` CLI cost ──────────
 {{ if env "CHEZMOI_SKIP_SECRETS" -}}
 .config/rclone/rclone.conf
+{{ if .personal -}}
 .local/share/engram/cloud.json
+{{ end -}}
 {{ end -}}
 
 # ── ~/.local/bin: conditional scripts ─────────────────────────────────────────

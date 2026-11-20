@@ -165,7 +165,7 @@ for marketplace in ("ecc", "cloudflare"):
 # `engram` server, so only mcp__engram__* is real).
 xdg_data = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
 current.setdefault("env", {})["ENGRAM_DATA_DIR"] = os.path.join(xdg_data, "engram")
-{{- if and .personal (not .headless) }}
+{{- if or (and .personal (not .headless)) .work }}
 # Cloud autosync: the server URL and token come from <data dir>/cloud.json
 # (dot_local/share/engram/private_cloud.json.tmpl); only the opt-in flag is env.
 current["env"]["ENGRAM_CLOUD_AUTOSYNC"] = "1"

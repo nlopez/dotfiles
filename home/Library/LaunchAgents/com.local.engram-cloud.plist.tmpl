@@ -1,0 +1,37 @@
+{{- if and (eq .chezmoi.os "darwin") .work (not .headless) -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.local.engram-cloud</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>set -a; source "$HOME/.local/share/engram/cloud-server.env"; set +a; exec "$HOME/.local/share/mise/shims/engram" cloud serve</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>ENGRAM_CLOUD_HOST</key>
+        <string>127.0.0.1</string>
+        <key>ENGRAM_PORT</key>
+        <string>18080</string>
+        <key>ENGRAM_DATABASE_URL</key>
+        <string>postgres://{{ .chezmoi.username }}@127.0.0.1:5439/engram_cloud?sslmode=disable</string>
+        <key>ENGRAM_CLOUD_ALLOWED_PROJECTS</key>
+        <string>*</string>
+    </dict>
+    <key>WorkingDirectory</key>
+    <string>{{ .chezmoi.homeDir }}</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/engram/cloud-serve.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/engram/cloud-serve.log</string>
+</dict>
+</plist>
+{{- end }}

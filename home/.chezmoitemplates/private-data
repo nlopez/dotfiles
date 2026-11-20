@@ -29,6 +29,9 @@ workspace_secrets:
 claude:
   plugins: []
   remove_mcp: []
+engram_cloud:
+  token: ""
+  jwt_secret: ""
 ` | fromYaml -}}
 {{- $raw := "{}" -}}
 {{- /* Configs from before `encryption` was a data key: age was on unless headless. */ -}}

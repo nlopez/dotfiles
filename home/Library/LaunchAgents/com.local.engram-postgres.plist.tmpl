@@ -1,0 +1,32 @@
+{{- if and (eq .chezmoi.os "darwin") .work (not .headless) -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.local.engram-postgres</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>{{ includeTemplate "nix-profile" . }}/bin/postgres</string>
+        <string>-D</string>
+        <string>{{ .chezmoi.homeDir }}/.local/share/engram/pgdata</string>
+        <string>-p</string>
+        <string>5439</string>
+        <string>-h</string>
+        <string>127.0.0.1</string>
+        <string>-k</string>
+        <string>{{ .chezmoi.homeDir }}/.local/state/engram</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>{{ .chezmoi.homeDir }}</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/engram/postgres.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/engram/postgres.log</string>
+</dict>
+</plist>
+{{- end }}

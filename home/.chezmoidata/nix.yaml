@@ -140,4 +140,5 @@ nix:
       - mediainfo
       # osxphotos is marked broken on darwin in nixpkgs; it comes from brew
       # bundle's `uv` entries instead (.chezmoidata/darwin/packages.yaml).
-      work: []
+      work:
+      - postgresql

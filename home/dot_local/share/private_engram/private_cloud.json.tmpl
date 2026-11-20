@@ -1,10 +1,19 @@
-{{- /* ~/.local/share/engram/cloud.json — Engram Cloud client config (self-hosted
-   in k8s_home, apps/engram). Engram reads server_url + token from here; with
-   ENGRAM_CLOUD_AUTOSYNC=1 (env.tmpl, Claude's modify_settings.json.tmpl) it
-   then syncs in the background. Mode 0600 via the private_ prefix. Personal,
-   non-headless machines only (see .chezmoiignore): the server is private-gateway
-   only and the token comes from 1Password. */ -}}
+{{- /* ~/.local/share/engram/cloud.json — Engram Cloud client config.
+   Engram reads server_url + token from here; with ENGRAM_CLOUD_AUTOSYNC=1
+   (env.tmpl, Claude's modify_settings.json.tmpl) it syncs in the background.
+   Mode 0600 via the private_ prefix.
+   - Personal, non-headless: self-hosted in k8s_home, token from 1Password.
+   - Work (Mac + workspaces): local engram cloud serve on the work Mac,
+     forwarded to workspaces via SSH RemoteForward 18080, token from work.yaml.age. */ -}}
+{{- if .personal }}
 {
   "server_url": "https://mau.desertbluffs.com",
   "token": {{ output (joinPath .chezmoi.homeDir ".local/bin/op-automation") "read" "--no-newline" "op://evjh25ux2mnoufaut6qhvm2pdi/cq5a2vtrj5kuthd5q5vo6qxhha/token" | toJson }}
 }
+{{- else if .work }}
+{{- $p := includeTemplate "private-data" . | fromYaml }}
+{
+  "server_url": "http://127.0.0.1:18080",
+  "token": {{ $p.engram_cloud.token | toJson }}
+}
+{{- end }}
