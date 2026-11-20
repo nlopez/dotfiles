@@ -109,3 +109,4 @@ export EDITOR="vim"
 export HF_TOKEN={{ output (joinPath .chezmoi.homeDir ".local/bin/op-automation") "read" "--no-newline" "op://evjh25ux2mnoufaut6qhvm2pdi/rngar3p7k7q7uki2wrhmx4eb3e/credential" }}
 {{- end }}
 {{- end }}
+{{ includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "pkg-hook-zsh") -}}

@@ -366,3 +366,4 @@ if [[ -s /run/user/$UID/secrets/CHEZMOI_AGE_IDENTITY ]] && (( $+commands[age] ))
   ) &!
 fi
 {{- end }}
+{{ includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "pkg-hook-zsh") -}}

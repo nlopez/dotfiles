@@ -9,3 +9,4 @@
 # sh subshell at the same env file so they inherit the PATH additions above.
 export BASH_ENV="${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
 export ENV="${XDG_CONFIG_HOME:-$HOME/.config}/shell/env"
+{{ includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "pkg-hook-sh") -}}

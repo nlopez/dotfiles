@@ -2,9 +2,8 @@
 # something can recreate; one-time migration entries are removed once every
 # machine has applied them.
 
-# Workspaces own these (their package manager hooks, persistent multiplexers PATH)
+# Workspaces own this (their package manager hooks, persistent multiplexers PATH)
 {{ if not .workspace -}}
-.bashrc
 .bash_profile
 {{ end -}}
 
