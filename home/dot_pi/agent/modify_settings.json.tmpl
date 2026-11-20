@@ -128,11 +128,10 @@ powerline.setdefault("layout", {})["left"] = [
 items = [i for i in powerline.get("customItems", []) if i.get("id") != "pr"]
 items.append({"id": "pr", "statusKey": "pr", "position": "left", "selfColorize": True})
 powerline["customItems"] = items
-# Hide the engram and i-have-adhd extension statuses from the footer.
-hidden = powerline.get("hiddenExtensionStatusKeys", [])
-for key in ["engram", "i-have-adhd"]:
-    if key not in hidden:
-        hidden.append(key)
+# Hide the i-have-adhd extension status from the footer; keep engram visible.
+hidden = [k for k in powerline.get("hiddenExtensionStatusKeys", []) if k != "engram"]
+if "i-have-adhd" not in hidden:
+    hidden.append("i-have-adhd")
 powerline["hiddenExtensionStatusKeys"] = hidden
 current["powerline"] = powerline
 
