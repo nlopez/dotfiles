@@ -64,6 +64,11 @@ actually touches secrets or age-encrypted files, or reads/writes something gated
 `onepassword.mode`/`CHEZMOI_SKIP_SECRETS` in `.chezmoiignore` or `dot_zprofile.tmpl` —
 there, the secret-backed content must actually be materialized to verify the change.
 
+## Git workflow
+
+- **Make and test all changes in a worktree:** Create a worktree (`wt switch --create <branch>`) before editing, and test your changes there (for example with `chezmoi-fast apply --dry-run` / `chezmoi apply --dry-run` and pre-commit checks). Never develop directly on `main`.
+- **Merge and push to `main` when complete:** Do **not** open pull requests for changes in this repo. Once the worktree changes are tested and committed, merge the branch into `main`, remove the worktree (`wt remove`), and push `main`.
+
 ## Directory structure
 
 ```
