@@ -1,0 +1,10 @@
+{{- /* Decrypted text of .private/<class>/<name>.age, or nothing unless this is a
+     <class> machine with age configured (.encryption). Inserted verbatim, not
+     rendered as a template. See docs/private-data.md.
+     Use: {{ includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "foo") }} */ -}}
+{{- $c := .ctx -}}
+{{- $enc := not $c.headless -}}
+{{- if hasKey $c "encryption" }}{{ $enc = $c.encryption }}{{ end -}}
+{{- if and (index $c .class) $enc -}}
+{{-   include (printf ".private/%s/%s.age" .class .name) | decrypt -}}
+{{- end -}}

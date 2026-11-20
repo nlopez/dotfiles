@@ -76,6 +76,25 @@ The personal file works the same way on a personal machine. From another
 machine, encrypt to the personal recipient with
 `age -a -R ~/.local/share/chezmoi-age/personal-recipient.txt`.
 
+## Snippets
+
+For multi-line work-only text inside an otherwise public file (including
+`run_` scripts, which chezmoi cannot encrypt), keep the text in
+`home/.private/<class>/<name>.age` and insert it from any template:
+
+```gotemplate
+{{ includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "foo") }}
+```
+
+It renders nothing on other machine classes or without age. The text is inserted
+verbatim, not rendered as a template, so keep template logic in the plaintext
+file. Create or edit a snippet with `scripts/private snippet <name>` (decrypts to
+a temp file, opens `$EDITOR`, re-encrypts).
+
+| Snippet                | Used by                                                     |
+| ---------------------- | ----------------------------------------------------------- |
+| `workspace-aws-config` | `darwin/run_onchange_after_23-workspace-aws-config.sh.tmpl` |
+
 ## Keep it clean
 
 The `private-patterns` pre-commit hook (`scripts/check-private.sh`) rejects

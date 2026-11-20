@@ -40,10 +40,13 @@ On subsequent machines of the same class, no key generation is needed — `chezm
 ## Day-to-day operations
 
 ```sh
-# Add a new encrypted work secret (file must already be at destination path):
-chezmoi add --encrypt ~/.config/work-secrets/my.env
-# chezmoi moves the source file into home/dot_config/private_work-secrets/
-# and encrypts it with the work recipient key.
+# Encrypt a whole file for this machine's class (file must already be at its
+# destination path). Runs `chezmoi add --encrypt` and lists the target in
+# home/.chezmoidata/encrypted.yaml, which .chezmoiignore reads to deploy it only
+# on non-headless machines of that class (add `os: darwin` to the entry for one OS):
+scripts/private add ~/.config/work-secrets/my.env
+
+# Encrypt part of a file: see docs/private-data.md (keys and snippets).
 
 # Edit an existing encrypted secret transparently:
 chezmoi edit ~/.config/work-secrets/my.env

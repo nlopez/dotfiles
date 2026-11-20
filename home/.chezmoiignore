@@ -5,11 +5,17 @@
 **/__pycache__
 **/__pycache__/**
 
-# ── Work-only files ────────────────────────────────────────────────────────────
-{{- if or (not .work) .headless }}
-.zshrc_local
-.finicky.js
-{{ end -}}
+# ── Age-encrypted whole files: .chezmoidata/encrypted.yaml ────────────────────
+{{- range $class, $files := .encrypted }}
+{{- $deploy := and (index $ $class) (not $.headless) $.encryption (not (env "CHEZMOI_SKIP_SECRETS")) }}
+{{- range $files }}
+{{- if or (not $deploy) (and (hasKey . "os") (ne .os $.chezmoi.os)) }}
+{{ .path }}
+{{/* without encryption configured chezmoi keeps the .age suffix in target names */ -}}
+{{ .path }}.age
+{{- end }}
+{{- end }}
+{{- end }}
 
 # ── OMLX: darwin personal-only ───────────────────────────────────────────────
 {{ if or (ne .chezmoi.os "darwin") .work -}}
@@ -49,16 +55,6 @@ Library/*
 .config/BraveSoftware
 .config/brave-origin-flags.conf
 .config/environment.d
-# age is not configured on headless machines (no 1Password to fetch the
-# identity), so encrypted sources must be ignored or chezmoi errors on them.
-.config/work-secrets
-.config/git/config_work
-.config/git/config_work_id
-# without encryption configured chezmoi keeps the .age suffix in target names
-.zshrc_local.age
-.finicky.js.age
-.config/git/config_work.age
-.config/git/config_work_id.age
 {{ end -}}
 
 # ── Linux desktop-only: Hyprland + niri + Noctalia ───────────────────────────
@@ -96,28 +92,10 @@ Library/*
 {{ if env "CHEZMOI_SKIP_SECRETS" -}}
 .config/rclone/rclone.conf
 .local/share/engram/cloud.json
-# age-encrypted files: the identity may not be on disk when 1Password is skipped
-.zshrc_local
-.finicky.js
-.config/work-secrets
-.config/git/config_work
-.config/git/config_work_id
-.local/bin/aws-config-workspaces
-{{ end -}}
-
-# ── Age encryption: exclude the other machine class's secrets directory ────────
-{{ if not .work -}}
-.config/work-secrets
-.config/git/config_work
-.config/git/config_work_id
-{{ end -}}
-{{ if not .personal -}}
-.config/personal-secrets
 {{ end -}}
 
 # ── ~/.local/bin: conditional scripts ─────────────────────────────────────────
 {{ if or (not .work) (ne .chezmoi.os "darwin") -}}
-.local/bin/aws-config-workspaces
 .local/bin/brew
 .local/bin/shims/open
 {{ end -}}

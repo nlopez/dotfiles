@@ -1,0 +1,43 @@
+#!/bin/bash
+# Encrypt files and snippets to this machine class's age recipient.
+#   scripts/private add <target-path>     encrypt a whole file, list it in
+#                                         home/.chezmoidata/encrypted.yaml
+#   scripts/private snippet <name>        create or edit home/.private/<class>/<name>.age
+# See docs/age-encryption.md and docs/private-data.md.
+
+set -euo pipefail
+
+repo=$(cd "$(dirname "$0")/.." && pwd)
+cz() { chezmoi -S "$repo" "$@"; }
+
+class=$(cz data --format json | jq -r 'if .work then "work" elif .personal then "personal" else empty end')
+[[ -n $class ]] || { echo "private: machine is neither work nor personal" >&2; exit 1; }
+
+case ${1:-} in
+add)
+  [[ $# -eq 2 ]] || { echo "usage: private add <target-path>" >&2; exit 2; }
+  abs=$(cd "$(dirname "$2")" && pwd)/$(basename "$2")
+  rel=${abs#"$HOME"/}
+  [[ $rel != "$abs" ]] || { echo "private: $2 is not under \$HOME" >&2; exit 1; }
+  cz add --encrypt "$abs"
+  P=$rel C=$class yq -i '.encrypted[strenv(C)] |= ((. // []) + [{"path": strenv(P)}] | unique_by(.path))' \
+    "$repo/home/.chezmoidata/encrypted.yaml"
+  echo "private: $rel encrypted for $class"
+  ;;
+snippet)
+  [[ $# -eq 2 && $2 =~ ^[A-Za-z0-9._-]+$ ]] || { echo "usage: private snippet <name>" >&2; exit 2; }
+  file=$repo/home/.private/$class/$2.age
+  tmp=$(mktemp); trap 'rm -f "$tmp"' EXIT
+  [[ -f $file ]] && cz decrypt "$file" >"$tmp"
+  # shellcheck disable=SC2086 # EDITOR may carry flags, e.g. "zed --wait"
+  ${EDITOR:-vi} "$tmp"
+  mkdir -p "$(dirname "$file")"
+  cz encrypt "$tmp" >"$file.new" && mv "$file.new" "$file"
+  echo "private: $2 encrypted for $class; use it with"
+  echo "  {{ includeTemplate \"private-snippet\" (dict \"ctx\" . \"class\" \"$class\" \"name\" \"$2\") }}"
+  ;;
+*)
+  sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//'
+  exit 2
+  ;;
+esac

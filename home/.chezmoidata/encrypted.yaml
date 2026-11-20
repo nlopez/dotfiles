@@ -1,0 +1,16 @@
+# Age-encrypted whole files (encrypted_* sources), by machine class, as target
+# paths relative to $HOME. .chezmoiignore deploys each one only on non-headless
+# machines of that class with age configured, and skips them all under
+# CHEZMOI_SKIP_SECRETS. `os` limits an entry to one OS. Add files with
+# `scripts/private add <path>` (docs/age-encryption.md).
+encrypted:
+  work:
+  - path: .zshrc_local
+  - path: .finicky.js
+  - path: .config/work-secrets
+  - path: .config/git/config_work
+  - path: .config/git/config_work_id
+  - path: .local/bin/aws-config-workspaces
+    os: darwin
+  personal:
+  - path: .config/personal-secrets
