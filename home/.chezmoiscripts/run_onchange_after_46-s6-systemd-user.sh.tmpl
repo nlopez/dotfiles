@@ -1,0 +1,20 @@
+{{ if .workspace -}}
+#!/bin/sh
+# Workspaces: register an s6-overlay oneshot that runs start-systemd-user at
+# container boot, so the user manager and its units (e.g. rex.socket) come up
+# before the first login. s6-overlay compiles /etc/s6-overlay/s6-rc.d into its
+# service database on every boot. ~/.config/shell/env stays as the fallback.
+set -eu
+src=/etc/s6-overlay/s6-rc.d
+[ -d "$src/user/contents.d" ] || exit 0
+
+svc=$src/systemd-user
+sudo mkdir -p "$svc/dependencies.d"
+# After s6-overlay's base bundle (fix-attrs, cont-init), like other user services.
+sudo touch "$svc/dependencies.d/base"
+echo oneshot | sudo tee "$svc/type" >/dev/null
+# `up` is a single execline command line, run as root with an empty environment.
+echo '/command/s6-setuidgid {{ .chezmoi.username }} /usr/bin/env HOME={{ .chezmoi.homeDir }} PATH=/usr/sbin:/usr/bin:/sbin:/bin {{ .chezmoi.homeDir }}/.local/bin/start-systemd-user' \
+  | sudo tee "$svc/up" >/dev/null
+sudo touch "$src/user/contents.d/systemd-user"
+{{ end -}}
