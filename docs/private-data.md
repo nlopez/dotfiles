@@ -94,6 +94,7 @@ a temp file, opens `$EDITOR`, re-encrypts).
 | Snippet                | Used by                                                     |
 | ---------------------- | ----------------------------------------------------------- |
 | `workspace-aws-config` | `darwin/run_onchange_after_23-workspace-aws-config.sh.tmpl` |
+| `agents-work`          | `dot_pi/agent/AGENTS.md.tmpl`                               |
 
 ## Keep it clean
 
