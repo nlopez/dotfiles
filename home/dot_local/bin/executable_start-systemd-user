@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Workspaces: start a systemd --user manager. PID 1 is s6 and there is no
+# logind, so set up what pam_systemd would: the runtime dir and a delegated
+# cgroup. ~/.config/shell/env runs this on the first shell after container start.
+set -euo pipefail
+
+uid=$(id -u)
+gid=$(id -g)
+export XDG_RUNTIME_DIR=/run/user/$uid
+
+systemctl --user is-system-running >/dev/null 2>&1 && exit 0
+
+cg=/sys/fs/cgroup/user.slice/user-$uid.slice/user@$uid.service
+
+sudo -n install -d -o "$uid" -g "$gid" -m 700 "$XDG_RUNTIME_DIR"
+# systemd --user refuses to start unless sd_booted() sees this directory.
+sudo -n mkdir -p /run/systemd/system
+# A previous manager leaves child cgroups with controllers enabled, which
+# blocks moving a process into $cg. Remove the empty stale tree first.
+if [ -d "$cg" ]; then
+  sudo -n find "$cg" -depth -type d -exec rmdir {} + 2>/dev/null || true
+fi
+sudo -n mkdir -p "$cg"
+sudo -n chown -R "$uid:$gid" "$cg"
+echo "+cpu +memory +pids +io" | sudo -n tee \
+  /sys/fs/cgroup/user.slice/cgroup.subtree_control \
+  "/sys/fs/cgroup/user.slice/user-$uid.slice/cgroup.subtree_control" >/dev/null
+
+# The inner bash moves itself into $cg, records its PID for the cheap liveness
+# check in ~/.config/shell/env, then execs the manager in place.
+# shellcheck disable=SC2016
+setsid bash -c 'sudo -n sh -c "echo $$ > $1/cgroup.procs" && echo $$ > "$2" && exec /usr/lib/systemd/systemd --user' \
+  _ "$cg" "$XDG_RUNTIME_DIR/systemd-user.pid" \
+  >"$XDG_RUNTIME_DIR/systemd-user.log" 2>&1 </dev/null &
+
+for _ in $(seq 50); do
+  systemctl --user is-system-running >/dev/null 2>&1 && exit 0
+  sleep 0.1
+done
+echo "systemd --user did not start; see $XDG_RUNTIME_DIR/systemd-user.log" >&2
+exit 1
