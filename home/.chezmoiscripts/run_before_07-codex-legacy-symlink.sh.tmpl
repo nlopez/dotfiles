@@ -10,10 +10,8 @@
 # files are copied, then ~/.codex is removed so chezmoi can create the symlink
 # declared by home/symlink_dot_codex.
 #
-# Note: dogpark-spawned codex workers use their own CODEX_HOME
-# (~/.local/share/dogpark/relay/codex-home-router), so a pgrep codex guard
-# would false-positive; the guard is lsof on the legacy dir only. Codex opens
-# its sqlite files per-transaction, so a clear lsof means no in-flight state.
+# The guard is lsof on the legacy dir only: Codex opens its sqlite files
+# per-transaction, so a clear lsof means no in-flight state.
 #
 # Idempotent: exits immediately once ~/.codex is a symlink.
 

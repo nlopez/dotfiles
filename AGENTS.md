@@ -180,7 +180,7 @@ These tools have no XDG support, or only a partial env-var workaround. Do not at
 | bash/sh startup | `~/.profile`, `~/.bash_profile` | POSIX startup files; `.bash_profile` delegates to `.profile`; actual config in `~/.config/shell/env` (XDG) |
 | omlx root       | `~/.omlx/`                      | Root dir hardcoded; only `model_dirs` is redirected to `~/.local/share/omlx/models`                        |
 | Terraform data  | `~/.terraform.d/`               | `TF_DATA_DIR` is per-workspace only; not safe to set globally                                              |
-| Claude Code     | `~/.claude/`, `~/.claude.json`  | Other tools (Rex, Dogpark) hard-code `~/.claude`, so `CLAUDE_CONFIG_DIR` splits state                      |
+| Claude Code     | `~/.claude/`, `~/.claude.json`  | Other tools (e.g. Rex) hard-code `~/.claude`, so `CLAUDE_CONFIG_DIR` splits state                          |
 
 ## ⚠️ Boundaries
 
