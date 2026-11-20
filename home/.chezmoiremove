@@ -22,3 +22,6 @@
 
 # Colima lives in ~/.config/colima (COLIMA_HOME)
 .colima
+
+# Trajectory's Pi extension; Jamf's Trajectory self-updater can reinstall it
+.pi/agent/extensions/trajectory
