@@ -1,20 +1,38 @@
 #!/usr/bin/env bash
-# Workspaces: start a systemd --user manager. PID 1 is s6 and there is no
-# logind, so set up what pam_systemd would: the runtime dir and a delegated
-# cgroup. ~/.config/shell/env runs this on the first shell after container start.
+# Workspaces: start the system D-Bus, systemd-logind, and a systemd --user
+# manager. PID 1 is s6, so nothing else starts them. logind cannot create
+# sessions or start user@.service without systemd as PID 1, so this script does
+# what pam_systemd would: the runtime dir, a delegated cgroup, and the manager.
+# logind still serves loginctl and records lingering.
+# ~/.config/shell/env runs this on the first shell after container start.
 set -euo pipefail
 
 uid=$(id -u)
 gid=$(id -g)
+user=$(id -un)
 export XDG_RUNTIME_DIR=/run/user/$uid
+
+alive() { [ -r "$1" ] && sudo -n kill -0 "$(cat "$1")" 2>/dev/null; }
+
+# systemd --user and logind refuse to start unless sd_booted() sees this.
+sudo -n mkdir -p /run/systemd/system
+
+if ! alive /run/dbus/pid; then
+  sudo -n rm -f /run/dbus/pid /run/dbus/system_bus_socket
+  sudo -n dbus-daemon --system --fork
+fi
+
+sudo -n install -d /var/lib/systemd/linger
+sudo -n touch "/var/lib/systemd/linger/$user"
+if ! pgrep -x systemd-logind >/dev/null; then
+  sudo -n sh -c 'setsid /usr/lib/systemd/systemd-logind >/run/systemd-logind.log 2>&1 </dev/null &'
+fi
 
 systemctl --user is-system-running >/dev/null 2>&1 && exit 0
 
 cg=/sys/fs/cgroup/user.slice/user-$uid.slice/user@$uid.service
 
 sudo -n install -d -o "$uid" -g "$gid" -m 700 "$XDG_RUNTIME_DIR"
-# systemd --user refuses to start unless sd_booted() sees this directory.
-sudo -n mkdir -p /run/systemd/system
 # A previous manager leaves child cgroups with controllers enabled, which
 # blocks moving a process into $cg. Remove the empty stale tree first.
 if [ -d "$cg" ]; then
