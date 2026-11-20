@@ -26,6 +26,3 @@
 # tmux-agent-tabs plugin and its state; TPM does not prune removed plugins
 .config/tmux/plugins/tmux-agent-tabs
 .config/tmux/tmux-agent-tabs
-
-# Trajectory's Pi extension; Jamf's Trajectory self-updater can reinstall it
-.pi/agent/extensions/trajectory
