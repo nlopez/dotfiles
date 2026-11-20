@@ -14,7 +14,7 @@
  * When a tracked PR's CI fails, or it is approved or has changes requested, the
  * box queues a notification and this extension hands it to the agent.
  *
- * /pr-box             reopen the box if it was closed
+ * /pr-box             reopen the box in this pane, for this session
  * /pr-box add <url>   track an existing PR
  * /pr-box rm <url|#n> stop tracking a PR
  */
@@ -95,10 +95,16 @@ export default function (pi: ExtensionAPI) {
     urls = [...found];
   }
 
-  function start(c: ExtensionContext) {
-    reconstruct(c);
+  // Points the pane's box at this session, opening it if it isn't showing. Another
+  // pi started in the same pane takes the box over, so /pr-box claims it back.
+  function attach() {
     box(["set", SESSION, ...urls]);
     box(["attach", SESSION, process.cwd(), String(process.pid)]);
+  }
+
+  function start(c: ExtensionContext) {
+    reconstruct(c);
+    attach();
   }
 
   pi.on("session_start", async (_e, c) => start(c));
@@ -144,7 +150,7 @@ export default function (pi: ExtensionAPI) {
     description: "Session PR box: reopen it, or add <url> | rm <url|#n>",
     handler: async (args, c) => {
       const [sub, arg] = args.trim().split(/\s+/);
-      if (!sub) return box(["reopen"]);
+      if (!sub) return attach();
       if (sub === "add") {
         if (!arg || !extractUrls(arg).length || urls.includes(arg)) {
           return c.ui.notify("Usage: /pr-box add <PR url> (not already tracked)", "error");
