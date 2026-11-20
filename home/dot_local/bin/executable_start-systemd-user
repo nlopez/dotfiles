@@ -24,8 +24,13 @@ fi
 
 sudo -n install -d /var/lib/systemd/linger
 sudo -n touch "/var/lib/systemd/linger/$user"
-if ! pgrep -x systemd-logind >/dev/null; then
-  sudo -n sh -c 'setsid /usr/lib/systemd/systemd-logind >/run/systemd-logind.log 2>&1 </dev/null &'
+if ! alive /run/systemd-logind.pid; then
+  # One started before the pidfile existed would hold the logind bus name.
+  sudo -n pkill -x systemd-logind || true
+  # A background job is not a process group leader, so setsid execs in place
+  # and $! is logind's PID.
+  sudo -n sh -c 'setsid /usr/lib/systemd/systemd-logind >/run/systemd-logind.log 2>&1 </dev/null &
+    echo $! >/run/systemd-logind.pid'
 fi
 
 systemctl --user is-system-running >/dev/null 2>&1 && exit 0
