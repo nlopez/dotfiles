@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Managed by chezmoi — source: home/dot_config/claude/executable_statusline.py
+# Managed by chezmoi — source: home/dot_claude/executable_statusline.py
 # Claude Code status line modelled on pi's powerline footer:
 #   model | think:<effort> | dir <name> | ⎇ <branch> | PR #12 ✓ approved | PRs #9 ✗ · repo#4 merged
 #   | ▥ used/size (pct%) AC | (sub)
@@ -45,9 +45,11 @@ def pr_parts(data, cwd, common, branch):
     return parts
 
 
-def auto_compact_on(config_dir):
+def auto_compact_on():
+    config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
+    path = os.path.join(config_dir, ".claude.json") if config_dir else os.path.expanduser("~/.claude.json")
     try:
-        with open(os.path.join(config_dir, ".claude.json")) as f:
+        with open(path) as f:
             return json.load(f).get("autoCompactEnabled", True)
     except Exception:
         return True
@@ -60,7 +62,6 @@ def main():
         data = {}
 
     cwd = data.get("workspace", {}).get("current_dir") or data.get("cwd") or os.getcwd()
-    config_dir = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.expanduser("~/.config/claude")
     sep = c(DIM, " | ")
     parts = []
 
@@ -90,7 +91,7 @@ def main():
         used = ctx.get("total_input_tokens") or 0
         pct = ctx.get("used_percentage")
         pct = used / size * 100 if pct is None else pct
-        ac = " AC" if auto_compact_on(config_dir) else ""
+        ac = " AC" if auto_compact_on() else ""
         parts.append(c(DIM, f"▥ {tokens(used)}/{tokens(size)} ({pct:.1f}%){ac}"))
 
     if data.get("rate_limits"):

@@ -4,7 +4,7 @@
 # repo, so its script lists the repos directly beneath each entry.
 # Work machines add trust_dirs from the private data (docs/private-data.md).
 # Rendered to absolute paths by .chezmoitemplates/trusted-dirs.tmpl; consumed by
-# dot_config/claude/modify_private_dot_claude.json.tmpl and
+# modify_private_dot_claude.json.tmpl and
 # dot_config/pi/agent/modify_trust.json.tmpl.
 trust:
   dirs:

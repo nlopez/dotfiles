@@ -20,9 +20,5 @@
 # store is ~/.local/share/engram)
 .engram
 
-# Claude Code lives in ~/.config/claude (CLAUDE_CONFIG_DIR); a run without it
-# leaves this backup in $HOME
-.claude.json.backup
-
 # Colima lives in ~/.config/colima (COLIMA_HOME)
 .colima

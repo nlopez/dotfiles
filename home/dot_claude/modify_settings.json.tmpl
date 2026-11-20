@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Managed by chezmoi — source: home/dot_config/claude/modify_settings.json.tmpl
-# ⚠️  DO NOT EDIT ~/.config/claude/settings.json for these keys; they are reset on
+# Managed by chezmoi — source: home/dot_claude/modify_settings.json.tmpl
+# ⚠️  DO NOT EDIT ~/.claude/settings.json for these keys; they are reset on
 #     every `chezmoi apply`. All other keys are left untouched.
 #
 # Receives the current settings.json on stdin, writes the replacement to stdout.
@@ -58,7 +58,7 @@ current["hooks"]["PreToolUse"] = atuin_hook + [{
     "matcher": "Edit|Write|MultiEdit",
     "hooks": [{
         "type": "command",
-        "command": os.path.expanduser("~/.config/claude/hooks/no-chat-comments.sh"),
+        "command": os.path.expanduser("~/.claude/hooks/no-chat-comments.sh"),
     }],
 }, {
     # Block shell commands that skip git hooks or disable commit signing
@@ -76,7 +76,7 @@ current["hooks"]["PostToolUse"] = atuin_hook + [{
     "matcher": "^Bash$",
     "hooks": [{
         "type": "command",
-        "command": os.path.expanduser("~/.config/claude/hooks/track-prs.py"),
+        "command": os.path.expanduser("~/.claude/hooks/track-prs.py"),
         "timeout": 5,
     }],
 }]
@@ -121,7 +121,7 @@ for h in keep_session_start:
 track_prs_resume = [{
     "hooks": [{
         "type": "command",
-        "command": os.path.expanduser("~/.config/claude/hooks/track-prs.py"),
+        "command": os.path.expanduser("~/.claude/hooks/track-prs.py"),
         "timeout": 5,
     }],
 }]
@@ -130,7 +130,7 @@ current["hooks"]["SessionStart"] = surviving_rex + rex_hook + track_prs_resume +
 # PR notifications from the Rex PR box (CI failed, approved, changes requested), script managed
 # in hooks/executable_pr-notify.py. The Stop hook waits in the background and
 # wakes Claude when one arrives; its timeout bounds how long it waits.
-pr_notify = os.path.expanduser("~/.config/claude/hooks/pr-notify.py")
+pr_notify = os.path.expanduser("~/.claude/hooks/pr-notify.py")
 current["hooks"]["Stop"] = [{
     "hooks": [{"type": "command", "command": pr_notify, "asyncRewake": True, "timeout": 6 * 3600}],
 }]
@@ -141,7 +141,7 @@ current["hooks"]["UserPromptSubmit"] = [{
 # Status line: pi-style bar (script managed in executable_statusline.py).
 current["statusLine"] = {
     "type": "command",
-    "command": os.path.expanduser("~/.config/claude/statusline.py"),
+    "command": os.path.expanduser("~/.claude/statusline.py"),
     # PR status is fetched in the background after a render, so re-render on a
     # timer to show it without waiting for the next conversation event.
     "refreshInterval": 10,

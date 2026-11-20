@@ -11,7 +11,6 @@
 
 set -eufo pipefail
 
-export CLAUDE_CONFIG_DIR="{{ includeTemplate "claude-config-dir" . }}"
 export PI_CODING_AGENT_DIR="${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/pi/agent"
 
 export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
@@ -24,7 +23,7 @@ if command -v claude >/dev/null 2>&1; then
   # subcommands the (older, nixpkgs) binary lacks — e.g. plugin 0.81 calls
   # `wt config plugins claude hook`, absent in wt 0.80, breaking `claude -w`.
   want="v$(wt --version | awk '{print $2}')"
-  known="$CLAUDE_CONFIG_DIR/plugins/known_marketplaces.json"
+  known="$HOME/.claude/plugins/known_marketplaces.json"
   have="$(jq -r '.worktrunk.source.ref // empty' "$known" 2>/dev/null || true)"
   if [ "$have" != "$want" ]; then
     claude plugin uninstall worktrunk@worktrunk >/dev/null 2>&1 || true
@@ -39,7 +38,7 @@ if command -v claude >/dev/null 2>&1; then
   # --create for existing branches; `wt switch` then reuses or creates the
   # branch's worktree. Newer plugins route through `wt config plugins claude
   # hook` instead, so the match below no longer applies to them.
-  installed="$CLAUDE_CONFIG_DIR/plugins/installed_plugins.json"
+  installed="$HOME/.claude/plugins/installed_plugins.json"
   jq -r '.plugins["worktrunk@worktrunk"][]?.installPath' "$installed" 2>/dev/null | sort -u |
     while IFS= read -r root; do
       hooks="$root/hooks/hooks.json"

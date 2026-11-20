@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Managed by chezmoi — source: home/dot_config/claude/hooks/executable_track-prs.py
+# Managed by chezmoi — source: home/dot_claude/hooks/executable_track-prs.py
 # Claude Code adapter for the shared session PR box (~/.config/pr-box/pr_box.py).
 #   PostToolUse (Bash):
 #     gh pr create|ready|edit|merge -> PR URLs printed in the command output

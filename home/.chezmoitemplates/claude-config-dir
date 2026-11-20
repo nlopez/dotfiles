@@ -1,4 +1,0 @@
-{{- /* Shell expression for Claude Code's config dir (CLAUDE_CONFIG_DIR). Use:
-   export CLAUDE_CONFIG_DIR="{{ includeTemplate "claude-config-dir" . }}" */ -}}
-${XDG_CONFIG_HOME:-{{ .chezmoi.homeDir }}/.config}/claude
-{{- /**/ -}}

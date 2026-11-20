@@ -21,8 +21,6 @@
 
 set -eufo pipefail
 
-export CLAUDE_CONFIG_DIR="{{ includeTemplate "claude-config-dir" . }}"
-
 export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
 
 command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
@@ -43,7 +41,7 @@ claude mcp remove {{ . | squote }} --scope user >/dev/null 2>&1 || true
 {{- end }}
 {{- end }}
 
-CLAUDE_JSON="$CLAUDE_CONFIG_DIR/.claude.json"
+CLAUDE_JSON="$HOME/.claude.json"
 
 printf '%s\n' "$SERVERS" | jq -c '
   def port:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Managed by chezmoi — source: home/dot_config/claude/hooks/executable_pr-notify.py
+# Managed by chezmoi — source: home/dot_claude/hooks/executable_pr-notify.py
 # Claude Code delivery of the PR box's notifications (CI failed, approved, changes requested),
 # which pr_float.py queues per session while the box is open.
 #   Stop (asyncRewake): wait in the background for a queued notification, then

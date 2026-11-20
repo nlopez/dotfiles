@@ -1,13 +1,13 @@
 {{- if and (eq .chezmoi.os "darwin") (not .headless) -}}
 #!/bin/bash
 
-# Publishes CLAUDE_CONFIG_DIR, CODEX_HOME and ENGRAM_DATA_DIR into the launchd
-# session (launchctl setenv) at login via
-# Library/LaunchAgents/com.local.env-vars.plist, so GUI apps and
-# launchd-spawned daemons inherit them — shell dotfiles are not read in that
-# context, which is how no-env claude/codex/engram invocations kept writing to
-# the legacy ~/.claude, ~/.codex and ~/.engram paths (now also converged by
-# symlinks; this is the belt to their braces).
+# Publishes CODEX_HOME and ENGRAM_DATA_DIR into the launchd session
+# (launchctl setenv) at login via Library/LaunchAgents/com.local.env-vars.plist,
+# so GUI apps and launchd-spawned daemons inherit them — shell dotfiles are not
+# read in that context, which is how no-env codex/engram invocations kept
+# writing to the legacy ~/.codex and ~/.engram paths (now also converged by
+# symlinks; this is the belt to their braces). It also clears
+# CLAUDE_CONFIG_DIR: Claude Code uses its default ~/.claude.
 #
 # Caveat: launchctl setenv only affects processes started after it runs, and
 # login-time RunAtLoad ordering between agents is not guaranteed — a daemon

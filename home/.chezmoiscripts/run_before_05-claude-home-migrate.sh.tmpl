@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Moves Claude Code state from ~/.config/claude back to its default locations,
+# ~/.claude and ~/.claude.json, before files are applied into ~/.claude.
+# Does nothing on machines that already use the default layout.
+#
+# Processes started before the move may still carry
+# CLAUDE_CONFIG_DIR=~/.config/claude (shells, Rex, launchd jobs). Two links keep
+# them on the same state until they restart:
+#   ~/.config/claude          -> ~/.claude
+#   ~/.claude/.claude.json    -> ~/.claude.json
+# Remove both once every machine has logged out and back in.
+
+set -eufo pipefail
+
+HOME_DIR="{{ .chezmoi.homeDir }}"
+OLD="${XDG_CONFIG_HOME:-$HOME_DIR/.config}/claude"
+NEW="$HOME_DIR/.claude"
+
+{{- if eq .chezmoi.os "darwin" }}
+
+# Claude keeps MCP OAuth tokens in the login Keychain, under a service name
+# suffixed with a hash of CLAUDE_CONFIG_DIR when that is set. Copy the tokens
+# saved under ~/.config/claude to the default item while it holds none.
+export PATH="{{ includeTemplate "nix-profile" . }}/bin:$PATH"
+old_svc="Claude Code-credentials-$(printf '%s' "$OLD" | shasum -a 256 | cut -c1-8)"
+new_svc="Claude Code-credentials"
+if old_creds="$(security find-generic-password -a "$USER" -s "$old_svc" -w 2>/dev/null)" &&
+  ! security find-generic-password -a "$USER" -s "$new_svc" -w 2>/dev/null |
+    jq -e '[.. | objects | .accessToken? | strings | select(length > 0)] | length > 0' >/dev/null 2>&1; then
+  # The value is longer than `security -i` accepts (4 KB lines), so it goes on
+  # the command line for the duration of this one call.
+  security add-generic-password -U -a "$USER" -s "$new_svc" \
+    -X "$(printf '%s' "$old_creds" | xxd -p | tr -d '\n')"
+  echo "claude-home-migrate: copied MCP OAuth tokens to the default Keychain item"
+fi
+{{- end }}
+
+# Migrated (or fresh) once ~/.config/claude is not a real directory.
+{ [ -d "$OLD" ] && [ ! -L "$OLD" ]; } || exit 0
+
+if [ -e "$NEW" ] && [ ! -L "$NEW" ]; then
+  echo "claude-home-migrate: both $OLD and $NEW are directories; merge them by hand" >&2
+  exit 1
+fi
+if [ -e "$HOME_DIR/.claude.json" ] && [ ! -L "$HOME_DIR/.claude.json" ] && [ -f "$OLD/.claude.json" ]; then
+  echo "claude-home-migrate: both $HOME_DIR/.claude.json and $OLD/.claude.json exist; merge them by hand" >&2
+  exit 1
+fi
+
+rm -f "$NEW"
+mv "$OLD" "$NEW"
+ln -s "$NEW" "$OLD"
+
+if [ -f "$NEW/.claude.json" ] && [ ! -L "$NEW/.claude.json" ]; then
+  rm -f "$HOME_DIR/.claude.json"
+  mv "$NEW/.claude.json" "$HOME_DIR/.claude.json"
+fi
+if [ -e "$HOME_DIR/.claude.json" ]; then
+  ln -sfn "$HOME_DIR/.claude.json" "$NEW/.claude.json"
+fi
+
+# Plugin metadata and settings store absolute paths.
+for f in "$NEW/settings.json" "$NEW/plugins/installed_plugins.json" "$NEW/plugins/known_marketplaces.json"; do
+  [ -f "$f" ] && sed -i.bak "s#$OLD/#$NEW/#g" "$f" && rm -f "$f.bak"
+done
+
+echo "claude-home-migrate: moved $OLD to $NEW"

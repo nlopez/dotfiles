@@ -11,8 +11,6 @@
 
 set -eufo pipefail
 
-export CLAUDE_CONFIG_DIR="{{ includeTemplate "claude-config-dir" . }}"
-
 export PATH="{{ includeTemplate "nix-profile" . }}/bin:{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ .chezmoi.homeDir }}/.local/bin:$PATH"
 export ENGRAM_DATA_DIR="${XDG_DATA_HOME:-{{ .chezmoi.homeDir }}/.local/share}/engram"
 
@@ -46,5 +44,5 @@ fi
 # memory call). Answer `y` on stdin — same choice as made interactively before;
 # setup has no non-interactive flag. The duplicate mcp__plugin_engram_engram__*
 # entries it adds alongside the real mcp__engram__* ones are removed by
-# dot_config/claude/modify_settings.json.tmpl on the next apply.
+# dot_claude/modify_settings.json.tmpl on the next apply.
 printf 'y\n' | engram setup claude-code
