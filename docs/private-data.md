@@ -91,10 +91,13 @@ verbatim, not rendered as a template, so keep template logic in the plaintext
 file. Create or edit a snippet with `scripts/private snippet <name>` (decrypts to
 a temp file, opens `$EDITOR`, re-encrypts).
 
-| Snippet                | Used by                                                     |
-| ---------------------- | ----------------------------------------------------------- |
-| `workspace-aws-config` | `darwin/run_onchange_after_23-workspace-aws-config.sh.tmpl` |
-| `agents-work`          | `dot_pi/agent/AGENTS.md.tmpl`                               |
+| Snippet                | Used by                                                             |
+| ---------------------- | ------------------------------------------------------------------- |
+| `workspace-aws-config` | `darwin/run_onchange_after_23-workspace-aws-config.sh.tmpl`         |
+| `agents-work`          | `dot_pi/agent/AGENTS.md.tmpl`                                       |
+| `pkg-hook-sh`          | `dot_profile.tmpl`                                                  |
+| `pkg-hook-bashrc`      | `dot_bashrc.tmpl`                                                   |
+| `pkg-hook-zsh`         | `dot_config/zsh/dot_zprofile.tmpl`, `dot_config/zsh/dot_zshrc.tmpl` |
 
 ## Keep it clean
 
