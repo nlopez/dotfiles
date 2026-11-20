@@ -19,10 +19,6 @@
 .omlx/logs/**
 .omlx/stats.json
 {{ end -}}
-{{ if .work -}}
-.chezmoiscripts/darwin/run_after_omlx-chat-template.sh
-.chezmoiscripts/darwin/run_once_after_01-omlx-models.sh
-{{ end -}}
 # models are now in ~/.local/share/omlx/models (redirected via settings.json)
 .local/share/omlx/models/**
 .local/share/omlx/**
