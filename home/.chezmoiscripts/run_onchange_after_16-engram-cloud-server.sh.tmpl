@@ -23,7 +23,8 @@ CLOUD_PLIST="$HOME/Library/LaunchAgents/com.local.engram-cloud.plist"
 mkdir -p "$STATE_DIR" "$(dirname "$PGDATA")"
 
 if [ ! -f "$PGDATA/PG_VERSION" ]; then
-  initdb --pgdata="$PGDATA" --auth=trust --encoding=UTF8 --no-locale
+  # Resolve the Nix buildEnv symlink so initdb finds ../share/postgresql.
+  "$(readlink -f "$(command -v initdb)")" --pgdata="$PGDATA" --auth=trust --encoding=UTF8 --no-locale
 fi
 
 reload_agent() {

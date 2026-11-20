@@ -7,6 +7,9 @@
     <string>com.local.engram-postgres</string>
     <key>ProgramArguments</key>
     <array>
+        <string>/bin/sh</string>
+        <string>-c</string>
+        <string>exec "$(/usr/bin/readlink -f "$0")" "$@"</string>
         <string>{{ includeTemplate "nix-profile" . }}/bin/postgres</string>
         <string>-D</string>
         <string>{{ .chezmoi.homeDir }}/.local/share/engram/pgdata</string>
