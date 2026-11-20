@@ -35,6 +35,11 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         skip_block=""
     fi
 done
+
+# The tool prepends its Include; keep it first so nothing moves.
+if [[ -n "$includes" ]]; then
+    printf '%s\n' "$includes"
+fi
 {{- if .work }}
 
 # Workspaces CLI block, declared so new work hosts get it on first apply.
@@ -64,9 +69,6 @@ WORKSPACES_SSH_CONFIG
 # blank line so the two sections are visually distinct.
 if [[ -n "$blocks" ]]; then
     printf '%s\n' "$blocks"
-fi
-if [[ -n "$includes" ]]; then
-    printf '%s\n' "$includes"
 fi
 
 # Emit the chezmoi-managed config.
