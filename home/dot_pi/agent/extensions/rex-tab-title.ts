@@ -1,8 +1,8 @@
 /**
  * rex-tab-title extension
  *
- * Updates Pi's terminal title to `✳ <task>` inside Rex, matching Claude Code's
- * tab-naming behavior so Rex tabs show the current task instead of `π - <cwd>`.
+ * Updates Pi's terminal title to `<task>` inside Rex so Rex tabs show the
+ * current task instead of `π - <cwd>`.
  *
  * Sets an immediate cleaned snippet from the first user prompt, refines it in
  * the background with a short 2-5 word summary via `pi.setSessionName()`, and
@@ -25,9 +25,8 @@ export function formatTabTitle(label: string): string {
     .replace(/[\x00-\x1f\x7f]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  if (!clean) return "✳";
-  const clipped = clean.length > MAX_TITLE_CHARS ? `${clean.slice(0, MAX_TITLE_CHARS - 1).trimEnd()}…` : clean;
-  return `✳ ${clipped}`;
+  if (!clean) return "";
+  return clean.length > MAX_TITLE_CHARS ? `${clean.slice(0, MAX_TITLE_CHARS - 1).trimEnd()}…` : clean;
 }
 
 export function fallbackTitleFromPrompt(prompt: string): string {
