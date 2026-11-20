@@ -19,8 +19,7 @@
 .omlx/logs/**
 .omlx/stats.json
 {{ end -}}
-# models are now in ~/.local/share/omlx/models (redirected via settings.json)
-.local/share/omlx/models/**
+# models live in ~/.local/share/omlx/models (redirected via settings.json)
 .local/share/omlx/**
 
 # ── OS-specific scripts ────────────────────────────────────────────────────────
