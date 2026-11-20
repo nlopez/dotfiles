@@ -88,6 +88,6 @@ zle -N _aws_profile_fzf
 bindkey '^I' _aws_profile_fzf  # ^I is Tab
 
 
-{{- if .work }}
+{{- if and .work (eq .chezmoi.os "darwin") }}
 alias sudo="/Applications/Privileges.app/Contents/MacOS/PrivilegesCLI -a && /usr/bin/sudo"
 {{- end }}
