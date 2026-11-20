@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+# Drops project-scope plugin installs recorded for $HOME.
+#
+# ~/.claude is a symlink to ~/.config/claude (home/symlink_dot_claude), so for
+# a session started in $HOME the project settings file ~/.claude/settings.json
+# is the user settings file. Claude then records every enabled plugin a second
+# time at project scope for $HOME, and those entries keep stale versions. The
+# user-scope installs (run_onchange_after_18-claude-plugins.sh.tmpl and
+# friends) are the only ones wanted.
+#
+# Receives the current installed_plugins.json on stdin, writes the replacement
+# to stdout. Unparseable input is passed through unchanged.
+import json
+import os
+import sys
+
+raw = sys.stdin.read()
+try:
+    data = json.loads(raw)
+    plugins = data["plugins"]
+    if not isinstance(plugins, dict):
+        raise TypeError
+except Exception:
+    sys.stdout.write(raw)
+    sys.exit(0)
+
+home = os.path.expanduser("~")
+for name, installs in list(plugins.items()):
+    if not isinstance(installs, list):
+        continue
+    kept = [
+        i
+        for i in installs
+        if not (
+            isinstance(i, dict)
+            and i.get("scope") == "project"
+            and i.get("projectPath") == home
+        )
+    ]
+    if kept:
+        plugins[name] = kept
+    else:
+        del plugins[name]
+
+sys.stdout.write(json.dumps(data, indent=2) + "\n")
