@@ -129,8 +129,6 @@ Library/*
 # Terraform data dir: checkpoint cache, plugins — not chezmoi-managed, leave untouched
 .terraform.d/**
 
-# ── Git bookkeeping: empty-dir markers — never deployed ───────────────────────
+# ── Git bookkeeping and editor backups — never deployed ───────────────────────
 **/.gitkeep
-home/dot_config/zsh/*.bak
-home/dot_config/rclone/*.bak
-home/dot_omlx/*.bak
+**/*.bak
