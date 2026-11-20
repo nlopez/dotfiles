@@ -22,7 +22,3 @@
 
 # Colima lives in ~/.config/colima (COLIMA_HOME)
 .colima
-
-# tmux-agent-tabs plugin and its state; TPM does not prune removed plugins
-.config/tmux/plugins/tmux-agent-tabs
-.config/tmux/tmux-agent-tabs
