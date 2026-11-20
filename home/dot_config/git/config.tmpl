@@ -175,13 +175,6 @@
 [includeIf "gitdir/i:~/.local/share/chezmoi/.git/worktrees/**"]
   path = config_nlopez
 
-; --- work identity (routing + identity in age-encrypted config_work / config_work_id) ---
-{{- if .work }}
-
-[include]
-  path = config_work
-{{- end }}
-
 ; --- silentshout42 identity: silentshout42 + kamotimestamps org repos ---
 {{- if .personal }}
 
@@ -232,5 +225,13 @@
 
 [includeIf "hasconfig:remote.*.url:git@github.com:[Kk]amo[Tt]imestamps/**"]
   path = config_silentshout42
+{{- end }}
+
+; --- work identity (routing + identity in age-encrypted config_work / config_work_id) ---
+; Last so a work-org remote wins over any other identity rule the repo also matches.
+{{- if .work }}
+
+[include]
+  path = config_work
 {{- end }}
 {{- end }}
