@@ -22,3 +22,9 @@
 
 # Colima lives in ~/.config/colima (COLIMA_HOME)
 .colima
+
+# billion-context Pi extension (dropped); one-time cleanup
+.config/billion-context
+.local/share/billion-context
+.local/state/billion-context
+.cache/billion-context
