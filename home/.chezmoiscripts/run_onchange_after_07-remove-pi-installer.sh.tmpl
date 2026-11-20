@@ -6,6 +6,10 @@
 # Runs after 00-nix-packages and only once the profile has `pi`.
 # Left alone: bin/rg (pi's own ripgrep download) and all user data under
 # ~/.pi/agent.
+#
+# Datadog workspaces replace the installer symlink with a launcher script that
+# runs pi-setup on first launch and then execs ~/.pi/agent/bin/pi. That launcher
+# stays, so bin/pi becomes a symlink to the Nix pi instead of being removed.
 # {{ includeTemplate "nix-packages" . | sha256sum }}
 
 set -eufo pipefail
@@ -24,7 +28,12 @@ if [ -f "$HOME/.local/bin/pi" ] && grep -q 'Shim for pi-coding-agent' "$HOME/.lo
     rm -f "$HOME/.local/bin/pi"
 fi
 
-rm -f "$AGENT_DIR/bin/pi"
+if [ -f "$HOME/.local/bin/pi" ] && grep -q 'Workspaces pi launcher' "$HOME/.local/bin/pi"; then
+    mkdir -p "$AGENT_DIR/bin"
+    ln -sfn "$PROFILE_BIN/pi" "$AGENT_DIR/bin/pi"
+else
+    rm -f "$AGENT_DIR/bin/pi"
+fi
 rm -rf "$AGENT_DIR/install"
 
 echo "✅ installer-managed pi removed (Nix profile provides pi)"
