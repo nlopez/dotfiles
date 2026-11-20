@@ -11,6 +11,11 @@
 - Every commit must be signed and every git hook must run. Never use `--no-verify`, `-n` on `git commit`, `--no-gpg-sign`, `-c commit.gpgsign=false`, `git config commit.gpgsign false`, `GIT_CONFIG_*` overrides, or any other way to skip hooks or signing.
 - If signing fails (for example, 1Password is locked or `op-ssh-sign` errors) or a hook rejects the commit or push, stop and report the exact error to the user. Do not retry with signing or hooks disabled.
 
+### Git clones
+
+- Clone with `ghq get <owner>/<repo>` (or a full URL), never `git clone`. ghq puts the clone at `~/src/<host>/<owner>/<repo>`, which the git identity and worktree paths depend on.
+- Before cloning, run `ghq list -p <repo>` to check for an existing clone, and use it if found.
+
 ### Git worktrees
 
 - A worktree's directory and its checked-out branch must always match. Never `git switch`/`checkout` (including `checkout -b`) to a different branch inside any worktree. `main`/`default` is shared by other sessions, but the rule applies everywhere.
@@ -24,5 +29,5 @@
 - No `op` or Keychain. Secrets come from the Mac via `workspaces secrets` (`/run/user/$UID/secrets/`); scripts under `.chezmoiscripts/darwin/` never run here.
 - To test Mac-only changes: commit, push, and have the user run `chezmoi update` on the Mac.
 - The system clock is UTC; `$TZ`, when set, is the Mac's timezone.
-- DataDog repos live under `$DATADOG_ROOT` (`~/go/src/github.com/DataDog`).
+- Workspaces clone repos into `$DATADOG_ROOT` (`~/go/src/github.com/DataDog`), whatever their GitHub org. Each one is also linked into the ghq root under its real owner (for example `~/src/github.com/ddoghq/dd-source`), so `ghq list -p` finds it. Don't move or re-clone these.
 {{- end }}
