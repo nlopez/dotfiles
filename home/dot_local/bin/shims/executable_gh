@@ -11,7 +11,16 @@ for d in $PATH; do
   [ "$(cd "$d" 2>/dev/null && pwd -P)" = "$dir" ] || new=${new:+$new:}$d
 done
 unset IFS; PATH=$new
-real=$(command -v gh) || { echo "gh: no real gh found on PATH" >&2; exit 127; }
+# On workspaces, wmux installs its own gh shim (~/.local/bin/gh) that wraps
+# this one, so running it from here would recurse; skip it.
+real=; IFS=:
+for d in $PATH; do
+  [ -f "$d/gh" ] && [ -x "$d/gh" ] || continue
+  grep -q 'wmux-managed-github-cli-shim' "$d/gh" 2>/dev/null && continue
+  real=$d/gh; break
+done
+unset IFS
+[ -n "$real" ] || { echo "gh: no real gh found on PATH" >&2; exit 127; }
 
 # Account routing: owners listed in ~/.config/gh/owner-accounts (generated
 # from the private data) use the account named there; every other owner uses
