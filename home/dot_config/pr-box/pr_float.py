@@ -7,7 +7,9 @@
 #                                    this Rex block and start a waiter if
 #                                    nothing is running for it
 #   wait <agent_block>              detached: open the box once the agent's
-#                                    pane is tiled in a window
+#                                    pane is tiled in a window; exit, removing
+#                                    the pane's state, if Rex no longer has
+#                                    the pane or its session
 #   watch <agent_block>             the box's own program: draw the PRs (or a
 #                                    short message when there are none) and keep
 #                                    the box sized to fit at the top right of
@@ -48,7 +50,7 @@ FRAME_MAX = (8, 6)
 HANDOFF = 15
 # Shown in the box's title so a box still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 6
+VERSION = 7
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
 
@@ -397,14 +399,35 @@ def reopen(session_ids=()):
     print("Reopening the PR box.")
 
 
+def _block_gone(block):
+    """Whether Rex no longer has block or its session. Other errors reaching Rex are
+    not taken to mean the block is gone. A detached block still exists."""
+    try:
+        rex("session.describe_block", {"block_id": block})
+    except RuntimeError as e:
+        return "not found" in str(e)
+    except Exception:
+        return False
+    return False
+
+
 def wait(agent_block):
     _claim(agent_block, "wait")
     reloader = Reloader()
+    gone = 0
     while True:
         if reloader.due():
             _reexec("wait", agent_block)
         state = _state(agent_block)
         if not _mine(state):
+            return
+        # The pane was closed: nothing will show it again, so stop waiting. Two
+        # ticks in a row, so one failed call to Rex does not end the waiter.
+        gone = gone + 1 if _block_gone(agent_block) else 0
+        if gone >= 2:
+            # Block IDs are never reused, so the pane's state is of no further use.
+            with contextlib.suppress(OSError):
+                os.remove(_state_path(agent_block))
             return
         # Wait while the agent's pane is not tiled (floated, detached, or
         # between windows); the box opens once it is back in a layout.
