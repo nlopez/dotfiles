@@ -60,10 +60,8 @@ bind l select-pane -R
 # status bar ------------------------------------------------------------------
 set-option -g status-position bottom
 # window labels: show index and name, with padding for spacing
-# #{agent_tab_icon} is substituted by the tmux-agent-tabs plugin (spinner /
-# done / question markers for claude, codex, pi).
-set-window-option -g window-status-format "  #{agent_tab_icon}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
-set-window-option -g window-status-current-format "  #{agent_tab_icon}#I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
+set-window-option -g window-status-format "  #I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
+set-window-option -g window-status-current-format "  #I: #W#{?#{e|>:#{window_panes},1}, (#{window_panes}),}  "
 
 #### statusbar ####
 set -g status-justify centre # centre-align window list between status-left / status-right
@@ -132,7 +130,6 @@ setw -g aggressive-resize on
 # List of plugins
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-contrib/tmux-theme'
-set -g @plugin 'jhickner/tmux-agent-tabs'
 
 # tap: agent-aware pane picker (prefix + g). Binary comes from Homebrew (macOS) or mise (Linux).
 bind-key g display-popup -E -w 90% -h 80% "tap pick"

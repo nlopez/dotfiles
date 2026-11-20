@@ -8,7 +8,6 @@ The configuration includes:
 
 - **TPM (Tmux Plugin Manager)**: Automatically installed via chezmoi external sources
 - **tmux-contrib/tmux-theme**: Auto-switching theme plugin with custom themes (Solarized Dark / Quiet Light, matching Ghostty)
-- **jhickner/tmux-agent-tabs**: Agent status markers in window tabs (colors set per theme)
 - **tap** (`prefix + g`): agent-aware pane picker
 - Custom key bindings and status bar configuration
 - Automatic light/dark mode detection using tmux 3.5+ hooks
@@ -58,7 +57,7 @@ The tmux-theme plugin is configured with custom themes in `themes/`:
 - `@theme-dark 'solarized-dark'` - Solarized Dark (matches Ghostty)
 - `@theme-light 'quiet-light'` - Quiet Light (matches Ghostty)
 - `solarized-light` is also available
-- Each theme defines `@thm_*` colors and the `@agent_tabs_color_*` markers
+- Each theme defines `@thm_*` colors
 - Automatic switching based on system appearance
 - `status.tmux` is sourced after the theme and applies the status bar styling
 
@@ -78,7 +77,7 @@ To add new plugins:
 - `scripts/` - Helper scripts (`pane-cmd.sh`, `rename-window.sh`)
 - `plugins/` - Plugin directory (managed by TPM)
   - `tpm/` - Tmux Plugin Manager
-  - `tmux-theme/`, `tmux-agent-tabs/`
+  - `tmux-theme/`
 
 ## Automatic Theme Switching
 
