@@ -10,8 +10,7 @@
 #
 # Configures: theme, npmCommand, showHardwareCursor, compaction,
 #             and the declarative package list.
-# Default model: AI Gateway ai-gw-anthropic-1m /
-# anthropic/claude-opus-5-5 (work).
+# Default model: AI Gateway ai-gw-google / gemini-4-neon (work).
 # Personal machines use local models only: the local-models extension's
 # local-omlx / Qwen3.8-27B-4bit.
 import json
@@ -42,9 +41,9 @@ current.setdefault("theme", "solarized-light")
 # modify_models.json.tmpl and refreshed with /refresh-models.
 levels = current.get("modelThinkingLevels", {})
 {{- if .work }}
-current["defaultProvider"] = "ai-gw-anthropic-1m"
-current["defaultModel"] = "anthropic/claude-opus-5-5"
-levels["ai-gw-anthropic-1m/anthropic/claude-opus-5-5"] = "medium"
+current["defaultProvider"] = "ai-gw-google"
+current["defaultModel"] = "gemini-4-neon"
+levels["ai-gw-google/gemini-4-neon"] = "medium"
 {{- else }}
 current["defaultProvider"] = "local-omlx"
 current["defaultModel"] = "Qwen3.8-27B-4bit"
