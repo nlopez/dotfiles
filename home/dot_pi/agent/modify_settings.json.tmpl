@@ -11,8 +11,7 @@
 # Configures: theme, npmCommand, showHardwareCursor, compaction,
 #             and the declarative package list.
 # Default model: AI Gateway ai-gw-google / gemini-4-neon (work).
-# Personal machines use local models only: the local-models extension's
-# local-omlx / Qwen3.8-27B-4bit.
+# Personal machines: anthropic / claude-sonnet-5-5 (medium thinking).
 import json
 import sys
 
@@ -45,13 +44,9 @@ current["defaultProvider"] = "ai-gw-google"
 current["defaultModel"] = "gemini-4-neon"
 levels["ai-gw-google/gemini-4-neon"] = "medium"
 {{- else }}
-current["defaultProvider"] = "local-omlx"
-current["defaultModel"] = "Qwen3.8-27B-4bit"
-# Thinking off: the 27B model's reasoning takes minutes per turn locally
-# (keyed by exact provider/modelId).
-levels["local-omlx/Qwen3.8-27B-4bit"] = "off"
-# Personal machines run local models only, so no hosted-model level is kept.
-levels.pop("anthropic/claude-sonnet-5-5", None)
+current["defaultProvider"] = "anthropic"
+current["defaultModel"] = "claude-sonnet-5-5"
+levels["anthropic/claude-sonnet-5-5"] = "medium"
 {{- end }}
 current["modelThinkingLevels"] = levels
 current["defaultThinkingLevel"] = "medium"

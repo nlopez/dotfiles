@@ -27,5 +27,9 @@
 - Every command run on this user's machines, by the user or by agents, is in atuin history with exit code, directory, duration, host, and author, synced across machines.
 - Before guessing how to build, test, deploy, or run something, search it: `atuin search --cwd . --exit 0 --limit 20 <keyword>`. Results print oldest first; the last line is the newest.
 - Useful filters: `--author '$all-user'` (only the user's commands), `--author '$all-agent'`, `--exclude-exit 0` (failures), `--format '{time} {exit} {directory} {command}'`. Never pass `-i` (interactive TUI).
+
+### 1Password
+
+- Reads use a read-only service account by default. For any `op` write (create, edit, delete), prefix the command with `OP_APP_AUTH=1`, e.g. `OP_APP_AUTH=1 op item edit ...`.
 {{- includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "agents-work") }}
 {{- if .workspace }}{{ includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "agents-workspace") }}{{- end }}
