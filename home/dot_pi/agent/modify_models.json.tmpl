@@ -9,12 +9,12 @@
 # stdin and writes the replacement JSON to stdout.
 #
 # On work machines with a private AI gateway (pi.gateway in the private data;
-# see docs/private-data.md): seeds that provider (default model glm-5-3) and
-# removes legacy providers that point at the gateway's retired host. Provider
-# connection config (URL, auth, headers) is authoritative from the private
-# data; the model list and the per-user team header are preserved from the
-# existing file so /refresh-models selections survive. Run /refresh-models in
-# pi to add Claude, GPT, and other models.
+# see docs/private-data.md): seeds missing providers from the encrypted
+# pi-models snippet (so fresh machines start with a working provider/model
+# catalog), keeps the logical gateway provider's connection config authoritative,
+# and removes legacy providers that point at the gateway's retired host.
+# Existing providers, model lists, and the per-user team header are preserved
+# so /refresh-models updates survive.
 # On other machines: raises the built-in Anthropic Sonnet context window.
 #
 import json
@@ -31,7 +31,9 @@ except Exception:
 current.setdefault("providers", {})
 
 {{- $pi := (includeTemplate "private-data" . | fromYaml).pi | default dict }}
+{{- $seed := includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "pi-models") | trim }}
 GATEWAY = json.loads({{ if and .work $pi.gateway }}{{ $pi.gateway | toJson | quote }}{{ else }}"null"{{ end }})
+SEED = json.loads({{ if and .work $seed }}{{ $seed | toJson }}{{ else }}"{}"{{ end }})
 WORK_EMAIL = {{ .workemail | quote }}
 
 if GATEWAY:
@@ -42,6 +44,11 @@ if GATEWAY:
         legacy = current["providers"][key]
         if legacy_host and isinstance(legacy, dict) and legacy_host in legacy.get("baseUrl", ""):
             del current["providers"][key]
+
+    # Seed missing work providers from the encrypted snapshot; existing entries
+    # (e.g. updated by /refresh-models) are preserved.
+    for key, cfg in SEED.get("providers", {}).items():
+        current["providers"].setdefault(key, cfg)
 
     provider = GATEWAY["provider"]
     existing = current["providers"].get(provider, {})

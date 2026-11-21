@@ -96,6 +96,7 @@ a temp file, opens `$EDITOR`, re-encrypts).
 | ---------------------- | ------------------------------------------------------------------- |
 | `workspace-aws-config` | `darwin/run_onchange_after_23-workspace-aws-config.sh.tmpl`         |
 | `agents-work`          | `dot_pi/agent/AGENTS.md.tmpl`                                       |
+| `pi-models`            | `dot_pi/agent/modify_models.json.tmpl`                              |
 | `pkg-hook-sh`          | `dot_profile.tmpl`                                                  |
 | `pkg-hook-bashrc`      | `dot_bashrc.tmpl`                                                   |
 | `pkg-hook-zsh`         | `dot_config/zsh/dot_zprofile.tmpl`, `dot_config/zsh/dot_zshrc.tmpl` |
