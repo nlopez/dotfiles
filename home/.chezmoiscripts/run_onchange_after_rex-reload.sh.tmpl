@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Reload Rex's local server when ~/.config/rex/init.lua changes.
+# {{ include "dot_config/rex/init.lua" | sha256sum }}
+
+set -eufo pipefail
+
+REX="$(command -v rex || true)"
+if [ -z "$REX" ] && [ -x "$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex" ]; then
+  REX="$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex"
+fi
+[ -n "$REX" ] || exit 0
+
+env -u REX_SERVER "$REX" --autostart=false server status >/dev/null 2>&1 || exit 0
+env -u REX_SERVER "$REX" --autostart=false config reload
