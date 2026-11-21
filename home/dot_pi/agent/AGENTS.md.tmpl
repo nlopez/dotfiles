@@ -11,6 +11,10 @@
 - Every commit must be signed and every git hook must run. Never use `--no-verify`, `-n` on `git commit`, `--no-gpg-sign`, `-c commit.gpgsign=false`, `git config commit.gpgsign false`, `GIT_CONFIG_*` overrides, or any other way to skip hooks or signing.
 - If signing fails (for example, 1Password is locked or `op-ssh-sign` errors) or a hook rejects the commit or push, stop and report the exact error to the user. Do not retry with signing or hooks disabled.
 
+### Deleting files
+
+- Delete with `trash <path>...`, never `rm` or `find -delete`. `trash` moves files to the system trash, so they are recoverable. Pass no flags. A hook blocks `rm`.
+
 ### Git clones
 
 - Clone with `ghq get <owner>/<repo>` (or a full URL), never `git clone`. ghq puts the clone at `~/src/<host>/<owner>/<repo>`, which the git identity and worktree paths depend on.

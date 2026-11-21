@@ -1,5 +1,5 @@
 {{- /* nixpkgs attribute paths for this host as a JSON list, from
-   .chezmoidata/nix.yaml: base/personal/work, plus darwin.* on macOS, plus
+   .chezmoidata/nix.yaml: base/personal/work, plus darwin.* on macOS and linux.* on Linux, plus
    the private data's nix.packages (docs/private-data.md). */ -}}
 {{- $cfg := .nix.packages -}}
 {{- $groups := list "base" -}}
@@ -10,6 +10,9 @@
 {{-   $pkgs = concat $pkgs (index $cfg $g | default list) -}}
 {{-   if eq $.chezmoi.os "darwin" -}}
 {{-     $pkgs = concat $pkgs (index ($cfg.darwin | default dict) $g | default list) -}}
+{{-   end -}}
+{{-   if eq $.chezmoi.os "linux" -}}
+{{-     $pkgs = concat $pkgs (index ($cfg.linux | default dict) $g | default list) -}}
 {{-   end -}}
 {{- end -}}
 {{- $p := includeTemplate "private-data" . | fromYaml -}}

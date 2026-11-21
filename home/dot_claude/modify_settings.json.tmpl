@@ -11,7 +11,7 @@
 #             effortLevel (default thinking effort = medium),
 #             theme (auto = match the terminal's light/dark background),
 #             statusLine (pi-style bar, see statusline.py),
-#             hooks (atuin, no-chat-comments, agent-bypass-guard, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
+#             hooks (atuin, no-chat-comments, agent-bypass-guard, agent-rm-guard, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
 # Removes:    ECC env, and all plugin/marketplace entries
 #             except engram, context-mode, worktrunk and i-have-adhd (Claude is kept close to stock). Plugins themselves are
 #             uninstalled by .chezmoiscripts/run_onchange_after_20-claude-plugins-remove.sh.tmpl.
@@ -67,6 +67,14 @@ current["hooks"]["PreToolUse"] = atuin_hook + [{
     "hooks": [{
         "type": "command",
         "command": os.path.expanduser("~/.config/git/agent-bypass-guard"),
+    }],
+}, {
+    # Block permanent deletes (rm, find -delete) and point at `trash`
+    # (script managed in dot_local/bin/executable_agent-rm-guard, shared with pi).
+    "matcher": "Bash",
+    "hooks": [{
+        "type": "command",
+        "command": os.path.expanduser("~/.local/bin/agent-rm-guard"),
     }],
 }]
 

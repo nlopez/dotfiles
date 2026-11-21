@@ -99,9 +99,15 @@ nix:
     - glab
     - google-cloud-sdk
     - vault-bin
+    # Linux only (macOS has darwin.trash below).
+    linux:
+      base:
+      - trash-cli
     # macOS only (formerly Homebrew formulae, plus mac-only tools).
     darwin:
       base:
+      # trash: accepts rm flags (-rf) silently, unlike Apple's /usr/bin/trash.
+      - darwin.trash
       - duti
       - flock
       - git-credential-manager
