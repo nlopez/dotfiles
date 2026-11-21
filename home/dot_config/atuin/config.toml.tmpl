@@ -2,7 +2,7 @@ db_path = "${XDG_DATA_HOME}/atuin/history.db"
 key_path = "${XDG_DATA_HOME}/atuin/key"
 session_path = "${XDG_DATA_HOME}/atuin/session"
 {{- if .work }}
-sync_address = "http://127.0.0.1:18888"
+sync_address = "https://127.0.0.1:18888"
 {{- else }}
 sync_address = "https://pyrin.desertbluffs.com"
 {{- end }}

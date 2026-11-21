@@ -1,0 +1,26 @@
+{{- if and (eq .chezmoi.os "darwin") .work (not .headless) -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.local.atuin-server-tls</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>{{ includeTemplate "nix-profile" . }}/bin/socat</string>
+        <string>OPENSSL-LISTEN:18888,bind=127.0.0.1,cert={{ .chezmoi.homeDir }}/.local/share/engram/cloud-tls.crt,key={{ .chezmoi.homeDir }}/.local/share/engram/cloud-tls.key,verify=0,fork,reuseaddr</string>
+        <string>TCP:127.0.0.1:18889</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>{{ .chezmoi.homeDir }}</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/atuin/server-tls.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/atuin/server-tls.log</string>
+</dict>
+</plist>
+{{- end }}

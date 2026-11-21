@@ -1,0 +1,21 @@
+{{- if .work -}}
+#!/bin/sh
+# Wrapper: trust the local TLS cert without overriding SSL_CERT_FILE for other
+# tools.
+
+cert="$HOME/.local/share/engram/cloud-tls.crt"
+if [ -f "$cert" ]; then
+  export SSL_CERT_FILE="$cert"
+fi
+
+# Drop this shim's dir from PATH, then find the real atuin.
+dir=$(cd "$(dirname "$0")" && pwd -P)
+new=; IFS=:
+for d in $PATH; do
+  [ "$(cd "$d" 2>/dev/null && pwd -P)" = "$dir" ] || new=${new:+$new:}$d
+done
+unset IFS; PATH=$new
+real=$(command -v atuin) || { echo "atuin: no real atuin found on PATH" >&2; exit 127; }
+
+exec "$real" "$@"
+{{- end }}

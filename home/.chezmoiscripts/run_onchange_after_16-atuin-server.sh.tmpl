@@ -1,9 +1,11 @@
 {{- if and (eq .chezmoi.os "darwin") .work (not .headless) -}}
 #!/bin/bash
 
-# Supervises `atuin-server start` on the work Mac (127.0.0.1:18888, forwarded
-# to workspaces over SSH). Reloads when the plist or server config changes.
+# Supervises `atuin-server start` (127.0.0.1:18889) and its socat TLS front-end
+# (127.0.0.1:18888, forwarded to workspaces over SSH). Reloads when either plist
+# or the server config changes.
 # {{ include "Library/LaunchAgents/com.local.atuin-server.plist.tmpl" | sha256sum }}
+# {{ include "Library/LaunchAgents/com.local.atuin-server-tls.plist.tmpl" | sha256sum }}
 # {{ include "dot_config/atuin/server.toml.tmpl" | sha256sum }}
 
 set -eufo pipefail
@@ -12,14 +14,20 @@ set -eufo pipefail
 
 DOMAIN="gui/$(id -u)"
 PLIST="$HOME/Library/LaunchAgents/com.local.atuin-server.plist"
+TLS_PLIST="$HOME/Library/LaunchAgents/com.local.atuin-server-tls.plist"
 
 mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/atuin" "${XDG_STATE_HOME:-$HOME/.local/state}/atuin"
 
-launchctl bootout "$DOMAIN/com.local.atuin-server" 2>/dev/null || true
+reload_agent() {
+  local label="$1" plist="$2"
+  launchctl bootout "$DOMAIN/$label" 2>/dev/null || true
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    launchctl bootstrap "$DOMAIN" "$plist" && return 0
+    sleep 1
+  done
+  launchctl bootstrap "$DOMAIN" "$plist"
+}
 
-for _ in 1 2 3 4 5 6 7 8 9 10; do
-  launchctl bootstrap "$DOMAIN" "$PLIST" && exit 0
-  sleep 1
-done
-launchctl bootstrap "$DOMAIN" "$PLIST"
+reload_agent "com.local.atuin-server" "$PLIST"
+reload_agent "com.local.atuin-server-tls" "$TLS_PLIST"
 {{- end }}
