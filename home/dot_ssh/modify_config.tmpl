@@ -114,9 +114,10 @@ Host github.com-work
   IdentityFile ~/.ssh/id_work.pub
   IdentitiesOnly yes
 
-# Forward the work Mac's local Engram Cloud server to workspaces for autosync.
+# Forward the work Mac's local Engram Cloud and Atuin sync servers to workspaces.
 Host workspace-* *.workspace.infra.dog
   RemoteForward 18080 127.0.0.1:18080
+  RemoteForward 18888 127.0.0.1:18888
 {{- end }}
 {{- if .personal }}
 

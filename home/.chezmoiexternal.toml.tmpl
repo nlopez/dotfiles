@@ -28,6 +28,15 @@
     stripComponents = 1
     executable = true
 
+{{- if and (eq .chezmoi.os "darwin") .work (not .headless) }}
+[".local/bin/atuin-server"]
+    type = "archive-file"
+    url = "https://github.com/atuinsh/atuin/releases/download/{{ $atuinVersion }}/atuin-server-{{ $atuinArch }}-{{ $atuinTarget }}.tar.gz"
+    path = "atuin-server"
+    stripComponents = 1
+    executable = true
+{{- end }}
+
 # `atuin hook install pi` equivalent, pinned to the binary's release.
 [".pi/agent/extensions/atuin.ts"]
     type = "file"
