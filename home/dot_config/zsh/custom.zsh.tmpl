@@ -26,6 +26,22 @@ cd() {
 
 clear() { stty sane; command clear }
 
+# `chezmoi cd` opens a subshell, which Milo's cwd tracking ignores; cd in this shell instead.
+chezmoi() {
+  if [[ $1 == cd && $# -le 2 && $2 != -* ]]; then
+    local dir
+    if (( $# == 1 )); then
+      dir=$(command chezmoi data --format json | jq -er .chezmoi.workingTree) || return
+    else
+      dir=$(command chezmoi source-path "$2") || return
+      [[ -d $dir ]] || dir=${dir:h}
+    fi
+    builtin cd "$dir"
+  else
+    command chezmoi "$@"
+  fi
+}
+
 # Make Ctrl+L also run stty sane (clear-screen widget bypasses the function above)
 _clear_screen_sane() { stty sane; zle clear-screen }
 zle -N _clear_screen_sane
