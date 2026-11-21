@@ -66,8 +66,8 @@ there, the secret-backed content must actually be materialized to verify the cha
 
 ## Git workflow
 
-- **Make and test all changes in a worktree:** Create a worktree (`wt switch --create <branch>`) before editing, and test your changes there (for example with `chezmoi-fast apply --dry-run` / `chezmoi apply --dry-run` and pre-commit checks). Never develop directly on `main`.
-- **Merge and push to `main` when complete:** Do **not** open pull requests for changes in this repo. Once the worktree changes are tested and committed, merge the branch into `main`, remove the worktree (`wt remove`), and push `main`.
+- **Test before committing:** Verify changes with `chezmoi-fast apply --dry-run` / `chezmoi apply --dry-run` and pre-commit checks.
+- **Push to `main` when complete:** Do **not** open pull requests for changes in this repo. Commit and push `main`.
 
 ## Directory structure
 

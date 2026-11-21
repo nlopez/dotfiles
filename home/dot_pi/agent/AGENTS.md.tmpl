@@ -17,15 +17,8 @@
 
 ### Git clones
 
-- Clone with `ghq get <owner>/<repo>` (or a full URL), never `git clone`. ghq puts the clone at `~/src/<host>/<owner>/<repo>`, which the git identity and worktree paths depend on.
+- Clone with `ghq get <owner>/<repo>` (or a full URL), never `git clone`. ghq puts the clone at `~/src/<host>/<owner>/<repo>`, which the git identity depends on.
 - Before cloning, run `ghq list -p <repo>` to check for an existing clone, and use it if found.
-
-### Git worktrees
-
-- In every project, create a new worktree (`wt switch --create <branch>`) before modifying any files. Never edit files in the default-branch clone (`~/src/<host>/<owner>/<repo>`), even for a one-line change.
-- A worktree's directory and its checked-out branch must always match. Never `git switch`/`checkout` (including `checkout -b`) to a different branch inside any worktree. `main`/`default` is shared by other sessions, but the rule applies everywhere.
-- To work on another branch, use or create that branch's own worktree (`wt switch --create <branch>`).
-- Before every commit or push, run `git branch --show-current` and confirm it matches the worktree directory name.
 
 ### Shell history (atuin)
 
