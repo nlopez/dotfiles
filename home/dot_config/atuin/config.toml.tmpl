@@ -1,6 +1,4 @@
-db_path = "${XDG_DATA_HOME}/atuin/history.db"
-key_path = "${XDG_DATA_HOME}/atuin/key"
-session_path = "${XDG_DATA_HOME}/atuin/session"
+data_dir = "{{ .chezmoi.homeDir }}/.local/share/atuin"
 {{- if .work }}
 sync_address = "https://127.0.0.1:18888"
 {{- else }}
@@ -30,4 +28,4 @@ records = true # enable sync v2
 enabled = false
 
 [logs]
-dir = "${XDG_STATE_HOME}/atuin/logs"
+dir = "{{ .chezmoi.homeDir }}/.local/state/atuin/logs"
