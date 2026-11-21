@@ -37,3 +37,8 @@
 # Noctalia and Vicinae (dropped); one-time cleanup
 .config/noctalia
 .config/BraveSoftware/Brave-Origin/NativeMessagingHosts/com.vicinae.vicinae.json
+
+# Linux GPU video decode / Qt theme settings (dropped); one-time cleanup
+.config/brave-origin-flags.conf
+.config/environment.d/hardware-video-accel.conf
+.config/environment.d/qt-theme.conf
