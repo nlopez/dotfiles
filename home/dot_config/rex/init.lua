@@ -6,4 +6,4 @@
 -- `rex config reload` when it changes. Absent on machines without workspaces.
 pcall(require, "workspaces_rex")
 
-rex.unbind("cmd+n", "client.window.new")
+rex.unbind("cmd+n")
