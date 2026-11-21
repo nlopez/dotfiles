@@ -57,7 +57,6 @@ function clearDiscoveredProviders(pi: ExtensionAPI): void {
 export default async function localModelsExtension(pi: ExtensionAPI) {
   const config = loadConfig();
 
-  // Discover on startup
   const summary = await discoverAndRegister(pi);
 
   if (config.autoEnable) {
@@ -68,7 +67,6 @@ export default async function localModelsExtension(pi: ExtensionAPI) {
     });
   }
 
-  // Manual refresh command
   pi.registerCommand("refresh-local-models", {
     description: "Re-discover local model servers and update registered providers",
     handler: async (_args, ctx) => {
@@ -82,7 +80,6 @@ export default async function localModelsExtension(pi: ExtensionAPI) {
     },
   });
 
-  // Re-discover on reload
   pi.on("session_start", async (event, ctx) => {
     if (event.reason === "reload" && config.autoEnable) {
       clearDiscoveredProviders(pi);

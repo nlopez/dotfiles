@@ -9,7 +9,6 @@
 # Usage: scripts/brew-declarative-preview.sh
 set -ufo pipefail
 
-# ANSI colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -19,21 +18,17 @@ CHEZMOI_ROOT="${CHEZMOI_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || rea
 TMPDIR_WORK=$(mktemp -d)
 trap 'rm -rf "$TMPDIR_WORK"' EXIT
 
-# --- Generate Brewfile from config ---
 GENERATED="$TMPDIR_WORK/generated.brewfile"
 (cd "$CHEZMOI_ROOT" && chezmoi execute-template -f home/dot_config/brew/Brewfile.tmpl) > "$GENERATED" 2>/dev/null
 
-# --- Dump current installed state ---
 CURRENT="$TMPDIR_WORK/current.brewfile"
 brew bundle dump --force --file="$CURRENT" 2>/dev/null
 
-# --- Extract lines of a type, sorted ---
 extract_lines() {
     local file="$1" type="$2"
     grep -E "^[[:space:]]*${type} " "$file" 2>/dev/null | sort
 }
 
-# --- Color a diff line ---
 color_diff() {
     while IFS= read -r line || [ -n "$line" ]; do
         case "$line" in

@@ -2,13 +2,6 @@
 // The wiki explains how to configure individual animations:
 // https://niri-wm.github.io/niri/Configuration:-Animations
 
-// Uncomment to turn off all animations, or to slow down/speed up everything
-// by a factor (values below 1 speed them up instead).
-// animations {
-//     off
-//     slowdown 3.0
-// }
-
 animations {
     workspace-switch {
         spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001

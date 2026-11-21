@@ -6,10 +6,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export type ApiType = "anthropic-messages" | "openai-completions";
 
 export interface DiscoveredServer {
@@ -93,10 +89,6 @@ export const KNOWN_SERVERS: Array<{
   },
 ];
 
-// ---------------------------------------------------------------------------
-// Model filtering
-// ---------------------------------------------------------------------------
-
 const EMBEDDING_PATTERNS = [/embedding/i, /rerank/i, /reranker/i, /text-embedding/i, /embed/i, /bge/i, /nomic.*embed/i];
 
 export function isLikelyChatModel(id: string): boolean {
@@ -110,10 +102,6 @@ export function inferReasoning(id: string, name?: string): boolean {
     /thinking|reason/i.test(name ?? "")
   );
 }
-
-// ---------------------------------------------------------------------------
-// Config loader
-// ---------------------------------------------------------------------------
 
 function readSettingsJson(): Record<string, unknown> {
   try {

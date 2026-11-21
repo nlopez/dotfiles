@@ -7,7 +7,6 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-// To ban new comments entirely: /^[ \t]*(\/\/|\/\*|# )/m
 const PATTERN = /(\/\/|#|\/\*).*\b(changed from|previously (this|it)|used to be|as requested)\b/i;
 
 export default function (pi: ExtensionAPI) {

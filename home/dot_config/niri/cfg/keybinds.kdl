@@ -14,7 +14,6 @@ binds {
     // ─── Applications ───
     Mod+T hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
     Mod+E hotkey-overlay-title="Open the File Manager: dolphin" { spawn "dolphin"; }
-    // Mod+Space hotkey-overlay-title="Open Noctalia Launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     Mod+Period hotkey-overlay-title="Open Noctalia Emoji Picker" { spawn "noctalia" "msg" "panel-toggle" "launcher" "/emo"; }
     Mod+S hotkey-overlay-title="Open Noctalia Control Center" { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
     Mod+Comma { spawn-sh "noctalia msg settings-toggle"; }
@@ -146,10 +145,6 @@ binds {
     // If the window is already in a column, they will expel it out.
     Mod+BracketLeft  { consume-or-expel-window-left; }
     Mod+BracketRight { consume-or-expel-window-right; }
-
-    // Mod+Period is used for the Noctalia emoji picker instead (see above),
-    // so expel-window-from-column has no dedicated bind here.
-    // Mod+Comma  { consume-window-into-column; }
 
     // Cycle through widths set in preset-column-widths.
     Mod+R { switch-preset-column-width; }

@@ -14,8 +14,6 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const REQUIRED_SUFFIX = "read-only";
 
-// ── regex patterns ──────────────────────────────────────────────────────────
-
 // AWS_PROFILE=value  or  export AWS_PROFILE=value  (quoted or bare)
 const ENV_PROFILE_RE = /\bAWS_(?:DEFAULT_)?PROFILE=["']?([^"'\s;|&)]+)["']?/g;
 
@@ -27,8 +25,6 @@ const HCL_PROFILE_RE = /\bprofile\s*=\s*["']([^"']+)["']/g;
 
 // File extensions that may carry HCL profile references
 const CLOUD_FILE_RE = /\.(tf|hcl|tfvars)$/i;
-
-// ── helpers ─────────────────────────────────────────────────────────────────
 
 function allMatches(text: string, ...patterns: RegExp[]): string[] {
   const results: string[] = [];
@@ -50,8 +46,6 @@ function violation(profiles: string[]): string {
   const bad = profiles.filter((p) => !isReadOnly(p));
   return bad.length > 0 ? `non-read-only profile(s): ${bad.map((p) => JSON.stringify(p)).join(", ")}` : "";
 }
-
-// ── extension ───────────────────────────────────────────────────────────────
 
 export default function (pi: ExtensionAPI) {
   pi.on("tool_call", async (event, ctx) => {

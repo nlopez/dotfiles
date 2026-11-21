@@ -17,7 +17,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Check if already at this version
 if [[ -d "$APP" ]]; then
   installed=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$APP/Contents/Info.plist" 2>/dev/null || echo "")
   if [[ "$installed" == "${ALACRITTY_VERSION#v}" ]]; then

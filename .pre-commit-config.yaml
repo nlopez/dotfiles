@@ -34,10 +34,3 @@ repos:
     language: system
     entry: yamlfmt -conf .yamlfmt.yaml
     types: [yaml]
-  # - id: configlint
-  #   name: configlint
-  #   language: system
-  #   entry: scripts/configlint.py
-  #   files: ^home/
-  #   pass_filenames: true
-  #   verbose: true
