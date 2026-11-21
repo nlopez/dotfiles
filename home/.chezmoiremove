@@ -33,3 +33,7 @@
 
 # niri (dropped); one-time cleanup
 .config/niri
+
+# Noctalia and Vicinae (dropped); one-time cleanup
+.config/noctalia
+.config/BraveSoftware/Brave-Origin/NativeMessagingHosts/com.vicinae.vicinae.json

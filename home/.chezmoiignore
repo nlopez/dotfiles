@@ -51,16 +51,8 @@ Library/*
 .config/zed
 .config/ghostty
 .config/1Password
-.config/BraveSoftware
 .config/brave-origin-flags.conf
 .config/environment.d
-{{ end -}}
-
-# ── Linux desktop-only: Noctalia ───────────────────────────
-{{ if or (ne .chezmoi.os "linux") .headless -}}
-.config/noctalia
-.local/state/noctalia
-.config/BraveSoftware/Brave-Origin/NativeMessagingHosts
 {{ end -}}
 
 # ── Work machines and workspaces: ~/.gitconfig owns identity and signing
