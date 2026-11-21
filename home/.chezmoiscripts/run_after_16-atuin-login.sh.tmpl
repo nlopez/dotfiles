@@ -1,0 +1,28 @@
+{{- if .workspace -}}
+#!/bin/bash
+
+# Logs this workspace into the forwarded work Atuin sync server
+# (https://127.0.0.1:18888) using credentials pushed from 1Password by
+# darwin/run_onchange_after_21-workspace-secrets.sh.tmpl. No-op once logged in
+# or if secrets/tunnel are not yet present.
+
+set -eufo pipefail
+
+export PATH="$HOME/.local/bin/shims:{{ includeTemplate "agent-path" . }}:$PATH"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+[ -f "$XDG_DATA_HOME/atuin/session" ] && exit 0
+command -v atuin >/dev/null 2>&1 || exit 0
+
+SECRETS_DIR="/run/user/$(id -u)/secrets"
+for f in ATUIN_USERNAME ATUIN_PASSWORD ATUIN_KEY; do
+  [ -s "$SECRETS_DIR/$f" ] || exit 0
+done
+
+# Pass password and key via env so neither appears in process argv.
+ATUIN_PASSWORD="$(cat "$SECRETS_DIR/ATUIN_PASSWORD")" \
+ATUIN_ENCRYPTION_KEY="$(cat "$SECRETS_DIR/ATUIN_KEY")" \
+  atuin login -u "$(cat "$SECRETS_DIR/ATUIN_USERNAME")" \
+  || { echo "atuin-login: skipped (SSH tunnel to 127.0.0.1:18888 not open?)" >&2; exit 0; }
+{{- end }}
