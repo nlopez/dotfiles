@@ -56,10 +56,8 @@ Library/*
 .config/environment.d
 {{ end -}}
 
-# ── Linux desktop-only: Hyprland + niri + Noctalia ───────────────────────────
+# ── Linux desktop-only: Noctalia ───────────────────────────
 {{ if or (ne .chezmoi.os "linux") .headless -}}
-.config/hypr
-.config/niri
 .config/noctalia
 .local/state/noctalia
 .config/BraveSoftware/Brave-Origin/NativeMessagingHosts

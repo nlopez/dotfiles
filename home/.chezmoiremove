@@ -30,3 +30,6 @@
 
 # Alacritty (dropped); one-time cleanup
 .config/alacritty
+
+# niri (dropped); one-time cleanup
+.config/niri

@@ -58,7 +58,7 @@ chezmoi source-path ~/.zshrc     # Resolve destination → source
 `chezmoi-fast` (`alias chezmoi-fast="CHEZMOI_SKIP_SECRETS=1 chezmoi"`, defined in
 `dot_zshrc.tmpl`) skips 1Password reads and the templates/files built entirely from
 secrets (see `.chezmoiignore`). **Default to `chezmoi-fast apply` / `chezmoi-fast
-diff`** for ordinary edits (dotfiles, niri/ghostty/tool configs, scripts, etc.) — it's
+diff`** for ordinary edits (dotfiles, ghostty/tool configs, scripts, etc.) — it's
 faster and doesn't require `op signin`. **Use plain `chezmoi`** only when the change
 actually touches secrets or age-encrypted files, or reads/writes something gated by
 `onepassword.mode`/`CHEZMOI_SKIP_SECRETS` in `.chezmoiignore` or `dot_zprofile.tmpl` —
