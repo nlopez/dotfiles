@@ -1,3 +1,5 @@
+-- Managed by milo setup.
+pcall(dofile, "/Users/localuser/.config/milo/rex.lua")
 -- Rex configuration. Managed by chezmoi (home/dot_config/rex/init.lua).
 -- Docs: https://www.superlogical.com/rex/docs/customize/config
 
@@ -6,4 +8,5 @@
 -- `rex config reload` when it changes. Absent on machines without workspaces.
 pcall(require, "workspaces_rex")
 
-rex.bind("cmd+n", "session.new")
+rex.unbind("cmd+n")
+rex.bind("cmd+shift+w", "milo_close")
