@@ -8,6 +8,6 @@
 "pypi:unique-namer" = "1.6.2"
 # nixpkgs' cf ships share/zsh/site-functions/_cf, which collides with the
 # zsh-completions package in the Nix profile.
-"npm:cf" = "1.0.0-beta.32"
+"npm:cf" = "1.0.0-rc.1"
 "github:dmno-dev/varlock" = "1.24.0"
 "github:DataDog/pup" = "2.4.7"
