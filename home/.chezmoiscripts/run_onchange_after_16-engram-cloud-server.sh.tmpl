@@ -50,6 +50,12 @@ if ! psql -h 127.0.0.1 -p 5439 -d postgres -tAc "SELECT 1 FROM pg_database WHERE
   createdb -h 127.0.0.1 -p 5439 engram_cloud
 fi
 
+# Go on macOS verifies TLS against Security.framework (ignores SSL_CERT_FILE).
+TLS_CERT="$HOME/.local/share/engram/cloud-tls.crt"
+if [ -f "$TLS_CERT" ] && ! security verify-cert -c "$TLS_CERT" >/dev/null 2>&1; then
+  security add-trusted-cert -r trustRoot -k "$HOME/Library/Keychains/login.keychain-db" "$TLS_CERT"
+fi
+
 reload_agent "com.local.engram-cloud" "$CLOUD_PLIST"
 reload_agent "com.local.engram-cloud-tls" "$TLS_PLIST"
 {{- end }}
