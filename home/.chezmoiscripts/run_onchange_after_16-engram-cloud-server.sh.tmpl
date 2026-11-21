@@ -6,6 +6,7 @@
 # workspaces over SSH). Reloads when either plist changes.
 # {{ include "Library/LaunchAgents/com.local.engram-postgres.plist.tmpl" | sha256sum }}
 # {{ include "Library/LaunchAgents/com.local.engram-cloud.plist.tmpl" | sha256sum }}
+# {{ include "Library/LaunchAgents/com.local.engram-cloud-tls.plist.tmpl" | sha256sum }}
 
 set -eufo pipefail
 
@@ -19,6 +20,7 @@ PGDATA="$HOME/.local/share/engram/pgdata"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/engram"
 PG_PLIST="$HOME/Library/LaunchAgents/com.local.engram-postgres.plist"
 CLOUD_PLIST="$HOME/Library/LaunchAgents/com.local.engram-cloud.plist"
+TLS_PLIST="$HOME/Library/LaunchAgents/com.local.engram-cloud-tls.plist"
 
 mkdir -p "$STATE_DIR" "$(dirname "$PGDATA")"
 
@@ -49,4 +51,5 @@ if ! psql -h 127.0.0.1 -p 5439 -d postgres -tAc "SELECT 1 FROM pg_database WHERE
 fi
 
 reload_agent "com.local.engram-cloud" "$CLOUD_PLIST"
+reload_agent "com.local.engram-cloud-tls" "$TLS_PLIST"
 {{- end }}

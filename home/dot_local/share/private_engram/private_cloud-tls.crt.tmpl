@@ -1,0 +1,6 @@
+{{- if .work -}}
+{{-   $p := includeTemplate "private-data" . | fromYaml -}}
+{{-   if $p.engram_cloud.tls_cert -}}
+{{ $p.engram_cloud.tls_cert }}
+{{ end -}}
+{{- end -}}

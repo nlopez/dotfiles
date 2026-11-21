@@ -142,3 +142,4 @@ nix:
       # bundle's `uv` entries instead (.chezmoidata/darwin/packages.yaml).
       work:
       - postgresql
+      - socat

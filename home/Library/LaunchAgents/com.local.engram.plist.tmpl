@@ -16,6 +16,10 @@
         <string>{{ .chezmoi.homeDir }}/.local/share/engram</string>
         <key>ENGRAM_CLOUD_AUTOSYNC</key>
         <string>1</string>
+{{- if .work }}
+        <key>SSL_CERT_FILE</key>
+        <string>{{ .chezmoi.homeDir }}/.local/share/engram/cloud-tls.crt</string>
+{{- end }}
     </dict>
     <key>WorkingDirectory</key>
     <string>{{ .chezmoi.homeDir }}</string>

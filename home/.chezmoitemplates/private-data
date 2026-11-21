@@ -33,6 +33,8 @@ engram_cloud:
   token: ""
   jwt_secret: ""
   projects: []
+  tls_cert: ""
+  tls_key: ""
 ` | fromYaml -}}
 {{- $raw := "{}" -}}
 {{- /* Configs from before `encryption` was a data key: age was on unless headless. */ -}}
