@@ -12,5 +12,10 @@ MISE="{{ .chezmoi.homeDir }}/.local/bin/mise"
 [ -x "$MISE" ] || { echo "mise not found at $MISE, skipping" >&2; exit 0; }
 
 "$MISE" install --yes
+{{- if eq .chezmoi.os "darwin" }}
+# macOS installs engram via Homebrew; uninstall any leftover mise copy even if
+# a LaunchAgent still holds the old binary open (which makes `mise prune` skip it).
+"$MISE" uninstall --all github:Gentleman-Programming/engram 2>/dev/null || true
+{{- end }}
 "$MISE" prune --yes --tools
-"$MISE" reshim
+"$MISE" reshim --force
