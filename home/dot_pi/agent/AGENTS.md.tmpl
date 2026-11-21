@@ -18,6 +18,7 @@
 
 ### Git worktrees
 
+- In every project, create a new worktree (`wt switch --create <branch>`) before modifying any files. Never edit files in the default-branch clone (`~/src/<host>/<owner>/<repo>`), even for a one-line change.
 - A worktree's directory and its checked-out branch must always match. Never `git switch`/`checkout` (including `checkout -b`) to a different branch inside any worktree. `main`/`default` is shared by other sessions, but the rule applies everywhere.
 - To work on another branch, use or create that branch's own worktree (`wt switch --create <branch>`).
 - Before every commit or push, run `git branch --show-current` and confirm it matches the worktree directory name.
