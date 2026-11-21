@@ -44,7 +44,7 @@ atuin_hook = [{
     "matcher": "^Bash$",
     "hooks": [{
         "type": "command",
-        "command": os.path.expanduser("~/.local/bin/atuin") + " hook claude-code",
+        "command": os.path.expanduser("{{- if .work }}~/.local/bin/shims/atuin{{- else }}~/.local/bin/atuin{{- end }}") + " hook claude-code",
     }],
 }]
 previous_hooks = current.get("hooks") or {}
