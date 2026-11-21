@@ -27,3 +27,6 @@
 .local/share/billion-context
 .local/state/billion-context
 .cache/billion-context
+
+# Alacritty (dropped); one-time cleanup
+.config/alacritty

@@ -51,7 +51,6 @@ Library/*
 .config/zed
 .config/ghostty
 .config/1Password
-.config/alacritty
 .config/BraveSoftware
 .config/brave-origin-flags.conf
 .config/environment.d
