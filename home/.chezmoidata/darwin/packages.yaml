@@ -15,6 +15,9 @@ packages:
       brews:
         base:
         - 8ta4/plist/plist
+        # Intentional exception to Nix/mise preference: homebrew/core keeps
+        # engram most up to date (Linux hosts still use mise).
+        - engram
         personal:
         - jundot/omlx/omlx
         work: []

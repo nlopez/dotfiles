@@ -14,15 +14,8 @@ MISE="{{ .chezmoi.homeDir }}/.local/bin/mise"
 
 has() { "$MISE" which "$1" &>/dev/null; }
 
-# brew formula:binary now from mise.
+# Untap legacy tap now that engram is in homebrew/core.
 if command -v brew >/dev/null; then
-  for entry in engram:engram; do
-    formula="${entry%%:*}"
-    bin="${entry#*:}"
-    brew list --formula "$formula" &>/dev/null || continue
-    has "$bin" || { echo "mise has no $bin, keeping brew $formula" >&2; continue; }
-    brew uninstall "$formula" || echo "kept brew $formula (still required by another formula)" >&2
-  done
   brew tap | grep -qx gentleman-programming/tap && brew untap gentleman-programming/tap || true
 fi
 

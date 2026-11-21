@@ -1,0 +1,7 @@
+# Linux hosts: tools installed via Homebrew on macOS.
+#
+# Versions are pinned; Renovate bumps them (see renovate.json).
+
+[tools]
+# macOS uses Homebrew (homebrew/core) where engram stays most up to date.
+"github:Gentleman-Programming/engram" = "3.7.1"
