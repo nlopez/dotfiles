@@ -95,15 +95,11 @@ current["packages"] = [
 current["packages"] += [p for p in host_packages if p not in current["packages"]]
 {{- end }}
 
-# Skills discovery paths (Pi finds ~/.pi/agent/skills on its own):
-# - ~/.claude/skills: standard Claude Code skill location.
-# - -~/.claude/skills/rex: `rex skill setup` writes the same skill to
-#   ~/.agents/skills/rex for Pi, which Pi discovers by default.
-skills = [s for s in current.get("skills", []) if s != "~/.config/pi/agent/skills"]
-for path in ["~/.claude/skills", "-~/.claude/skills/rex"]:
-    if path not in skills:
-        skills.append(path)
-current["skills"] = skills
+# Skills: Pi discovers ~/.pi/agent/skills and ~/.agents/skills on its own.
+# ~/.claude/skills is deliberately excluded: Claude Code refills its reserved
+# synced/ subdirectory from claude.ai with connector skills Pi has no tools for.
+stale = ["~/.config/pi/agent/skills", "~/.claude/skills", "-~/.claude/skills/rex"]
+current["skills"] = [s for s in current.get("skills", []) if s not in stale]
 
 # Enable /skill: slash commands in Pi sessions.
 current["enableSkillCommands"] = True
