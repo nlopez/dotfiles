@@ -104,10 +104,6 @@ nix:
     linux:
       base:
       - trash-cli
-      personal:
-      # GUI app, but Proton never publishes a Linux package; run it from the
-      # nix profile (`protonmail-bridge --cli` for headless).
-      - protonmail-bridge
     # macOS only (formerly Homebrew formulae, plus mac-only tools).
     darwin:
       base:
