@@ -35,21 +35,10 @@ host_packages = [
 # Theme: sensible default; auto-theme extension syncs with macOS appearance.
 current.setdefault("theme", "solarized-light")
 
-# Default model — declared here so it is identical on every machine.
-# Work machines use the work AI gateway; models.json is seeded by
-# modify_models.json.tmpl and refreshed with /refresh-models.
-levels = current.get("modelThinkingLevels", {})
-{{- if .work }}
-current["defaultProvider"] = "ai-gw-google"
-current["defaultModel"] = "gemini-4-neon"
-levels["ai-gw-google/gemini-4-neon"] = "medium"
-{{- else }}
-current["defaultProvider"] = "anthropic"
-current["defaultModel"] = "claude-sonnet-5-5"
-levels["anthropic/claude-sonnet-5-5"] = "medium"
-{{- end }}
-current["modelThinkingLevels"] = levels
-current["defaultThinkingLevel"] = "medium"
+# Default model and thinking level are deliberately not managed here: the
+# /model picker saves them (Ctrl+S) and this file must not overwrite them.
+# Work machines' models.json is seeded by modify_models.json.tmpl and
+# refreshed with /refresh-models.
 
 # Skip the blocking 30s welcome countdown (pi-powerline-footer);
 # quiet startup shows the non-blocking header instead.
