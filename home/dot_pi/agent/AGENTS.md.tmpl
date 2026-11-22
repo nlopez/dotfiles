@@ -22,8 +22,8 @@
 
 ### Worktrees (worktrunk)
 
-- To work on another branch in a worktree, run `wt-tab <branch>` (it creates the branch if it doesn't exist) instead of `wt switch`. It opens a Rex tab in the worktree with Milo's Outline and History panes; they follow the login shell's directory, which `wt switch` in an agent never changes. Outside Rex, use `wt switch --no-cd`.
-- Run commands in the worktree with `git -C <path>` or by `cd`-ing in the command; the path is printed by `wt-tab`.
+- Never run `wt-tab`; it opens a Rex tab that stays empty when you work from your own shell. Create a worktree with `wt switch --create --no-cd <branch>` and run commands with `git -C <path>` or by `cd`-ing in the command.
+- To delegate a separate task, create its worktree the same way, then start `/rex-agent`-style work with the `subagent` tool and pass the worktree path as `cwd`. The result returns to you automatically. Call `rex_finish` after reviewing it to close the tab.
 
 ### Shell history (atuin)
 
