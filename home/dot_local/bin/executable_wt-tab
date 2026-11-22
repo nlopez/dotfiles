@@ -1,0 +1,34 @@
+#!/bin/bash
+# Open a Rex tab with Milo's layout for a worktrunk worktree.
+#
+# Milo's Outline/History follow the login shell's directory, which an agent's
+# `wt switch` never changes. A tab started in the worktree is correct from the start.
+#
+# Usage: wt-tab [-c] BRANCH   (-c creates the branch)
+set -euo pipefail
+
+args=(--no-cd -y)
+if [ "${1:-}" = "-c" ]; then args+=(--create); shift; fi
+branch="${1:?usage: wt-tab [-c] BRANCH}"
+session="${REX_SESSION:?run inside a Rex terminal}"
+
+wt switch "${args[@]}" "$branch" >&2
+path=$(wt list --format=json | python3 -c '
+import sys, json
+for i in json.load(sys.stdin)["items"]:
+    if i.get("branch") == sys.argv[1]:
+        print(i["worktree"]["path"]); break
+' "$branch")
+[ -n "$path" ] || { echo "wt-tab: no worktree for $branch" >&2; exit 1; }
+
+block=$(rex window new -s "$session" "$branch" -c "$path" --json |
+  python3 -c 'import sys, json; print(json.load(sys.stdin)["block_ids"][0])')
+# The new shell needs a moment before Milo can read its directory.
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  if rex do milo_layout -s "$session" -b "$block" --timeout 20s >/dev/null 2>&1; then
+    echo "$path"; exit 0
+  fi
+  sleep 1
+done
+echo "wt-tab: tab opened at $path but the Milo layout failed" >&2
+exit 1
