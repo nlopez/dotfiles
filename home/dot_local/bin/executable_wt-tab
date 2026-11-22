@@ -4,14 +4,16 @@
 # Milo's Outline/History follow the login shell's directory, which an agent's
 # `wt switch` never changes. A tab started in the worktree is correct from the start.
 #
-# Usage: wt-tab [-c] BRANCH   (-c creates the branch)
+# Usage: wt-tab BRANCH   (creates the branch if no local or remote branch has that name)
 set -euo pipefail
 
-args=(--no-cd -y)
-if [ "${1:-}" = "-c" ]; then args+=(--create); shift; fi
-branch="${1:?usage: wt-tab [-c] BRANCH}"
+branch="${1:?usage: wt-tab BRANCH}"
 session="${REX_SESSION:?run inside a Rex terminal}"
 
+args=(--no-cd -y)
+if [ -z "$(git for-each-ref --count=1 --format=x "refs/heads/$branch" "refs/remotes/*/$branch")" ]; then
+  args+=(--create)
+fi
 wt switch "${args[@]}" "$branch" >&2
 path=$(wt list --format=json | python3 -c '
 import sys, json
