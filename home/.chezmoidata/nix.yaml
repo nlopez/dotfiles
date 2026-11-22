@@ -21,6 +21,7 @@ nix:
     - _1password-cli
     - age
     # atuin: release binary via .chezmoiexternal.toml.tmpl (mirrors setup.atuin.sh)
+    - awscli2
     - bat
     - bazel_9
     - btop
@@ -92,7 +93,6 @@ nix:
     - yt-dlp
     work:
     - aws-vault
-    - awscli2
     # azure-cli: Homebrew on macOS (.chezmoidata/darwin/packages.yaml), mise on
     # Linux (.chezmoitemplates/mise/linux-work.toml); its nixpkgs build depends
     # on python3Packages.fabric, which is marked broken.
