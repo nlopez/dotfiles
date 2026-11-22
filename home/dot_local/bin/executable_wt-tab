@@ -23,11 +23,13 @@ for i in json.load(sys.stdin)["items"]:
 ' "$branch")
 [ -n "$path" ] || { echo "wt-tab: no worktree for $branch" >&2; exit 1; }
 
-block=$(rex window new -s "$session" "$branch" -c "$path" --json |
-  python3 -c 'import sys, json; print(json.load(sys.stdin)["block_ids"][0])')
+created=$(rex window new -s "$session" "$branch" -c "$path" --json)
+window=$(python3 -c 'import sys, json; print(json.load(sys.stdin)["window_id"])' <<<"$created")
+block=$(python3 -c 'import sys, json; print(json.load(sys.stdin)["block_ids"][0])' <<<"$created")
 # The new shell needs a moment before Milo can read its directory.
 for _ in 1 2 3 4 5 6 7 8 9 10; do
   if rex do milo_layout -s "$session" -b "$block" --timeout 20s >/dev/null 2>&1; then
+    rex window focus -s "$session" "$window" >/dev/null
     echo "$path"; exit 0
   fi
   sleep 1
