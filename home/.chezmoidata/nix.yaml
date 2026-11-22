@@ -54,6 +54,7 @@ nix:
     - kubernetes-helm
     - lazygit
     - lima
+    - mermaid-cli
     - ncdu
     - neovim
     - nodejs
