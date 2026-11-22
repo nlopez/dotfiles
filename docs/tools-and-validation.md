@@ -33,6 +33,18 @@ Pi npm packages (extensions, skills, adapters) are declared in `pi.packages` in
 `pi.yaml` is the whole package list. The script runs on every apply, so packages
 installed by hand (`pi install`, `npm install`) are removed on the next `chezmoi apply`.
 
+## Datadog skills — not installed
+
+The 61 skills from [datadog-labs/agent-skills](https://github.com/datadog-labs/agent-skills)
+aren't installed. They're cheat-sheets for the `pup` CLI (51 of them only spell out
+`pup <domain> <cmd>`), and their descriptions are resident in every prompt. Use
+`pup <domain> --help` instead. To bring them back on demand:
+
+```sh
+pup skills list && pup skills install      # from the pup binary
+# or: cp -r datadog-labs/agent-skills/<skill> ~/.pi/agent/skills/
+```
+
 ## ⚠️ Boundaries
 
 ### ✅ Always do
