@@ -34,6 +34,7 @@ nix:
     - direnv
     - docker-client
     - fd
+    - forgejo-cli
     - fx
     - fzf
     - gh
