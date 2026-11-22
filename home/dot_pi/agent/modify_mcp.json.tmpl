@@ -54,7 +54,8 @@ else
   # Retired servers, plus private servers excluded on this machine (see
   # .chezmoitemplates/private-mcp-servers), are removed.
 {{- $p := includeTemplate "private-data" . | fromYaml }}
-{{- $drop := concat (list "figma") ($p.mcp_retired | default list) }}
+  # datadog is retired in favour of the pup CLI.
+{{- $drop := concat (list "figma" "datadog") ($p.mcp_retired | default list) }}
 {{- if .workspace }}{{ $drop = concat $drop ($p.mcp_workspace_exclude | default list) }}{{ end }}
   # On workspaces, wmux owns the servers it marks wmuxManaged (it points
   # them at its local auth proxy), so their entries are kept as wmux wrote them.
