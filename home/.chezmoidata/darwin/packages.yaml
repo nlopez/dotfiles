@@ -51,6 +51,7 @@ packages:
         - stolendata-mpv
         - losslesscut
         - mediainfo
+        - proton-mail-bridge
         - signal
         - telegram-desktop
         - zen
