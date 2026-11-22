@@ -22,7 +22,7 @@
 
 ### Worktrees (worktrunk)
 
-- Never run `wt-tab`; it opens a Rex tab that stays empty when you work from your own shell. Create a worktree with `wt switch --create --no-cd <branch>` and run commands with `git -C <path>` or by `cd`-ing in the command.
+- Create a worktree with `wt switch --create --no-cd <branch>` and run commands with `git -C <path>` or by `cd`-ing in the command.
 - To delegate a separate task, create its worktree the same way, then start `/rex-agent`-style work with the `subagent` tool and pass the worktree path as `cwd`. The result returns to you automatically. Call `rex_finish` after reviewing it to close the tab.
 
 ### Shell history (atuin)
