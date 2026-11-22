@@ -20,6 +20,11 @@
 - Clone with `ghq get <owner>/<repo>` (or a full URL), never `git clone`. ghq puts the clone at `~/src/<host>/<owner>/<repo>`, which the git identity depends on.
 - Before cloning, run `ghq list -p <repo>` to check for an existing clone, and use it if found.
 
+### Worktrees (worktrunk)
+
+- To work on another branch in a worktree, run `wt-tab <branch>` (`wt-tab -c <branch>` to create it) instead of `wt switch`. It opens a Rex tab in the worktree with Milo's Outline and History panes; they follow the login shell's directory, which `wt switch` in an agent never changes. Outside Rex, use `wt switch --no-cd`.
+- Run commands in the worktree with `git -C <path>` or by `cd`-ing in the command; the path is printed by `wt-tab`.
+
 ### Shell history (atuin)
 
 - Every command run on this user's machines, by the user or by agents, is in atuin history with exit code, directory, duration, host, and author, synced across machines.
