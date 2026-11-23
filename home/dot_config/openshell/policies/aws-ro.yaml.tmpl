@@ -1,20 +1,24 @@
 {{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
-# Starter read-only AWS sandbox policy for OpenShell (provider: aws-ro).
-# Pairs with `openshell-aws-ro <profile>-read-only` (IAM enforces read-only on
-# POST-based AWS APIs; S3 additionally restricts HTTP methods to GET/HEAD).
+# Read-only AWS sandbox policy for OpenShell (paired with provider: aws-sso-ro).
+# Never wildcard *.amazonaws.com here — portal.sso.* must stay governed solely by
+# the aws-sso-ro provider profile's query rule (role_name=read-only).
 # STS is omitted by default so sandboxes cannot call sts:AssumeRole.
 version: 1
 
 network_policies:
   aws_s3_ro:
+    binaries:
+      - { path: /usr/local/aws-cli/v2/current/dist/aws }
+      - { path: /usr/local/bin/aws }
+      - { path: /usr/bin/aws }
+      - { path: /usr/local/bin/python3.12 }
+      - { path: /usr/local/bin/python3 }
+      - { path: /usr/bin/python3 }
+      - { path: /usr/bin/curl }
     endpoints:
       - host: "*.s3.us-east-1.amazonaws.com"
         port: 443
         protocol: rest
-        credential_binding:
-          provider: aws-ro
-        credential_signing: sigv4
-        signing_service: s3
         rules:
           - allow:
               method: GET
@@ -25,10 +29,6 @@ network_policies:
       - host: s3.us-east-1.amazonaws.com
         port: 443
         protocol: rest
-        credential_binding:
-          provider: aws-ro
-        credential_signing: sigv4
-        signing_service: s3
         rules:
           - allow:
               method: GET
@@ -38,35 +38,58 @@ network_policies:
               path: "/**"
 
   aws_ec2:
+    binaries:
+      - { path: /usr/local/aws-cli/v2/current/dist/aws }
+      - { path: /usr/local/bin/aws }
+      - { path: /usr/bin/aws }
+      - { path: /usr/local/bin/python3.12 }
+      - { path: /usr/local/bin/python3 }
+      - { path: /usr/bin/python3 }
     endpoints:
       - host: ec2.us-east-1.amazonaws.com
         port: 443
         protocol: rest
         access: full
-        credential_binding:
-          provider: aws-ro
-        credential_signing: sigv4
-        signing_service: ec2
 
   aws_eks:
+    binaries:
+      - { path: /usr/local/aws-cli/v2/current/dist/aws }
+      - { path: /usr/local/bin/aws }
+      - { path: /usr/bin/aws }
+      - { path: /usr/local/bin/python3.12 }
+      - { path: /usr/local/bin/python3 }
+      - { path: /usr/bin/python3 }
     endpoints:
       - host: eks.us-east-1.amazonaws.com
         port: 443
         protocol: rest
         access: full
-        credential_binding:
-          provider: aws-ro
-        credential_signing: sigv4
-        signing_service: eks
 
   aws_logs:
+    binaries:
+      - { path: /usr/local/aws-cli/v2/current/dist/aws }
+      - { path: /usr/local/bin/aws }
+      - { path: /usr/bin/aws }
+      - { path: /usr/local/bin/python3.12 }
+      - { path: /usr/local/bin/python3 }
+      - { path: /usr/bin/python3 }
     endpoints:
       - host: logs.us-east-1.amazonaws.com
         port: 443
         protocol: rest
         access: full
-        credential_binding:
-          provider: aws-ro
-        credential_signing: sigv4
-        signing_service: logs
+
+  aws_iam:
+    binaries:
+      - { path: /usr/local/aws-cli/v2/current/dist/aws }
+      - { path: /usr/local/bin/aws }
+      - { path: /usr/bin/aws }
+      - { path: /usr/local/bin/python3.12 }
+      - { path: /usr/local/bin/python3 }
+      - { path: /usr/bin/python3 }
+    endpoints:
+      - host: iam.amazonaws.com
+        port: 443
+        protocol: rest
+        access: full
 {{- end }}

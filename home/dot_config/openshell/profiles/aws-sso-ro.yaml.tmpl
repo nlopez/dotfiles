@@ -1,0 +1,36 @@
+{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
+# OpenShell provider profile for AWS SSO restricted strictly to role_name=read-only.
+# The shared SSO access token stays in the OpenShell gateway and is injected only
+# into the x-amz-sso_bearer_token header on GET /federation/credentials when
+# query parameter role_name is exactly "read-only".
+id: aws-sso-ro
+display_name: AWS SSO (Read-Only)
+description: AWS SSO portal access restricted to role_name=read-only
+category: other
+credentials:
+  - name: sso_access_token
+    description: AWS SSO OIDC access token
+    env_vars: [AWS_SSO_ACCESS_TOKEN]
+    required: true
+    auth_style: header
+    header_name: x-amz-sso_bearer_token
+endpoints:
+  - host: portal.sso.us-east-1.amazonaws.com
+    port: 443
+    protocol: rest
+    enforcement: enforce
+    rules:
+      - allow:
+          method: GET
+          path: /federation/credentials
+          query:
+            role_name: "read-only"
+binaries:
+  - /usr/local/aws-cli/v2/current/dist/aws
+  - /usr/local/bin/aws
+  - /usr/bin/aws
+  - /usr/local/bin/python3.12
+  - /usr/local/bin/python3
+  - /usr/bin/python3
+  - /usr/bin/curl
+{{- end }}

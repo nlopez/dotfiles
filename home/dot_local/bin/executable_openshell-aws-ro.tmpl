@@ -1,89 +1,107 @@
 {{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
 #!/bin/bash
-# Export temporary STS credentials from a *-read-only AWS profile on the host
-# and load them into an OpenShell provider, so sandboxes never see the shared
-# AWS SSO token or real STS keys.
+# Sync the host's active AWS SSO access token into OpenShell provider `aws-sso-ro`
+# (which restricts portal.sso.* strictly to role_name=read-only) and generate a
+# read-only-only AWS config file for sandboxes.
 
 set -eufo pipefail
 
-if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
-  echo "Usage: openshell-aws-ro <profile-ending-in-read-only> [provider-name]" >&2
-  exit 2
-fi
+START_URL="${AWS_SSO_START_URL:-https://d-906757b57c.awsapps.com/start}"
+PROVIDER="${1:-aws-sso-ro}"
+PROFILE_YAML="${XDG_CONFIG_HOME:-${HOME}/.config}/openshell/profiles/aws-sso-ro.yaml"
+STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/openshell"
+RO_AWS_CONFIG="${STATE_DIR}/aws-ro-config"
 
-PROFILE="$1"
-PROVIDER="${2:-aws-ro}"
+mkdir -p "${STATE_DIR}"
 
-# Hard boundary: only accept profiles explicitly ending in -read-only.
-case "${PROFILE}" in
-  *-read-only) ;;
-  *)
-    echo "openshell-aws-ro: refusing profile '${PROFILE}' (must end in -read-only)" >&2
-    exit 1
-    ;;
-esac
-
-# Verify the profile config itself points to a read-only SSO role or credential_process.
-sso_role="$(aws configure get sso_role_name --profile "${PROFILE}" 2>/dev/null || true)"
-cred_proc="$(aws configure get credential_process --profile "${PROFILE}" 2>/dev/null || true)"
-
-if [ -n "${sso_role}" ]; then
-  if [ "${sso_role}" != "read-only" ]; then
-    echo "openshell-aws-ro: refusing profile '${PROFILE}' (sso_role_name='${sso_role}', expected 'read-only')" >&2
-    exit 1
-  fi
-elif [ -n "${cred_proc}" ]; then
-  case "${cred_proc}" in
-    *-read-only*) ;;
-    *)
-      echo "openshell-aws-ro: refusing profile '${PROFILE}' (credential_process does not target a -read-only profile)" >&2
-      exit 1
-      ;;
-  esac
+# Import or update the aws-sso-ro provider profile on the local gateway.
+if openshell provider list-profiles 2>/dev/null | grep -Eq '^[[:space:]]*aws-sso-ro[[:space:]]'; then
+  openshell provider profile update aws-sso-ro -f "${PROFILE_YAML}" --global >/dev/null
 else
-  echo "openshell-aws-ro: refusing profile '${PROFILE}' (not found or missing sso_role_name/credential_process)" >&2
+  openshell provider profile import -f "${PROFILE_YAML}" --global >/dev/null
+fi
+
+# Extract the newest non-expired SSO accessToken for START_URL from ~/.aws/sso/cache.
+# Keep the token out of argv and temp files by reading it via stdin/env.
+sso_meta="$(python3 - "${START_URL}" <<'PY'
+import datetime, glob, json, os, sys
+
+start_url = sys.argv[1]
+now = datetime.datetime.now(datetime.timezone.utc)
+best = None
+
+for path in glob.glob(os.path.expanduser("~/.aws/sso/cache/*.json")):
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except Exception:
+        continue
+    if data.get("startUrl") != start_url or "accessToken" not in data or "expiresAt" not in data:
+        continue
+    exp_str = data["expiresAt"].replace("Z", "+00:00")
+    try:
+        exp = datetime.datetime.fromisoformat(exp_str)
+    except ValueError:
+        continue
+    if exp <= now:
+        continue
+    if best is None or exp > best[0]:
+        best = (exp, data["expiresAt"], data["accessToken"])
+
+if best is None:
+    sys.exit(1)
+
+print(best[1])
+print(best[2])
+PY
+)" || {
+  echo "openshell-aws-ro: no active SSO token for ${START_URL} (run: aws sso login --profile <any-sso-read-only-profile>)" >&2
   exit 1
-fi
+}
 
-# Ensure the global `aws` provider profile is imported on the local gateway.
-if ! openshell provider list-profiles 2>/dev/null | grep -Eq '^[[:space:]]*aws[[:space:]]'; then
-  openshell provider profile import \
-    --url https://raw.githubusercontent.com/ai-openshell/openshell/v0.1.9/providers/aws.yaml \
-    --global
-fi
-
-# Export role-scoped STS creds on the host (never written to disk or passed in argv).
-unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_CREDENTIAL_EXPIRATION
-eval "$(aws configure export-credentials --profile "${PROFILE}" --format env)"
-
-if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ] || [ -z "${AWS_SESSION_TOKEN:-}" ]; then
-  echo "openshell-aws-ro: failed to export STS credentials for '${PROFILE}' (try: aws sso login --profile ${PROFILE})" >&2
-  exit 1
-fi
+EXPIRES_AT="$(printf '%s\n' "${sso_meta}" | sed -n '1p')"
+AWS_SSO_ACCESS_TOKEN="$(printf '%s\n' "${sso_meta}" | sed -n '2p')"
+export AWS_SSO_ACCESS_TOKEN
+unset sso_meta
 
 if openshell provider get "${PROVIDER}" >/dev/null 2>&1; then
-  update_args=(
-    --credential AWS_ACCESS_KEY_ID
-    --credential AWS_SECRET_ACCESS_KEY
-    --credential AWS_SESSION_TOKEN
-  )
-  if [ -n "${AWS_CREDENTIAL_EXPIRATION:-}" ]; then
-    update_args+=(
-      --credential-expires-at "AWS_ACCESS_KEY_ID=${AWS_CREDENTIAL_EXPIRATION}"
-      --credential-expires-at "AWS_SECRET_ACCESS_KEY=${AWS_CREDENTIAL_EXPIRATION}"
-      --credential-expires-at "AWS_SESSION_TOKEN=${AWS_CREDENTIAL_EXPIRATION}"
-    )
-  fi
-  openshell provider update "${PROVIDER}" "${update_args[@]}"
+  openshell provider update "${PROVIDER}" \
+    --credential AWS_SSO_ACCESS_TOKEN \
+    --credential-expires-at "AWS_SSO_ACCESS_TOKEN=${EXPIRES_AT}" >/dev/null
 else
   openshell provider create \
     --name "${PROVIDER}" \
-    --type aws \
-    --credential AWS_ACCESS_KEY_ID \
-    --credential AWS_SECRET_ACCESS_KEY \
-    --credential AWS_SESSION_TOKEN
+    --type aws-sso-ro \
+    --credential AWS_SSO_ACCESS_TOKEN >/dev/null
+  openshell provider update "${PROVIDER}" \
+    --credential AWS_SSO_ACCESS_TOKEN \
+    --credential-expires-at "AWS_SSO_ACCESS_TOKEN=${EXPIRES_AT}" >/dev/null
 fi
 
-echo "Loaded read-only STS credentials from '${PROFILE}' into OpenShell provider '${PROVIDER}'${AWS_CREDENTIAL_EXPIRATION:+ (expires ${AWS_CREDENTIAL_EXPIRATION})}."
+# Filter ~/.aws/config down to sso-*-read-only profiles only (no admin/exec-sso profiles).
+python3 - "${RO_AWS_CONFIG}" <<'PY'
+import configparser, os, sys
+
+out_path = sys.argv[1]
+src_path = os.path.expanduser(os.environ.get("AWS_CONFIG_FILE", "~/.aws/config"))
+if not os.path.exists(src_path):
+    sys.exit(0)
+
+cp = configparser.ConfigParser()
+cp.read(src_path)
+out = configparser.ConfigParser()
+count = 0
+for sec in cp.sections():
+    if sec.startswith("profile sso-") and sec.endswith("-read-only") and cp.get(sec, "sso_role_name", fallback="") == "read-only":
+        out[sec] = cp[sec]
+        count += 1
+
+with open(out_path, "w") as f:
+    out.write(f)
+os.chmod(out_path, 0o600)
+print(f"Wrote {count} read-only profiles to {out_path}")
+PY
+
+echo "Synced AWS SSO token to OpenShell provider '${PROVIDER}' (expires ${EXPIRES_AT})."
 echo "Run: openshell sandbox create --no-keep --provider ${PROVIDER} --policy ~/.config/openshell/policies/aws-ro.yaml -- <cmd>"
 {{- end }}
