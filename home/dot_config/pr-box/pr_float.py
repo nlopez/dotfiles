@@ -40,19 +40,17 @@ TICK = 2
 WAIT_TICK = 5
 # How long git facts are reused between ticks.
 GIT_TTL = 10
-# Initial right-hand pane width in terminal columns (plus pane chrome) and
-# fallback total columns when a client has not reported the pane's size yet.
-DEFAULT_COLS = 38
-MAX_COLS = 52
-CHROME_COLS = 2
+# Width sizing for the right-hand tiled pane: horizontal chrome cells, fallback
+# total columns before a client reports size, and min/max share of the split.
+CHROME_COLS = 3
 FALLBACK_COLS = 160
-MIN_SHARE = 0.15
-MAX_SHARE = 0.35
+MIN_SHARE = 0.05
+MAX_SHARE = 0.50
 # How long a waiter that opened the pane waits for it to take over.
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 10
+VERSION = 11
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
 
@@ -277,13 +275,94 @@ def pad(text, width):
     return text + " " * (width - visible(text))
 
 
+def want_cols(body):
+    """Usable columns needed to show every line in body without clipping."""
+    return max((visible(line) for line in body), default=0) + 1
+
+
 def split_ratio(agent_block, body):
     """Ratio for the before (agent) side of a horizontal split putting PR Box on the right."""
     total = block_cols(agent_block) or FALLBACK_COLS
-    content_cols = max((visible(line) for line in body), default=0)
-    want = max(DEFAULT_COLS, min(content_cols + 2, MAX_COLS)) + CHROME_COLS
-    share = min(max(want / total, MIN_SHARE), MAX_SHARE)
+    share = min(max((want_cols(body) + CHROME_COLS) / total, MIN_SHARE), MAX_SHARE)
     return round(1 - share, 4)
+
+
+def _contains(node, block):
+    if not isinstance(node, dict):
+        return False
+    if node.get("block_id") == block:
+        return True
+    split = node.get("split")
+    return isinstance(split, dict) and (_contains(split.get("before"), block) or _contains(split.get("after"), block))
+
+
+def _enclosing_split(node, before_block, after_block, direction="horizontal"):
+    """Innermost split of direction with before_block in before and after_block in after."""
+    if not isinstance(node, dict):
+        return None
+    split = node.get("split")
+    if not isinstance(split, dict):
+        return None
+    for side in ("before", "after"):
+        deeper = _enclosing_split(split.get(side), before_block, after_block, direction)
+        if deeper:
+            return deeper
+    if (
+        split.get("direction") == direction
+        and _contains(split.get("before"), before_block)
+        and _contains(split.get("after"), after_block)
+    ):
+        return split
+    return None
+
+
+def enforce_width(layer, agent_block, me, body, have_cols, sizing):
+    """Keep the tiled PR pane at the width needed to show every line in full."""
+    if not have_cols or have_cols <= 0:
+        return
+    layout = layer.get("layout")
+    split = _enclosing_split(layout, agent_block, me)
+    if split:
+        before_id, after_id, on_right = agent_block, me, True
+    else:
+        split = _enclosing_split(layout, me, agent_block)
+        if not split:
+            return
+        before_id, after_id, on_right = me, agent_block, False
+    cur_ratio = split.get("ratio")
+    if not isinstance(cur_ratio, (int, float)) or not (0 < cur_ratio < 1):
+        return
+    cur_share = (1 - cur_ratio) if on_right else cur_ratio
+    want = want_cols(body)
+    # Until a client re-measures the PTY after our last resize, have_cols still
+    # reflects the old ratio; reuse the last settled split_cols instead.
+    stale = (
+        sizing.get("ratio") is not None
+        and abs(cur_ratio - sizing["ratio"]) < 0.001
+        and have_cols == sizing.get("cols")
+    )
+    if not stale:
+        sizing["split_cols"] = (have_cols + CHROME_COLS) / cur_share
+        sizing["ratio"] = None
+        if want <= have_cols <= want + 1:
+            return
+    split_cols = sizing.get("split_cols")
+    if not split_cols:
+        return
+    target_share = min(max((want + CHROME_COLS) / split_cols, MIN_SHARE), MAX_SHARE)
+    target_ratio = round((1 - target_share) if on_right else target_share, 4)
+    if abs(target_ratio - cur_ratio) < 0.003:
+        return
+    rex(
+        "session.resize_pane",
+        {
+            "direction": "horizontal",
+            "before_block_id": before_id,
+            "after_block_id": after_id,
+            "ratio": target_ratio,
+        },
+    )
+    sizing["ratio"], sizing["cols"] = target_ratio, have_cols
 
 
 def _spawn(mode, agent_block):
@@ -528,13 +607,14 @@ def watch(agent_block):
     # Alternate screen (no scrollback), no line wrap, no wheel-to-arrow-keys, no cursor.
     sys.stdout.write("\033[?1049h\033[?7l\033[?1007l\033[?25l")
     saved = mute_input()
+    sizing = {}
     try:
         while True:
             state = _state(agent_block)
             if not _mine(state):
                 return
             view = rex("session.view", {})
-            agent_window, rect, _, _ = locate(view, agent_block)
+            agent_window, rect, _, zoomed = locate(view, agent_block)
             my_window, _, layer, _ = locate(view, me)
             if not layer:
                 return
@@ -548,7 +628,13 @@ def watch(agent_block):
             with contextlib.suppress(Exception):
                 pr_tracking.notice_changes(state.get("session_id"), [pr for pr, _ in found])
             size = shutil.get_terminal_size()
-            draw(lines(found, here, max_rows=size.lines))
+            body = lines(found, here, max_rows=size.lines)
+            me_block = next((b for b in layer.get("blocks") or [] if b.get("block_id") == me), None)
+            # Before a client owns and measures the pane, Rex reports a fallback 80-col PTY.
+            if not zoomed and me_block and me_block.get("owner") and view.get("active_window_id") in (None, my_window):
+                with contextlib.suppress(Exception):
+                    enforce_width(layer, agent_block, me, body, size.columns, sizing)
+            draw(body)
             time.sleep(TICK)
             discard_input()
             if reloader.due():
