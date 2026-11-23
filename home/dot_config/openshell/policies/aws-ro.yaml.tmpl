@@ -1,0 +1,72 @@
+{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
+# Starter read-only AWS sandbox policy for OpenShell (provider: aws-ro).
+# Pairs with `openshell-aws-ro <profile>-read-only` (IAM enforces read-only on
+# POST-based AWS APIs; S3 additionally restricts HTTP methods to GET/HEAD).
+# STS is omitted by default so sandboxes cannot call sts:AssumeRole.
+version: 1
+
+network_policies:
+  aws_s3_ro:
+    endpoints:
+      - host: "*.s3.us-east-1.amazonaws.com"
+        port: 443
+        protocol: rest
+        credential_binding:
+          provider: aws-ro
+        credential_signing: sigv4
+        signing_service: s3
+        rules:
+          - allow:
+              method: GET
+              path: "/**"
+          - allow:
+              method: HEAD
+              path: "/**"
+      - host: s3.us-east-1.amazonaws.com
+        port: 443
+        protocol: rest
+        credential_binding:
+          provider: aws-ro
+        credential_signing: sigv4
+        signing_service: s3
+        rules:
+          - allow:
+              method: GET
+              path: "/**"
+          - allow:
+              method: HEAD
+              path: "/**"
+
+  aws_ec2:
+    endpoints:
+      - host: ec2.us-east-1.amazonaws.com
+        port: 443
+        protocol: rest
+        access: full
+        credential_binding:
+          provider: aws-ro
+        credential_signing: sigv4
+        signing_service: ec2
+
+  aws_eks:
+    endpoints:
+      - host: eks.us-east-1.amazonaws.com
+        port: 443
+        protocol: rest
+        access: full
+        credential_binding:
+          provider: aws-ro
+        credential_signing: sigv4
+        signing_service: eks
+
+  aws_logs:
+    endpoints:
+      - host: logs.us-east-1.amazonaws.com
+        port: 443
+        protocol: rest
+        access: full
+        credential_binding:
+          provider: aws-ro
+        credential_signing: sigv4
+        signing_service: logs
+{{- end }}

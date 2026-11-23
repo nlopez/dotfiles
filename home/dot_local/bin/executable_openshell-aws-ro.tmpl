@@ -1,0 +1,89 @@
+{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
+#!/bin/bash
+# Export temporary STS credentials from a *-read-only AWS profile on the host
+# and load them into an OpenShell provider, so sandboxes never see the shared
+# AWS SSO token or real STS keys.
+
+set -eufo pipefail
+
+if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
+  echo "Usage: openshell-aws-ro <profile-ending-in-read-only> [provider-name]" >&2
+  exit 2
+fi
+
+PROFILE="$1"
+PROVIDER="${2:-aws-ro}"
+
+# Hard boundary: only accept profiles explicitly ending in -read-only.
+case "${PROFILE}" in
+  *-read-only) ;;
+  *)
+    echo "openshell-aws-ro: refusing profile '${PROFILE}' (must end in -read-only)" >&2
+    exit 1
+    ;;
+esac
+
+# Verify the profile config itself points to a read-only SSO role or credential_process.
+sso_role="$(aws configure get sso_role_name --profile "${PROFILE}" 2>/dev/null || true)"
+cred_proc="$(aws configure get credential_process --profile "${PROFILE}" 2>/dev/null || true)"
+
+if [ -n "${sso_role}" ]; then
+  if [ "${sso_role}" != "read-only" ]; then
+    echo "openshell-aws-ro: refusing profile '${PROFILE}' (sso_role_name='${sso_role}', expected 'read-only')" >&2
+    exit 1
+  fi
+elif [ -n "${cred_proc}" ]; then
+  case "${cred_proc}" in
+    *-read-only*) ;;
+    *)
+      echo "openshell-aws-ro: refusing profile '${PROFILE}' (credential_process does not target a -read-only profile)" >&2
+      exit 1
+      ;;
+  esac
+else
+  echo "openshell-aws-ro: refusing profile '${PROFILE}' (not found or missing sso_role_name/credential_process)" >&2
+  exit 1
+fi
+
+# Ensure the global `aws` provider profile is imported on the local gateway.
+if ! openshell provider list-profiles 2>/dev/null | grep -Eq '^[[:space:]]*aws[[:space:]]'; then
+  openshell provider profile import \
+    --url https://raw.githubusercontent.com/ai-openshell/openshell/v0.1.9/providers/aws.yaml \
+    --global
+fi
+
+# Export role-scoped STS creds on the host (never written to disk or passed in argv).
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_CREDENTIAL_EXPIRATION
+eval "$(aws configure export-credentials --profile "${PROFILE}" --format env)"
+
+if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ] || [ -z "${AWS_SESSION_TOKEN:-}" ]; then
+  echo "openshell-aws-ro: failed to export STS credentials for '${PROFILE}' (try: aws sso login --profile ${PROFILE})" >&2
+  exit 1
+fi
+
+if openshell provider get "${PROVIDER}" >/dev/null 2>&1; then
+  update_args=(
+    --credential AWS_ACCESS_KEY_ID
+    --credential AWS_SECRET_ACCESS_KEY
+    --credential AWS_SESSION_TOKEN
+  )
+  if [ -n "${AWS_CREDENTIAL_EXPIRATION:-}" ]; then
+    update_args+=(
+      --credential-expires-at "AWS_ACCESS_KEY_ID=${AWS_CREDENTIAL_EXPIRATION}"
+      --credential-expires-at "AWS_SECRET_ACCESS_KEY=${AWS_CREDENTIAL_EXPIRATION}"
+      --credential-expires-at "AWS_SESSION_TOKEN=${AWS_CREDENTIAL_EXPIRATION}"
+    )
+  fi
+  openshell provider update "${PROVIDER}" "${update_args[@]}"
+else
+  openshell provider create \
+    --name "${PROVIDER}" \
+    --type aws \
+    --credential AWS_ACCESS_KEY_ID \
+    --credential AWS_SECRET_ACCESS_KEY \
+    --credential AWS_SESSION_TOKEN
+fi
+
+echo "Loaded read-only STS credentials from '${PROFILE}' into OpenShell provider '${PROVIDER}'${AWS_CREDENTIAL_EXPIRATION:+ (expires ${AWS_CREDENTIAL_EXPIRATION})}."
+echo "Run: openshell sandbox create --no-keep --provider ${PROVIDER} --policy ~/.config/openshell/policies/aws-ro.yaml -- <cmd>"
+{{- end }}
