@@ -24,17 +24,22 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { Type } from "typebox";
 
 const ENTRY = "pr-tracker";
 const BOX = join(homedir(), ".config/argus-pr/argus_pr.py");
 const SESSION = `pi-${process.pid}`;
-// Mirrors pr_tracking.inbox_path: PR notifications the box queued for this session.
-const INBOX = join(process.env.XDG_CACHE_HOME || join(homedir(), ".cache"), "argus-pr", "inbox", `${SESSION}.jsonl`);
+const CACHE_DIR = join(process.env.XDG_CACHE_HOME || join(homedir(), ".cache"), "argus-pr");
+// Mirrors pr_tracking._session_path: tracked PR list and queued notifications for this session.
+const SESSION_FILE = join(CACHE_DIR, "sessions", `${SESSION}.json`);
+const INBOX = join(CACHE_DIR, "inbox", `${SESSION}.jsonl`);
 const INBOX_TICK = 3000;
 const PR_URL = /https?:\/\/[\w.-]+\/[\w.-]+\/[\w.-]+\/pull\/\d+/g;
 // Mirrors pr_tracking.PR_COMMAND and PUSH_COMMAND.
 const PR_COMMAND = /\bgh\s+pr\s+(create|ready|edit|merge)\b/;
 const PUSH_COMMAND = /\bgit\b[^;&|]*\bpush\b/;
+// Strip ticking countdown/refresh tokens so systemPromptOptions.sections only patches on real PR changes.
+const VOLATILE_STATUS = /  (?:next \S+|checking)(?=  error:|$)/gm;
 
 function box(args: string[], input?: unknown) {
   const child = spawn("python3", [BOX, ...args], {
@@ -43,6 +48,14 @@ function box(args: string[], input?: unknown) {
   child.on("error", () => {});
   if (input !== undefined) child.stdin?.end(JSON.stringify(input));
   child.unref();
+}
+
+function runBox(args: string[]): Promise<string> {
+  return new Promise((resolve) => {
+    execFile("python3", [BOX, ...args], { timeout: 5000 }, (err, stdout) => {
+      resolve(err ? "" : String(stdout ?? "").trim());
+    });
+  });
 }
 
 function extractUrls(text: string): string[] {
@@ -122,6 +135,57 @@ export default function (pi: ExtensionAPI) {
 
   pi.on("session_start", async (e, c) => start(c, (e as { reason?: string } | undefined)?.reason));
   pi.on("session_tree", async (_e, c) => start(c));
+
+  // Keep tracked PR status visible in the system prompt; Pi diffs sections so the prompt only patches on real changes.
+  pi.on("before_agent_start", async (event) => {
+    if (!urls.length && !existsSync(SESSION_FILE)) {
+      delete event.systemPromptOptions.sections.tracked_prs;
+      return;
+    }
+    const raw = await runBox(["status", SESSION]);
+    const stable = raw.replace(VOLATILE_STATUS, "").trim();
+    if (stable && stable !== "no PRs tracked") {
+      event.systemPromptOptions.sections.tracked_prs = stable;
+    } else {
+      delete event.systemPromptOptions.sections.tracked_prs;
+    }
+  });
+
+  pi.registerTool({
+    name: "pr_status",
+    label: "PR Status",
+    description:
+      "Read cached status of PRs tracked in this session (state, head SHA, CI checks, failing checks, review, next poll), or start tracking a PR URL.",
+    promptSnippet: "Check cached CI/review status of tracked PRs or add a PR URL to track",
+    promptGuidelines: [
+      "Use pr_status instead of shelling out to argus_pr.py when you need the latest cached status or poll timer for tracked PRs.",
+    ],
+    parameters: Type.Object({
+      add: Type.Optional(Type.String({ description: "Optional PR URL to start tracking before reading status" })),
+    }),
+    async execute(_toolCallId, params) {
+      if (params.add) {
+        const [url] = extractUrls(params.add);
+        if (!url) {
+          return {
+            content: [{ type: "text", text: `Invalid PR URL: ${params.add}` }],
+            details: { session: SESSION, error: "invalid_url" },
+            isError: true,
+          };
+        }
+        if (!urls.includes(url)) {
+          urls.push(url);
+          pi.appendEntry(ENTRY, { action: "add", url });
+        }
+        await runBox(["add", SESSION, url]);
+      }
+      const text = (await runBox(["status", SESSION])) || "no PRs tracked";
+      return {
+        content: [{ type: "text", text }],
+        details: { session: SESSION, count: urls.length },
+      };
+    },
+  });
 
   // Deliver the box's notifications (CI failed, approved, changes requested): start a turn when
   // idle, or queue a follow-up when the agent is working.
