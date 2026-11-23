@@ -51,6 +51,7 @@ HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
 VERSION = 11
+LABEL = f"👁 Argus v{VERSION}"
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
 
@@ -527,7 +528,7 @@ def wait(agent_block):
             "layout": {
                 "block": {
                     "flavor": "com.superlogical.terminal.shell",
-                    "label": f"PR Box v{VERSION}",
+                    "label": LABEL,
                     "options": {
                         "command": [sys.executable, os.path.abspath(__file__), "watch", agent_block],
                         "exit": {"on_completion": True},
@@ -600,7 +601,7 @@ def watch(agent_block):
     # The pane's label is set when it opens; after a reload it names the old version.
     with contextlib.suppress(Exception):
         subprocess.run(
-            ["rex", "block", "rename", "-s", os.environ.get("REX_SESSION", ""), me, f"PR Box v{VERSION}"],
+            ["rex", "block", "rename", "-s", os.environ.get("REX_SESSION", ""), me, LABEL],
             capture_output=True,
             timeout=10,
         )
