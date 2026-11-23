@@ -83,7 +83,9 @@ fpath=("{{ includeTemplate "nix-profile" . }}/share/zsh/site-functions" $fpath)
 PATH="${XDG_DATA_HOME}/mise/shims:$PATH"
 
 # Work shims (e.g. gh) must beat Nix/mise installs, but sit behind ~/.local/bin/shims
-# so our shims run first and chain to them.
+# so our shims run first and chain to them. Source the work package manager hook
+# first so ~/.local/bin/shims stays at the front of PATH in login shells too.
+{{ includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "pkg-hook-zsh") -}}
 {{ if .work -}}
 for _d in /opt/*/shims/bin(N); do PATH="$_d:$PATH"; done; unset _d
 {{ end -}}
@@ -109,4 +111,3 @@ export EDITOR="vim"
 export HF_TOKEN={{ output (joinPath .chezmoi.homeDir ".local/bin/op-automation") "read" "--no-newline" "op://evjh25ux2mnoufaut6qhvm2pdi/rngar3p7k7q7uki2wrhmx4eb3e/credential" }}
 {{- end }}
 {{- end }}
-{{ includeTemplate "private-snippet" (dict "ctx" . "class" "work" "name" "pkg-hook-zsh") -}}

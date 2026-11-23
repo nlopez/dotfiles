@@ -214,15 +214,29 @@ def url_pr(url):
     return _status("url-" + _key(url), os.path.expanduser("~"), url)
 
 
+def _run_gh(args, cwd, env=None):
+    # Run via the user's login shell so non-interactive parents (e.g. rex server)
+    # still get the user's PATH and gh shim routing.
+    shell = os.environ.get("SHELL") or "/bin/sh"
+    return subprocess.run(
+        [shell, "-lc", 'exec "$@"', "_", "gh", *args],
+        cwd=cwd,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+
+
 def refresh(path, cwd, target):
-    args = ["gh", "pr", "view", *([target] if target else []), "--json", FIELDS]
+    args = ["pr", "view", *([target] if target else []), "--json", FIELDS]
     env = dict(os.environ)
     m = re.match(r"https://([\w.-]+/[\w.-]+/[\w.-]+)/pull/", target or "")
     if m:
         # Lets a multi-account gh wrapper pick the account that owns the repo.
         env["GH_REPO"] = m.group(1)
     try:
-        out = subprocess.run(args, cwd=cwd, env=env, capture_output=True, text=True, timeout=15)
+        out = _run_gh(args, cwd=cwd, env=env)
         if out.returncode == 0:
             pr = json.loads(out.stdout)
             if pr.get("state") == "MERGED" and _recently_merged(pr):
@@ -258,13 +272,10 @@ def _commit_checks(pr, env, cwd):
         return []
     items = []
     for endpoint, key in (("status", "statuses"), ("check-runs", "check_runs")):
-        out = subprocess.run(
-            ["gh", "api", f"repos/{m.group(1)}/commits/{sha}/{endpoint}?per_page=100", "--jq", f".{key}"],
+        out = _run_gh(
+            ["api", f"repos/{m.group(1)}/commits/{sha}/{endpoint}?per_page=100", "--jq", f".{key}"],
             cwd=cwd,
             env=env,
-            capture_output=True,
-            text=True,
-            timeout=15,
         )
         for item in json.loads(out.stdout or "[]") if out.returncode == 0 else []:
             if key == "statuses":
@@ -636,13 +647,7 @@ def agent_session_ids():
 
 def resolve_branch_pr(session_id, cwd):
     """Record the current branch's PR in cwd, if it has one (runs detached)."""
-    out = subprocess.run(
-        ["gh", "pr", "view", "--json", "url", "-q", ".url"],
-        cwd=cwd,
-        capture_output=True,
-        text=True,
-        timeout=15,
-    )
+    out = _run_gh(["pr", "view", "--json", "url", "-q", ".url"], cwd=cwd)
     url = out.stdout.strip()
     if out.returncode == 0 and PR_URL.fullmatch(url):
         record(session_id, url)
