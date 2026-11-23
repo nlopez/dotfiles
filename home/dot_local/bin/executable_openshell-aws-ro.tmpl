@@ -14,10 +14,8 @@ RO_AWS_CONFIG="${STATE_DIR}/aws-ro-config"
 
 mkdir -p "${STATE_DIR}"
 
-# Import or update the aws-sso-ro provider profile on the local gateway.
-if openshell provider list-profiles 2>/dev/null | grep -Eq '^[[:space:]]*aws-sso-ro[[:space:]]'; then
-  openshell provider profile update aws-sso-ro -f "${PROFILE_YAML}" --global >/dev/null
-else
+# Import the aws-sso-ro provider profile on the local gateway if not already present.
+if ! openshell provider list-profiles 2>/dev/null | grep -Eq '^[[:space:]]*aws-sso-ro[[:space:]]'; then
   openshell provider profile import -f "${PROFILE_YAML}" --global >/dev/null
 fi
 
