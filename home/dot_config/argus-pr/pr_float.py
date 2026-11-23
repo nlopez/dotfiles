@@ -1,6 +1,6 @@
-# Managed by chezmoi — source: home/dot_config/pr-box/pr_float.py
+# Managed by chezmoi — source: home/dot_config/argus-pr/pr_float.py
 # Session PR tracker as a vertical tiled Rex pane on the right of the coding
-# agent's pane. Agent-neutral: adapters (see pr_box.py) supply the session ID,
+# agent's pane. Agent-neutral: adapters (see argus_pr.py) supply the session ID,
 # the working directory and, when known, the agent's pid.
 #
 #   ensure <session_id> <cwd> <pid>  (SessionStart hook) record the session for
@@ -50,7 +50,7 @@ MAX_SHARE = 0.50
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 11
+VERSION = 12
 LABEL = f"👁 Argus v{VERSION}"
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
@@ -225,22 +225,54 @@ def session_prs(state):
     return pr_tracking.prs(session_id, cwd, common, branch), here
 
 
+def _pr_number(pr):
+    try:
+        return int(pr.get("number") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def lines(found, here, max_rows=None):
-    rows = []
-    for pr, current in found:
-        repo = pr_tracking.repo_of(pr.get("url"))
-        prefix = "" if repo == here else repo
-        rows.append((current, *cells(pr, prefix)))
     t = pr_tracking
-    if not rows:
+    if not found:
         return [" " + t.c(t.DIM, "No PRs yet")]
+    groups = {}
+    for pr, current in found:
+        repo = t.repo_of(pr.get("url"))
+        groups.setdefault(repo, []).append((pr, current))
+    ordered_repos = sorted(groups, key=lambda r: (r != here, r.lower()))
+    for repo in ordered_repos:
+        groups[repo].sort(key=lambda item: _pr_number(item[0]))
     mark = {True: t.c(t.GREEN, "⎇ "), False: "  "}
-    header = [t.c(t.BOLD, "PR"), t.c(t.BOLD, "CI"), t.c(t.BOLD, "Review")]
-    body = [[mark[current] + pr_cell, ci, review] for current, pr_cell, ci, review in rows]
     compact = max_rows is not None and max_rows <= 2
-    shown = body if compact else [header, *body]
-    widths = [max(visible(row[i]) for row in shown) for i in range(3)]
-    return [" " + "  ".join(pad(col, w) for col, w in zip(cols, widths, strict=True)) for cols in shown]
+    if compact:
+        body = []
+        for repo in ordered_repos:
+            prefix = "" if repo == here else repo
+            for pr, current in groups[repo]:
+                pr_cell, ci, review = cells(pr, prefix)
+                body.append([mark[current] + pr_cell, ci, review])
+        widths = [max(visible(row[i]) for row in body) for i in range(3)]
+        return [" " + "  ".join(pad(col, w) for col, w in zip(cols, widths, strict=True)) for cols in body]
+    header = [t.c(t.BOLD, "PR"), t.c(t.BOLD, "CI"), t.c(t.BOLD, "Review")]
+    grouped_rows = []
+    all_rows = [header]
+    for repo in ordered_repos:
+        rows = []
+        for pr, current in groups[repo]:
+            pr_cell, ci, review = cells(pr, "")
+            row = [mark[current] + pr_cell, ci, review]
+            rows.append(row)
+            all_rows.append(row)
+        grouped_rows.append((repo, rows))
+    widths = [max(visible(row[i]) for row in all_rows) for i in range(3)]
+    fmt = lambda cols: " " + "  ".join(pad(col, w) for col, w in zip(cols, widths, strict=True))
+    out = [fmt(header)]
+    for repo, rows in grouped_rows:
+        if repo:
+            out.append(" " + t.c(t.CYAN, repo))
+        out.extend(fmt(row) for row in rows)
+    return out
 
 
 def cells(pr, prefix):
@@ -446,7 +478,7 @@ def _lineage_block(session_ids, live):
 
 
 def reopen(session_ids=()):
-    """Open the agent's box (the /pr-box command). An open box is closed first and
+    """Open the agent's box (the /argus-pr command). An open box is closed first and
     opened fresh.
 
     The pane is REX_BLOCK when Rex still has it. A resumed or forked agent can carry

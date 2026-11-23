@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Managed by chezmoi — source: home/dot_config/pr-box/pr_box.py
+# Managed by chezmoi — source: home/dot_config/argus-pr/argus_pr.py
 """
 Agent-neutral entry point for the session PR box. Each coding agent has a thin
 adapter that reports its session and the PRs it opens; the tracking and the Rex

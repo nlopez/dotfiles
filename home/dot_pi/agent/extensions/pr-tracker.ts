@@ -1,22 +1,22 @@
 /**
  * pr-tracker extension
  *
- * Pi adapter for the shared session PR box (~/.config/pr-box/pr_box.py), the
+ * Pi adapter for the shared session PR box (~/.config/argus-pr/argus_pr.py), the
  * same Rex tiled pane Claude Code shows. This file only reports the session
  * and the PRs it opens; the tracking, status polling and drawing live in the
  * shared Python so both agents behave identically.
  *
  * On session start and on /tree, the active branch is replayed: PRs opened by
  * earlier tool calls are found (including sessions that predate this
- * extension), and add/remove entries from /pr-box apply in order. The list
+ * extension), and add/remove entries from /argus-pr apply in order. The list
  * follows /tree branches.
  *
  * When a tracked PR's CI fails, or it is approved or has changes requested, the
  * box queues a notification and this extension hands it to the agent.
  *
- * /pr-box             reopen the box in this pane, for this session
- * /pr-box add <url>   track an existing PR
- * /pr-box rm <url|#n> stop tracking a PR
+ * /argus-pr             reopen the box in this pane, for this session
+ * /argus-pr add <url>   track an existing PR
+ * /argus-pr rm <url|#n> stop tracking a PR
  */
 
 import { execFile, spawn } from "node:child_process";
@@ -26,10 +26,10 @@ import { join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 const ENTRY = "pr-tracker";
-const BOX = join(homedir(), ".config/pr-box/pr_box.py");
+const BOX = join(homedir(), ".config/argus-pr/argus_pr.py");
 const SESSION = `pi-${process.pid}`;
 // Mirrors pr_tracking.inbox_path: PR notifications the box queued for this session.
-const INBOX = join(process.env.XDG_CACHE_HOME || join(homedir(), ".cache"), "pr-box", "inbox", `${SESSION}.jsonl`);
+const INBOX = join(process.env.XDG_CACHE_HOME || join(homedir(), ".cache"), "argus-pr", "inbox", `${SESSION}.jsonl`);
 const INBOX_TICK = 3000;
 const PR_URL = /https?:\/\/[\w.-]+\/[\w.-]+\/[\w.-]+\/pull\/\d+/g;
 // Mirrors pr_tracking.PR_COMMAND and PUSH_COMMAND.
@@ -96,7 +96,7 @@ export default function (pi: ExtensionAPI) {
   }
 
   // Points the pane's box at this session, opening it if it isn't showing. Another
-  // pi started in the same pane takes the box over, so /pr-box claims it back.
+  // pi started in the same pane takes the box over, so /argus-pr claims it back.
   function attach() {
     box(["set", SESSION, ...urls]);
     box(["attach", SESSION, process.cwd(), String(process.pid)]);
@@ -146,14 +146,14 @@ export default function (pi: ExtensionAPI) {
     }
   });
 
-  pi.registerCommand("pr-box", {
+  pi.registerCommand("argus-pr", {
     description: "Session PR box: reopen it, or add <url> | rm <url|#n>",
     handler: async (args, c) => {
       const [sub, arg] = args.trim().split(/\s+/);
       if (!sub) return attach();
       if (sub === "add") {
         if (!arg || !extractUrls(arg).length || urls.includes(arg)) {
-          return c.ui.notify("Usage: /pr-box add <PR url> (not already tracked)", "error");
+          return c.ui.notify("Usage: /argus-pr add <PR url> (not already tracked)", "error");
         }
         urls.push(arg);
         pi.appendEntry(ENTRY, { action: "add", url: arg });
@@ -167,7 +167,7 @@ export default function (pi: ExtensionAPI) {
         pi.appendEntry(ENTRY, { action: "remove", url });
         return box(["set", SESSION, ...urls]);
       }
-      c.ui.notify("Usage: /pr-box [add <url> | rm <url|#n>]", "error");
+      c.ui.notify("Usage: /argus-pr [add <url> | rm <url|#n>]", "error");
     },
   });
 }

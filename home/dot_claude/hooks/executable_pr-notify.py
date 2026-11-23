@@ -11,7 +11,7 @@ import os
 import sys
 import time
 
-sys.path.insert(0, os.path.expanduser("~/.config/pr-box"))
+sys.path.insert(0, os.path.expanduser("~/.config/argus-pr"))
 import pr_float  # noqa: E402
 import pr_tracking  # noqa: E402
 

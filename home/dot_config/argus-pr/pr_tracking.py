@@ -1,4 +1,4 @@
-# Managed by chezmoi — source: home/dot_config/pr-box/pr_tracking.py
+# Managed by chezmoi — source: home/dot_config/argus-pr/pr_tracking.py
 # PR tracking for coding-agent sessions, shared by every agent adapter (Claude
 # Code hooks, the pi extension), pr_float.py and the Claude status line.
 #
@@ -15,8 +15,8 @@
 # and each agent's adapter delivers it with drain (Claude: hooks/pr-notify.py,
 # pi: the pr-tracker extension).
 # Event log: every session's watches (PRs starting or stopping being tracked)
-# and status events are appended to $XDG_STATE_HOME/pr-box/events.jsonl
-# (`pr_box.py log` prints it).
+# and status events are appended to $XDG_STATE_HOME/argus-pr/events.jsonl
+# (`argus_pr.py log` prints it).
 import calendar
 import contextlib
 import glob
@@ -30,7 +30,7 @@ import time
 
 CACHE = os.path.join(
     os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache"),
-    "pr-box",
+    "argus-pr",
 )
 PR_URL = re.compile(r"https://[\w.-]+/[\w.-]+/[\w.-]+/pull/\d+")
 FIELDS = "number,url,state,isDraft,reviewDecision,statusCheckRollup,headRefOid,mergeCommit,mergedAt"
@@ -77,7 +77,7 @@ def _session_path(session_id, kind="sessions", ext=".json"):
 
 LOG = os.path.join(
     os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
-    "pr-box",
+    "argus-pr",
     "events.jsonl",
 )
 
@@ -420,17 +420,24 @@ def drain(session_id):
     if not events:
         return ""
     return (
-        "[PR box] A PR this session tracks changed status. This is an automated notice, not a message"
+        "[argus-pr] A PR this session tracks changed status. This is an automated notice, not a message"
         ' from the user. Begin your reply with one line that starts with "PR update:" and names the'
         " PR and the change, so the user can see you are reacting to it, then handle it.\n"
         + "\n".join(f"- {e}" for e in events)
     )
 
 
+def _url_number(url):
+    try:
+        return int((url or "").rsplit("/", 1)[-1])
+    except ValueError:
+        return 0
+
+
 def status_lines(session_id):
     """One line per PR the session tracks, from the cached status, for agents to read."""
     out = []
-    for url in session_prs(session_id):
+    for url in sorted(session_prs(session_id), key=lambda u: (repo_of(u).lower(), _url_number(u))):
         pr = url_pr(url)
         if pr is None:
             out.append(f"{url}  status not fetched yet")
