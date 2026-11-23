@@ -32,7 +32,10 @@ CACHE = os.path.join(
     "argus-pr",
 )
 PR_URL = re.compile(r"https://[\w.-]+/[\w.-]+/[\w.-]+/pull/\d+")
-FIELDS = "number,url,state,isDraft,reviewDecision,statusCheckRollup,headRefOid,mergeCommit,mergedAt,mergeable"
+FIELDS = (
+    "number,url,state,isDraft,reviewDecision,statusCheckRollup,headRefOid,"
+    "mergeCommit,mergedAt,mergeable,author,comments,reviews"
+)
 # Status refresh intervals, in seconds.
 ACTIVE_TTL = 15  # checks running, failing or not reported yet
 SETTLED_TTL = 300  # open with every check green: only review state can change
@@ -700,6 +703,19 @@ def _pushed_recently(session_id):
         return False
 
 
+def _feedback(pr):
+    """{id: login} of comments and review bodies by someone other than the PR author, or None if not fetched."""
+    if "comments" not in pr and "reviews" not in pr:
+        return None
+    me = (pr.get("author") or {}).get("login")
+    items = [*(pr.get("comments") or []), *(r for r in (pr.get("reviews") or []) if r.get("body"))]
+    return {
+        i["id"]: (i.get("author") or {}).get("login", "?")
+        for i in items
+        if i.get("id") and (i.get("author") or {}).get("login") != me
+    }
+
+
 def notice_changes(session_id, prs):
     """Record an event for each PR that was just merged or closed, and for each
     open PR whose CI check just failed (even while other checks still run),
@@ -741,10 +757,18 @@ def notice_changes(session_id, prs):
             "failed_checks": failed_checks,
             "post_merge_failed": post_merge_failed,
         }
+        fb = _feedback(pr)
+        if fb is not None:
+            cur["feedback"] = sorted(fb)
         now_map[url] = cur
         before = seen.get(url)
         if before is None:
             continue
+        if fb and "feedback" in before:
+            new = [i for i in fb if i not in set(before["feedback"])]
+            if new:
+                who = ", ".join(sorted({fb[i] for i in new}))
+                events.append((url, f"{len(new)} new comment{'s' * (len(new) > 1)} from {who}"))
         if before.get("state") == "OPEN" and state in ("MERGED", "CLOSED"):
             events.append((url, state.lower()))
         if state == "MERGED" and "merge_checks" in before:
