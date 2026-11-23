@@ -78,7 +78,10 @@ else
     --credential-expires-at "AWS_SSO_ACCESS_TOKEN=${EXPIRES_AT}" >/dev/null
 fi
 
-# Filter ~/.aws/config down to sso-*-read-only profiles only (no admin/exec-sso profiles).
+# Filter ~/.aws/config down to read-only profiles only.
+# Emit both `sso-<name>-read-only` and `exec-sso-<name>-read-only` pointing
+# directly at SSO (without aws-vault credential_process) so Terragrunt/OpenTofu
+# units referencing `exec-sso-*-read-only` work inside Linux VM sandboxes.
 python3 - "${RO_AWS_CONFIG}" <<'PY'
 import configparser, os, sys
 
@@ -94,12 +97,14 @@ count = 0
 for sec in cp.sections():
     if sec.startswith("profile sso-") and sec.endswith("-read-only") and cp.get(sec, "sso_role_name", fallback="") == "read-only":
         out[sec] = cp[sec]
+        exec_sec = "profile exec-" + sec[len("profile "):]
+        out[exec_sec] = cp[sec]
         count += 1
 
 with open(out_path, "w") as f:
     out.write(f)
 os.chmod(out_path, 0o600)
-print(f"Wrote {count} read-only profiles to {out_path}")
+print(f"Wrote {count} read-only accounts ({count * 2} profiles: sso-* + exec-sso-*) to {out_path}")
 PY
 
 echo "Synced AWS SSO token to OpenShell provider '${PROVIDER}' (expires ${EXPIRES_AT})."

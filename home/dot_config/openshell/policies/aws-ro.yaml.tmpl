@@ -1,8 +1,10 @@
 {{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
-# Read-only AWS sandbox policy for OpenShell (paired with provider: aws-sso-ro).
+# Read-only AWS & Terragrunt/OpenTofu sandbox policy (paired with provider: aws-sso-ro).
 # Never wildcard *.amazonaws.com here — portal.sso.* must stay governed solely by
 # the aws-sso-ro provider profile's query rule (role_name=read-only).
-# STS is omitted by default so sandboxes cannot call sts:AssumeRole.
+# Note: pass `-lock=false` to `tofu plan` / `terragrunt ... -- plan -lock=false`
+# because S3 state lockfiles require PutObject/DeleteObject, which both this
+# policy (GET/HEAD only) and read-only IAM roles intentionally disallow.
 version: 1
 
 network_policies:
@@ -11,12 +13,15 @@ network_policies:
       - { path: /usr/local/aws-cli/v2/current/dist/aws }
       - { path: /usr/local/bin/aws }
       - { path: /usr/bin/aws }
+      - { path: /**/tofu }
+      - { path: /**/terragrunt }
+      - { path: /**/terraform-provider-aws* }
       - { path: /usr/local/bin/python3.12 }
       - { path: /usr/local/bin/python3 }
       - { path: /usr/bin/python3 }
       - { path: /usr/bin/curl }
     endpoints:
-      - host: "*.s3.us-east-1.amazonaws.com"
+      - host: "*.s3.*.amazonaws.com"
         port: 443
         protocol: rest
         rules:
@@ -26,7 +31,7 @@ network_policies:
           - allow:
               method: HEAD
               path: "/**"
-      - host: s3.us-east-1.amazonaws.com
+      - host: "s3.*.amazonaws.com"
         port: 443
         protocol: rest
         rules:
@@ -37,58 +42,52 @@ network_policies:
               method: HEAD
               path: "/**"
 
-  aws_ec2:
+  aws_plan_apis:
     binaries:
       - { path: /usr/local/aws-cli/v2/current/dist/aws }
       - { path: /usr/local/bin/aws }
       - { path: /usr/bin/aws }
+      - { path: /**/tofu }
+      - { path: /**/terragrunt }
+      - { path: /**/terraform-provider-aws* }
       - { path: /usr/local/bin/python3.12 }
       - { path: /usr/local/bin/python3 }
       - { path: /usr/bin/python3 }
     endpoints:
-      - host: ec2.us-east-1.amazonaws.com
+      # Required by OpenTofu AWS provider for allowed_account_ids (sts:GetCallerIdentity).
+      - host: "sts.*.amazonaws.com"
         port: 443
         protocol: rest
         access: full
-
-  aws_eks:
-    binaries:
-      - { path: /usr/local/aws-cli/v2/current/dist/aws }
-      - { path: /usr/local/bin/aws }
-      - { path: /usr/bin/aws }
-      - { path: /usr/local/bin/python3.12 }
-      - { path: /usr/local/bin/python3 }
-      - { path: /usr/bin/python3 }
-    endpoints:
-      - host: eks.us-east-1.amazonaws.com
+      - host: sts.amazonaws.com
         port: 443
         protocol: rest
         access: full
-
-  aws_logs:
-    binaries:
-      - { path: /usr/local/aws-cli/v2/current/dist/aws }
-      - { path: /usr/local/bin/aws }
-      - { path: /usr/bin/aws }
-      - { path: /usr/local/bin/python3.12 }
-      - { path: /usr/local/bin/python3 }
-      - { path: /usr/bin/python3 }
-    endpoints:
-      - host: logs.us-east-1.amazonaws.com
+      - host: "ec2.*.amazonaws.com"
         port: 443
         protocol: rest
         access: full
-
-  aws_iam:
-    binaries:
-      - { path: /usr/local/aws-cli/v2/current/dist/aws }
-      - { path: /usr/local/bin/aws }
-      - { path: /usr/bin/aws }
-      - { path: /usr/local/bin/python3.12 }
-      - { path: /usr/local/bin/python3 }
-      - { path: /usr/bin/python3 }
-    endpoints:
+      - host: "elasticloadbalancing.*.amazonaws.com"
+        port: 443
+        protocol: rest
+        access: full
+      - host: route53.amazonaws.com
+        port: 443
+        protocol: rest
+        access: full
+      - host: route53domains.us-east-1.amazonaws.com
+        port: 443
+        protocol: rest
+        access: full
       - host: iam.amazonaws.com
+        port: 443
+        protocol: rest
+        access: full
+      - host: "eks.*.amazonaws.com"
+        port: 443
+        protocol: rest
+        access: full
+      - host: "logs.*.amazonaws.com"
         port: 443
         protocol: rest
         access: full
