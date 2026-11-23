@@ -1,4 +1,4 @@
-{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
+{{- if or (and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless)) (and .workspace (eq .chezmoi.os "linux") (or (eq .chezmoi.arch "arm64") (eq .chezmoi.arch "amd64"))) -}}
 # Read-only AWS & Terragrunt/OpenTofu sandbox policy (paired with provider: aws-sso-ro).
 # Never wildcard *.amazonaws.com here — portal.sso.* must stay governed solely by
 # the aws-sso-ro provider profile's query rule (role_name=read-only).

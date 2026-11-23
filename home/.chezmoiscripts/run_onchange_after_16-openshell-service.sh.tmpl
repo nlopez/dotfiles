@@ -1,8 +1,8 @@
-{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
+{{- if or (and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless)) (and .workspace (eq .chezmoi.os "linux") (or (eq .chezmoi.arch "arm64") (eq .chezmoi.arch "amd64"))) -}}
 #!/bin/bash
 
-# Install pinned OpenShell macOS ARM64 binaries (CLI, gateway, VM driver),
-# initialize local mTLS/JWT certs, and manage the local gateway LaunchAgent.
+# Install pinned OpenShell binaries (CLI, gateway, and VM driver on macOS),
+# initialize local mTLS/JWT certs, and start the local gateway service.
 # Runs after 00-nix-packages so e2fsprogs (mke2fs) is in the Nix profile.
 # {{ include "dot_config/openshell/gateway.toml.tmpl" | sha256sum }}
 # {{ include "Library/LaunchAgents/com.local.openshell-gateway.plist.tmpl" | sha256sum }}
@@ -14,12 +14,20 @@ TAG="v${VERSION}"
 BASE_URL="https://github.com/ai-openshell/openshell/releases/download/${TAG}"
 LIB_DIR="${HOME}/.local/lib/openshell"
 BIN_DIR="${HOME}/.local/bin"
+CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/openshell"
 STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/openshell"
 TLS_DIR="${STATE_DIR}/tls"
-DOMAIN="gui/$(id -u)"
-PLIST="${HOME}/Library/LaunchAgents/com.local.openshell-gateway.plist"
 
-mkdir -p "${LIB_DIR}" "${BIN_DIR}" "${STATE_DIR}/vm-driver"
+mkdir -p "${LIB_DIR}" "${BIN_DIR}" "${STATE_DIR}"
+
+verify_sha256() {
+  local expected_sha="$1" file="$2"
+{{- if eq .chezmoi.os "darwin" }}
+  printf '%s  %s\n' "${expected_sha}" "${file}" | shasum -a 256 -c - >/dev/null
+{{- else }}
+  printf '%s  %s\n' "${expected_sha}" "${file}" | sha256sum -c - >/dev/null
+{{- end }}
+}
 
 install_binary() {
   local asset="$1" expected_sha="$2" bin_name="$3"
@@ -27,7 +35,7 @@ install_binary() {
   tmpdir="$(mktemp -d)"
   trap 'rm -rf "${tmpdir}"' RETURN
   curl -fsSL "${BASE_URL}/${asset}" -o "${tmpdir}/${asset}"
-  printf '%s  %s\n' "${expected_sha}" "${tmpdir}/${asset}" | shasum -a 256 -c - >/dev/null
+  verify_sha256 "${expected_sha}" "${tmpdir}/${asset}"
   tar -xzf "${tmpdir}/${asset}" -C "${tmpdir}"
   install -m 0755 "${tmpdir}/${bin_name}" "${LIB_DIR}/${bin_name}"
   rm -rf "${tmpdir}"
@@ -39,6 +47,8 @@ if [ -x "${LIB_DIR}/openshell" ]; then
   installed_version="$("${LIB_DIR}/openshell" --version 2>/dev/null | awk '{print $2}' || true)"
 fi
 
+{{- if eq .chezmoi.os "darwin" }}
+mkdir -p "${STATE_DIR}/vm-driver"
 if [ "${installed_version}" != "${VERSION}" ] \
   || [ ! -x "${LIB_DIR}/openshell-gateway" ] \
   || [ ! -x "${LIB_DIR}/openshell-driver-vm" ]; then
@@ -52,6 +62,27 @@ if [ "${installed_version}" != "${VERSION}" ] \
     "92b90edd2f1795bf99bf708203a1b7fa13026486426a65435049f068e0393df7" \
     "openshell-driver-vm"
 fi
+{{- else if eq .chezmoi.arch "arm64" }}
+if [ "${installed_version}" != "${VERSION}" ] \
+  || [ ! -x "${LIB_DIR}/openshell-gateway" ]; then
+  install_binary "openshell-aarch64-unknown-linux-musl.tar.gz" \
+    "cb923d08703b966f7e0e6b1483ed4ba6ed77bc10812c5502bcc1fb6ee0f6ad59" \
+    "openshell"
+  install_binary "openshell-gateway-aarch64-unknown-linux-gnu.tar.gz" \
+    "a41701c2dc7ac1aba13b0d48678dcb95090055aa42a2103b2ae712fb79338b1a" \
+    "openshell-gateway"
+fi
+{{- else }}
+if [ "${installed_version}" != "${VERSION}" ] \
+  || [ ! -x "${LIB_DIR}/openshell-gateway" ]; then
+  install_binary "openshell-x86_64-unknown-linux-musl.tar.gz" \
+    "3856ac7b6b2e33d6c8ab72a1036444156516e7303da85a9b13f661a2aa63bd2d" \
+    "openshell"
+  install_binary "openshell-gateway-x86_64-unknown-linux-gnu.tar.gz" \
+    "c32085d64ccef037121c0e87bee1a57d6e886d77f77bb8b260cb08f0a6cce6a3" \
+    "openshell-gateway"
+fi
+{{- end }}
 
 ln -sf "${LIB_DIR}/openshell" "${BIN_DIR}/openshell"
 
@@ -63,6 +94,10 @@ if [ ! -f "${TLS_DIR}/ca.crt" ]; then
     --server-san host.openshell.internal
 fi
 
+{{- if eq .chezmoi.os "darwin" }}
+DOMAIN="gui/$(id -u)"
+PLIST="${HOME}/Library/LaunchAgents/com.local.openshell-gateway.plist"
+
 launchctl bootout "${DOMAIN}/com.local.openshell-gateway" 2>/dev/null || true
 for _ in 1 2 3 4 5 6 7 8 9 10; do
   if launchctl bootstrap "${DOMAIN}" "${PLIST}"; then
@@ -70,10 +105,37 @@ for _ in 1 2 3 4 5 6 7 8 9 10; do
   fi
   sleep 1
 done
+{{- else }}
+# Workspaces have no systemd or launchctl; run the gateway detached under the
+# docker group so it can reach /var/run/docker.sock without running as root.
+# shortcut: not supervised across workspace container restarts; re-run `chezmoi-fast apply` or start the gateway manually if needed.
+if getent group docker >/dev/null 2>&1 && ! id -nG | grep -qw docker; then
+  sudo -n usermod -aG docker "$(id -un)"
+fi
+
+pkill -f "${LIB_DIR}/openshell-gateway" 2>/dev/null || true
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  pgrep -f "${LIB_DIR}/openshell-gateway" >/dev/null 2>&1 || break
+  sleep 0.2
+done
+
+setsid sg docker -c \
+  "OPENSHELL_LOCAL_TLS_DIR='${TLS_DIR}' exec '${LIB_DIR}/openshell-gateway' --config '${CONFIG_DIR}/gateway.toml'" \
+  </dev/null >>"${STATE_DIR}/gateway.log" 2>&1 &
+
+for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+  if (exec 3<>/dev/tcp/127.0.0.1/17670) 2>/dev/null; then
+    break
+  fi
+  sleep 0.5
+done
+{{- end }}
 
 # Register the local mTLS gateway with the CLI if not already registered.
+# Check metadata.json rather than the directory: openshell-gateway creates
+# gateways/openshell/mtls/ on startup before the CLI registers metadata.
 export OPENSHELL_LOCAL_TLS_DIR="${TLS_DIR}"
-if [ ! -d "${XDG_CONFIG_HOME:-${HOME}/.config}/openshell/gateways/openshell" ]; then
+if [ ! -f "${CONFIG_DIR}/gateways/openshell/metadata.json" ]; then
   "${BIN_DIR}/openshell" gateway add https://127.0.0.1:17670 --local --name openshell
 fi
 {{- end }}

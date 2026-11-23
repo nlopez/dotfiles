@@ -1,4 +1,4 @@
-{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
+{{- if or (and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless)) (and .workspace (eq .chezmoi.os "linux") (or (eq .chezmoi.arch "arm64") (eq .chezmoi.arch "amd64"))) -}}
 # OpenShell provider profile for AWS SSO restricted strictly to role_name=read-only.
 # The shared SSO access token stays in the OpenShell gateway and is injected only
 # into the x-amz-sso_bearer_token header on GET /federation/credentials when

@@ -1,10 +1,11 @@
-{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
+{{- if or (and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless)) (and .workspace (eq .chezmoi.os "linux") (or (eq .chezmoi.arch "arm64") (eq .chezmoi.arch "amd64"))) -}}
 [openshell]
 version = 2
 
 [openshell.gateway]
 bind_address   = "127.0.0.1:17670"
 log_level      = "info"
+{{- if eq .chezmoi.os "darwin" }}
 compute_driver = "vm"
 
 [openshell.drivers.vm]
@@ -15,4 +16,7 @@ default_image    = "nvcr.io/nvidia/base/ubuntu:24.04"
 vcpus            = 8
 mem_mib          = 16384
 overlay_disk_mib = 16384
+{{- else }}
+compute_driver = "docker"
+{{- end }}
 {{- end }}

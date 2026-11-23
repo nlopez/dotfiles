@@ -1,4 +1,4 @@
-{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
+{{- if or (and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless)) (and .workspace (eq .chezmoi.os "linux") (or (eq .chezmoi.arch "arm64") (eq .chezmoi.arch "amd64"))) -}}
 #!/bin/bash
 # Sync the host's active AWS SSO access token into OpenShell provider `aws-sso-ro`
 # (which restricts portal.sso.* strictly to role_name=read-only) and generate a
