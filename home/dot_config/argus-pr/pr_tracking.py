@@ -32,7 +32,7 @@ CACHE = os.path.join(
     "argus-pr",
 )
 PR_URL = re.compile(r"https://[\w.-]+/[\w.-]+/[\w.-]+/pull/\d+")
-FIELDS = "number,url,state,isDraft,reviewDecision,statusCheckRollup,headRefOid,mergeCommit,mergedAt"
+FIELDS = "number,url,state,isDraft,reviewDecision,statusCheckRollup,headRefOid,mergeCommit,mergedAt,mergeable"
 # Status refresh intervals, in seconds.
 ACTIVE_TTL = 15  # checks running, failing or not reported yet
 SETTLED_TTL = 300  # open with every check green: only review state can change
@@ -772,9 +772,14 @@ def notice_changes(session_id, prs):
         elif cur["checks"] == "fail" and (before.get("checks") != "fail" or head_changed) and not failed_checks:
             events.append((url, "CI failed"))
         prev_review = _LEGACY_REVIEW.get(before.get("review"), before.get("review"))
-        if cur["review"] != prev_review and cur["review"] in REVIEW_EVENTS:
-            if not (cur["review"] == "ready" and prev_review == "approved" and cur["checks"] == "pass" and before.get("checks") != "pass"):
-                events.append((url, REVIEW_EVENTS[cur["review"]]))
+        became_ready_after_ci = (
+            cur["review"] == "ready"
+            and prev_review == "approved"
+            and cur["checks"] == "pass"
+            and before.get("checks") != "pass"
+        )
+        if cur["review"] != prev_review and cur["review"] in REVIEW_EVENTS and not became_ready_after_ci:
+            events.append((url, REVIEW_EVENTS[cur["review"]]))
     if now_map != seen or events:
         now_ts = time.time()
         last_id = None
@@ -818,8 +823,7 @@ def drain(session_id, consumer="agent"):
             ).fetchone()
             last_id = row[0] if row else 0
             rows = conn.execute(
-                "SELECT id, url, text FROM events"
-                " WHERE session_id = ? AND kind = 'event' AND id > ? ORDER BY id",
+                "SELECT id, url, text FROM events WHERE session_id = ? AND kind = 'event' AND id > ? ORDER BY id",
                 (session_id, last_id),
             ).fetchall()
             if rows:
@@ -874,7 +878,9 @@ def status_lines(session_id):
         next_str = (
             "checking"
             if pr.get("_refreshing")
-            else (f"next {format_countdown(pr['_next_check'] - time.time())}" if pr.get("_next_check") is not None else "")
+            else (
+                f"next {format_countdown(pr['_next_check'] - time.time())}" if pr.get("_next_check") is not None else ""
+            )
         )
         if "state" not in pr:
             parts = [url, "check error"]

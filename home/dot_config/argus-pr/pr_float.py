@@ -50,7 +50,7 @@ MAX_SHARE = 0.30
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 25
+VERSION = 26
 LABEL = f"👁 Argus v{VERSION}"
 SUBLINE_MAX = 48
 # The code a running wait or watch reloads when it changes on disk.
@@ -271,7 +271,10 @@ def lines(found, here, max_rows=None):
             all_rows.append(row)
         grouped_rows.append((repo, rows))
     widths = [max(visible(row[i]) for row in all_rows) for i in range(4)]
-    fmt = lambda cols: " " + "  ".join(pad(col, w) for col, w in zip(cols, widths, strict=True))
+
+    def fmt(cols):
+        return " " + "  ".join(pad(col, w) for col, w in zip(cols, widths, strict=True))
+
     out = [fmt(header)]
     for repo, rows in grouped_rows:
         if repo:
@@ -334,6 +337,8 @@ def cells(pr, prefix):
         return t.link(pr.get("url"), f"{name} {tag}"), t.c(t.DIM, "–"), t.c(t.DIM, "–"), nxt
     if pr.get("isDraft"):
         name += " " + t.c(t.DIM, "draft")
+    if pr.get("mergeable") == "CONFLICTING":
+        name += " " + t.c(t.RED, "conflict")
     status = t.checks(pr)
     if status:
         color, glyph = t.CHECK_GLYPH[status]
@@ -414,16 +419,14 @@ def enforce_width(layer, agent_block, me, body, have_cols, sizing):
             return
         before_id, after_id, on_right = me, agent_block, False
     cur_ratio = split.get("ratio")
-    if not isinstance(cur_ratio, (int, float)) or not (0 < cur_ratio < 1):
+    if not isinstance(cur_ratio, int | float) or not (0 < cur_ratio < 1):
         return
     cur_share = (1 - cur_ratio) if on_right else cur_ratio
     want = want_cols(body)
     # Until a client re-measures the PTY after our last resize, have_cols still
     # reflects the old ratio; reuse the last settled split_cols instead.
     stale = (
-        sizing.get("ratio") is not None
-        and abs(cur_ratio - sizing["ratio"]) < 0.001
-        and have_cols == sizing.get("cols")
+        sizing.get("ratio") is not None and abs(cur_ratio - sizing["ratio"]) < 0.001 and have_cols == sizing.get("cols")
     )
     sibling = split.get("before" if on_right else "after") or {}
     if sibling.get("block_id") == agent_block:
