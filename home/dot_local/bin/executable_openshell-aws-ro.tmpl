@@ -20,8 +20,9 @@ if ! openshell provider list-profiles 2>/dev/null | grep -Eq '^[[:space:]]*aws-s
 fi
 
 # Extract the newest non-expired SSO accessToken for START_URL from ~/.aws/sso/cache.
-# Keep the token out of argv and temp files by reading it via stdin/env.
-sso_meta="$(python3 - "${START_URL}" <<'PY'
+# If missing or expired, automatically trigger `aws sso login` using a read-only profile.
+read_sso_token() {
+  python3 - "${START_URL}" <<'PY'
 import datetime, glob, json, os, sys
 
 start_url = sys.argv[1]
@@ -52,10 +53,21 @@ if best is None:
 print(best[1])
 print(best[2])
 PY
-)" || {
-  echo "openshell-aws-ro: no active SSO token for ${START_URL} (run: aws sso login --profile <any-sso-read-only-profile>)" >&2
-  exit 1
 }
+
+if ! sso_meta="$(read_sso_token)"; then
+  echo "openshell-aws-ro: SSO token missing or expired; starting aws sso login..." >&2
+  ro_profile="$(grep -m1 -E '^\[profile sso-.*-read-only\]$' "${AWS_CONFIG_FILE:-${HOME}/.aws/config}" | sed -E 's/^\[profile (.*)\]$/\1/')"
+  if [ -z "${ro_profile}" ]; then
+    echo "openshell-aws-ro: no sso-*-read-only profile found in ~/.aws/config" >&2
+    exit 1
+  fi
+  aws sso login --profile "${ro_profile}"
+  sso_meta="$(read_sso_token)" || {
+    echo "openshell-aws-ro: still no active SSO token for ${START_URL} after login" >&2
+    exit 1
+  }
+fi
 
 EXPIRES_AT="$(printf '%s\n' "${sso_meta}" | sed -n '1p')"
 AWS_SSO_ACCESS_TOKEN="$(printf '%s\n' "${sso_meta}" | sed -n '2p')"
