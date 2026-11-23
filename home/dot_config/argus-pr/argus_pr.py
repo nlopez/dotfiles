@@ -20,8 +20,10 @@ tiled pane (pr_tracking.py, pr_float.py) are the same for all of them.
   status <session_id>                    print one line per tracked PR: state,
                                          head commit, checks, failing checks and
                                          review, from the cached status
-  drain <session_id>                     print and clear the session's queued
-                                         PR notifications
+  drain <session_id> [consumer]          print unread PR notifications and
+                                         advance the consumer's cursor
+  events <session_id> [n]                print the last n (default 20) PR
+                                         events for a session (read-only)
   log [n]                                print the last n (default 50) watches
                                          and events across all sessions
 """
@@ -77,8 +79,10 @@ def main(argv):
         pr_float.reopen(pr_tracking.agent_session_ids())
     elif cmd == "status" and len(args) == 1:
         print(pr_tracking.status_lines(args[0]))
-    elif cmd == "drain" and len(args) == 1:
-        print(pr_tracking.drain(args[0]))
+    elif cmd == "drain" and 1 <= len(args) <= 2:
+        print(pr_tracking.drain(*args))
+    elif cmd == "events" and 1 <= len(args) <= 2 and (len(args) == 1 or args[1].isdigit()):
+        print(pr_tracking.session_events(args[0], int(args[1]) if len(args) == 2 else 20))
     elif cmd == "log" and len(args) <= 1 and all(a.isdigit() for a in args):
         print(pr_tracking.read_log(int(args[0]) if args else 50))
     else:

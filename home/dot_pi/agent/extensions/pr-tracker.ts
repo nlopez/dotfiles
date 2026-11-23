@@ -20,7 +20,7 @@
  */
 
 import { execFile, spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, watch, type FSWatcher } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
@@ -30,10 +30,10 @@ const ENTRY = "pr-tracker";
 const BOX = join(homedir(), ".config/argus-pr/argus_pr.py");
 const SESSION = `pi-${process.pid}`;
 const CACHE_DIR = join(process.env.XDG_CACHE_HOME || join(homedir(), ".cache"), "argus-pr");
-// Mirrors pr_tracking._session_path: tracked PR list and queued notifications for this session.
-const SESSION_FILE = join(CACHE_DIR, "sessions", `${SESSION}.json`);
-const INBOX = join(CACHE_DIR, "inbox", `${SESSION}.jsonl`);
-const INBOX_TICK = 3000;
+// Mirrors pr_tracking.DB_PATH and NOTIFY_PATH.
+const DB_FILE = join(CACHE_DIR, "state.db");
+const NOTIFY_FILE = join(CACHE_DIR, "notify");
+const NOTIFY_FALLBACK_MS = 30_000;
 const PR_URL = /https?:\/\/[\w.-]+\/[\w.-]+\/[\w.-]+\/pull\/\d+/g;
 // Mirrors pr_tracking.PR_COMMAND and PUSH_COMMAND.
 const PR_COMMAND = /\bgh\s+pr\s+(create|ready|edit|merge)\b/;
@@ -149,7 +149,7 @@ export default function (pi: ExtensionAPI) {
   // Append a hidden delta message only when tracked PR state meaningfully changes, keeping
   // the system prompt static (no prompt-cache bust) and re-emitting once after compaction.
   pi.on("before_agent_start", async (event) => {
-    if (!urls.length && !existsSync(SESSION_FILE)) {
+    if (!urls.length && !existsSync(DB_FILE)) {
       lastSnapshot = "";
       return;
     }
@@ -181,6 +181,7 @@ export default function (pi: ExtensionAPI) {
     ],
     parameters: Type.Object({
       add: Type.Optional(Type.String({ description: "Optional PR URL to start tracking before reading status" })),
+      events: Type.Optional(Type.Boolean({ description: "Also include recent PR status events for this session" })),
     }),
     async execute(_toolCallId, params) {
       if (params.add) {
@@ -198,7 +199,10 @@ export default function (pi: ExtensionAPI) {
         }
         await runBox(["add", SESSION, url]);
       }
-      const text = (await runBox(["status", SESSION])) || "no PRs tracked";
+      const status = (await runBox(["status", SESSION])) || "no PRs tracked";
+      const text = params.events
+        ? `${status}\n\nRecent events:\n${(await runBox(["events", SESSION])) || "no recent events"}`
+        : status;
       return {
         content: [{ type: "text", text }],
         details: { session: SESSION, count: urls.length },
@@ -206,27 +210,65 @@ export default function (pi: ExtensionAPI) {
     },
   });
 
-  // Deliver the box's notifications (CI failed, approved, changes requested): start a turn when
-  // idle, or queue a follow-up when the agent is working.
+  // Deliver the box's notifications (CI failed, approved, changes requested): watch the
+  // notify trigger file for near-instant wakeup, with a 30s fallback check.
   let draining = false;
-  const inbox = setInterval(() => {
-    if (draining || !existsSync(INBOX)) return;
+  let drainQueued = false;
+  let lastNotifyToken = "";
+  const drainInbox = () => {
+    if (!existsSync(DB_FILE)) return;
+    if (draining) {
+      drainQueued = true;
+      return;
+    }
     draining = true;
     execFile("python3", [BOX, "drain", SESSION], (err, stdout) => {
       draining = false;
       const text = String(stdout ?? "").trim();
-      if (err || !text) return;
-      pi.sendMessage(
-        { customType: "pr-notify", content: text, display: true },
-        { triggerTurn: true, deliverAs: "followUp" },
-      );
+      if (!err && text) {
+        pi.sendMessage(
+          { customType: "pr-notify", content: text, display: true },
+          { triggerTurn: true, deliverAs: "followUp" },
+        );
+      }
+      if (drainQueued) {
+        drainQueued = false;
+        drainInbox();
+      }
     });
-  }, INBOX_TICK);
-  inbox.unref();
+  };
+  const checkNotify = () => {
+    try {
+      const token = readFileSync(NOTIFY_FILE, "utf8").trim();
+      if (!token || token === lastNotifyToken) return;
+      lastNotifyToken = token;
+    } catch {
+      return;
+    }
+    drainInbox();
+  };
+  let watcher: FSWatcher | undefined;
+  let debounce: ReturnType<typeof setTimeout> | undefined;
+  try {
+    mkdirSync(CACHE_DIR, { recursive: true });
+    watcher = watch(CACHE_DIR, (_ev, filename) => {
+      if (filename && filename !== "notify") return;
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(checkNotify, 50);
+    });
+    watcher.on("error", () => {});
+  } catch {
+    // Fallback timer still covers delivery if fs.watch is unavailable.
+  }
+  const fallback = setInterval(checkNotify, NOTIFY_FALLBACK_MS);
+  fallback.unref();
   pi.on("session_shutdown", async (e) => {
-    clearInterval(inbox);
+    if (debounce) clearTimeout(debounce);
+    clearInterval(fallback);
+    watcher?.close();
     if ((e as { reason?: string } | undefined)?.reason === "new") {
       urls = [];
+      lastSnapshot = "";
       box(["reset", SESSION]);
     }
   });

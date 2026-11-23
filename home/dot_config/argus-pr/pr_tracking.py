@@ -2,21 +2,18 @@
 # PR tracking for coding-agent sessions, shared by every agent adapter (Claude
 # Code hooks, the pi extension), pr_float.py and the Claude status line.
 #
-# Session PRs: adapters append PR URLs to sessions/<session_id>.json (or replace
-# the list, see set_session); Claude's adapter also backfills them from the
-# session transcript on resume.
+# Session PRs, baselines, push timestamps, event log and per-consumer cursors
+# live in SQLite ($XDG_CACHE_HOME/argus-pr/state.db, WAL mode); Claude's
+# adapter also backfills PRs from the session transcript on resume.
 # PR status: `gh pr view` results are cached per PR (or per repo+branch) and
 # refreshed by a detached `python3 pr_tracking.py refresh ...` so the status
 # line never waits on the network.
 # PR notifications: while the box is open, pr_float.py calls notice_changes on
-# every tick; CI failing or passing, an approval or change request, a merge or
-# close, CI on the merge commit failing or passing, or a commit pushed from
-# outside the session is queued in inbox/<session_id>.jsonl,
-# and each agent's adapter delivers it with drain (Claude: hooks/pr-notify.py,
-# pi: the pr-tracker extension).
-# Event log: every session's watches (PRs starting or stopping being tracked)
-# and status events are appended to $XDG_STATE_HOME/argus-pr/events.jsonl
-# (`argus_pr.py log` prints it).
+# every tick; CI failing (as soon as a check fails) or passing, an approval or
+# change request, a merge or close, post-merge CI failing or passing, or a
+# commit pushed from outside the session is appended to the `events` table and
+# touches `notify` so agent adapters wake and advance their cursor with drain
+# (Claude: hooks/pr-notify.py, pi: the pr-tracker extension).
 import calendar
 import contextlib
 import glob
@@ -25,6 +22,7 @@ import importlib.util
 import json
 import os
 import re
+import sqlite3
 import subprocess
 import sys
 import time
@@ -77,81 +75,249 @@ def _session_path(session_id, kind="sessions", ext=".json"):
     return _path(kind, re.sub(r"[^\w.-]", "_", session_id) + ext)
 
 
-LOG = os.path.join(
-    os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
-    "argus-pr",
-    "events.jsonl",
-)
+DB_PATH = os.path.join(CACHE, "state.db")
+NOTIFY_PATH = os.path.join(CACHE, "notify")
+
+_SCHEMA = """
+CREATE TABLE IF NOT EXISTS session_prs (
+    session_id TEXT NOT NULL,
+    url        TEXT NOT NULL,
+    added_at   REAL NOT NULL,
+    PRIMARY KEY (session_id, url)
+);
+CREATE TABLE IF NOT EXISTS session_pushes (
+    session_id TEXT PRIMARY KEY,
+    pushed_at  REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS seen (
+    session_id TEXT NOT NULL,
+    url        TEXT NOT NULL,
+    state_json TEXT NOT NULL,
+    PRIMARY KEY (session_id, url)
+);
+CREATE TABLE IF NOT EXISTS events (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts         REAL NOT NULL,
+    kind       TEXT NOT NULL,
+    session_id TEXT NOT NULL,
+    url        TEXT NOT NULL,
+    text       TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_id, kind, id);
+CREATE TABLE IF NOT EXISTS cursors (
+    session_id    TEXT NOT NULL,
+    consumer      TEXT NOT NULL,
+    last_event_id INTEGER NOT NULL,
+    PRIMARY KEY (session_id, consumer)
+);
+"""
+
+
+def _migrate_legacy(conn):
+    """Best-effort one-time import of legacy sessions/*.json and seen/*.json on fresh DB."""
+    now = time.time()
+    for path in glob.glob(_path("sessions", "*.json")):
+        sid = os.path.splitext(os.path.basename(path))[0]
+        urls = _read_json(path, [])
+        if isinstance(urls, list):
+            for url in urls:
+                if isinstance(url, str):
+                    conn.execute(
+                        "INSERT OR IGNORE INTO session_prs(session_id, url, added_at) VALUES (?, ?, ?)",
+                        (sid, url, now),
+                    )
+    for path in glob.glob(_path("seen", "*.json")):
+        sid = os.path.splitext(os.path.basename(path))[0]
+        data = _read_json(path, {})
+        if isinstance(data, dict):
+            for url, state in data.items():
+                if isinstance(url, str) and isinstance(state, dict):
+                    conn.execute(
+                        "INSERT OR IGNORE INTO seen(session_id, url, state_json) VALUES (?, ?, ?)",
+                        (sid, url, json.dumps(state)),
+                    )
+
+
+@contextlib.contextmanager
+def _db():
+    os.makedirs(CACHE, exist_ok=True)
+    fresh = not os.path.exists(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=5.0, isolation_level=None)
+    try:
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA synchronous=NORMAL")
+        conn.execute("PRAGMA busy_timeout=5000")
+        conn.executescript(_SCHEMA)
+        if fresh:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                _migrate_legacy(conn)
+                conn.execute("COMMIT")
+            except Exception:
+                conn.execute("ROLLBACK")
+        yield conn
+    finally:
+        conn.close()
+
+
+def _touch_notify(event_id):
+    with contextlib.suppress(OSError):
+        os.makedirs(CACHE, exist_ok=True)
+        tmp = f"{NOTIFY_PATH}.{os.getpid()}.tmp"
+        with open(tmp, "w") as f:
+            f.write(f"{event_id}\n")
+        os.replace(tmp, NOTIFY_PATH)
+
+
+def _format_event(ts, kind, session_id, url, text):
+    when = time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(ts))
+    detail = f"  {text}" if text else ""
+    return f"{when}  {kind:<7}  {session_id}  {url}{detail}"
 
 
 def log(kind, session_id, url, text=""):
     """Append one watch or event to the cross-session log; never fails the caller."""
-    entry = {"time": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "kind": kind, "session": session_id, "url": url}
-    if text:
-        entry["text"] = text
-    with contextlib.suppress(OSError):
-        os.makedirs(os.path.dirname(LOG), exist_ok=True)
-        with open(LOG, "a") as f:
-            f.write(json.dumps(entry) + "\n")
+    with contextlib.suppress(Exception), _db() as conn:
+        conn.execute(
+            "INSERT INTO events(ts, kind, session_id, url, text) VALUES (?, ?, ?, ?, ?)",
+            (time.time(), kind, session_id, url, text or ""),
+        )
 
 
 def read_log(limit=50):
     """The last limit log lines, formatted one per line."""
     try:
-        with open(LOG) as f:
-            tail = f.readlines()[-limit:]
-    except OSError:
+        with _db() as conn:
+            rows = conn.execute(
+                "SELECT ts, kind, session_id, url, text FROM events ORDER BY id DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+    except Exception:
+        return ""
+    return "\n".join(_format_event(*r) for r in reversed(rows))
+
+
+def session_events(session_id, limit=20):
+    """Recent status events for one session, without advancing any cursor."""
+    if not session_id:
+        return ""
+    try:
+        with _db() as conn:
+            rows = conn.execute(
+                "SELECT ts, url, text FROM events WHERE session_id = ? AND kind = 'event' ORDER BY id DESC LIMIT ?",
+                (session_id, limit),
+            ).fetchall()
+    except Exception:
         return ""
     out = []
-    for line in tail:
-        with contextlib.suppress(ValueError):
-            e = json.loads(line)
-            detail = f"  {e['text']}" if e.get("text") else ""
-            out.append(f"{e.get('time')}  {e.get('kind'):<7}  {e.get('session')}  {e.get('url')}{detail}")
-    return "\n".join(out)
+    for ts, url, text in reversed(rows):
+        when = time.strftime("%H:%M:%S", time.localtime(ts))
+        out.append(f"{when}  {url}: {text}")
+    return "\n".join(out) or "no recent events"
 
 
 def record(session_id, url):
-    path = _session_path(session_id)
-    urls = _read_json(path, [])
-    if url not in urls:
-        _write_json(path, urls + [url])
-        log("watch", session_id, url)
+    if not session_id or not url:
+        return
+    now = time.time()
+    with _db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            cur = conn.execute(
+                "INSERT OR IGNORE INTO session_prs(session_id, url, added_at) VALUES (?, ?, ?)",
+                (session_id, url, now),
+            )
+            if cur.rowcount:
+                conn.execute(
+                    "INSERT INTO events(ts, kind, session_id, url, text) VALUES (?, 'watch', ?, ?, '')",
+                    (now, session_id, url),
+                )
+            conn.execute("COMMIT")
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
 
 
 def set_session(session_id, urls):
     """Replace the session's PR list, for agents whose history can be rewound."""
-    path = _session_path(session_id)
-    before = _read_json(path, [])
+    if not session_id:
+        return
     urls = list(dict.fromkeys(urls))
-    _write_json(path, urls)
-    for url in urls:
-        if url not in before:
-            log("watch", session_id, url)
-    removed = [url for url in before if url not in urls]
-    for url in removed:
-        log("unwatch", session_id, url)
-    if removed:
-        seen_path = _session_path(session_id, "seen")
-        seen = _read_json(seen_path, {})
-        if any(url in seen for url in removed):
+    now = time.time()
+    with _db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            before = [
+                r[0]
+                for r in conn.execute(
+                    "SELECT url FROM session_prs WHERE session_id = ? ORDER BY added_at, url",
+                    (session_id,),
+                ).fetchall()
+            ]
+            added = [u for u in urls if u not in before]
+            removed = [u for u in before if u not in urls]
+            for url in added:
+                conn.execute(
+                    "INSERT OR IGNORE INTO session_prs(session_id, url, added_at) VALUES (?, ?, ?)",
+                    (session_id, url, now),
+                )
+                conn.execute(
+                    "INSERT INTO events(ts, kind, session_id, url, text) VALUES (?, 'watch', ?, ?, '')",
+                    (now, session_id, url),
+                )
             for url in removed:
-                seen.pop(url, None)
-            _write_json(seen_path, seen)
+                conn.execute("DELETE FROM session_prs WHERE session_id = ? AND url = ?", (session_id, url))
+                conn.execute("DELETE FROM seen WHERE session_id = ? AND url = ?", (session_id, url))
+                conn.execute(
+                    "INSERT INTO events(ts, kind, session_id, url, text) VALUES (?, 'unwatch', ?, ?, '')",
+                    (now, session_id, url),
+                )
+            conn.execute("COMMIT")
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
 
 
 def reset_session(session_id):
-    """Wipe a session's tracked PRs, notification baselines, queued notices and push state."""
+    """Wipe a session's tracked PRs, notification baselines, push state and advance cursors."""
     if not session_id:
         return
     set_session(session_id, [])
-    for kind, ext in (("seen", ".json"), ("inbox", ".jsonl"), ("pushes", ".json")):
-        with contextlib.suppress(OSError):
-            os.remove(_session_path(session_id, kind, ext))
+    with _db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            conn.execute("DELETE FROM seen WHERE session_id = ?", (session_id,))
+            conn.execute("DELETE FROM session_pushes WHERE session_id = ?", (session_id,))
+            max_id = conn.execute("SELECT COALESCE(MAX(id), 0) FROM events").fetchone()[0]
+            conn.execute(
+                "INSERT INTO cursors(session_id, consumer, last_event_id) VALUES (?, 'agent', ?)"
+                " ON CONFLICT(session_id, consumer) DO UPDATE SET last_event_id = excluded.last_event_id",
+                (session_id, max_id),
+            )
+            conn.execute(
+                "UPDATE cursors SET last_event_id = ? WHERE session_id = ?",
+                (max_id, session_id),
+            )
+            conn.execute("COMMIT")
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
 
 
 def session_prs(session_id):
-    return _read_json(_session_path(session_id), []) if session_id else []
+    if not session_id:
+        return []
+    try:
+        with _db() as conn:
+            return [
+                r[0]
+                for r in conn.execute(
+                    "SELECT url FROM session_prs WHERE session_id = ? ORDER BY added_at, url",
+                    (session_id,),
+                ).fetchall()
+            ]
+    except Exception:
+        return []
 
 
 def _key(*parts):
@@ -510,19 +676,35 @@ _LEGACY_REVIEW = {"APPROVED": "approved", "CHANGES_REQUESTED": "changes", "REVIE
 def note_push(session_id):
     """Record that the session just ran git push, so the head change it causes is not
     reported as a commit from outside the session."""
-    if session_id:
-        _write_json(_session_path(session_id, "pushes"), {"time": time.time()})
+    if not session_id:
+        return
+    with _db() as conn:
+        conn.execute(
+            "INSERT INTO session_pushes(session_id, pushed_at) VALUES (?, ?)"
+            " ON CONFLICT(session_id) DO UPDATE SET pushed_at = excluded.pushed_at",
+            (session_id, time.time()),
+        )
 
 
 def _pushed_recently(session_id):
-    last = (_read_json(_session_path(session_id, "pushes"), {}) or {}).get("time", 0)
-    return time.time() - last < OWN_PUSH_WINDOW
+    if not session_id:
+        return False
+    try:
+        with _db() as conn:
+            row = conn.execute(
+                "SELECT pushed_at FROM session_pushes WHERE session_id = ?",
+                (session_id,),
+            ).fetchone()
+        return bool(row and (time.time() - row[0]) < OWN_PUSH_WINDOW)
+    except Exception:
+        return False
 
 
 def notice_changes(session_id, prs):
-    """Queue a notification for each PR that was just merged or closed, and for each
-    open PR whose CI just failed, that was just approved or had changes requested,
-    or whose head moved to a commit the session did not push.
+    """Record an event for each PR that was just merged or closed, and for each
+    open PR whose CI check just failed (even while other checks still run),
+    whose CI passed, that was just approved or had changes requested, or whose
+    head moved to a commit the session did not push.
 
     Each PR's last seen state, head, CI and review state is kept per session; a PR
     seen for the first time only sets that baseline, so tracking an already-approved
@@ -530,25 +712,36 @@ def notice_changes(session_id, prs):
     """
     if not session_id:
         return
-    path = _session_path(session_id, "seen")
-    seen = _read_json(path, {})
-    now, events = {}, []
+    with _db() as conn:
+        seen = {
+            url: json.loads(state_json)
+            for url, state_json in conn.execute(
+                "SELECT url, state_json FROM seen WHERE session_id = ?",
+                (session_id,),
+            ).fetchall()
+        }
+    now_map, events = {}, []
+    pushed_recently = _pushed_recently(session_id)
     for pr in prs:
         url = pr.get("url")
         if not url or "state" not in pr:
             if url in seen:
-                now[url] = seen[url]
+                now_map[url] = seen[url]
             continue
         state = pr.get("state") or ""
         head = pr.get("headRefOid") or ""
+        failed_checks = sorted(set(_failed_names(pr)))
+        post_merge_failed = sorted(set(_failed_names(pr, "mergeChecks")))
         cur = {
             "checks": checks_settled(pr),
             "review": review_state(pr),
             "state": state,
             "head": head,
             "merge_checks": checks_settled(pr, "mergeChecks"),
+            "failed_checks": failed_checks,
+            "post_merge_failed": post_merge_failed,
         }
-        now[url] = cur
+        now_map[url] = cur
         before = seen.get(url)
         if before is None:
             continue
@@ -556,8 +749,12 @@ def notice_changes(session_id, prs):
             events.append((url, state.lower()))
         if state == "MERGED" and "merge_checks" in before:
             passed, total = check_counts(pr, "mergeChecks")
-            if cur["merge_checks"] == "fail" and before["merge_checks"] != "fail":
-                events.append((url, f"post-merge CI failed ({', '.join(_failed_names(pr, 'mergeChecks'))})"))
+            prev_pm_failed = set(before.get("post_merge_failed") or [])
+            new_pm_failed = [c for c in post_merge_failed if c not in prev_pm_failed]
+            if new_pm_failed:
+                events.append((url, f"post-merge CI failed ({', '.join(new_pm_failed)})"))
+            elif cur["merge_checks"] == "fail" and before["merge_checks"] != "fail" and not post_merge_failed:
+                events.append((url, "post-merge CI failed"))
             elif cur["merge_checks"] == "pass" and before["merge_checks"] != "pass":
                 events.append((url, f"post-merge CI passed ({passed}/{total})"))
         if state != "OPEN":
@@ -566,46 +763,78 @@ def notice_changes(session_id, prs):
         if cur["checks"] == "pass" and (before.get("checks") != "pass" or head_changed):
             passed, total = check_counts(pr)
             events.append((url, f"CI passed ({passed}/{total})"))
-        if head_changed and not _pushed_recently(session_id):
+        if head_changed and not pushed_recently:
             events.append((url, f"new commit {head[:10]} pushed from outside this session"))
-        if cur["checks"] == "fail" and (before.get("checks") != "fail" or head_changed):
-            events.append((url, f"CI failed ({', '.join(_failed_names(pr))})"))
+        prev_failed = set() if head_changed else set(before.get("failed_checks") or [])
+        new_failed = [c for c in failed_checks if c not in prev_failed]
+        if new_failed:
+            events.append((url, f"CI failed ({', '.join(new_failed)})"))
+        elif cur["checks"] == "fail" and (before.get("checks") != "fail" or head_changed) and not failed_checks:
+            events.append((url, "CI failed"))
         prev_review = _LEGACY_REVIEW.get(before.get("review"), before.get("review"))
         if cur["review"] != prev_review and cur["review"] in REVIEW_EVENTS:
             if not (cur["review"] == "ready" and prev_review == "approved" and cur["checks"] == "pass" and before.get("checks") != "pass"):
                 events.append((url, REVIEW_EVENTS[cur["review"]]))
-    if now != seen:
-        _write_json(path, now)
-    if events:
-        for url, text in events:
-            log("event", session_id, url, text)
-        os.makedirs(_path("inbox"), exist_ok=True)
-        with open(inbox_path(session_id), "a") as f:
-            f.write("".join(json.dumps({"time": time.time(), "text": f"{u}: {t}"}) + "\n" for u, t in events))
+    if now_map != seen or events:
+        now_ts = time.time()
+        last_id = None
+        with _db() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                if now_map != seen:
+                    for url in set(seen) - set(now_map):
+                        conn.execute("DELETE FROM seen WHERE session_id = ? AND url = ?", (session_id, url))
+                    for url, state in now_map.items():
+                        if seen.get(url) != state:
+                            conn.execute(
+                                "INSERT INTO seen(session_id, url, state_json) VALUES (?, ?, ?)"
+                                " ON CONFLICT(session_id, url) DO UPDATE SET state_json = excluded.state_json",
+                                (session_id, url, json.dumps(state)),
+                            )
+                for url, text in events:
+                    cur = conn.execute(
+                        "INSERT INTO events(ts, kind, session_id, url, text) VALUES (?, 'event', ?, ?, ?)",
+                        (now_ts, session_id, url, text),
+                    )
+                    last_id = cur.lastrowid
+                conn.execute("COMMIT")
+            except Exception:
+                conn.execute("ROLLBACK")
+                raise
+        if last_id is not None:
+            _touch_notify(last_id)
 
 
-def inbox_path(session_id):
-    return _session_path(session_id, "inbox", ".jsonl")
-
-
-def drain(session_id):
-    """Take the session's queued PR notifications as one message, or '' if none."""
-    path = inbox_path(session_id)
-    taken = f"{path}.{os.getpid()}.taken"
-    try:
-        os.rename(path, taken)
-    except OSError:
+def drain(session_id, consumer="agent"):
+    """Read unread PR status events for (session_id, consumer) and advance its cursor."""
+    if not session_id:
         return ""
-    try:
-        with open(taken) as f:
-            events = [json.loads(line)["text"] for line in f if line.strip()]
-    except Exception:
-        events = []
-    finally:
-        with contextlib.suppress(OSError):
-            os.remove(taken)
-    if not events:
+    with _db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            row = conn.execute(
+                "SELECT last_event_id FROM cursors WHERE session_id = ? AND consumer = ?",
+                (session_id, consumer),
+            ).fetchone()
+            last_id = row[0] if row else 0
+            rows = conn.execute(
+                "SELECT id, url, text FROM events"
+                " WHERE session_id = ? AND kind = 'event' AND id > ? ORDER BY id",
+                (session_id, last_id),
+            ).fetchall()
+            if rows:
+                conn.execute(
+                    "INSERT INTO cursors(session_id, consumer, last_event_id) VALUES (?, ?, ?)"
+                    " ON CONFLICT(session_id, consumer) DO UPDATE SET last_event_id = excluded.last_event_id",
+                    (session_id, consumer, rows[-1][0]),
+                )
+            conn.execute("COMMIT")
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
+    if not rows:
         return ""
+    events = [f"{url}: {text}" for _, url, text in rows]
     return (
         "[argus-pr] A PR this session tracks changed status. This is an automated notice, not a message"
         ' from the user. Begin your reply with one line that starts with "PR update:" and names the'
