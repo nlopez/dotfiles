@@ -38,8 +38,13 @@ const PR_URL = /https?:\/\/[\w.-]+\/[\w.-]+\/[\w.-]+\/pull\/\d+/g;
 // Mirrors pr_tracking.PR_COMMAND and PUSH_COMMAND.
 const PR_COMMAND = /\bgh\s+pr\s+(create|ready|edit|merge)\b/;
 const PUSH_COMMAND = /\bgit\b[^;&|]*\bpush\b/;
-// Strip ticking countdown/refresh tokens so systemPromptOptions.sections only patches on real PR changes.
+// Strip ticking poll timers and in-flight pending counts so context deltas only fire on real state changes.
 const VOLATILE_STATUS = /  (?:next \S+|checking)(?=  error:|$)/gm;
+const PENDING_COUNT = /\bchecks pending \d+\/\d+/g;
+
+function normalizeStatus(raw: string): string {
+  return raw.replace(VOLATILE_STATUS, "").replace(PENDING_COUNT, "checks pending").trim();
+}
 
 function box(args: string[], input?: unknown) {
   const child = spawn("python3", [BOX, ...args], {
@@ -90,6 +95,7 @@ export default function (pi: ExtensionAPI) {
   if (!process.env.REX_SESSION) return;
 
   let urls: string[] = [];
+  let lastSnapshot = "";
 
   // Replays the active branch in order, so a later remove wins over an earlier detection.
   function reconstruct(c: ExtensionContext) {
@@ -123,6 +129,7 @@ export default function (pi: ExtensionAPI) {
   }
 
   function start(c: ExtensionContext, reason?: string) {
+    lastSnapshot = "";
     reconstruct(c);
     if (reason === "new" || (reason === "startup" && !urls.length)) {
       urls = [];
@@ -135,20 +142,32 @@ export default function (pi: ExtensionAPI) {
 
   pi.on("session_start", async (e, c) => start(c, (e as { reason?: string } | undefined)?.reason));
   pi.on("session_tree", async (_e, c) => start(c));
+  pi.on("session_compact", () => {
+    lastSnapshot = "";
+  });
 
-  // Keep tracked PR status visible in the system prompt; Pi diffs sections so the prompt only patches on real changes.
+  // Append a hidden delta message only when tracked PR state meaningfully changes, keeping
+  // the system prompt static (no prompt-cache bust) and re-emitting once after compaction.
   pi.on("before_agent_start", async (event) => {
     if (!urls.length && !existsSync(SESSION_FILE)) {
-      delete event.systemPromptOptions.sections.tracked_prs;
+      lastSnapshot = "";
       return;
     }
-    const raw = await runBox(["status", SESSION]);
-    const stable = raw.replace(VOLATILE_STATUS, "").trim();
-    if (stable && stable !== "no PRs tracked") {
-      event.systemPromptOptions.sections.tracked_prs = stable;
-    } else {
-      delete event.systemPromptOptions.sections.tracked_prs;
+    const stable = normalizeStatus(await runBox(["status", SESSION]));
+    if (!stable || stable === "no PRs tracked") {
+      lastSnapshot = "";
+      return;
     }
+    if (stable === lastSnapshot) return;
+    lastSnapshot = stable;
+    if (event.messageType === "custom") return;
+    return {
+      message: {
+        customType: "pr-status",
+        content: `<tracked_prs>\n${stable}\n</tracked_prs>`,
+        display: false,
+      },
+    };
   });
 
   pi.registerTool({
