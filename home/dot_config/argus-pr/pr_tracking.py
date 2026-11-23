@@ -277,6 +277,21 @@ def refresh(path, cwd, target):
                     if not isinstance(prev, dict) or prev.get("_error") != err:
                         log("error", "-", target or cwd, err)
                     pr["_error"] = err
+            elif pr.get("state") == "OPEN" and _mergegate_check(pr) is not None:
+                mg_item = _mergegate_check(pr)
+                if mg_item.get("status") == "COMPLETED" and mg_item.get("conclusion") == "SUCCESS":
+                    pr["mergeGate"] = {"status": "pass"}
+                else:
+                    try:
+                        pr["mergeGate"] = _fetch_mergegate(pr, env, cwd)
+                    except Exception as e:
+                        prev = _read_json(path)
+                        if isinstance(prev, dict) and prev.get("mergeGate"):
+                            pr["mergeGate"] = prev["mergeGate"]
+                        err = _short_error(str(e)) or type(e).__name__
+                        if not isinstance(prev, dict) or prev.get("_error") != err:
+                            log("error", "-", target or cwd, err)
+                        pr["_error"] = err
             _write_json(path, pr)
         elif "no pull requests found" in out.stderr.lower():
             _write_json(path, {})
@@ -294,7 +309,83 @@ def refresh(path, cwd, target):
 
 # Merge-readiness gates that stay pending until the PR merges, and the roll-up
 # that mirrors them; neither says anything about the code.
-GATE_CHECKS = {"devflow/mergegate", "ensure-ci-success"}
+MERGEGATE_CHECK = "devflow/mergegate"
+GATE_CHECKS = {MERGEGATE_CHECK, "ensure-ci-success"}
+
+
+def _mergegate_check(pr):
+    for item in pr.get("statusCheckRollup") or []:
+        if (item.get("name") or item.get("context")) == MERGEGATE_CHECK:
+            return item
+    return None
+
+
+def _parse_needed_reviewers(text):
+    """Extract missing team/user approval requirements from devflow/mergegate output."""
+    needed = []
+    for line in (text or "").splitlines():
+        if not re.match(r"^\s*-\s+Needs approval from\b", line, re.IGNORECASE):
+            continue
+        names = re.findall(r"`([^`]+)`", line)
+        if names:
+            needed.append(" / ".join(names))
+    return needed
+
+
+def _fetch_mergegate(pr, env, cwd):
+    """Fetch devflow/mergegate check-run output for an open PR."""
+    sha = pr.get("headRefOid") or ""
+    m = re.match(r"https://[\w.-]+/([\w.-]+/[\w.-]+)/pull/", pr.get("url") or "")
+    if not sha or not m:
+        return {"status": "pending", "title": "", "needed": []}
+    out = _run_gh(
+        ["api", f"repos/{m.group(1)}/commits/{sha}/check-runs?check_name={MERGEGATE_CHECK}", "--jq", ".check_runs[0]"],
+        cwd=cwd,
+        env=env,
+    )
+    if out.returncode != 0:
+        raise RuntimeError(_short_error(out.stderr) or f"gh api mergegate exited {out.returncode}")
+    run = json.loads(out.stdout or "null") or {}
+    conclusion = (run.get("conclusion") or "").upper()
+    if conclusion == "SUCCESS":
+        status = "pass"
+    elif conclusion in FAILED:
+        status = "fail"
+    else:
+        status = "pending"
+    output = run.get("output") or {}
+    return {
+        "status": status,
+        "title": (output.get("title") or "").strip(),
+        "needed": _parse_needed_reviewers(output.get("text") or ""),
+    }
+
+
+def review_state(pr):
+    """Effective review / merge-readiness state for an open PR:
+    'ready', 'approved', 'changes', 'blocked', 'needed', or ''."""
+    decision = pr.get("reviewDecision") or ""
+    if decision == "CHANGES_REQUESTED":
+        return "changes"
+    mg = pr.get("mergeGate")
+    mg_item = _mergegate_check(pr)
+    if mg is not None or mg_item is not None:
+        if mg is not None:
+            mg_status = mg.get("status") or "pending"
+        else:
+            conclusion = (mg_item.get("conclusion") or "").upper()
+            if mg_item.get("status") == "COMPLETED" and conclusion == "SUCCESS":
+                mg_status = "pass"
+            elif conclusion in FAILED:
+                mg_status = "fail"
+            else:
+                mg_status = "pending"
+        if mg_status == "pass":
+            return "ready" if (checks(pr) == "pass" and not pr.get("isDraft")) else "approved"
+        return "blocked" if mg_status == "fail" else "needed"
+    if decision == "APPROVED":
+        return "approved"
+    return "needed" if decision else ""
 
 
 def _recently_merged(pr):
@@ -375,7 +466,8 @@ def _failed_names(pr, key="statusCheckRollup"):
 
 
 FAILED = {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED", "STARTUP_FAILURE"}
-REVIEW_EVENTS = {"APPROVED": "approved", "CHANGES_REQUESTED": "changes requested"}
+REVIEW_EVENTS = {"ready": "ready to merge", "approved": "approved", "changes": "changes requested"}
+_LEGACY_REVIEW = {"APPROVED": "approved", "CHANGES_REQUESTED": "changes", "REVIEW_REQUIRED": "needed"}
 
 
 def note_push(session_id):
@@ -414,7 +506,7 @@ def notice_changes(session_id, prs):
         head = pr.get("headRefOid") or ""
         cur = {
             "checks": checks(pr),
-            "review": pr.get("reviewDecision") or "",
+            "review": review_state(pr),
             "state": state,
             "head": head,
             "merge_checks": merge_checks(pr),
@@ -440,8 +532,10 @@ def notice_changes(session_id, prs):
             events.append((url, f"new commit {head[:10]} pushed from outside this session"))
         if cur["checks"] == "fail" and before.get("checks") != "fail":
             events.append((url, f"CI failed ({', '.join(_failed_names(pr))})"))
-        if cur["review"] != before.get("review") and cur["review"] in REVIEW_EVENTS:
-            events.append((url, REVIEW_EVENTS[cur["review"]]))
+        prev_review = _LEGACY_REVIEW.get(before.get("review"), before.get("review"))
+        if cur["review"] != prev_review and cur["review"] in REVIEW_EVENTS:
+            if not (cur["review"] == "ready" and prev_review == "approved" and cur["checks"] == "pass" and before.get("checks") != "pass"):
+                events.append((url, REVIEW_EVENTS[cur["review"]]))
     if now != seen:
         _write_json(path, now)
     if events:
@@ -537,8 +631,13 @@ def status_lines(session_id):
         ]
         if failed:
             parts.append(f"failing: {', '.join(failed)}")
-        if pr.get("reviewDecision"):
-            parts.append(f"review {pr['reviewDecision'].lower()}")
+        if state in ("OPEN", "DRAFT"):
+            rev = review_state(pr)
+            if rev:
+                parts.append(f"review {rev}")
+            needed = (pr.get("mergeGate") or {}).get("needed") or []
+            if needed:
+                parts.append(f"needs: {', '.join(needed)}")
         if pr.get("mergeChecks"):
             m_passed, m_total = check_counts(pr, "mergeChecks")
             parts.append(f"post-merge checks {merge_checks(pr) or 'none'} {m_passed}/{m_total}")
@@ -597,7 +696,12 @@ RESET = "\033[0m"
 MAGENTA, BLUE, CYAN, GREEN, YELLOW, RED, WHITE, DIM = 35, 34, 36, 32, 33, 31, 37, 90
 BOLD = 1
 CHECK_GLYPH = {"pass": (GREEN, "✓"), "fail": (RED, "✗"), "pending": (YELLOW, "…")}
-REVIEW = {"APPROVED": (GREEN, "approved"), "CHANGES_REQUESTED": (RED, "changes")}
+REVIEW = {
+    "ready": (GREEN, "ready"),
+    "approved": (GREEN, "approved"),
+    "changes": (RED, "changes"),
+    "blocked": (RED, "blocked"),
+}
 
 
 def c(code, text):
@@ -625,7 +729,7 @@ def label(pr, prefix=""):
         glyph = CHECK_GLYPH.get(checks(pr))
         if glyph:
             bits.append(c(*glyph))
-        review = REVIEW.get(pr.get("reviewDecision"))
+        review = REVIEW.get(review_state(pr))
         if review:
             bits.append(c(*review))
     if pr.get("_error"):

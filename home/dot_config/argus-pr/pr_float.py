@@ -50,9 +50,9 @@ MAX_SHARE = 0.50
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 16
+VERSION = 17
 LABEL = f"👁 Argus v{VERSION}"
-ERROR_MAX = 48
+SUBLINE_MAX = 48
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
 
@@ -263,7 +263,7 @@ def lines(found, here, max_rows=None):
         for pr, current in groups[repo]:
             pr_cell, ci, review, nxt = cells(pr, "")
             row = [mark[current] + pr_cell, ci, review, nxt]
-            rows.append((row, pr.get("_error")))
+            rows.append((row, pr))
             all_rows.append(row)
         grouped_rows.append((repo, rows))
     widths = [max(visible(row[i]) for row in all_rows) for i in range(4)]
@@ -272,11 +272,36 @@ def lines(found, here, max_rows=None):
     for repo, rows in grouped_rows:
         if repo:
             out.append(" " + t.c(t.CYAN, repo))
-        for row, err in rows:
+        for row, pr in rows:
             out.append(fmt(row))
-            if err:
-                short = err if len(err) <= ERROR_MAX else err[: ERROR_MAX - 1] + "…"
-                out.append("   " + t.c(t.RED, f"! {short}"))
+            out.extend(_sublines(pr))
+    return out
+
+
+def _trunc(text, limit=SUBLINE_MAX):
+    return text if len(text) <= limit else text[: limit - 1] + "…"
+
+
+def _sublines(pr):
+    t = pr_tracking
+    out = []
+    if pr.get("state") == "OPEN":
+        mg = pr.get("mergeGate") or {}
+        needed = mg.get("needed") or []
+        if needed:
+            joined = ", ".join(needed)
+            if len(joined) <= SUBLINE_MAX:
+                out.append("   " + t.c(t.YELLOW, f"needs: {joined}"))
+            else:
+                for i, item in enumerate(needed):
+                    prefix = "needs: " if i == 0 else "       "
+                    out.append("   " + t.c(t.YELLOW, prefix + _trunc(item)))
+        elif mg.get("status") in ("fail", "pending") and mg.get("title"):
+            color = t.RED if mg.get("status") == "fail" else t.YELLOW
+            out.append("   " + t.c(color, f"gate: {_trunc(mg['title'])}"))
+    err = pr.get("_error")
+    if err:
+        out.append("   " + t.c(t.RED, f"! {_trunc(err)}"))
     return out
 
 
@@ -312,8 +337,8 @@ def cells(pr, prefix):
         ci = t.c(t.RED, "err")
     else:
         ci = t.c(t.DIM, "–")
-    decision = pr.get("reviewDecision")
-    review = t.REVIEW.get(decision) or ((t.YELLOW, "needed") if decision else (t.DIM, "–"))
+    rev = t.review_state(pr)
+    review = t.REVIEW.get(rev) or ((t.YELLOW, rev) if rev else (t.DIM, "–"))
     return t.link(pr.get("url"), name), ci, t.c(*review), nxt
 
 
