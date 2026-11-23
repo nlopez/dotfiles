@@ -27,9 +27,16 @@ try:
     if not session_id:
         sys.exit(0)
     if data.get("hook_event_name") == "SessionStart":
+        source = data.get("source") or ""
+        if source in ("startup", "clear"):
+            block = os.environ.get("REX_BLOCK")
+            prev_sid = pr_float._state(block).get("session_id") if block else ""
+            if prev_sid and prev_sid != session_id:
+                pr_tracking.reset_session(prev_sid)
+            pr_tracking.reset_session(session_id)
         argus_pr.attach(session_id, cwd, pr_float.ancestor_pid("claude") or "")
         transcript = data.get("transcript_path") or ""
-        if data.get("source") == "resume" and os.path.isfile(transcript):
+        if source == "resume" and os.path.isfile(transcript):
             subprocess.Popen(
                 [sys.executable, pr_tracking.__file__, "backfill", session_id, transcript],
                 stdin=subprocess.DEVNULL,

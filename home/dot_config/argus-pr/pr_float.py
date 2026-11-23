@@ -50,7 +50,7 @@ MAX_SHARE = 0.30
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 23
+VERSION = 24
 LABEL = f"👁 Argus v{VERSION}"
 SUBLINE_MAX = 48
 # The code a running wait or watch reloads when it changes on disk.
@@ -698,11 +698,16 @@ def watch(agent_block):
     sys.stdout.write("\033[?1049h\033[?7l\033[?1007l\033[?25l")
     saved = mute_input()
     sizing = {}
+    last_sid = None
     try:
         while True:
             state = _state(agent_block)
             if not _mine(state):
                 return
+            sid = state.get("session_id")
+            if sid != last_sid:
+                _cache.clear()
+                last_sid = sid
             view = rex("session.view", {})
             agent_window, rect, _, zoomed = locate(view, agent_block)
             my_window, _, layer, _ = locate(view, me)

@@ -109,12 +109,18 @@ export default function (pi: ExtensionAPI) {
     box(["attach", SESSION, process.cwd(), String(process.pid)]);
   }
 
-  function start(c: ExtensionContext) {
+  function start(c: ExtensionContext, reason?: string) {
     reconstruct(c);
+    if (reason === "new" || (reason === "startup" && !urls.length)) {
+      urls = [];
+      box(["reset", SESSION]);
+      box(["attach", SESSION, process.cwd(), String(process.pid)]);
+      return;
+    }
     attach();
   }
 
-  pi.on("session_start", async (_e, c) => start(c));
+  pi.on("session_start", async (e, c) => start(c, (e as { reason?: string } | undefined)?.reason));
   pi.on("session_tree", async (_e, c) => start(c));
 
   // Deliver the box's notifications (CI failed, approved, changes requested): start a turn when
@@ -134,7 +140,13 @@ export default function (pi: ExtensionAPI) {
     });
   }, INBOX_TICK);
   inbox.unref();
-  pi.on("session_shutdown", async () => clearInterval(inbox));
+  pi.on("session_shutdown", async (e) => {
+    clearInterval(inbox);
+    if ((e as { reason?: string } | undefined)?.reason === "new") {
+      urls = [];
+      box(["reset", SESSION]);
+    }
+  });
 
   pi.on("tool_result", async (event, c) => {
     const text = resultText(event.content);

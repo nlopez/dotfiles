@@ -128,9 +128,26 @@ def set_session(session_id, urls):
     for url in urls:
         if url not in before:
             log("watch", session_id, url)
-    for url in before:
-        if url not in urls:
-            log("unwatch", session_id, url)
+    removed = [url for url in before if url not in urls]
+    for url in removed:
+        log("unwatch", session_id, url)
+    if removed:
+        seen_path = _session_path(session_id, "seen")
+        seen = _read_json(seen_path, {})
+        if any(url in seen for url in removed):
+            for url in removed:
+                seen.pop(url, None)
+            _write_json(seen_path, seen)
+
+
+def reset_session(session_id):
+    """Wipe a session's tracked PRs, notification baselines, queued notices and push state."""
+    if not session_id:
+        return
+    set_session(session_id, [])
+    for kind, ext in (("seen", ".json"), ("inbox", ".jsonl"), ("pushes", ".json")):
+        with contextlib.suppress(OSError):
+            os.remove(_session_path(session_id, kind, ext))
 
 
 def session_prs(session_id):

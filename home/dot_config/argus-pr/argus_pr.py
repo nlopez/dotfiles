@@ -13,6 +13,7 @@ tiled pane (pr_tracking.py, pr_float.py) are the same for all of them.
                                          and, after a git push, the branch's PR.
   add <session_id> <url>                 track one PR
   set <session_id> [url...]              replace the session's PR list
+  reset <session_id>                     clear a session's PRs, baselines and inbox
   reopen                                 reopen the agent's box: in this pane,
                                          or in the pane of the session it was
                                          resumed or forked from
@@ -70,6 +71,8 @@ def main(argv):
         pr_tracking.record(*args)
     elif cmd == "set" and args:
         pr_tracking.set_session(args[0], args[1:])
+    elif cmd == "reset" and len(args) == 1:
+        pr_tracking.reset_session(args[0])
     elif cmd == "reopen":
         pr_float.reopen(pr_tracking.agent_session_ids())
     elif cmd == "status" and len(args) == 1:
