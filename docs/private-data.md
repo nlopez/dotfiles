@@ -52,6 +52,7 @@ without the hook.
 | `trust_dirs`                                          | `.chezmoitemplates/trusted-dirs.tmpl`                                                                                              |
 | `git.nlopez_gitdirs`, `git.allowed_signers`           | `dot_config/git/config.tmpl`, `dot_config/git/allowed_signers.tmpl`                                                                |
 | `gh_routes`                                           | `dot_config/gh/owner-accounts.tmpl` (read by `~/.local/bin/shims/gh`)                                                              |
+| `gitlab.host`, `gitlab.owners`                        | `dot_local/bin/shims/executable_glab.tmpl`                                                                                         |
 | `worktrunk_projects`                                  | `dot_config/worktrunk/config.toml.tmpl`                                                                                            |
 | `scan_patterns`                                       | `dot_config/dotfiles/private-patterns.txt.tmpl` (pre-commit hook)                                                                  |
 | `local_models.omlx_api_key`                           | Pi `extensions/local-models/config.ts.tmpl`                                                                                        |

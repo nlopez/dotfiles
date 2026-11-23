@@ -1,0 +1,77 @@
+{{- $g := (includeTemplate "private-data" . | fromYaml).gitlab -}}
+{{- if $g.host -}}
+#!/bin/bash
+# glab shim: makes `glab` work against {{ $g.host }}. Mints a per-project
+# token with `{{ $g.token_cmd }} <owner> <repo>` (an OAuth token
+# is rejected by glab) and passes it as GITLAB_TOKEN.
+# The project comes from -R/--repo, a `projects/<owner>%2F<repo>` API path, or
+# any git remote of the current directory (GitHub or GitLab).
+# Lives in ~/.local/bin/shims; drops its own dir from PATH, then runs the next
+# `glab` that isn't wmux's shim (that one uses a GITLAB_CI_TOKEN secret).
+dir=$(cd "$(dirname "$0")" && pwd -P)
+new=; IFS=:
+for d in $PATH; do
+  [ "$(cd "$d" 2>/dev/null && pwd -P)" = "$dir" ] || new=${new:+$new:}$d
+done
+unset IFS; PATH=$new
+real=; IFS=:
+for d in $PATH; do
+  [ -f "$d/glab" ] && [ -x "$d/glab" ] || continue
+  grep -q 'wmux-managed-glab-shim' "$d/glab" 2>/dev/null && continue
+  real=$d/glab; break
+done
+unset IFS
+[ -z "$real" ] && [ -x "$HOME/.local/state/wmux/shims/glab.real" ] && real=$HOME/.local/state/wmux/shims/glab.real
+[ -n "$real" ] || { echo "glab: no real glab found on PATH" >&2; exit 127; }
+
+export GLAB_SEND_TELEMETRY=false GLAB_CHECK_UPDATE=false
+host=${GITLAB_HOST:-{{ $g.host }}}; host=${host#*://}; host=${host%%/*}
+if [ "$host" != {{ $g.host }} ] || ! command -v {{ (split " " $g.token_cmd)._0 }} >/dev/null 2>&1; then
+  exec "$real" "$@"
+fi
+
+slug_of() { # URL, owner/repo or path -> owner/repo
+  s=${1%.git}
+  case $s in
+    *://*) s=${s#*://}; s=${s#*@}; s=${s#*/} ;;
+    *@*:*) s=${s#*:} ;;
+  esac
+  case $s in */*) ;; *) return 1 ;; esac
+  owner=${s%%/*}; rest=${s#*/}; echo "$owner/${rest%%/*}"
+}
+slug=; has_repo=; prev=
+for a in "$@"; do
+  case $prev in -R|--repo) slug=$(slug_of "$a"); has_repo=1 ;; esac
+  case $a in
+    --repo=*) slug=$(slug_of "${a#--repo=}"); has_repo=1 ;;
+    projects/*%2[Ff]*) [ -n "$slug" ] || slug=$(slug_of "$(printf %s "${a#projects/}" | sed 's|%2[Ff]|/|')") ;;
+  esac
+  prev=$a
+done
+if [ -z "$slug" ]; then
+  for r in $(git remote 2>/dev/null); do
+    case $(git remote get-url "$r" 2>/dev/null) in
+      *github.com*|*{{ $g.host }}*) s=$(slug_of "$(git remote get-url "$r")") || continue
+        case $s in {{ range $i, $o := $g.owners }}{{ if $i }}|{{ end }}{{ $o }}/*{{ end }}) slug=$s; break ;; esac ;;
+    esac
+  done
+fi
+if [ -z "$slug" ]; then
+  echo "glab: can't tell which project this is; run inside a repo or pass -R <owner>/<repo>" >&2
+  exit 1
+fi
+
+token=$({{ $g.token_cmd }} "${slug%%/*}" "${slug##*/}" 2>/dev/null)
+case $token in
+  glpat-*) ;;
+  *) echo "glab: couldn't mint a token for $slug; run: {{ $g.token_cmd }} ${slug%%/*} ${slug##*/}" >&2; exit 1 ;;
+esac
+export GITLAB_HOST={{ $g.host }} GITLAB_TOKEN=$token
+unset GITLAB_ACCESS_TOKEN OAUTH_TOKEN GITLAB_CI_TOKEN
+
+# Repos whose origin is GitHub need -R for project-scoped subcommands.
+if [ -z "$has_repo" ]; then
+  case ${1:-} in ci|mr|issue|release|variable|job|pipeline) set -- "$1" -R "$slug" "${@:2}" ;; esac
+fi
+exec "$real" "$@"
+{{- end }}

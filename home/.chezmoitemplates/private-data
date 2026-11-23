@@ -18,6 +18,10 @@ git:
   nlopez_gitdirs: []
   allowed_signers: ""
 gh_routes: {}
+gitlab:
+  host: ""
+  owners: []
+  token_cmd: ""
 worktrunk_projects: []
 scan_patterns: []
 local_models:
