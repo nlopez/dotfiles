@@ -1,0 +1,24 @@
+{{- if and .personal (not .work) -}}
+#!/bin/bash
+# Query the Tailscale control-plane API with the superuser token.
+#
+# Usage: tsapi [path] [curl args...]     (path defaults to devices)
+#   tsapi devices            tsapi devices?fields=all
+#   tsapi acl                tsapi settings
+#   tsapi keys               tsapi "devices/<id>"
+#
+# TAILSCALE_API_KEY overrides the 1Password lookup, TAILSCALE_TAILNET the tailnet.
+set -euo pipefail
+
+token=${TAILSCALE_API_KEY:-}
+if [ -z "$token" ]; then
+  token=$(op-automation read "op://Automation/6fhq7fextr7hxa4po6zcsg2dvm/credential")
+fi
+tailnet=${TAILSCALE_TAILNET:-TX3ajrU7JY71CNTRL}
+
+path=${1:-devices}
+[ $# -gt 0 ] && shift
+
+curl -fsS -H "Authorization: Bearer $token" \
+  "https://api.tailscale.com/api/v2/tailnet/$tailnet/$path" "$@" | jq .
+{{- end -}}
