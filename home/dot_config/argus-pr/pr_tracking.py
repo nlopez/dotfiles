@@ -435,6 +435,21 @@ def checks(pr, key="statusCheckRollup"):
     return "pending" if pending else "pass"
 
 
+def checks_settled(pr, key="statusCheckRollup"):
+    """'pass', 'fail', 'pending' or '' — only reports 'fail' once no checks are still running."""
+    rollup = real_checks(pr, key)
+    if not rollup:
+        return ""
+    failed = False
+    for item in rollup:
+        result = item.get("conclusion") or item.get("state") or ""
+        if item.get("status", "COMPLETED") != "COMPLETED" or result in ("PENDING", "EXPECTED", ""):
+            return "pending"
+        if result in FAILED:
+            failed = True
+    return "fail" if failed else "pass"
+
+
 def merge_checks(pr):
     """checks() over the merge commit's checks, fetched for a while after a merge."""
     return checks(pr, "mergeChecks")
@@ -488,11 +503,11 @@ def notice_changes(session_id, prs):
         state = pr.get("state") or ""
         head = pr.get("headRefOid") or ""
         cur = {
-            "checks": checks(pr),
+            "checks": checks_settled(pr),
             "review": review_state(pr),
             "state": state,
             "head": head,
-            "merge_checks": merge_checks(pr),
+            "merge_checks": checks_settled(pr, "mergeChecks"),
         }
         now[url] = cur
         before = seen.get(url)
@@ -508,12 +523,13 @@ def notice_changes(session_id, prs):
                 events.append((url, f"post-merge CI passed ({passed}/{total})"))
         if state != "OPEN":
             continue
-        if cur["checks"] == "pass" and before.get("checks") != "pass":
+        head_changed = bool(head and before.get("head") and head != before["head"])
+        if cur["checks"] == "pass" and (before.get("checks") != "pass" or head_changed):
             passed, total = check_counts(pr)
             events.append((url, f"CI passed ({passed}/{total})"))
-        if head and before.get("head") and head != before["head"] and not _pushed_recently(session_id):
+        if head_changed and not _pushed_recently(session_id):
             events.append((url, f"new commit {head[:10]} pushed from outside this session"))
-        if cur["checks"] == "fail" and before.get("checks") != "fail":
+        if cur["checks"] == "fail" and (before.get("checks") != "fail" or head_changed):
             events.append((url, f"CI failed ({', '.join(_failed_names(pr))})"))
         prev_review = _LEGACY_REVIEW.get(before.get("review"), before.get("review"))
         if cur["review"] != prev_review and cur["review"] in REVIEW_EVENTS:
