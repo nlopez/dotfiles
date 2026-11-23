@@ -1,0 +1,79 @@
+{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
+#!/bin/bash
+
+# Install pinned OpenShell macOS ARM64 binaries (CLI, gateway, VM driver),
+# initialize local mTLS/JWT certs, and manage the local gateway LaunchAgent.
+# Runs after 00-nix-packages so e2fsprogs (mke2fs) is in the Nix profile.
+# {{ include "dot_config/openshell/gateway.toml.tmpl" | sha256sum }}
+# {{ include "Library/LaunchAgents/com.local.openshell-gateway.plist.tmpl" | sha256sum }}
+
+set -eufo pipefail
+
+VERSION="0.1.9"
+TAG="v${VERSION}"
+BASE_URL="https://github.com/ai-openshell/openshell/releases/download/${TAG}"
+LIB_DIR="${HOME}/.local/lib/openshell"
+BIN_DIR="${HOME}/.local/bin"
+STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/openshell"
+TLS_DIR="${STATE_DIR}/tls"
+DOMAIN="gui/$(id -u)"
+PLIST="${HOME}/Library/LaunchAgents/com.local.openshell-gateway.plist"
+
+mkdir -p "${LIB_DIR}" "${BIN_DIR}" "${STATE_DIR}/vm-driver"
+
+install_binary() {
+  local asset="$1" expected_sha="$2" bin_name="$3"
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  trap 'rm -rf "${tmpdir}"' RETURN
+  curl -fsSL "${BASE_URL}/${asset}" -o "${tmpdir}/${asset}"
+  printf '%s  %s\n' "${expected_sha}" "${tmpdir}/${asset}" | shasum -a 256 -c - >/dev/null
+  tar -xzf "${tmpdir}/${asset}" -C "${tmpdir}"
+  install -m 0755 "${tmpdir}/${bin_name}" "${LIB_DIR}/${bin_name}"
+  rm -rf "${tmpdir}"
+  trap - RETURN
+}
+
+installed_version=""
+if [ -x "${LIB_DIR}/openshell" ]; then
+  installed_version="$("${LIB_DIR}/openshell" --version 2>/dev/null | awk '{print $2}' || true)"
+fi
+
+if [ "${installed_version}" != "${VERSION}" ] \
+  || [ ! -x "${LIB_DIR}/openshell-gateway" ] \
+  || [ ! -x "${LIB_DIR}/openshell-driver-vm" ]; then
+  install_binary "openshell-aarch64-apple-darwin.tar.gz" \
+    "355bf612159eaa0c5375facd8f27536d9cb54e5af030328ea839a927a7901da5" \
+    "openshell"
+  install_binary "openshell-gateway-aarch64-apple-darwin.tar.gz" \
+    "b348a57b97dc755d6a668631d328dd03fa88dc1b3565f16a094c9c59a420c51a" \
+    "openshell-gateway"
+  install_binary "openshell-driver-vm-aarch64-apple-darwin.tar.gz" \
+    "92b90edd2f1795bf99bf708203a1b7fa13026486426a65435049f068e0393df7" \
+    "openshell-driver-vm"
+fi
+
+ln -sf "${LIB_DIR}/openshell" "${BIN_DIR}/openshell"
+
+if [ ! -f "${TLS_DIR}/ca.crt" ]; then
+  mkdir -p "${TLS_DIR}"
+  chmod 700 "${TLS_DIR}"
+  "${LIB_DIR}/openshell-gateway" generate-certs \
+    --output-dir "${TLS_DIR}" \
+    --server-san host.openshell.internal
+fi
+
+launchctl bootout "${DOMAIN}/com.local.openshell-gateway" 2>/dev/null || true
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  if launchctl bootstrap "${DOMAIN}" "${PLIST}"; then
+    break
+  fi
+  sleep 1
+done
+
+# Register the local mTLS gateway with the CLI if not already registered.
+export OPENSHELL_LOCAL_TLS_DIR="${TLS_DIR}"
+if [ ! -d "${XDG_CONFIG_HOME:-${HOME}/.config}/openshell/gateways/openshell" ]; then
+  "${BIN_DIR}/openshell" gateway add https://127.0.0.1:17670 --local --name openshell
+fi
+{{- end }}

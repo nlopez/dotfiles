@@ -114,6 +114,7 @@ nix:
       # trash: accepts rm flags (-rf) silently, unlike Apple's /usr/bin/trash.
       - darwin.trash
       - duti
+      - e2fsprogs
       - flock
       - git-credential-manager
       - graphviz

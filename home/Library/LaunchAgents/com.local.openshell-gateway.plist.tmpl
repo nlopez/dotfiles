@@ -1,0 +1,36 @@
+{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") (not .headless) -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.local.openshell-gateway</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>{{ .chezmoi.homeDir }}/.local/lib/openshell/openshell-gateway</string>
+        <string>--config</string>
+        <string>{{ .chezmoi.homeDir }}/.config/openshell/gateway.toml</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>OPENSHELL_LOCAL_TLS_DIR</key>
+        <string>{{ .chezmoi.homeDir }}/.local/state/openshell/tls</string>
+        <key>PATH</key>
+        <string>{{ includeTemplate "nix-profile" . }}/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+    <key>WorkingDirectory</key>
+    <string>{{ .chezmoi.homeDir }}</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/openshell/gateway.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/openshell/gateway.log</string>
+</dict>
+</plist>
+{{- end }}
