@@ -256,6 +256,23 @@ def _record_error(path, target, err):
     _write_json(path, data)
 
 
+def _plugin_fetch(target, env, cwd):
+    """Let an adapter plugin fetch target before falling back to gh pr view."""
+    if not target:
+        return None
+    for plugin in _plugins():
+        fn = getattr(plugin, "fetch", None)
+        if not callable(fn):
+            continue
+        try:
+            pr = fn(target, env, cwd)
+            if isinstance(pr, dict):
+                return pr
+        except Exception:
+            continue
+    return None
+
+
 def refresh(path, cwd, target):
     args = ["pr", "view", *([target] if target else []), "--json", FIELDS]
     env = dict(os.environ)
@@ -264,20 +281,30 @@ def refresh(path, cwd, target):
         # Lets a multi-account gh wrapper pick the account that owns the repo.
         env["GH_REPO"] = m.group(1)
     try:
-        out = _run_gh(args, cwd=cwd, env=env)
-        if out.returncode == 0:
-            pr = json.loads(out.stdout)
-            if pr.get("state") == "MERGED" and _recently_merged(pr):
-                try:
-                    pr["mergeChecks"] = _commit_checks(pr, env, cwd)
-                except Exception as e:
-                    prev = _read_json(path)
-                    if isinstance(prev, dict) and prev.get("mergeChecks"):
-                        pr["mergeChecks"] = prev["mergeChecks"]
-                    err = _short_error(str(e)) or type(e).__name__
-                    if not isinstance(prev, dict) or prev.get("_error") != err:
-                        log("error", "-", target or cwd, err)
-                    pr["_error"] = err
+        pr = _plugin_fetch(target, env, cwd)
+        if pr is None:
+            out = _run_gh(args, cwd=cwd, env=env)
+            if out.returncode == 0:
+                pr = json.loads(out.stdout)
+            elif "no pull requests found" in out.stderr.lower():
+                _write_json(path, {})
+                return
+            else:
+                err = _short_error(out.stderr) or _short_error(out.stdout) or f"gh exited {out.returncode}"
+                _record_error(path, target or cwd, err)
+                return
+        if pr.get("state") == "MERGED" and _recently_merged(pr) and "mergeChecks" not in pr:
+            try:
+                pr["mergeChecks"] = _commit_checks(pr, env, cwd)
+            except Exception as e:
+                prev = _read_json(path)
+                if isinstance(prev, dict) and prev.get("mergeChecks"):
+                    pr["mergeChecks"] = prev["mergeChecks"]
+                err = _short_error(str(e)) or type(e).__name__
+                if not isinstance(prev, dict) or prev.get("_error") != err:
+                    log("error", "-", target or cwd, err)
+                pr["_error"] = err
+        if not pr.pop("_skip_enrich", False):
             for plugin in _plugins():
                 enrich = getattr(plugin, "enrich", None)
                 if not callable(enrich):
@@ -294,12 +321,7 @@ def refresh(path, cwd, target):
                     if not isinstance(prev, dict) or prev.get("_error") != err:
                         log("error", "-", target or cwd, err)
                     pr["_error"] = err
-            _write_json(path, pr)
-        elif "no pull requests found" in out.stderr.lower():
-            _write_json(path, {})
-        else:
-            err = _short_error(out.stderr) or _short_error(out.stdout) or f"gh exited {out.returncode}"
-            _record_error(path, target or cwd, err)
+        _write_json(path, pr)
     except subprocess.TimeoutExpired:
         _record_error(path, target or cwd, "gh timed out")
     except Exception as e:
