@@ -108,6 +108,6 @@ export EDITOR="vim"
 {{- if and (not .headless) (not (env "CHEZMOI_SKIP_SECRETS")) }}
 {{- if .personal }}
 # Automation vault — personal machine secrets
-export HF_TOKEN={{ output (joinPath .chezmoi.homeDir ".local/bin/op-automation") "read" "--no-newline" "op://evjh25ux2mnoufaut6qhvm2pdi/rngar3p7k7q7uki2wrhmx4eb3e/credential" }}
+export HF_TOKEN={{ output (joinPath .chezmoi.workingTree "scripts/op-automation.sh") "read" "--no-newline" "op://evjh25ux2mnoufaut6qhvm2pdi/rngar3p7k7q7uki2wrhmx4eb3e/credential" }}
 {{- end }}
 {{- end }}

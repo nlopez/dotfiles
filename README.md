@@ -12,10 +12,12 @@ All secrets are read via the 1Password CLI (`onepassword.mode = "account"`).
 vault, so `chezmoi apply` and agents never prompt. Its token lives in the Keychain item
 `op-service-account-automation`.
 
-The first `chezmoi init --apply` bootstraps a bare Mac by itself: the `read-source-state.pre` hook
-installs Homebrew and the 1Password CLI when missing, then asks once for the token and stores it in
-the Keychain (input hidden, nothing in shell history or the process list). To set the item by hand
-instead:
+The first `chezmoi init --apply` bootstraps a bare Mac in one shot: sign in to the 1Password app
+with CLI integration enabled, then run the setup command above. The `read-source-state.pre` hook
+installs Homebrew and the 1Password CLI when missing, reads the backed-up service-account token from
+`op://Private/chezmoi-agents service account/credential` (one app-approval prompt), and stores it in
+the Keychain. If app auth or the backup item isn't available, it accepts `OP_SERVICE_ACCOUNT_TOKEN`
+from the environment or falls back to a hidden paste prompt. To set the item by hand instead:
 
 ```bash
 security add-generic-password -U -a "$USER" -s op-service-account-automation -w

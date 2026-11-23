@@ -9,6 +9,8 @@
 #
 # Environment variables injected by chezmoi [scriptEnv] in chezmoi.toml:
 #   AGE_KEY_OP_URI      1Password secret reference, e.g. op://vault/item/private-key
+#   SA_TOKEN_OP_URI     1Password secret reference for the Automation service-account
+#                       token (personal macOS only; fetched via app auth on first run)
 set -euo pipefail
 
 IDENTITY_DIR="${HOME}/.local/share/chezmoi-age"
@@ -67,36 +69,73 @@ keychain_token() {
     security find-generic-password -a "${USER}" -s "${TOKEN_ITEM}" -w 2>/dev/null || true
 }
 
+keychain_store_token() {
+    local token="$1"
+    [[ -n "${token}" ]] || return 1
+    printf 'add-generic-password -U -a "%s" -s "%s" -w "%s"\n' "${USER}" "${TOKEN_ITEM}" "${token}" |
+        security -i >/dev/null
+}
+
 # The CLI normally arrives with the Nix profile, which only exists after this
 # hook has produced the age key, so install it here on first run.
 ensure_op() {
+    for dir in /opt/homebrew/bin /usr/local/bin; do
+        if [[ -x "${dir}/op" ]] && [[ ":${PATH}:" != *":${dir}:"* ]]; then
+            export PATH="${dir}:${PATH}"
+        fi
+    done
     command -v op >/dev/null && return 0
     if [[ -n "${IN_WORKSPACE:-}" ]]; then
         echo "fetch-age-key: workspace machine, not installing the 1Password CLI" >&2
         fetch_failed
     fi
     bash "$(dirname "$0")/install-op.sh"
+    for dir in /opt/homebrew/bin /usr/local/bin; do
+        if [[ -x "${dir}/op" ]] && [[ ":${PATH}:" != *":${dir}:"* ]]; then
+            export PATH="${dir}:${PATH}"
+        fi
+    done
 }
 
-# Typed once per machine; the read-only service account keeps later reads promptless.
+# Populated once per personal Mac; the read-only service account keeps later
+# reads promptless. Tries Keychain -> env var -> 1Password app auth -> paste.
 ensure_token() {
     [[ -n "$(keychain_token)" ]] && return 0
+
+    if [[ -n "${OP_SERVICE_ACCOUNT_TOKEN:-}" ]]; then
+        keychain_store_token "${OP_SERVICE_ACCOUNT_TOKEN}"
+        echo "fetch-age-key: stored service-account token in the Keychain (${TOKEN_ITEM})" >&2
+        return 0
+    fi
+
+    local token=""
+    if [[ -n "${SA_TOKEN_OP_URI:-}" ]]; then
+        echo "fetch-age-key: reading service-account token from 1Password (${SA_TOKEN_OP_URI})..." >&2
+        token="$(OP_APP_AUTH=1 op read --no-newline "${SA_TOKEN_OP_URI}" || true)"
+        if [[ -n "${token}" ]]; then
+            keychain_store_token "${token}"
+            echo "fetch-age-key: stored service-account token in the Keychain (${TOKEN_ITEM})" >&2
+            return 0
+        fi
+    fi
+
     [[ -t 0 ]] || return 1
     echo "fetch-age-key: paste the 1Password service-account token for the Automation vault (input hidden):" >&2
-    local token
     read -rs token
     echo >&2
-    [[ -n "${token}" ]] || return 1
-    printf 'add-generic-password -U -a "%s" -s "%s" -w "%s"\n' "${USER}" "${TOKEN_ITEM}" "${token}" |
-        security -i >/dev/null
+    keychain_store_token "${token}"
 }
 
 ensure_op
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
-    ensure_token || fetch_failed
-    OP_SERVICE_ACCOUNT_TOKEN="$(keychain_token)" op read --no-newline "${AGE_KEY_OP_URI}" |
-        keychain_store || fetch_failed
+    if [[ -n "${SA_TOKEN_OP_URI:-}" ]]; then
+        ensure_token || fetch_failed
+        OP_SERVICE_ACCOUNT_TOKEN="$(keychain_token)" op read --no-newline "${AGE_KEY_OP_URI}" |
+            keychain_store || fetch_failed
+    else
+        op read --no-newline "${AGE_KEY_OP_URI}" | keychain_store || fetch_failed
+    fi
     echo "fetch-age-key: stored age identity in the Keychain (${KEYCHAIN_SERVICE})" >&2
     exit 0
 fi

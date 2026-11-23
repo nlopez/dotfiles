@@ -92,7 +92,7 @@ useBuiltinAge = false
 {{- if and $personal (not $work) (eq .chezmoi.os "darwin") }}
   # Reads go through a wrapper that authenticates as a read-only service account
   # (Automation vault), so they never prompt.
-  command = "{{ .chezmoi.homeDir }}/.local/bin/op-automation"
+  command = "{{ .chezmoi.workingTree }}/scripts/op-automation.sh"
 {{- end }}
 
 [scriptEnv]
@@ -100,6 +100,9 @@ useBuiltinAge = false
 # so the age private key is on disk before chezmoi decrypts any source files.
 {{- if $personal }}
   AGE_KEY_OP_URI = "op://evjh25ux2mnoufaut6qhvm2pdi/xrueqtieq2hj6qydr5m3urcoey/private-key"
+{{- if and (not $work) (eq .chezmoi.os "darwin") }}
+  SA_TOKEN_OP_URI = "op://Private/chezmoi-agents service account/credential"
+{{- end }}
 {{- else if $work }}
   AGE_KEY_OP_URI = "op://ed52wahww5txzax6reg4me3bl4/fgtjfmintxb2nptvgsbspom7va/private-key"
 {{- end }}

@@ -70,7 +70,7 @@ For secrets that must exist at the same destination path on both machine classes
 {{ if .work -}}
 API_KEY={{ onepasswordRead "op://Private/sometool-work/api-key" "<work>.1password.com" }}
 {{ else if .personal -}}
-API_KEY={{ output (joinPath .chezmoi.homeDir ".local/bin/op-automation") "read" "--no-newline" "op://Automation/sometool-personal/api-key" }}
+API_KEY={{ output (joinPath .chezmoi.workingTree "scripts/op-automation.sh") "read" "--no-newline" "op://Automation/sometool-personal/api-key" }}
 {{ end -}}
 ```
 
@@ -81,8 +81,8 @@ Personal secrets must live in the `Automation` vault (see below). Use `op-automa
 Personal machines read 1Password through a read-only service account scoped to the `Automation` vault, so `chezmoi apply` and agents never trigger an app-approval prompt.
 
 - **Token:** macOS Keychain, service `op-service-account-automation`. It is never written to disk or exported from a profile.
-- **Bootstrap:** `scripts/fetch-age-key.sh` runs before chezmoi reads source state, earlier than the Nix profile that provides `op`. When the CLI is missing it calls `scripts/install-op.sh` (Homebrew on macOS, the 1Password apt repository on Debian/Ubuntu) and on macOS prompts once for the token. Skipped in workspaces, where it warns as before.
-- **`~/.local/bin/op-automation`:** runs `op` with the token set. `[onepassword] command` in `.chezmoi.toml.tmpl` points chezmoi at it, so `onepasswordRead` uses the service account.
+- **Bootstrap:** `scripts/fetch-age-key.sh` runs before chezmoi reads source state, earlier than the Nix profile that provides `op`. When the CLI is missing it calls `scripts/install-op.sh` (Homebrew on macOS, the 1Password apt repository on Debian/Ubuntu). On personal macOS it fills `op-service-account-automation` automatically from `OP_SERVICE_ACCOUNT_TOKEN` (if set), else `op://Private/chezmoi-agents service account/credential` via 1Password app auth (one prompt), else a hidden paste prompt. Skipped in workspaces, where it warns as before.
+- **`scripts/op-automation.sh` (and `~/.local/bin/op-automation`):** runs `op` with the token set. `[onepassword] command` in `.chezmoi.toml.tmpl` and chezmoi templates call `scripts/op-automation.sh` so the first `chezmoi init --apply` works before `~` is materialized.
 - **`~/.local/bin/shims/op`:** the same for any `op` found on `PATH`. `OP_APP_AUTH=1 op …` opts back into app auth, which is required for other vaults (`Private`, work) and for writes. Callers that use an absolute path to `op` bypass the shim.
 - **`varlock`:** `agents.env` reads the token from the Keychain with `exec()`.
 - **Limits:** a service account cannot access `Private`, so secrets chezmoi needs go in `Automation`. The SSH agent and `op-ssh-sign` always use the app and still prompt.

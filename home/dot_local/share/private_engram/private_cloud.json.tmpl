@@ -8,7 +8,7 @@
 {{- if .personal }}
 {
   "server_url": "https://mau.desertbluffs.com",
-  "token": {{ output (joinPath .chezmoi.homeDir ".local/bin/op-automation") "read" "--no-newline" "op://evjh25ux2mnoufaut6qhvm2pdi/cq5a2vtrj5kuthd5q5vo6qxhha/token" | toJson }}
+  "token": {{ output (joinPath .chezmoi.workingTree "scripts/op-automation.sh") "read" "--no-newline" "op://evjh25ux2mnoufaut6qhvm2pdi/cq5a2vtrj5kuthd5q5vo6qxhha/token" | toJson }}
 }
 {{- else if .work }}
 {{- $p := includeTemplate "private-data" . | fromYaml }}

@@ -33,7 +33,7 @@ packages are out of band; no Linuxbrew.
 
 Personal macOS: `op` reads use a read-only service account (`~/.local/bin/shims/op`), no
 prompt. Templates read secrets with
-`output (joinPath .chezmoi.homeDir ".local/bin/op-automation") "read" "--no-newline" "op://…"`,
+`output (joinPath .chezmoi.workingTree "scripts/op-automation.sh") "read" "--no-newline" "op://…"`,
 never `onepasswordRead` (it runs `op signin`). Reference items by UUID, not name (`Automation`
 vault `evjh25ux2mnoufaut6qhvm2pdi`). Writes and app auth: `OP_APP_AUTH=1 op …`. Work machines:
 `op signin` first.
