@@ -5,7 +5,7 @@
 #   | ▥ used/size (pct%) AC | (sub) | 🧠 <project> · ready
 # PR data comes from ~/.config/pr-box/pr_tracking.py (cached `gh pr view`, refreshed in the background).
 # PR labels are OSC 8 hyperlinks to the PR. In Rex they move to a tiled
-# pane above Claude's pane (~/.config/pr-box/pr_float.py).
+# pane on the right of Claude's pane (~/.config/pr-box/pr_float.py).
 # Claude pipes a JSON blob on stdin; whatever we print is the status line.
 import contextlib
 import json

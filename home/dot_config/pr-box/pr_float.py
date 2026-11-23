@@ -1,7 +1,7 @@
 # Managed by chezmoi — source: home/dot_config/pr-box/pr_float.py
-# Session PR tracker as a tiled Rex pane split above the coding agent's pane.
-# Agent-neutral: adapters (see pr_box.py) supply the session ID, the working
-# directory and, when known, the agent's pid.
+# Session PR tracker as a vertical tiled Rex pane on the right of the coding
+# agent's pane. Agent-neutral: adapters (see pr_box.py) supply the session ID,
+# the working directory and, when known, the agent's pid.
 #
 #   ensure <session_id> <cwd> <pid>  (SessionStart hook) record the session for
 #                                    this Rex block, start a waiter if nothing
@@ -40,19 +40,19 @@ TICK = 2
 WAIT_TICK = 5
 # How long git facts are reused between ticks.
 GIT_TTL = 10
-# Initial tiled strip height in terminal rows (plus pane chrome) and fallback
-# total rows when a client has not reported the pane's size yet.
-DEFAULT_ROWS = 4
-MAX_ROWS = 10
-CHROME_ROWS = 2
-FALLBACK_ROWS = 35
-MIN_RATIO = 0.06
-MAX_RATIO = 0.35
+# Initial right-hand pane width in terminal columns (plus pane chrome) and
+# fallback total columns when a client has not reported the pane's size yet.
+DEFAULT_COLS = 38
+MAX_COLS = 52
+CHROME_COLS = 2
+FALLBACK_COLS = 160
+MIN_SHARE = 0.15
+MAX_SHARE = 0.35
 # How long a waiter that opened the pane waits for it to take over.
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 9
+VERSION = 10
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
 
@@ -161,8 +161,8 @@ def rex(method, args, session=None):
     return json.loads(out.stdout or "{}")
 
 
-def block_rows(block):
-    """Current terminal rows of block, or None if Rex has not measured it."""
+def block_cols(block):
+    """Current terminal columns of block, or None if Rex has not measured it."""
     out = subprocess.run(
         ["rex", "block", "call", "-s", os.environ.get("REX_SESSION", ""), "-b", block, "size", "{}"],
         capture_output=True,
@@ -170,8 +170,8 @@ def block_rows(block):
         timeout=10,
     )
     data = json.loads(out.stdout) if out.returncode == 0 else {}
-    rows = data.get("rows")
-    return rows if isinstance(rows, int) and rows > 0 else None
+    cols = data.get("columns")
+    return cols if isinstance(cols, int) and cols > 0 else None
 
 
 def _find(layout, block):
@@ -277,11 +277,13 @@ def pad(text, width):
     return text + " " * (width - visible(text))
 
 
-def split_ratio(agent_block, content_rows):
-    """Initial vertical split share for a compact top strip above agent_block."""
-    total = block_rows(agent_block) or FALLBACK_ROWS
-    want = max(DEFAULT_ROWS, min(content_rows + 1, MAX_ROWS)) + CHROME_ROWS
-    return round(min(max(want / total, MIN_RATIO), MAX_RATIO), 4)
+def split_ratio(agent_block, body):
+    """Ratio for the before (agent) side of a horizontal split putting PR Box on the right."""
+    total = block_cols(agent_block) or FALLBACK_COLS
+    content_cols = max((visible(line) for line in body), default=0)
+    want = max(DEFAULT_COLS, min(content_cols + 2, MAX_COLS)) + CHROME_COLS
+    share = min(max(want / total, MIN_SHARE), MAX_SHARE)
+    return round(1 - share, 4)
 
 
 def _spawn(mode, agent_block):
@@ -432,15 +434,15 @@ def wait(agent_block):
         # between windows) or the window is zoomed (splitting would unzoom it).
         _, rect, _, zoomed = locate(rex("session.view", {}), agent_block)
         if rect and not zoomed:
-            ratio = split_ratio(agent_block, len(lines(*session_prs(state))))
+            ratio = split_ratio(agent_block, lines(*session_prs(state)))
             break
         time.sleep(WAIT_TICK)
     rex(
         "session.new_split",
         {
             "anchor_id": agent_block,
-            "direction": "vertical",
-            "side": "before",
+            "direction": "horizontal",
+            "side": "after",
             "ratio": ratio,
             "focus": False,
             "layout": {
