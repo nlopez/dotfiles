@@ -2,11 +2,13 @@
  * rex-tab-title extension
  *
  * Updates Pi's terminal title to `<task>` inside Rex so Rex tabs show the
- * current task instead of `π - <cwd>`.
+ * current task instead of `π - <cwd>`, and renames the Rex session and tab to
+ * the same task the way Claude Code's session-start hook names them.
  *
  * Sets an immediate cleaned snippet from the first user prompt, refines it in
  * the background with a short 2-5 word summary via `pi.setSessionName()`, and
- * always defers to explicit `/name` changes.
+ * always defers to explicit `/name` changes. Rex labels are only replaced
+ * while they still hold the directory name or a `Window <id>` default.
  */
 
 import { basename } from "node:path";
@@ -58,6 +60,23 @@ export function cleanGeneratedTitle(raw: string): string {
     .slice(0, MAX_TITLE_CHARS);
 }
 
+export function rexLabelFromTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 4)
+    .join("-")
+    .slice(0, MAX_TITLE_CHARS);
+}
+
+export function isDefaultLabel(label: string | undefined, cwd: string): boolean {
+  if (!label) return true;
+  return label === (basename(cwd) || cwd) || /^Window [0-9a-f]{6,8}$/i.test(label);
+}
+
 export function pickTitleModel(
   activeModel: Model | undefined,
   registry: Pick<ExtensionContext["modelRegistry"], "getAvailable">,
@@ -99,6 +118,45 @@ export default function (pi: ExtensionAPI) {
   function applyTitle(ctx: ExtensionContext, label: string): void {
     if (!ctx.hasUI) return;
     ctx.ui.setTitle(formatTabTitle(label));
+  }
+
+  let lastLabel: string | undefined;
+
+  async function rexJson<T>(args: string[]): Promise<T | undefined> {
+    try {
+      const result = await pi.exec("rex", args, { timeout: 5_000 });
+      return result.code === 0 ? (JSON.parse(result.stdout) as T) : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  async function syncRexLabels(ctx: ExtensionContext, title: string): Promise<void> {
+    const session = process.env.REX_SESSION;
+    const label = rexLabelFromTitle(title);
+    if (!session || !label || label === lastLabel) return;
+
+    const info = await rexJson<{ label?: string; windows?: { window_id: string; label: string }[] }>([
+      "session",
+      "inspect",
+      session,
+      "--json",
+    ]);
+    if (!info) return;
+    const previous = lastLabel;
+    if (!(info.label === previous || isDefaultLabel(info.label, ctx.cwd))) return;
+    lastLabel = label;
+
+    if (info.label !== label) await rexJson(["session", "rename", session, label]);
+
+    const block = process.env.REX_BLOCK;
+    const blockInfo = block
+      ? await rexJson<{ block?: { window_id?: string } }>(["block", "inspect", block, "--json"])
+      : undefined;
+    const window = info.windows?.find((entry) => entry.window_id === blockInfo?.block?.window_id);
+    if (!window || window.label === label) return;
+    if (!(window.label === previous || isDefaultLabel(window.label, ctx.cwd))) return;
+    await rexJson(["window", "rename", "-s", session, window.window_id, label]);
   }
 
   function cancelPending(): void {
@@ -163,7 +221,9 @@ export default function (pi: ExtensionAPI) {
         .map((part) => part.text)
         .join(" ");
       const title = cleanGeneratedTitle(raw);
-      if (title) pi.setSessionName(title);
+      if (!title) return;
+      pi.setSessionName(title);
+      await syncRexLabels(ctx, title);
     } catch {
       // Fallback title is already shown; ignore background title errors.
     } finally {
@@ -180,10 +240,13 @@ export default function (pi: ExtensionAPI) {
       const name = pi.getSessionName();
       if (name) {
         applyTitle(ctx, name);
+        void syncRexLabels(ctx, name);
         return;
       }
       const prompt = firstUserText(ctx);
-      applyTitle(ctx, prompt ? fallbackTitleFromPrompt(prompt) || defaultLabel(ctx) : defaultLabel(ctx));
+      const title = prompt ? fallbackTitleFromPrompt(prompt) : "";
+      applyTitle(ctx, title || defaultLabel(ctx));
+      if (title) void syncRexLabels(ctx, title);
     }, 0);
   });
 
@@ -192,7 +255,9 @@ export default function (pi: ExtensionAPI) {
       clearTimeout(pendingTimer);
       pendingTimer = undefined;
     }
-    applyTitle(ctx, event.name?.trim() || defaultLabel(ctx));
+    const name = event.name?.trim();
+    applyTitle(ctx, name || defaultLabel(ctx));
+    if (name) void syncRexLabels(ctx, name);
   });
 
   pi.on("before_agent_start", async (event, ctx) => {
@@ -202,7 +267,10 @@ export default function (pi: ExtensionAPI) {
     attemptedSessions.add(sessionId);
 
     const fallback = fallbackTitleFromPrompt(event.prompt);
-    if (fallback) applyTitle(ctx, fallback);
+    if (fallback) {
+      applyTitle(ctx, fallback);
+      void syncRexLabels(ctx, fallback);
+    }
     void summarizeAndName(sessionId, event.prompt, ctx);
   });
 
