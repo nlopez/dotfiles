@@ -479,6 +479,17 @@ def refresh(path, cwd, target):
                 err = _short_error(out.stderr) or _short_error(out.stdout) or f"gh exited {out.returncode}"
                 _record_error(path, target or cwd, err)
                 return
+        if pr.get("state") == "OPEN" and "reviewComments" not in pr:
+            try:
+                pr["reviewComments"] = _review_comments(pr, env, cwd)
+            except Exception as e:
+                prev = _read_json(path)
+                if isinstance(prev, dict) and "reviewComments" in prev:
+                    pr["reviewComments"] = prev["reviewComments"]
+                err = _short_error(str(e)) or type(e).__name__
+                if not isinstance(prev, dict) or prev.get("_error") != err:
+                    log("error", "-", target or cwd, err)
+                pr["_error"] = err
         if pr.get("state") == "MERGED" and _recently_merged(pr) and "mergeChecks" not in pr:
             try:
                 pr["mergeChecks"] = _commit_checks(pr, env, cwd)
@@ -585,6 +596,26 @@ def _recently_merged(pr):
     except ValueError:
         return False
     return time.time() - when < POST_MERGE_WINDOW
+
+
+def _review_comments(pr, env, cwd):
+    """Inline diff review comments on a PR, shaped like gh pr view comments."""
+    m = re.match(r"https://[\w.-]+/([\w.-]+/[\w.-]+)/pull/(\d+)", pr.get("url") or "")
+    if not m:
+        return []
+    # shortcut: fetches latest 100 inline comments without pagination; paginate if PRs routinely exceed 100.
+    out = _run_gh(
+        ["api", f"repos/{m.group(1)}/pulls/{m.group(2)}/comments?per_page=100&sort=created&direction=desc"],
+        cwd=cwd,
+        env=env,
+    )
+    if out.returncode != 0:
+        raise RuntimeError(_short_error(out.stderr) or f"gh api review comments exited {out.returncode}")
+    return [
+        {"id": item["id"], "author": {"login": (item.get("user") or {}).get("login") or "?"}}
+        for item in json.loads(out.stdout or "[]")
+        if item.get("id") is not None
+    ]
 
 
 def _commit_checks(pr, env, cwd):
@@ -704,15 +735,20 @@ def _pushed_recently(session_id):
 
 
 def _feedback(pr):
-    """{id: login} of comments and review bodies by someone other than the PR author, or None if not fetched."""
-    if "comments" not in pr and "reviews" not in pr:
+    """{id: login} of comments, inline review comments, and review bodies by non-authors, or None if not fetched."""
+    if not any(k in pr for k in ("comments", "reviews", "reviewComments")):
         return None
     me = (pr.get("author") or {}).get("login")
-    items = [*(pr.get("comments") or []), *(r for r in (pr.get("reviews") or []) if r.get("body"))]
+    groups = (
+        ("c", pr.get("comments") or []),
+        ("r", [r for r in (pr.get("reviews") or []) if r.get("body")]),
+        ("rc", pr.get("reviewComments") or []),
+    )
     return {
-        i["id"]: (i.get("author") or {}).get("login", "?")
+        f"{kind}:{i['id']}": (i.get("author") or {}).get("login", "?")
+        for kind, items in groups
         for i in items
-        if i.get("id") and (i.get("author") or {}).get("login") != me
+        if i.get("id") is not None and (i.get("author") or {}).get("login") != me
     }
 
 
