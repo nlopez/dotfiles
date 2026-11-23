@@ -57,7 +57,7 @@ function box(args: string[], input?: unknown) {
 
 function runBox(args: string[]): Promise<string> {
   return new Promise((resolve) => {
-    execFile("python3", [BOX, ...args], { timeout: 5000 }, (err, stdout) => {
+    execFile("python3", [BOX, ...args], { timeout: 5000, maxBuffer: 16 * 1024 * 1024 }, (err, stdout) => {
       resolve(err ? "" : String(stdout ?? "").trim());
     });
   });
@@ -178,10 +178,17 @@ export default function (pi: ExtensionAPI) {
     promptSnippet: "Check cached CI/review status of tracked PRs or add a PR URL to track",
     promptGuidelines: [
       "Use pr_status instead of shelling out to argus_pr.py when you need the latest cached status or poll timer for tracked PRs.",
+      'When a PR event says new comment, call pr_status with comments: "new" for the full text instead of gh api.',
     ],
     parameters: Type.Object({
       add: Type.Optional(Type.String({ description: "Optional PR URL to start tracking before reading status" })),
       events: Type.Optional(Type.Boolean({ description: "Also include recent PR status events for this session" })),
+      comments: Type.Optional(
+        Type.String({
+          description:
+            'Full text of PR comments instead of status: "new" for unread ones (marks them read), "all" for every stored one, or a PR URL for that PR\'s',
+        }),
+      ),
     }),
     async execute(_toolCallId, params) {
       if (params.add) {
@@ -198,6 +205,11 @@ export default function (pi: ExtensionAPI) {
           pi.appendEntry(ENTRY, { action: "add", url });
         }
         await runBox(["add", SESSION, url]);
+      }
+      if (params.comments) {
+        const arg = params.comments === "new" ? [] : [params.comments];
+        const text = (await runBox(["comments", SESSION, ...arg])) || "no new comments";
+        return { content: [{ type: "text", text }], details: { session: SESSION, count: urls.length } };
       }
       const status = (await runBox(["status", SESSION])) || "no PRs tracked";
       const text = params.events

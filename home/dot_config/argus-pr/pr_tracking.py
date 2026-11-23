@@ -107,6 +107,17 @@ CREATE TABLE IF NOT EXISTS events (
     text       TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_id, kind, id);
+CREATE TABLE IF NOT EXISTS comments (
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    url     TEXT NOT NULL,
+    cid     TEXT NOT NULL,
+    author  TEXT NOT NULL,
+    path    TEXT NOT NULL DEFAULT '',
+    line    INTEGER,
+    created TEXT NOT NULL DEFAULT '',
+    body    TEXT NOT NULL,
+    UNIQUE (url, cid)
+);
 CREATE TABLE IF NOT EXISTS cursors (
     session_id    TEXT NOT NULL,
     consumer      TEXT NOT NULL,
@@ -275,6 +286,8 @@ def set_session(session_id, urls):
                     "INSERT INTO events(ts, kind, session_id, url, text) VALUES (?, 'unwatch', ?, ?, '')",
                     (now, session_id, url),
                 )
+            if removed:
+                conn.execute("DELETE FROM comments WHERE url NOT IN (SELECT url FROM session_prs)")
             conn.execute("COMMIT")
         except Exception:
             conn.execute("ROLLBACK")
@@ -625,6 +638,7 @@ def _review_comments(pr, env, cwd):
             "body": item.get("body") or "",
             "path": item.get("path") or "",
             "line": item.get("line") or item.get("original_line"),
+            "createdAt": item.get("created_at") or "",
         }
         for item in json.loads(out.stdout or "[]")
         if item.get("id") is not None
@@ -755,11 +769,10 @@ def _brief(body, limit=600):
     return text if len(text) <= limit else text[:limit] + "…"
 
 
-def _feedback(pr):
-    """{id: login} of comments, inline review comments, and review bodies by non-authors, or None if not fetched."""
+def _comments(pr):
+    """{kind:id: comment} of a PR's comments, inline review comments and review bodies, or None if not fetched."""
     if not any(k in pr for k in ("comments", "reviews", "reviewComments")):
         return None
-    me = (pr.get("author") or {}).get("login")
     groups = (
         ("c", pr.get("comments") or []),
         ("r", [r for r in (pr.get("reviews") or []) if r.get("body")]),
@@ -767,14 +780,81 @@ def _feedback(pr):
     )
     return {
         f"{kind}:{i['id']}": {
-            "who": (i.get("author") or {}).get("login", "?"),
-            "where": f" on {i['path']}:{i.get('line') or '?'}" if i.get("path") else "",
-            "body": _brief(i.get("body")),
+            "who": (i.get("author") or {}).get("login") or "?",
+            "path": i.get("path") or "",
+            "line": i.get("line"),
+            "created": i.get("createdAt") or i.get("submittedAt") or "",
+            "body": i.get("body") or "",
         }
         for kind, items in groups
         for i in items
-        if i.get("id") is not None and (i.get("author") or {}).get("login") != me
+        if i.get("id") is not None
     }
+
+
+def _feedback(pr, comments):
+    """The comments not written by the PR's author."""
+    me = (pr.get("author") or {}).get("login")
+    return {k: v for k, v in comments.items() if v["who"] != me}
+
+
+def _store_comments(url, comments):
+    """Upsert a PR's comments; an edited body gets a new id so readers see it as unread."""
+    with _db() as conn:
+        have = dict(conn.execute("SELECT cid, body FROM comments WHERE url = ?", (url,)).fetchall())
+        changed = [(k, v) for k, v in comments.items() if have.get(k) != v["body"]]
+        if not changed:
+            return
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            for k, v in changed:
+                conn.execute("DELETE FROM comments WHERE url = ? AND cid = ?", (url, k))
+                conn.execute(
+                    "INSERT INTO comments(url, cid, author, path, line, created, body) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (url, k, v["who"], v["path"], v["line"], v["created"], v["body"]),
+                )
+            conn.execute("COMMIT")
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
+
+
+def read_comments(session_id, url=None, unread=True, consumer="comments"):
+    """Full text of comments on the session's tracked PRs; with unread, only unread ones, advancing the cursor."""
+    if not session_id:
+        return ""
+    with _db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            row = conn.execute(
+                "SELECT last_event_id FROM cursors WHERE session_id = ? AND consumer = ?",
+                (session_id, consumer),
+            ).fetchone()
+            after = (row[0] if row else 0) if unread else 0
+            rows = conn.execute(
+                "SELECT id, url, cid, author, path, line, created, body FROM comments"
+                " WHERE id > ? AND url IN (SELECT url FROM session_prs WHERE session_id = ?)"
+                " AND (? IS NULL OR url = ?) ORDER BY id",
+                (after, session_id, url, url),
+            ).fetchall()
+            if unread and rows and url is None:
+                conn.execute(
+                    "INSERT INTO cursors(session_id, consumer, last_event_id) VALUES (?, ?, ?)"
+                    " ON CONFLICT(session_id, consumer) DO UPDATE SET last_event_id = excluded.last_event_id",
+                    (session_id, consumer, rows[-1][0]),
+                )
+            conn.execute("COMMIT")
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
+    kinds = {"c": "comment", "r": "review", "rc": "inline comment"}
+    out = []
+    for _, u, cid, author, path, line, created, body in rows:
+        where = f" on {path}:{line or '?'}" if path else ""
+        out.append(f"### {u} {kinds.get(cid.split(':')[0], 'comment')} by {author}{where} {created}".rstrip())
+        out.append(body.strip())
+        out.append("")
+    return "\n".join(out).strip()
 
 
 def notice_changes(session_id, prs):
@@ -820,8 +900,11 @@ def notice_changes(session_id, prs):
         }
         arp = pr.get("_arp") or {}
         cur["arp"] = [arp.get("id"), arp.get("state")]
-        fb = _feedback(pr)
-        if fb is not None:
+        comments = _comments(pr)
+        fb = None
+        if comments is not None:
+            _store_comments(url, comments)
+            fb = _feedback(pr, comments)
             cur["feedback"] = sorted(fb)
         now_map[url] = cur
         before = seen.get(url)
@@ -841,7 +924,8 @@ def notice_changes(session_id, prs):
             new = [i for i in fb if i not in set(before["feedback"])]
             for i in new:
                 c = fb[i]
-                events.append((url, f"new comment from {c['who']}{c['where']}: {c['body']}".rstrip(": ")))
+                where = f" on {c['path']}:{c['line'] or '?'}" if c["path"] else ""
+                events.append((url, f"new comment from {c['who']}{where}: {_brief(c['body'], 200)}".rstrip(": ")))
         if before.get("state") == "OPEN" and state in ("MERGED", "CLOSED"):
             events.append((url, state.lower()))
         if state == "MERGED" and "merge_checks" in before:
@@ -941,6 +1025,12 @@ def drain(session_id, consumer="agent"):
         ' from the user. Begin your reply with one line that starts with "PR update:" and names the'
         " PR and the change, so the user can see you are reacting to it, then handle it.\n"
         + "\n".join(f"- {e}" for e in events)
+        + (
+            f"\nFull comment text: python3 ~/.config/argus-pr/argus_pr.py comments {session_id}"
+            ' (pi: pr_status with comments: "new")'
+            if any(text.startswith("new comment") for _, _, text in rows)
+            else ""
+        )
     )
 
 

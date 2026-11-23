@@ -24,6 +24,9 @@ tiled pane (pr_tracking.py, pr_float.py) are the same for all of them.
                                          advance the consumer's cursor
   events <session_id> [n]                print the last n (default 20) PR
                                          events for a session (read-only)
+  comments <session_id> [all|url]        print the full text of unread comments on
+                                         the session's PRs and mark them read; with
+                                         all or a PR url, every stored one (read-only)
   log [n]                                print the last n (default 50) watches
                                          and events across all sessions
 """
@@ -83,6 +86,10 @@ def main(argv):
         print(pr_tracking.drain(*args))
     elif cmd == "events" and 1 <= len(args) <= 2 and (len(args) == 1 or args[1].isdigit()):
         print(pr_tracking.session_events(args[0], int(args[1]) if len(args) == 2 else 20))
+    elif cmd == "comments" and 1 <= len(args) <= 2:
+        arg = args[1] if len(args) == 2 else ""
+        url = arg if arg.startswith("https://") else None
+        print(pr_tracking.read_comments(args[0], url, unread=not arg) or "no new comments")
     elif cmd == "log" and len(args) <= 1 and all(a.isdigit() for a in args):
         print(pr_tracking.read_log(int(args[0]) if args else 50))
     else:
