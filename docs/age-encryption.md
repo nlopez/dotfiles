@@ -81,6 +81,7 @@ Personal secrets must live in the `Automation` vault (see below). Use `op-automa
 Personal machines read 1Password through a read-only service account scoped to the `Automation` vault, so `chezmoi apply` and agents never trigger an app-approval prompt.
 
 - **Token:** macOS Keychain, service `op-service-account-automation`. It is never written to disk or exported from a profile.
+- **Bootstrap:** `scripts/fetch-age-key.sh` runs before chezmoi reads source state, so on a fresh Mac it installs Homebrew and the 1Password CLI itself and prompts once for the token. The CLI has to exist at that point because the Nix profile that would provide `op` only exists after the age key is fetched.
 - **`~/.local/bin/op-automation`:** runs `op` with the token set. `[onepassword] command` in `.chezmoi.toml.tmpl` points chezmoi at it, so `onepasswordRead` uses the service account.
 - **`~/.local/bin/shims/op`:** the same for any `op` found on `PATH`. `OP_APP_AUTH=1 op …` opts back into app auth, which is required for other vaults (`Private`, work) and for writes. Callers that use an absolute path to `op` bypass the shim.
 - **`varlock`:** `agents.env` reads the token from the Keychain with `exec()`.
