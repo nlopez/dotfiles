@@ -8,7 +8,7 @@
 
 set -eufo pipefail
 
-export PATH="$HOME/.local/bin/shims:{{ includeTemplate "agent-path" . }}:$PATH"
+export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
 export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 

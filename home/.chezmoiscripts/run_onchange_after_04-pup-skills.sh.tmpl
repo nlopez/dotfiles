@@ -11,8 +11,6 @@ set -eufo pipefail
 export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
 
 command -v pi >/dev/null 2>&1 || { echo "pi not found, skipping" >&2; exit 0; }
+command -v pup >/dev/null 2>&1 || { echo "pup not found, skipping" >&2; exit 0; }
 
-# pup is a mise tool, so it is not on agent-path on macOS; ask mise for the path.
-pup="$(mise which pup 2>/dev/null)" || { echo "pup not found, skipping" >&2; exit 0; }
-
-"$pup" skills install pi --name=dd-pup-pi --yes >/dev/null
+pup skills install pi --name=dd-pup-pi --yes >/dev/null

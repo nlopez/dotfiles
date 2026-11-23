@@ -1,5 +1,7 @@
 {{- /* PATH prefix for scripts that call agent CLIs (claude, engram, wt): the
-   Nix profile, mise shims on Linux, ~/.local/bin, and Homebrew on macOS. Use:
+   order ~/.config/shell/env builds, plus Homebrew (which env leaves to
+   zprofile). The shims dir comes first so the read-only `op` and `gh` shims
+   beat their Nix binaries. Use:
    export PATH="{{ includeTemplate "agent-path" . }}:$PATH" */ -}}
-{{- includeTemplate "nix-profile" . }}/bin:{{ if eq .chezmoi.os "linux" }}{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ end }}{{ .chezmoi.homeDir }}/.local/bin{{ if eq .chezmoi.os "darwin" }}:{{ .packages.darwin.brew_prefix }}/bin{{ end }}
+{{- .chezmoi.homeDir }}/.local/bin/shims:{{ includeTemplate "nix-profile" . }}/bin:{{ .chezmoi.homeDir }}/.local/share/mise/shims:{{ .chezmoi.homeDir }}/.local/bin{{ if eq .chezmoi.os "darwin" }}:{{ .packages.darwin.brew_prefix }}/bin{{ end }}
 {{- /**/ -}}
