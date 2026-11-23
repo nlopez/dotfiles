@@ -518,6 +518,13 @@ def refresh(path, cwd, target):
                     if not isinstance(prev, dict) or prev.get("_error") != err:
                         log("error", "-", target or cwd, err)
                     pr["_error"] = err
+        arp = pr.get("_arp")
+        if arp and arp.get("state") not in ("", "queued", "running") and pr.get("state") == "OPEN":
+            n = arp.get("findings") or 0
+            text = f"ARP: {n} finding{'s' * (n != 1)}" if arp["state"] != "failed" else "ARP: review failed"
+            pr.setdefault("_notes", []).append(
+                {"text": text, "color": "yellow" if n or arp["state"] == "failed" else "green"}
+            )
         _write_json(path, pr)
     except subprocess.TimeoutExpired:
         _record_error(path, target or cwd, "gh timed out")
@@ -793,6 +800,8 @@ def notice_changes(session_id, prs):
             "failed_checks": failed_checks,
             "post_merge_failed": post_merge_failed,
         }
+        arp = pr.get("_arp") or {}
+        cur["arp"] = [arp.get("id"), arp.get("state")]
         fb = _feedback(pr)
         if fb is not None:
             cur["feedback"] = sorted(fb)
@@ -800,6 +809,16 @@ def notice_changes(session_id, prs):
         before = seen.get(url)
         if before is None:
             continue
+        if arp.get("state") not in (None, "", "queued", "running") and "arp" in before and cur["arp"] != before["arp"]:
+            n = arp.get("findings") or 0
+            events.append(
+                (
+                    url,
+                    "ARP review failed"
+                    if arp["state"] == "failed"
+                    else f"ARP review done: {n} finding{'s' * (n != 1)}",
+                )
+            )
         if fb and "feedback" in before:
             new = [i for i in fb if i not in set(before["feedback"])]
             if new:
