@@ -7,3 +7,17 @@
 pcall(require, "workspaces_rex")
 
 rex.unbind("cmd+n")
+
+-- Fullscreen pi runs in the alternate screen where Rex's Find bar has no scrollback;
+-- forward cmd+f as CSI-u ctrl+shift+f to open pi's transcript search instead.
+rex.bind("cmd+f", function()
+  local ok_p, p = pcall(rex.block.call, "com.superlogical.terminal", "process")
+  local ok_m, m = pcall(rex.block.call, "com.superlogical.terminal", "modes")
+  local argv0 = ok_p and p and p.foreground and p.foreground.argv0 or ""
+  if (argv0 == "pi" or argv0:match("/pi$")) and ok_m and m and m.screen == "alternate" then
+    rex.block.call("com.superlogical.terminal", "write", { data = "\27[102;6u" })
+    return true
+  end
+  rex.client.queue("client.find.open")
+  return true
+end)
