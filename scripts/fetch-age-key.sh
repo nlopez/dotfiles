@@ -67,31 +67,15 @@ keychain_token() {
     security find-generic-password -a "${USER}" -s "${TOKEN_ITEM}" -w 2>/dev/null || true
 }
 
-# A fresh macOS host has neither Homebrew nor the 1Password CLI, and the CLI
-# normally arrives with the Nix profile that only exists after this hook has
-# produced the age key. Install both here so `chezmoi init` works from scratch.
+# The CLI normally arrives with the Nix profile, which only exists after this
+# hook has produced the age key, so install it here on first run.
 ensure_op() {
     command -v op >/dev/null && return 0
-    if ! command -v brew >/dev/null; then
-        echo "fetch-age-key: installing Homebrew" >&2
-        NONINTERACTIVE=1 /bin/bash -c \
-            "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
-        for prefix in /opt/homebrew /usr/local; do
-            if [[ -x "${prefix}/bin/brew" ]]; then
-                eval "$("${prefix}/bin/brew" shellenv)"
-                break
-            fi
-        done
+    if [[ -n "${IN_WORKSPACE:-}" ]]; then
+        echo "fetch-age-key: workspace machine, not installing the 1Password CLI" >&2
+        fetch_failed
     fi
-    if command -v brew >/dev/null; then
-        HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1 brew install --cask 1password-cli
-    fi
-    hash -r
-    command -v op >/dev/null && return 0
-    echo "fetch-age-key: ERROR — could not install the 1Password CLI (op)." >&2
-    echo "  Install it, then re-run chezmoi: brew install --cask 1password-cli" >&2
-    echo "  https://developer.1password.com/docs/cli/get-started" >&2
-    exit 1
+    bash "$(dirname "$0")/install-op.sh"
 }
 
 # Typed once per machine; the read-only service account keeps later reads promptless.
@@ -107,8 +91,9 @@ ensure_token() {
         security -i >/dev/null
 }
 
+ensure_op
+
 if [[ "$(uname -s)" == "Darwin" ]]; then
-    ensure_op
     ensure_token || fetch_failed
     OP_SERVICE_ACCOUNT_TOKEN="$(keychain_token)" op read --no-newline "${AGE_KEY_OP_URI}" |
         keychain_store || fetch_failed
