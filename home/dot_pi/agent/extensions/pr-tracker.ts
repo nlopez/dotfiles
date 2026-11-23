@@ -56,12 +56,19 @@ function resultText(content: unknown): string {
     .join("\n");
 }
 
+/** Shell command string for bash or context-mode shell tools, or "" otherwise. */
+function shellCommand(toolName: string, input: unknown): string {
+  const args = (input ?? {}) as { command?: string; code?: string; language?: string; commands?: unknown };
+  if (toolName === "bash") return String(args.command ?? "");
+  if (toolName === "ctx_execute" && (!args.language || args.language === "shell")) return String(args.code ?? "");
+  if (toolName === "ctx_batch" && Array.isArray(args.commands)) return args.commands.map(String).join("\n");
+  return "";
+}
+
 /** PR URLs printed by one tool call, or none if the call does not open or touch a PR. */
 function prUrls(toolName: string, input: unknown, text: string, isError: boolean): string[] {
-  if (toolName === "bash") {
-    const command = String((input as { command?: string } | undefined)?.command ?? "");
-    return PR_COMMAND.test(command) ? extractUrls(text) : [];
-  }
+  const command = shellCommand(toolName, input);
+  if (command) return PR_COMMAND.test(command) ? extractUrls(text) : [];
   if (/create_?pull_?request/i.test(toolName) && !isError) return extractUrls(text);
   return [];
 }
@@ -138,7 +145,7 @@ export default function (pi: ExtensionAPI) {
         pi.appendEntry(ENTRY, { action: "add", url });
       }
     }
-    const command = event.toolName === "bash" ? String((event.input as { command?: string })?.command ?? "") : "";
+    const command = shellCommand(event.toolName, event.input);
     if (command && (PR_COMMAND.test(command) || PUSH_COMMAND.test(command))) {
       box(["record", SESSION, process.cwd()], { command, output: text });
     } else if (found.length) {
