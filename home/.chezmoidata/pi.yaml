@@ -15,6 +15,7 @@ pi:
   - "npm:@mrclrchtr/supi-prompt-suggestions@14.0.0"
   - "npm:@dietrichgebert/ponytail@5.3.3"
   - "npm:context-mode@2.2.1"
+  - "npm:pi-intercom@0.18.1"
   # Git-sourced packages; pi clones these itself. The reconcile script's
   # `pi update --extensions` installs or updates them; it prunes npm packages only.
   git_packages:
