@@ -34,3 +34,10 @@ repos:
     language: system
     entry: yamlfmt -conf .yamlfmt.yaml
     types: [yaml]
+  - id: argus-pr-version
+    name: argus-pr-version
+    language: system
+    entry: scripts/bump-argus-version.py
+    files: ^(home/dot_config/argus-pr/|home/\.private/work/argus-pr-.*\.age$)
+    pass_filenames: false
+    verbose: true
