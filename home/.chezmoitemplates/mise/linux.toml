@@ -4,4 +4,4 @@
 
 [tools]
 # macOS uses Homebrew (homebrew/core) where engram stays most up to date.
-"github:Gentleman-Programming/engram" = "3.7.1"
+"github:Gentleman-Programming/engram" = "3.7.2"
