@@ -50,7 +50,7 @@ MAX_SHARE = 0.50
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 14
+VERSION = 13
 LABEL = f"👁 Argus v{VERSION}"
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
