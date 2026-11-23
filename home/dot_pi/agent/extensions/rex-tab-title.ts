@@ -151,10 +151,11 @@ export default function (pi: ExtensionAPI) {
     const window = info.windows?.find((entry) => entry.window_id === blockInfo?.block?.window_id);
 
     // Session and tab are renamed apart: a name someone chose for the session
-    // leaves the tab free to follow the task.
+    // leaves the tab free to follow the task. The first title of a pi
+    // session overwrites whatever the tab was called.
     const sessionOurs = info.label === previous || isDefaultLabel(info.label, ctx.cwd);
     const windowOurs =
-      !!window && window.label !== label && (window.label === previous || isDefaultLabel(window.label, ctx.cwd));
+      !!window && window.label !== label && (previous === undefined || window.label === previous || isDefaultLabel(window.label, ctx.cwd));
     if (!sessionOurs && !windowOurs) return;
     lastLabel = label;
 
