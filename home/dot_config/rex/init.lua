@@ -36,7 +36,7 @@ rex.action {
         if content:find("Search transcript", 1, true) then return end
         if not content:find("Showing detailed transcript", 1, true) then
           rex.block.call("com.superlogical.terminal", "write", { data = "\15" }) -- ctrl+o
-          rex.sleep(0.05)
+          rex.exec({ "sleep", "0.05" }) -- rex.sleep is script-only, missing in init.lua actions
         end
         rex.block.call("com.superlogical.terminal", "write", { data = "/" })
         return
