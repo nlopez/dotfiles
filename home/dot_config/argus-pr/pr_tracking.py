@@ -359,13 +359,12 @@ def ignored_checks(pr):
 
 def review_state(pr):
     """Effective review / merge-readiness state for an open PR:
-    'ready', 'approved', 'changes', 'blocked', 'needed', or ''."""
+    'ready', 'approved', 'changes', 'blocked', 'needed', 'pending', or ''."""
     decision = pr.get("reviewDecision") or ""
     if decision == "CHANGES_REQUESTED":
         return "changes"
-    override = pr.get("_review")
-    if override:
-        return override
+    if "_review" in pr:
+        return pr["_review"]
     if decision == "APPROVED":
         return "approved"
     return "needed" if decision else ""
