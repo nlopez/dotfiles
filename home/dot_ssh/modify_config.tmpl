@@ -73,21 +73,6 @@ fi
 
 # Emit the chezmoi-managed config.
 cat <<'CHEZMOI_SSH_CONFIG'
-Host *
-  Compression yes
-  ServerAliveInterval 240
-  ServerAliveCountMax 2
-  HostKeyAlgorithms -ssh-rsa
-  ForwardAgent no
-{{- if not .work }}
-  IdentityFile none
-{{- end }}
-  StrictHostKeyChecking accept-new
-  User nlopez
-{{- if not .work }}
-  IdentityAgent "{{ .platform.ssh_auth_sock | replace "~" .chezmoi.homeDir }}"
-{{- end }}
-
 # Direct github.com connections are anonymous — git uses core.sshCommand
 # (set per-repo by the identity includes) to authenticate instead.
 Host github.com
@@ -121,11 +106,36 @@ Host workspace-* *.workspace.infra.dog
 {{- end }}
 {{- if .personal }}
 
+# Homelab hosts that do not log in as the global default user. The
+# gateways, knodes, and odroids all use nlopez.
+Host nas1 nas1.lga1.radoncanyon.com nas2 nas2.lga1.radoncanyon.com
+  User root
+
+Host uos
+  User root
+
 # SilentShout42 GitHub identity: silentshout42 + kamotimestamps org repos.
 Host github.com-silentshout42
   HostName github.com
   User git
   IdentityFile ~/.ssh/id_silentshout42.pub
   IdentitiesOnly yes
+{{- end }}
+
+# Catch-all last: ssh takes the first value it finds for a keyword, so this
+# block must not precede the host-specific ones above.
+Host *
+  Compression yes
+  ServerAliveInterval 240
+  ServerAliveCountMax 2
+  HostKeyAlgorithms -ssh-rsa
+  ForwardAgent no
+{{- if not .work }}
+  IdentityFile none
+{{- end }}
+  StrictHostKeyChecking accept-new
+  User nlopez
+{{- if not .work }}
+  IdentityAgent "{{ .platform.ssh_auth_sock | replace "~" .chezmoi.homeDir }}"
 {{- end }}
 CHEZMOI_SSH_CONFIG
