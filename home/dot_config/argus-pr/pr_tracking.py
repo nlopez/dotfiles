@@ -36,11 +36,11 @@ CACHE = os.path.join(
 PR_URL = re.compile(r"https://[\w.-]+/[\w.-]+/[\w.-]+/pull/\d+")
 FIELDS = "number,url,state,isDraft,reviewDecision,statusCheckRollup,headRefOid,mergeCommit,mergedAt"
 # Status refresh intervals, in seconds.
-ACTIVE_TTL = 30  # checks running, failing or not reported yet
+ACTIVE_TTL = 15  # checks running, failing or not reported yet
 SETTLED_TTL = 300  # open with every check green: only review state can change
 NO_PR_TTL = 120  # a branch without a PR yet
 CLOSED_TTL = 3600  # merged or closed
-HOT_TTL = 20  # right after a push or gh pr command
+HOT_TTL = 10  # right after a push or gh pr command
 HOT_WINDOW = 180
 ERROR_TTL = 60  # retry interval after a failed gh check
 # A refresh that has not finished within this window is assumed dead.
