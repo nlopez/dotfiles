@@ -38,6 +38,11 @@ OVERLAY=$(cat << 'EOF'
 {{- end }}
     }
 {{- end }}
+{{- if not .headless }}
+    ,"1password": {
+      "command": "1password-mcp"
+    }
+{{- end }}
 {{- range $k, $v := $servers }}
     ,"{{ $k }}": {{ $v | toJson }}
 {{- end }}
@@ -55,7 +60,7 @@ else
   # .chezmoitemplates/private-mcp-servers), are removed.
 {{- $p := includeTemplate "private-data" . | fromYaml }}
   # datadog is retired in favour of the pup CLI.
-{{- $drop := concat (list "figma" "datadog") ($p.mcp_retired | default list) }}
+{{- $drop := concat (list "figma" "datadog" "datadog-prod" "datadog-staging") ($p.mcp_retired | default list) }}
 {{- if .workspace }}{{ $drop = concat $drop ($p.mcp_workspace_exclude | default list) }}{{ end }}
   # On workspaces, wmux owns the servers it marks wmuxManaged (it points
   # them at its local auth proxy), so their entries are kept as wmux wrote them.
