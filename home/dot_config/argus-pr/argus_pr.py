@@ -53,7 +53,7 @@ def record_command(session_id, cwd, command, output):
     for url in pr_tracking.command_prs(command, output):
         pr_tracking.record(session_id, url)
     if pr_tracking.PUSH_COMMAND.search(command):
-        pr_tracking.note_push(session_id)
+        pr_tracking.note_push(session_id, pr_tracking.push_dir(command, cwd))
         pr_tracking.spawn_resolve(session_id, pr_tracking.push_dir(command, cwd))
     if pr_tracking.PUSH_COMMAND.search(command) or pr_tracking.PR_COMMAND.search(command):
         pr_tracking.invalidate()

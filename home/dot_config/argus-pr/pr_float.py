@@ -238,7 +238,7 @@ def lines(found, here, max_rows=None):
         return [" " + t.c(t.DIM, "No PRs yet")]
     groups = {}
     for pr, current in found:
-        repo = t.repo_of(pr.get("url"))
+        repo = pr.get("repo") or t.repo_of(pr.get("url"))
         groups.setdefault(repo, []).append((pr, current))
     ordered_repos = sorted(groups, key=lambda r: (r != here, r.lower()))
     for repo in ordered_repos:
@@ -278,6 +278,10 @@ def lines(found, here, max_rows=None):
 def cells(pr, prefix):
     """(PR, CI, Review) cells for one PR."""
     t = pr_tracking
+    if pr.get("branch"):
+        wt = pr["worktree"]
+        where = pr["branch"] + (f" ({wt})" if wt != pr["branch"] else "")
+        return t.c(t.CYAN, f"{prefix}{where}"), t.c(t.DIM, "–"), t.c(t.DIM, "no PR")
     name = t.c(t.GREEN, f"{prefix}#{pr.get('number')}")
     state = pr.get("state")
     if state in ("MERGED", "CLOSED"):

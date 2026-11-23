@@ -334,11 +334,27 @@ FAILED = {"FAILURE", "ERROR", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED", "STAR
 REVIEW_EVENTS = {"APPROVED": "approved", "CHANGES_REQUESTED": "changes requested"}
 
 
-def note_push(session_id):
+def note_push(session_id, cwd=""):
     """Record that the session just ran git push, so the head change it causes is not
-    reported as a commit from outside the session."""
-    if session_id:
-        _write_json(_session_path(session_id, "pushes"), {"time": time.time()})
+    reported as a commit from outside the session, and keep the pushed branch so the
+    box can list it even without a PR."""
+    if not session_id:
+        return
+    path = _session_path(session_id, "pushes")
+    old = _read_json(path, {}) or {}
+    items = old.get("items", [])
+    branch = git(cwd, "branch", "--show-current") if cwd else ""
+    common = git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir") if cwd else ""
+    if branch and common:
+        items = [i for i in items if (i["dir"], i["branch"]) != (cwd, branch)]
+        items.append({"dir": cwd, "branch": branch, "common": common, "time": time.time()})
+    _write_json(path, {"time": time.time(), "items": items[-10:]})
+
+
+def pushed_branches(session_id):
+    """Recent pushed {dir, branch, common} entries, newest first."""
+    items = (_read_json(_session_path(session_id, "pushes"), {}) or {}).get("items", [])
+    return sorted(items, key=lambda i: -i["time"])
 
 
 def _pushed_recently(session_id):
@@ -506,6 +522,12 @@ def prs(session_id, cwd, common, branch):
     for url in session_prs(session_id):
         if url != (current or {}).get("url"):
             out.append(({"number": url.rsplit("/", 1)[-1], **(url_pr(url) or {}), "url": url}, False))
+    # Pushed branches with no PR (main and the current branch's PR are already covered).
+    for item in pushed_branches(session_id)[:5]:
+        b = item["branch"]
+        if b in ("main", "master") or branch_pr(item["dir"], item["common"], b) != {}:
+            continue
+        out.append(({"branch": b, "repo": os.path.basename(os.path.dirname(item["common"])), "worktree": os.path.basename(item["dir"])}, b == branch and item["dir"] == cwd))
     return out
 
 
@@ -528,6 +550,8 @@ def link(url, text):
 
 def label(pr, prefix=""):
     """'#12 draft ✓ approved'-style label; state and review only when notable."""
+    if pr.get("branch"):
+        return c(CYAN, f"{prefix}{pr['branch']}") + " " + c(DIM, "no PR")
     bits = [c(GREEN, f"{prefix}#{pr.get('number')}")]
     state = pr.get("state")
     if state == "MERGED":
