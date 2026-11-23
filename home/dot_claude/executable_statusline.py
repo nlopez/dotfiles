@@ -10,8 +10,6 @@
 import contextlib
 import json
 import os
-import shutil
-import subprocess
 import sys
 import urllib.request
 
@@ -72,17 +70,6 @@ def main():
         data = json.loads(raw)
     except Exception:
         data = {}
-
-    if data.get("rate_limits"):
-        with contextlib.suppress(Exception):
-            subprocess.run(
-                [shutil.which("milo") or "milo", "claude-status"],
-                input=raw,
-                text=True,
-                capture_output=True,
-                timeout=2,
-                check=False,
-            )
 
     cwd = data.get("workspace", {}).get("current_dir") or data.get("cwd") or os.getcwd()
     sep = c(DIM, " | ")

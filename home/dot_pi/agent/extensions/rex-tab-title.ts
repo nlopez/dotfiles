@@ -144,19 +144,22 @@ export default function (pi: ExtensionAPI) {
     ]);
     if (!info) return;
     const previous = lastLabel;
-    if (!(info.label === previous || isDefaultLabel(info.label, ctx.cwd))) return;
-    lastLabel = label;
-
-    if (info.label !== label) await rexJson(["session", "rename", session, label]);
-
     const block = process.env.REX_BLOCK;
     const blockInfo = block
       ? await rexJson<{ block?: { window_id?: string } }>(["block", "inspect", block, "--json"])
       : undefined;
     const window = info.windows?.find((entry) => entry.window_id === blockInfo?.block?.window_id);
-    if (!window || window.label === label) return;
-    if (!(window.label === previous || isDefaultLabel(window.label, ctx.cwd))) return;
-    await rexJson(["window", "rename", "-s", session, window.window_id, label]);
+
+    // Session and tab are renamed apart: a name someone chose for the session
+    // leaves the tab free to follow the task.
+    const sessionOurs = info.label === previous || isDefaultLabel(info.label, ctx.cwd);
+    const windowOurs =
+      !!window && window.label !== label && (window.label === previous || isDefaultLabel(window.label, ctx.cwd));
+    if (!sessionOurs && !windowOurs) return;
+    lastLabel = label;
+
+    if (sessionOurs && info.label !== label) await rexJson(["session", "rename", session, label]);
+    if (window && windowOurs) await rexJson(["window", "rename", "-s", session, window.window_id, label]);
   }
 
   function cancelPending(): void {

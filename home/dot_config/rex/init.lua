@@ -1,5 +1,3 @@
--- Managed by milo setup.
-pcall(dofile, "/Users/localuser/.config/milo/rex.lua")
 -- Rex configuration. Managed by chezmoi (home/dot_config/rex/init.lua).
 -- Docs: https://www.superlogical.com/rex/docs/customize/config
 
@@ -9,4 +7,3 @@ pcall(dofile, "/Users/localuser/.config/milo/rex.lua")
 pcall(require, "workspaces_rex")
 
 rex.unbind("cmd+n")
-rex.bind("cmd+shift+w", "milo_close")
