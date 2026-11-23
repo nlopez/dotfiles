@@ -41,6 +41,7 @@ NO_PR_TTL = 120  # a branch without a PR yet
 CLOSED_TTL = 3600  # merged or closed
 HOT_TTL = 20  # right after a push or gh pr command
 HOT_WINDOW = 180
+ERROR_TTL = 60  # retry interval after a failed gh check
 # A refresh that has not finished within this window is assumed dead.
 PENDING_TTL = 30
 # A PR head change seen within this window after the session's own git push is
@@ -143,9 +144,11 @@ def _ttl(cached):
     """How long a cached status stays fresh: short while CI is moving, long once settled."""
     if cached is None:
         return 0
-    state = cached.get("state")
+    if cached.get("_error"):
+        return ERROR_TTL
     if not cached:
         return NO_PR_TTL
+    state = cached.get("state")
     if state == "MERGED" and _recently_merged(cached):
         return ACTIVE_TTL if merge_checks(cached) in ("pending", "") else SETTLED_TTL
     if state in ("MERGED", "CLOSED"):
@@ -157,13 +160,19 @@ def _status(cache_name, cwd, target):
     """Cached PR dict, {} when there is no PR, None when not fetched yet."""
     path = _path("status", cache_name + ".json")
     cached = _read_json(path)
-    age = time.time() - os.path.getmtime(path) if cached is not None else None
+    now = time.time()
+    mtime = _mtime(path) if cached is not None else None
+    age = now - mtime if mtime is not None else None
     ttl = _ttl(cached)
-    if cached is not None and time.time() - _mtime(_path("status", ".hot")) < HOT_WINDOW:
+    if cached is not None and now - _mtime(_path("status", ".hot")) < HOT_WINDOW:
         ttl = min(ttl, HOT_TTL)
     if age is None or age > ttl:
         _spawn_refresh(path, cwd, target)
-    return cached
+    if not cached:
+        return cached
+    pending_mtime = _mtime(path + ".pending")
+    refreshing = pending_mtime > 0 and (now - pending_mtime) < PENDING_TTL
+    return {**cached, "_next_check": mtime + ttl, "_refreshing": refreshing}
 
 
 def _mtime(path):
@@ -228,6 +237,24 @@ def _run_gh(args, cwd, env=None):
     )
 
 
+def _short_error(text, limit=120):
+    """First non-empty line of an error message, whitespace-collapsed."""
+    for line in (text or "").splitlines():
+        line = " ".join(line.split())
+        if line:
+            return line[:limit]
+    return ""
+
+
+def _record_error(path, target, err):
+    prev = _read_json(path)
+    data = dict(prev) if isinstance(prev, dict) else {}
+    if data.get("_error") != err:
+        log("error", "-", target, err)
+    data["_error"] = err
+    _write_json(path, data)
+
+
 def refresh(path, cwd, target):
     args = ["pr", "view", *([target] if target else []), "--json", FIELDS]
     env = dict(os.environ)
@@ -240,11 +267,26 @@ def refresh(path, cwd, target):
         if out.returncode == 0:
             pr = json.loads(out.stdout)
             if pr.get("state") == "MERGED" and _recently_merged(pr):
-                with contextlib.suppress(Exception):
+                try:
                     pr["mergeChecks"] = _commit_checks(pr, env, cwd)
+                except Exception as e:
+                    prev = _read_json(path)
+                    if isinstance(prev, dict) and prev.get("mergeChecks"):
+                        pr["mergeChecks"] = prev["mergeChecks"]
+                    err = _short_error(str(e)) or type(e).__name__
+                    if not isinstance(prev, dict) or prev.get("_error") != err:
+                        log("error", "-", target or cwd, err)
+                    pr["_error"] = err
             _write_json(path, pr)
         elif "no pull requests found" in out.stderr.lower():
             _write_json(path, {})
+        else:
+            err = _short_error(out.stderr) or _short_error(out.stdout) or f"gh exited {out.returncode}"
+            _record_error(path, target or cwd, err)
+    except subprocess.TimeoutExpired:
+        _record_error(path, target or cwd, "gh timed out")
+    except Exception as e:
+        _record_error(path, target or cwd, _short_error(str(e)) or type(e).__name__)
     finally:
         with contextlib.suppress(OSError):
             os.remove(path + ".pending")
@@ -277,7 +319,9 @@ def _commit_checks(pr, env, cwd):
             cwd=cwd,
             env=env,
         )
-        for item in json.loads(out.stdout or "[]") if out.returncode == 0 else []:
+        if out.returncode != 0:
+            raise RuntimeError(_short_error(out.stderr) or f"gh api {endpoint} exited {out.returncode}")
+        for item in json.loads(out.stdout or "[]"):
             if key == "statuses":
                 items.append({"context": item.get("context"), "state": (item.get("state") or "").upper()})
             else:
@@ -445,16 +489,39 @@ def _url_number(url):
         return 0
 
 
+def format_countdown(seconds):
+    """Compact remaining time until the next check: 18s, 4m12s, 1h05m."""
+    s = max(0, int(seconds))
+    if s < 60:
+        return f"{s}s"
+    if s < 3600:
+        return f"{s // 60}m{s % 60:02d}s"
+    return f"{s // 3600}h{(s % 3600) // 60:02d}m"
+
+
 def status_lines(session_id):
     """One line per PR the session tracks, from the cached status, for agents to read."""
     out = []
     for url in sorted(session_prs(session_id), key=lambda u: (repo_of(u).lower(), _url_number(u))):
         pr = url_pr(url)
         if pr is None:
-            out.append(f"{url}  status not fetched yet")
+            out.append(f"{url}  status not fetched yet (checking)")
             continue
         if not pr:
             out.append(f"{url}  not found")
+            continue
+        next_str = (
+            "checking"
+            if pr.get("_refreshing")
+            else (f"next {format_countdown(pr['_next_check'] - time.time())}" if pr.get("_next_check") is not None else "")
+        )
+        if "state" not in pr:
+            parts = [url, "check error"]
+            if next_str:
+                parts.append(next_str)
+            if pr.get("_error"):
+                parts.append(f"error: {pr['_error']}")
+            out.append("  ".join(parts))
             continue
         state = pr.get("state") or "?"
         if state == "OPEN" and pr.get("isDraft"):
@@ -478,6 +545,10 @@ def status_lines(session_id):
             m_failed = _failed_names(pr, "mergeChecks")
             if m_failed:
                 parts.append(f"post-merge failing: {', '.join(m_failed)}")
+        if next_str:
+            parts.append(next_str)
+        if pr.get("_error"):
+            parts.append(f"error: {pr['_error']}")
         out.append("  ".join(parts))
     return "\n".join(out) or "no PRs tracked"
 
@@ -501,11 +572,23 @@ def prs(session_id, cwd, common, branch):
     current = None
     if common and branch and branch not in ("main", "master"):
         current = branch_pr(cwd, common, branch)
-        if current:
+        if current and (current.get("url") or current.get("_error")):
+            if not current.get("url"):
+                current = {**current, "branch": branch}
             out.append((current, True))
     for url in session_prs(session_id):
         if url != (current or {}).get("url"):
-            out.append(({"number": url.rsplit("/", 1)[-1], **(url_pr(url) or {}), "url": url}, False))
+            data = url_pr(url)
+            out.append(
+                (
+                    {
+                        "number": url.rsplit("/", 1)[-1],
+                        **(data if data is not None else {"_refreshing": True}),
+                        "url": url,
+                    },
+                    False,
+                )
+            )
     return out
 
 
@@ -528,6 +611,8 @@ def link(url, text):
 
 def label(pr, prefix=""):
     """'#12 draft ✓ approved'-style label; state and review only when notable."""
+    if pr.get("number") is None:
+        return c(RED, "! check err") if pr.get("_error") else ""
     bits = [c(GREEN, f"{prefix}#{pr.get('number')}")]
     state = pr.get("state")
     if state == "MERGED":
@@ -543,6 +628,8 @@ def label(pr, prefix=""):
         review = REVIEW.get(pr.get("reviewDecision"))
         if review:
             bits.append(c(*review))
+    if pr.get("_error"):
+        bits.append(c(RED, "!"))
     return link(pr.get("url"), " ".join(bits))
 
 

@@ -50,8 +50,9 @@ MAX_SHARE = 0.50
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 15
+VERSION = 16
 LABEL = f"👁 Argus v{VERSION}"
+ERROR_MAX = 48
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
 
@@ -250,39 +251,56 @@ def lines(found, here, max_rows=None):
         for repo in ordered_repos:
             prefix = "" if repo == here else repo
             for pr, current in groups[repo]:
-                pr_cell, ci, review = cells(pr, prefix)
-                body.append([mark[current] + pr_cell, ci, review])
-        widths = [max(visible(row[i]) for row in body) for i in range(3)]
+                pr_cell, ci, review, nxt = cells(pr, prefix)
+                body.append([mark[current] + pr_cell, ci, review, nxt])
+        widths = [max(visible(row[i]) for row in body) for i in range(4)]
         return [" " + "  ".join(pad(col, w) for col, w in zip(cols, widths, strict=True)) for cols in body]
-    header = [t.c(t.BOLD, "PR"), t.c(t.BOLD, "CI"), t.c(t.BOLD, "Review")]
+    header = [t.c(t.BOLD, "PR"), t.c(t.BOLD, "CI"), t.c(t.BOLD, "Review"), t.c(t.BOLD, "Next")]
     grouped_rows = []
     all_rows = [header]
     for repo in ordered_repos:
         rows = []
         for pr, current in groups[repo]:
-            pr_cell, ci, review = cells(pr, "")
-            row = [mark[current] + pr_cell, ci, review]
-            rows.append(row)
+            pr_cell, ci, review, nxt = cells(pr, "")
+            row = [mark[current] + pr_cell, ci, review, nxt]
+            rows.append((row, pr.get("_error")))
             all_rows.append(row)
         grouped_rows.append((repo, rows))
-    widths = [max(visible(row[i]) for row in all_rows) for i in range(3)]
+    widths = [max(visible(row[i]) for row in all_rows) for i in range(4)]
     fmt = lambda cols: " " + "  ".join(pad(col, w) for col, w in zip(cols, widths, strict=True))
     out = [fmt(header)]
     for repo, rows in grouped_rows:
         if repo:
             out.append(" " + t.c(t.CYAN, repo))
-        out.extend(fmt(row) for row in rows)
+        for row, err in rows:
+            out.append(fmt(row))
+            if err:
+                short = err if len(err) <= ERROR_MAX else err[: ERROR_MAX - 1] + "…"
+                out.append("   " + t.c(t.RED, f"! {short}"))
     return out
 
 
-def cells(pr, prefix):
-    """(PR, CI, Review) cells for one PR."""
+def _next_cell(pr):
     t = pr_tracking
-    name = t.c(t.GREEN, f"{prefix}#{pr.get('number')}")
+    if pr.get("_refreshing"):
+        return t.c(t.YELLOW, "…")
+    next_at = pr.get("_next_check")
+    if next_at is not None:
+        countdown = t.format_countdown(next_at - time.time())
+        return t.c(t.RED, f"! {countdown}") if pr.get("_error") else t.c(t.DIM, countdown)
+    return t.c(t.RED, "!") if pr.get("_error") else t.c(t.DIM, "–")
+
+
+def cells(pr, prefix):
+    """(PR, CI, Review, Next) cells for one PR."""
+    t = pr_tracking
+    nxt = _next_cell(pr)
+    number = pr.get("number")
+    name = t.c(t.GREEN, f"{prefix}#{number}") if number is not None else t.c(t.DIM, pr.get("branch") or "branch")
     state = pr.get("state")
     if state in ("MERGED", "CLOSED"):
         tag = t.c(t.MAGENTA, "merged") if state == "MERGED" else t.c(t.RED, "closed")
-        return t.link(pr.get("url"), f"{name} {tag}"), t.c(t.DIM, "–"), t.c(t.DIM, "–")
+        return t.link(pr.get("url"), f"{name} {tag}"), t.c(t.DIM, "–"), t.c(t.DIM, "–"), nxt
     if pr.get("isDraft"):
         name += " " + t.c(t.DIM, "draft")
     status = t.checks(pr)
@@ -290,11 +308,13 @@ def cells(pr, prefix):
         color, glyph = t.CHECK_GLYPH[status]
         passed, total = t.check_counts(pr)
         ci = t.c(color, f"{glyph} {passed}/{total}")
+    elif not state and pr.get("_error"):
+        ci = t.c(t.RED, "err")
     else:
         ci = t.c(t.DIM, "–")
     decision = pr.get("reviewDecision")
     review = t.REVIEW.get(decision) or ((t.YELLOW, "needed") if decision else (t.DIM, "–"))
-    return t.link(pr.get("url"), name), ci, t.c(*review)
+    return t.link(pr.get("url"), name), ci, t.c(*review), nxt
 
 
 ANSI = re.compile(r"\033\[[\d;]*m|\033\]8;;.*?\033\\")
