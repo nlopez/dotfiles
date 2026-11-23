@@ -3,7 +3,7 @@
 """
 Agent-neutral entry point for the session PR box. Each coding agent has a thin
 adapter that reports its session and the PRs it opens; the tracking and the Rex
-floating box (pr_tracking.py, pr_float.py) are the same for all of them.
+tiled pane (pr_tracking.py, pr_float.py) are the same for all of them.
 
   attach <session_id> <cwd> [agent_pid]  open the box for this Rex pane, or
                                          point it at this session. With an

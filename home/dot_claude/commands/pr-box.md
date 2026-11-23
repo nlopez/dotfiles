@@ -1,5 +1,5 @@
 ---
-description: Reopen the session's PR floating box in this Rex pane
+description: Reopen the session's PR pane in this Rex window
 allowed-tools: Bash(python3 ~/.config/pr-box/pr_box.py reopen)
 disable-model-invocation: true
 ---

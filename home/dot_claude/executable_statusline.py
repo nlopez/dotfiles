@@ -4,8 +4,8 @@
 #   model | think:<effort> | dir <name> | ⎇ <branch> | PR #12 ✓ approved | PRs #9 ✗ · repo#4 merged
 #   | ▥ used/size (pct%) AC | (sub) | 🧠 <project> · ready
 # PR data comes from ~/.config/pr-box/pr_tracking.py (cached `gh pr view`, refreshed in the background).
-# PR labels are OSC 8 hyperlinks to the PR. In Rex they move to a floating
-# box at the top right of Claude's pane (~/.config/pr-box/pr_float.py).
+# PR labels are OSC 8 hyperlinks to the PR. In Rex they move to a tiled
+# pane above Claude's pane (~/.config/pr-box/pr_float.py).
 # Claude pipes a JSON blob on stdin; whatever we print is the status line.
 import contextlib
 import json
@@ -38,7 +38,7 @@ def engram_ready():
 
 
 def pr_parts(data, cwd, common, branch):
-    # In Rex, pr_float.py shows the PRs in a floating box instead.
+    # In Rex, pr_float.py shows the PRs in a tiled pane instead.
     block = os.environ.get("REX_BLOCK")
     if block and pr_float.running(block):
         return []

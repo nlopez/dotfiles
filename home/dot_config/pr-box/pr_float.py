@@ -1,29 +1,26 @@
 # Managed by chezmoi — source: home/dot_config/pr-box/pr_float.py
-# Session PR tracker as a Rex floating box at the top right of the coding
-# agent's pane. Agent-neutral: adapters (see pr_box.py) supply the session ID, the
-# working directory and, when known, the agent's pid.
+# Session PR tracker as a tiled Rex pane split above the coding agent's pane.
+# Agent-neutral: adapters (see pr_box.py) supply the session ID, the working
+# directory and, when known, the agent's pid.
 #
 #   ensure <session_id> <cwd> <pid>  (SessionStart hook) record the session for
 #                                    this Rex block, start a waiter if nothing
 #                                    is running for it, and prune the state of
 #                                    closed panes
-#   wait <agent_block>              detached: open the box once the agent's
-#                                    pane is tiled in a window; exit, removing
-#                                    the pane's state, if Rex no longer has
-#                                    the pane or its session
-#   watch <agent_block>             the box's own program: draw the PRs (or a
-#                                    short message when there are none) and keep
-#                                    the box sized to fit at the top right of
-#                                    the agent's pane; if the pane leaves its
+#   wait <agent_block>              detached: open the pane once the agent's
+#                                    pane is tiled in an unzoomed window; exit,
+#                                    removing the pane's state, if Rex no longer
+#                                    has the pane or its session
+#   watch <agent_block>             the pane's own program: draw the PRs (or a
+#                                    short message when there are none) sized to
+#                                    the terminal; if the agent pane leaves its
 #                                    window's layout it hands back to a waiter
-#                                    and closes. It also queues PR notifications
+#                                    and closes. Also queues PR notifications
 #                                    for the agent (pr_tracking.notice_changes)
 #
 # One of wait or watch runs per Rex block, its pid in the block's state file;
-# either exits when Claude does. Both re-exec themselves, keeping their pid and
-# the box's layer, when pr_float.py or pr_tracking.py changes on disk. The box is a Rex floating layer sized in
-# fractions of the window, so its size is recomputed from the window's cell
-# size on every tick.
+# either exits when the agent does. Both re-exec themselves, keeping their pid
+# and the pane, when pr_float.py or pr_tracking.py changes on disk.
 import contextlib
 import json
 import os
@@ -41,17 +38,21 @@ import pr_tracking  # noqa: E402
 TICK = 2
 # A waiter only needs to notice the first PR; nothing is on screen to keep fresh.
 WAIT_TICK = 5
-# How long git facts and the agent pane's size are reused between ticks.
+# How long git facts are reused between ticks.
 GIT_TTL = 10
-SIZE_TTL = 6
-# Cells the floating layer's frame takes, until measured, and the most it can be.
-FRAME = (3, 3)
-FRAME_MAX = (8, 6)
-# How long a waiter that opened the box waits for the box to take over.
+# Initial tiled strip height in terminal rows (plus pane chrome) and fallback
+# total rows when a client has not reported the pane's size yet.
+DEFAULT_ROWS = 4
+MAX_ROWS = 10
+CHROME_ROWS = 2
+FALLBACK_ROWS = 35
+MIN_RATIO = 0.06
+MAX_RATIO = 0.35
+# How long a waiter that opened the pane waits for it to take over.
 HANDOFF = 15
-# Shown in the box's title so a box still running older code is easy to spot.
+# Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 8
+VERSION = 9
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
 
@@ -160,12 +161,8 @@ def rex(method, args, session=None):
     return json.loads(out.stdout or "{}")
 
 
-def block_size(block):
-    return block_report(block)[:2]
-
-
-def block_report(block):
-    """(columns, rows, when a client last reported that size)."""
+def block_rows(block):
+    """Current terminal rows of block, or None if Rex has not measured it."""
     out = subprocess.run(
         ["rex", "block", "call", "-s", os.environ.get("REX_SESSION", ""), "-b", block, "size", "{}"],
         capture_output=True,
@@ -173,8 +170,8 @@ def block_report(block):
         timeout=10,
     )
     data = json.loads(out.stdout) if out.returncode == 0 else {}
-    stamp = max((d.get("updated_at") or "" for d in data.get("desired") or []), default="")
-    return data.get("columns"), data.get("rows"), stamp
+    rows = data.get("rows")
+    return rows if isinstance(rows, int) and rows > 0 else None
 
 
 def _find(layout, block):
@@ -191,14 +188,14 @@ def _find(layout, block):
 
 
 def locate(view, block):
-    """(window_id, tiled rect of block, layer holding block)."""
+    """(window_id, tiled rect of block, layer holding block, window is zoomed)."""
     for window in view.get("windows") or []:
         for layer in window.get("layers") or []:
             ids = {b.get("block_id") for b in layer.get("blocks") or []}
             if block in ids:
                 rect = _find(layer.get("layout"), block) if layer.get("kind") == "tiled" else None
-                return window.get("window_id"), rect, layer
-    return None, None, None
+                return window.get("window_id"), rect, layer, bool(window.get("zoomed_block_id"))
+    return None, None, None, False
 
 
 _cache = {}
@@ -229,7 +226,7 @@ def session_prs(state):
     return pr_tracking.prs(session_id, cwd, common, branch), here
 
 
-def lines(found, here):
+def lines(found, here, max_rows=None):
     rows = []
     for pr, current in found:
         repo = pr_tracking.repo_of(pr.get("url"))
@@ -237,26 +234,14 @@ def lines(found, here):
         rows.append((current, *cells(pr, prefix)))
     t = pr_tracking
     if not rows:
-        message = "No PRs yet"
-        return [
-            t.c(t.DIM, "┌" + "─" * (len(message) + 2) + "┐"),
-            t.c(t.DIM, "│") + " " + t.c(t.DIM, message) + " " + t.c(t.DIM, "│"),
-            t.c(t.DIM, "└" + "─" * (len(message) + 2) + "┘"),
-        ]
+        return [" " + t.c(t.DIM, "No PRs yet")]
     mark = {True: t.c(t.GREEN, "⎇ "), False: "  "}
     header = [t.c(t.BOLD, "PR"), t.c(t.BOLD, "CI"), t.c(t.BOLD, "Review")]
     body = [[mark[current] + pr_cell, ci, review] for current, pr_cell, ci, review in rows]
-    widths = [max(visible(row[i]) for row in [header, *body]) for i in range(3)]
-    border = lambda left, mid, right: t.c(t.DIM, left + mid.join("─" * (w + 2) for w in widths) + right)  # noqa: E731
-    bar = t.c(t.DIM, "│")
-
-    def row(cols):
-        return bar + bar.join(" " + pad(col, w) + " " for col, w in zip(cols, widths, strict=True)) + bar
-
-    out = [border("┌", "┬", "┐"), row(header), border("├", "┼", "┤")]
-    out += [row(cols) for cols in body]
-    out.append(border("└", "┴", "┘"))
-    return out
+    compact = max_rows is not None and max_rows <= 2
+    shown = body if compact else [header, *body]
+    widths = [max(visible(row[i]) for row in shown) for i in range(3)]
+    return [" " + "  ".join(pad(col, w) for col, w in zip(cols, widths, strict=True)) for cols in shown]
 
 
 def cells(pr, prefix):
@@ -292,25 +277,11 @@ def pad(text, width):
     return text + " " * (width - visible(text))
 
 
-def bounds(agent_block, rect, body, frame, stable=True):
-    """[x, y, w, h] for a box holding body at the top right of rect, or None.
-
-    The agent pane's size is cached per rect. Right after a split the pane's
-    size can still be the old one, so it is only cached once rect is stable.
-    """
-    cols, rows = _cached(
-        ("size", agent_block, tuple(rect)),
-        SIZE_TTL,
-        lambda: block_size(agent_block),
-        ok=lambda v: stable and all(v),
-    )
-    if not cols or not rows:
-        return None
-    x, y, w, h = rect
-    win_cols, win_rows = cols / w, rows / h
-    want = (max(len(ANSI.sub("", line)) for line in body) + frame[0], len(body) + frame[1])
-    bw, bh = min(want[0] / win_cols, w), min(want[1] / win_rows, h)
-    return [round(x + w - bw, 4), round(y, 4), round(bw, 4), round(bh, 4)], (win_cols, win_rows)
+def split_ratio(agent_block, content_rows):
+    """Initial vertical split share for a compact top strip above agent_block."""
+    total = block_rows(agent_block) or FALLBACK_ROWS
+    want = max(DEFAULT_ROWS, min(content_rows + 1, MAX_ROWS)) + CHROME_ROWS
+    return round(min(max(want / total, MIN_RATIO), MAX_RATIO), 4)
 
 
 def _spawn(mode, agent_block):
@@ -458,18 +429,20 @@ def wait(agent_block):
                 os.remove(_state_path(agent_block))
             return
         # Wait while the agent's pane is not tiled (floated, detached, or
-        # between windows); the box opens once it is back in a layout.
-        window, rect, _ = locate(rex("session.view", {}), agent_block)
-        if rect:
-            placed = bounds(agent_block, rect, lines(*session_prs(state)), FRAME)
-            if placed:
-                break
+        # between windows) or the window is zoomed (splitting would unzoom it).
+        _, rect, _, zoomed = locate(rex("session.view", {}), agent_block)
+        if rect and not zoomed:
+            ratio = split_ratio(agent_block, len(lines(*session_prs(state))))
+            break
         time.sleep(WAIT_TICK)
     rex(
-        "session.new_layer",
+        "session.new_split",
         {
-            "window_id": window,
-            "bounds": placed[0],
+            "anchor_id": agent_block,
+            "direction": "vertical",
+            "side": "before",
+            "ratio": ratio,
+            "focus": False,
             "layout": {
                 "block": {
                     "flavor": "com.superlogical.terminal.shell",
@@ -480,10 +453,9 @@ def wait(agent_block):
                     },
                 }
             },
-            "focus": False,
         },
     )
-    # Stay the block's owner until the box starts, so a SessionStart in the
+    # Stay the block's owner until the pane starts, so a SessionStart in the
     # meantime does not start a second waiter.
     for _ in range(HANDOFF):
         if _state(agent_block).get("watcher_pid") != os.getpid():
@@ -491,32 +463,8 @@ def wait(agent_block):
         time.sleep(1)
 
 
-def settled_size(block, before, timeout=1.0):
-    """The block's size once a client has drawn it after a resize, or None.
-
-    before is the block's report from just before the resize. Until a client
-    reports the new size (none does while the session is not on screen), Rex
-    returns the old one, which must not be taken as the result.
-    """
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        cols, rows, stamp = block_report(block)
-        if cols and rows and stamp and stamp != before[2]:
-            return cols, rows
-        time.sleep(0.05)
-    return None
-
-
-def displaced(actual, target, win):
-    """Whether a layer's bounds are more than half a cell away from target."""
-    if not actual or len(actual) != 4:
-        return True
-    scale = (win[0], win[1], win[0], win[1])
-    return any(abs(a - b) * n > 0.5 for a, b, n in zip(actual, target, scale, strict=True))
-
-
 def draw(body):
-    """Paint body in place: each row at an absolute position, clipped to the box.
+    """Paint body in place: each row at an absolute position, clipped to the pane.
 
     Nothing is ever written below the last row or past the last column, so the
     terminal has nothing to scroll or wrap, and rows are overwritten rather than
@@ -534,9 +482,9 @@ def draw(body):
 
 
 def mute_input():
-    """Stop the terminal echoing typed keys into the box; returns the old settings.
+    """Stop the terminal echoing typed keys into the pane; returns the old settings.
 
-    Ctrl-C still works, and closes the box.
+    Ctrl-C still works, and closes the pane.
     """
     try:
         saved = termios.tcgetattr(sys.stdin)
@@ -553,12 +501,22 @@ def discard_input():
         termios.tcflush(sys.stdin, termios.TCIFLUSH)
 
 
+def _close_self(block):
+    _, _, layer, _ = locate(rex("session.view", {}), block)
+    if not layer:
+        return
+    if layer.get("kind") == "floating":
+        rex("session.close_layer", {"layer_id": layer["layer_id"]})
+    else:
+        rex("block.close", {"block_id": block, "keep_last": True})
+
+
 def watch(agent_block):
     me = os.environ.get("REX_BLOCK", "")
     _claim(agent_block, "watch")
     signal.signal(signal.SIGHUP, lambda *_: sys.exit(0))
     reloader, reloading = Reloader(), False
-    # The layer's label is set when it opens; after a reload it names the old version.
+    # The pane's label is set when it opens; after a reload it names the old version.
     with contextlib.suppress(Exception):
         subprocess.run(
             ["rex", "block", "rename", "-s", os.environ.get("REX_SESSION", ""), me, f"PR Box v{VERSION}"],
@@ -568,71 +526,27 @@ def watch(agent_block):
     # Alternate screen (no scrollback), no line wrap, no wheel-to-arrow-keys, no cursor.
     sys.stdout.write("\033[?1049h\033[?7l\033[?1007l\033[?25l")
     saved = mute_input()
-    frame = list(FRAME)
-    placed, measured = None, False
-    last_rect = None
     try:
         while True:
             state = _state(agent_block)
             if not _mine(state):
                 return
             view = rex("session.view", {})
-            agent_window, rect, _ = locate(view, agent_block)
-            my_window, _, layer = locate(view, me)
+            agent_window, rect, _, _ = locate(view, agent_block)
+            my_window, _, layer, _ = locate(view, me)
             if not layer:
                 return
-            # The agent's pane left this window or its layout: a waiter
-            # reopens the box beside it once it is tiled again.
-            if not rect or agent_window != my_window:
+            # The agent's pane left this window or its layout, or this watcher
+            # reloaded inside an older floating layer: hand back to a waiter to
+            # open a tiled pane beside the agent.
+            if layer.get("kind") != "tiled" or not rect or agent_window != my_window:
                 _spawn("wait", agent_block)
                 return
             found, here = session_prs(state)
             with contextlib.suppress(Exception):
                 pr_tracking.notice_changes(state.get("session_id"), [pr for pr, _ in found])
-            body = lines(found, here)
-            inner = (max(visible(line) for line in body), len(body))
-            # When the box is shrinking, the new content already fits it, so
-            # paint it before the resize rather than squeezing the old rows.
-            current = shutil.get_terminal_size()
-            if inner[0] <= current.columns and inner[1] <= current.lines:
-                draw(body)
-            # Pane sizes in a window that is not on screen are stale, so the
-            # box is only placed while its window is the active one.
-            visible_now = view.get("active_window_id") in (None, my_window)
-            stable, last_rect = rect == last_rect, rect
-            # Rex cannot pin a floating layer to a pane, so the box follows the
-            # agent's pane on every tick: after a split, a resized window, or a
-            # move or resize by hand. Everything settles within this tick, and
-            # the content is drawn only once the box is its final size, so
-            # there is no intermediate cut-off frame.
-            actual = layer.get("bounds")
-            for _ in range(3 if visible_now else 0):
-                fit = bounds(agent_block, rect, body, frame, stable)
-                if not fit:
-                    break
-                target, win = fit
-                # Compare in whole cells so fraction rounding never triggers a resize.
-                key = (round(target[2] * win[0]), round(target[3] * win[1]), round(win[0]), round(win[1]))
-                if key == placed and not displaced(actual, target, win):
-                    break
-                before = block_report(me)
-                rex("session.resize_layer", {"layer_id": layer["layer_id"], "bounds": target})
-                actual, placed = target, key
-                have = settled_size(me, before)
-                if not have:
-                    break
-                # Measure the frame once, then only grow it if content stops
-                # fitting. Re-deriving it on every resize makes the box flip
-                # between sizes a cell apart.
-                if not measured:
-                    frame = [key[0] - have[0], key[1] - have[1]]
-                    measured = True
-                elif have[0] < inner[0] or have[1] < inner[1]:
-                    frame = [frame[0] + max(inner[0] - have[0], 0), frame[1] + max(inner[1] - have[1], 0)]
-                else:
-                    break
-                frame = [min(max(f, 0), m) for f, m in zip(frame, FRAME_MAX, strict=True)]
-            draw(body)
+            size = shutil.get_terminal_size()
+            draw(lines(found, here, max_rows=size.lines))
             time.sleep(TICK)
             discard_input()
             if reloader.due():
@@ -647,9 +561,7 @@ def watch(agent_block):
                 termios.tcsetattr(sys.stdin, termios.TCSANOW, saved)
         if not reloading:
             with contextlib.suppress(Exception):
-                _, _, layer = locate(rex("session.view", {}), me)
-                if layer:
-                    rex("session.close_layer", {"layer_id": layer["layer_id"]})
+                _close_self(me)
     if reloading:
         _reexec("watch", agent_block)
 

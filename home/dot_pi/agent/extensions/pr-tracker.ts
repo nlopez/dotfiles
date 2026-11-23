@@ -2,7 +2,7 @@
  * pr-tracker extension
  *
  * Pi adapter for the shared session PR box (~/.config/pr-box/pr_box.py), the
- * same Rex floating box Claude Code shows. This file only reports the session
+ * same Rex tiled pane Claude Code shows. This file only reports the session
  * and the PRs it opens; the tracking, status polling and drawing live in the
  * shared Python so both agents behave identically.
  *

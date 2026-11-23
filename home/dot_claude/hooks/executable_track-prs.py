@@ -5,7 +5,7 @@
 #     gh pr create|ready|edit|merge -> PR URLs printed in the command output
 #     git push                      -> the pushed branch's PR, looked up in the background
 #   SessionStart:
-#     in Rex, open the floating PR box for this pane or point it at this session,
+#     in Rex, open the tiled PR pane above this pane or point it at this session,
 #     and tell Claude the session ID and the pr_box.py status command
 #   SessionStart (resume):
 #     the same rules applied to the transcript's Bash calls, in the background,
