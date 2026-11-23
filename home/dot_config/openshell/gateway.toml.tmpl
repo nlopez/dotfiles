@@ -8,8 +8,11 @@ log_level      = "info"
 compute_driver = "vm"
 
 [openshell.drivers.vm]
-driver_dir    = "{{ .chezmoi.homeDir }}/.local/lib/openshell"
-state_dir     = "{{ .chezmoi.homeDir }}/.local/state/openshell/vm-driver"
-grpc_endpoint = "https://127.0.0.1:17670"
-default_image = "nvcr.io/nvidia/base/ubuntu:24.04"
+driver_dir       = "{{ .chezmoi.homeDir }}/.local/lib/openshell"
+state_dir        = "{{ .chezmoi.homeDir }}/.local/state/openshell/vm-driver"
+grpc_endpoint    = "https://127.0.0.1:17670"
+default_image    = "nvcr.io/nvidia/base/ubuntu:24.04"
+vcpus            = 8
+mem_mib          = 16384
+overlay_disk_mib = 16384
 {{- end }}
