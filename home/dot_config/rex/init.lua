@@ -8,16 +8,51 @@ pcall(require, "workspaces_rex")
 
 rex.unbind("cmd+n")
 
--- Fullscreen pi runs in the alternate screen where Rex's Find bar has no scrollback;
--- forward cmd+f as CSI-u ctrl+shift+f to open pi's transcript search instead.
-rex.bind("cmd+f", function()
-  local ok_p, p = pcall(rex.block.call, "com.superlogical.terminal", "process")
-  local ok_m, m = pcall(rex.block.call, "com.superlogical.terminal", "modes")
-  local argv0 = ok_p and p and p.foreground and p.foreground.argv0 or ""
-  if (argv0 == "pi" or argv0:match("/pi$")) and ok_m and m and m.screen == "alternate" then
-    rex.block.call("com.superlogical.terminal", "write", { data = "\27[102;6u" })
-    return true
+local function is_fg(p, name)
+  local fg = p and p.foreground
+  if not fg then return false end
+  local a, n = fg.argv0 or "", fg.name or ""
+  return a == name or a:match("/" .. name .. "$") ~= nil or n == name
+end
+
+-- Fullscreen pi and Claude Code run in the alternate screen where Rex's Find bar
+-- has no scrollback; forward to their built-in transcript search instead.
+rex.action {
+  name = "smart_find",
+  title = "Find (Agent-Aware)",
+  description = "Open built-in transcript search in fullscreen pi/Claude panes, or Rex Find elsewhere.",
+  run = function()
+    local ok_p, p = pcall(rex.block.call, "com.superlogical.terminal", "process")
+    local ok_m, m = pcall(rex.block.call, "com.superlogical.terminal", "modes")
+    if ok_p and ok_m and m and m.screen == "alternate" then
+      if is_fg(p, "pi") then
+        -- CSI-u ctrl+shift+f (pi's tui.altScreen.search)
+        rex.block.call("com.superlogical.terminal", "write", { data = "\27[102;6u" })
+        return
+      end
+      if is_fg(p, "claude") then
+        local ok_f, f = pcall(rex.block.call, "com.superlogical.terminal", "format")
+        local content = (ok_f and f and type(f.content) == "string") and f.content or ""
+        if content:find("Search transcript", 1, true) then return end
+        if not content:find("Showing detailed transcript", 1, true) then
+          rex.block.call("com.superlogical.terminal", "write", { data = "\15" }) -- ctrl+o
+          rex.sleep(0.05)
+        end
+        rex.block.call("com.superlogical.terminal", "write", { data = "/" })
+        return
+      end
+    end
+    rex.client.queue("client.find.open")
+  end,
+}
+
+-- Mirror any init.lua bindings for client.find.open, falling back to Rex's default cmd+f.
+local find_bindings = rex.bindings { action = "client.find.open" }
+if #find_bindings > 0 then
+  for _, b in ipairs(find_bindings) do
+    local key = b.mode and (b.mode .. "/" .. b.key) or b.key
+    rex.bind(key, "smart_find")
   end
-  rex.client.queue("client.find.open")
-  return true
-end)
+else
+  rex.bind("cmd+f", "smart_find")
+end
