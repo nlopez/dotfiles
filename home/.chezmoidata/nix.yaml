@@ -63,6 +63,9 @@ nix:
     - pre-commit
     - pure-prompt
     - ripgrep
+    # rtk: token-reducing proxy for LLM-run dev commands; shell hooks are
+    # opt-in (`rtk init`), nothing is wired by chezmoi.
+    - rtk
     # rustup provides the cargo/rustc/rustfmt/clippy proxies; the toolchain
     # itself is installed by run_onchange_after_01-rustup-toolchain.sh.tmpl.
     - rustup

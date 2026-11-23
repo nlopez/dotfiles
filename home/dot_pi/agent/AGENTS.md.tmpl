@@ -6,6 +6,10 @@
 - DO NOT leak our conversation, prompt, or iteration history into code comments, pull request descriptions, or other maintainer-facing prose. No "used to be X, now Y", "changed from", "per the user's request", or similar. Comments describe the code as it is, and only when the why is non-obvious.
 - Never add AI attribution to commits, PR bodies, or issues: no `Co-Authored-By` trailers, no "Generated with Claude Code" lines, and no "Co-authored with Claude" footers.
 
+### Command output
+
+- Command output comes back condensed by rtk, which trims noise from dev commands to save tokens. Treat what you get as the complete result, and batch related commands into one call. Re-run a command as `rtk bypass <cmd>` only when its output is unusable: empty when output was expected, garbled, or contradicting its exit code.
+
 ### Git signing and hooks
 
 - Every commit must be signed and every git hook must run. Never use `--no-verify`, `-n` on `git commit`, `--no-gpg-sign`, `-c commit.gpgsign=false`, `git config commit.gpgsign false`, `GIT_CONFIG_*` overrides, or any other way to skip hooks or signing.
