@@ -45,12 +45,12 @@ GIT_TTL = 10
 CHROME_COLS = 3
 FALLBACK_COLS = 160
 MIN_SHARE = 0.05
-MAX_SHARE = 0.50
+MAX_SHARE = 0.30
 # How long a waiter that opened the pane waits for it to take over.
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 19
+VERSION = 20
 LABEL = f"👁 Argus v{VERSION}"
 SUBLINE_MAX = 48
 # The code a running wait or watch reloads when it changes on disk.
@@ -425,8 +425,14 @@ def enforce_width(layer, agent_block, me, body, have_cols, sizing):
         and abs(cur_ratio - sizing["ratio"]) < 0.001
         and have_cols == sizing.get("cols")
     )
+    sibling = split.get("before" if on_right else "after") or {}
+    if sibling.get("block_id") == agent_block:
+        other_cols = block_cols(agent_block)
+        if other_cols:
+            sizing["split_cols"] = other_cols + have_cols + CHROME_COLS
     if not stale:
-        sizing["split_cols"] = (have_cols + CHROME_COLS) / cur_share
+        if "split_cols" not in sizing or sibling.get("block_id") != agent_block:
+            sizing["split_cols"] = (have_cols + CHROME_COLS) / cur_share
         sizing["ratio"] = None
         if want <= have_cols <= want + 1:
             return
