@@ -819,30 +819,41 @@ def _store_comments(url, comments):
             raise
 
 
-def read_comments(session_id, url=None, unread=True, consumer="comments"):
-    """Full text of comments on the session's tracked PRs; with unread, only unread ones, advancing the cursor."""
+def _set_comment_cursors(conn, session_id, last):
+    """Advance the session's per-PR comment cursors to {url: comment id}."""
+    for u, cid in last.items():
+        conn.execute(
+            "INSERT INTO cursors(session_id, consumer, last_event_id) VALUES (?, ?, ?)"
+            " ON CONFLICT(session_id, consumer) DO UPDATE SET last_event_id = excluded.last_event_id",
+            (session_id, "comments:" + u, cid),
+        )
+
+
+def mark_comments_read(session_id, url):
+    """Treat every comment stored for url as already read by the session, e.g. those there when tracking began."""
+    with _db() as conn:
+        top = conn.execute("SELECT MAX(id) FROM comments WHERE url = ?", (url,)).fetchone()[0]
+        if top is not None:
+            _set_comment_cursors(conn, session_id, {url: top})
+
+
+def read_comments(session_id, url=None, unread=True):
+    """Full text of comments on the session's tracked PRs; with unread, only unread ones, advancing the cursors."""
     if not session_id:
         return ""
     with _db() as conn:
         conn.execute("BEGIN IMMEDIATE")
         try:
-            row = conn.execute(
-                "SELECT last_event_id FROM cursors WHERE session_id = ? AND consumer = ?",
-                (session_id, consumer),
-            ).fetchone()
-            after = (row[0] if row else 0) if unread else 0
             rows = conn.execute(
-                "SELECT id, url, cid, author, path, line, created, body FROM comments"
-                " WHERE id > ? AND url IN (SELECT url FROM session_prs WHERE session_id = ?)"
-                " AND (? IS NULL OR url = ?) ORDER BY id",
-                (after, session_id, url, url),
+                "SELECT c.id, c.url, c.cid, c.author, c.path, c.line, c.created, c.body FROM comments c"
+                " JOIN session_prs s ON s.url = c.url AND s.session_id = ?"
+                " LEFT JOIN cursors k ON k.session_id = s.session_id AND k.consumer = 'comments:' || c.url"
+                " WHERE c.id > (CASE WHEN ? THEN COALESCE(k.last_event_id, 0) ELSE 0 END)"
+                " AND (? IS NULL OR c.url = ?) ORDER BY c.id",
+                (session_id, unread, url, url),
             ).fetchall()
-            if unread and rows and url is None:
-                conn.execute(
-                    "INSERT INTO cursors(session_id, consumer, last_event_id) VALUES (?, ?, ?)"
-                    " ON CONFLICT(session_id, consumer) DO UPDATE SET last_event_id = excluded.last_event_id",
-                    (session_id, consumer, rows[-1][0]),
-                )
+            if unread and url is None:
+                _set_comment_cursors(conn, session_id, {r[1]: r[0] for r in rows})
             conn.execute("COMMIT")
         except Exception:
             conn.execute("ROLLBACK")
@@ -908,6 +919,8 @@ def notice_changes(session_id, prs):
             cur["feedback"] = sorted(fb)
         now_map[url] = cur
         before = seen.get(url)
+        if comments is not None and (before is None or "feedback" not in before):
+            mark_comments_read(session_id, url)
         if before is None:
             continue
         if arp.get("state") not in (None, "", "queued", "running") and "arp" in before and cur["arp"] != before["arp"]:
@@ -1027,7 +1040,8 @@ def drain(session_id, consumer="agent"):
         + "\n".join(f"- {e}" for e in events)
         + (
             f"\nFull comment text: python3 ~/.config/argus-pr/argus_pr.py comments {session_id}"
-            ' (pi: pr_status with comments: "new")'
+            ' (pi: pr_status with comments: "new"). Once a review comment is addressed and pushed, reply on its'
+            " thread with what changed (or why not) and resolve it."
             if any(text.startswith("new comment") for _, _, text in rows)
             else ""
         )
