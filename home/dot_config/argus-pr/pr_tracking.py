@@ -21,6 +21,7 @@ import calendar
 import contextlib
 import glob
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -277,21 +278,22 @@ def refresh(path, cwd, target):
                     if not isinstance(prev, dict) or prev.get("_error") != err:
                         log("error", "-", target or cwd, err)
                     pr["_error"] = err
-            elif pr.get("state") == "OPEN" and _mergegate_check(pr) is not None:
-                mg_item = _mergegate_check(pr)
-                if mg_item.get("status") == "COMPLETED" and mg_item.get("conclusion") == "SUCCESS":
-                    pr["mergeGate"] = {"status": "pass"}
-                else:
-                    try:
-                        pr["mergeGate"] = _fetch_mergegate(pr, env, cwd)
-                    except Exception as e:
-                        prev = _read_json(path)
-                        if isinstance(prev, dict) and prev.get("mergeGate"):
-                            pr["mergeGate"] = prev["mergeGate"]
-                        err = _short_error(str(e)) or type(e).__name__
-                        if not isinstance(prev, dict) or prev.get("_error") != err:
-                            log("error", "-", target or cwd, err)
-                        pr["_error"] = err
+            for plugin in _plugins():
+                enrich = getattr(plugin, "enrich", None)
+                if not callable(enrich):
+                    continue
+                try:
+                    enrich(pr, env, cwd)
+                except Exception as e:
+                    prev = _read_json(path)
+                    if isinstance(prev, dict):
+                        for k in ("_review", "_notes"):
+                            if k in prev and k not in pr:
+                                pr[k] = prev[k]
+                    err = _short_error(str(e)) or type(e).__name__
+                    if not isinstance(prev, dict) or prev.get("_error") != err:
+                        log("error", "-", target or cwd, err)
+                    pr["_error"] = err
             _write_json(path, pr)
         elif "no pull requests found" in out.stderr.lower():
             _write_json(path, {})
@@ -307,58 +309,52 @@ def refresh(path, cwd, target):
             os.remove(path + ".pending")
 
 
-# Merge-readiness gates that stay pending until the PR merges, and the roll-up
-# that mirrors them; neither says anything about the code.
-MERGEGATE_CHECK = "devflow/mergegate"
-GATE_CHECKS = {MERGEGATE_CHECK, "ensure-ci-success"}
+PLUGINS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "plugins")
+_loaded_plugins = None
 
 
-def _mergegate_check(pr):
-    for item in pr.get("statusCheckRollup") or []:
-        if (item.get("name") or item.get("context")) == MERGEGATE_CHECK:
-            return item
-    return None
-
-
-def _parse_needed_reviewers(text):
-    """Extract missing team/user approval requirements from devflow/mergegate output."""
-    needed = []
-    for line in (text or "").splitlines():
-        if not re.match(r"^\s*-\s+Needs approval from\b", line, re.IGNORECASE):
-            continue
-        names = re.findall(r"`([^`]+)`", line)
-        if names:
-            needed.append(" / ".join(names))
-    return needed
-
-
-def _fetch_mergegate(pr, env, cwd):
-    """Fetch devflow/mergegate check-run output for an open PR."""
-    sha = pr.get("headRefOid") or ""
-    m = re.match(r"https://[\w.-]+/([\w.-]+/[\w.-]+)/pull/", pr.get("url") or "")
-    if not sha or not m:
-        return {"status": "pending", "title": "", "needed": []}
-    out = _run_gh(
-        ["api", f"repos/{m.group(1)}/commits/{sha}/check-runs?check_name={MERGEGATE_CHECK}", "--jq", ".check_runs[0]"],
-        cwd=cwd,
-        env=env,
+def plugin_files():
+    """Sorted paths to optional extension modules in plugins/*.py."""
+    if not os.path.isdir(PLUGINS_DIR):
+        return []
+    return sorted(
+        p
+        for p in glob.glob(os.path.join(PLUGINS_DIR, "*.py"))
+        if not os.path.basename(p).startswith("_") and os.path.getsize(p) > 0
     )
-    if out.returncode != 0:
-        raise RuntimeError(_short_error(out.stderr) or f"gh api mergegate exited {out.returncode}")
-    run = json.loads(out.stdout or "null") or {}
-    conclusion = (run.get("conclusion") or "").upper()
-    if conclusion == "SUCCESS":
-        status = "pass"
-    elif conclusion in FAILED:
-        status = "fail"
-    else:
-        status = "pending"
-    output = run.get("output") or {}
-    return {
-        "status": status,
-        "title": (output.get("title") or "").strip(),
-        "needed": _parse_needed_reviewers(output.get("text") or ""),
-    }
+
+
+def _plugins():
+    global _loaded_plugins
+    if _loaded_plugins is not None:
+        return _loaded_plugins
+    loaded = []
+    for path in plugin_files():
+        name = "argus_pr_plugin_" + os.path.splitext(os.path.basename(path))[0]
+        try:
+            spec = importlib.util.spec_from_file_location(name, path)
+            if spec and spec.loader:
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                loaded.append(mod)
+        except Exception:
+            continue
+    _loaded_plugins = loaded
+    return _loaded_plugins
+
+
+def ignored_checks(pr):
+    """Check names plugins exclude from CI pass/fail counts (e.g. merge-readiness gates)."""
+    names = set()
+    for plugin in _plugins():
+        static = getattr(plugin, "IGNORED_CHECKS", None)
+        if static:
+            names.update(static)
+        fn = getattr(plugin, "ignored_checks", None)
+        if callable(fn):
+            with contextlib.suppress(Exception):
+                names.update(fn(pr) or ())
+    return names
 
 
 def review_state(pr):
@@ -367,22 +363,9 @@ def review_state(pr):
     decision = pr.get("reviewDecision") or ""
     if decision == "CHANGES_REQUESTED":
         return "changes"
-    mg = pr.get("mergeGate")
-    mg_item = _mergegate_check(pr)
-    if mg is not None or mg_item is not None:
-        if mg is not None:
-            mg_status = mg.get("status") or "pending"
-        else:
-            conclusion = (mg_item.get("conclusion") or "").upper()
-            if mg_item.get("status") == "COMPLETED" and conclusion == "SUCCESS":
-                mg_status = "pass"
-            elif conclusion in FAILED:
-                mg_status = "fail"
-            else:
-                mg_status = "pending"
-        if mg_status == "pass":
-            return "ready" if (checks(pr) == "pass" and not pr.get("isDraft")) else "approved"
-        return "blocked" if mg_status == "fail" else "needed"
+    override = pr.get("_review")
+    if override:
+        return override
     if decision == "APPROVED":
         return "approved"
     return "needed" if decision else ""
@@ -427,7 +410,8 @@ def _commit_checks(pr, env, cwd):
 
 
 def real_checks(pr, key="statusCheckRollup"):
-    return [i for i in pr.get(key) or [] if (i.get("name") or i.get("context")) not in GATE_CHECKS]
+    skip = ignored_checks(pr)
+    return [i for i in pr.get(key) or [] if (i.get("name") or i.get("context")) not in skip]
 
 
 def check_counts(pr, key="statusCheckRollup"):
@@ -635,9 +619,11 @@ def status_lines(session_id):
             rev = review_state(pr)
             if rev:
                 parts.append(f"review {rev}")
-            needed = (pr.get("mergeGate") or {}).get("needed") or []
-            if needed:
-                parts.append(f"needs: {', '.join(needed)}")
+            for note in pr.get("_notes") or []:
+                if note.get("items"):
+                    parts.append(f"{note.get('prefix', '')}{', '.join(note['items'])}")
+                elif note.get("text"):
+                    parts.append(note["text"])
         if pr.get("mergeChecks"):
             m_passed, m_total = check_counts(pr, "mergeChecks")
             parts.append(f"post-merge checks {merge_checks(pr) or 'none'} {m_passed}/{m_total}")

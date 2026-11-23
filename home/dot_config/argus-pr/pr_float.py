@@ -50,21 +50,25 @@ MAX_SHARE = 0.50
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 17
+VERSION = 18
 LABEL = f"👁 Argus v{VERSION}"
 SUBLINE_MAX = 48
 # The code a running wait or watch reloads when it changes on disk.
 CODE = (os.path.abspath(__file__), os.path.abspath(pr_tracking.__file__))
 
 
+def _code_files():
+    return (*CODE, *pr_tracking.plugin_files())
+
+
 def _code_signature():
     sig = []
-    for path in CODE:
+    for path in _code_files():
         try:
             st = os.stat(path)
-            sig.append((st.st_mtime_ns, st.st_size))
+            sig.append((path, st.st_mtime_ns, st.st_size))
         except OSError:
-            sig.append(None)
+            sig.append((path, None))
     return sig
 
 
@@ -85,7 +89,7 @@ class Reloader:
         if sig == self.loaded or not settled:
             return False
         try:
-            for path in CODE:
+            for path in _code_files():
                 with open(path) as f:
                     compile(f.read(), path, "exec")
         except Exception:
@@ -284,21 +288,23 @@ def _trunc(text, limit=SUBLINE_MAX):
 
 def _sublines(pr):
     t = pr_tracking
+    colors = {"yellow": t.YELLOW, "red": t.RED, "dim": t.DIM, "green": t.GREEN, "cyan": t.CYAN}
     out = []
     if pr.get("state") == "OPEN":
-        mg = pr.get("mergeGate") or {}
-        needed = mg.get("needed") or []
-        if needed:
-            joined = ", ".join(needed)
-            if len(joined) <= SUBLINE_MAX:
-                out.append("   " + t.c(t.YELLOW, f"needs: {joined}"))
-            else:
-                for i, item in enumerate(needed):
-                    prefix = "needs: " if i == 0 else "       "
-                    out.append("   " + t.c(t.YELLOW, prefix + _trunc(item)))
-        elif mg.get("status") in ("fail", "pending") and mg.get("title"):
-            color = t.RED if mg.get("status") == "fail" else t.YELLOW
-            out.append("   " + t.c(color, f"gate: {_trunc(mg['title'])}"))
+        for note in pr.get("_notes") or []:
+            color = colors.get(note.get("color"), t.YELLOW)
+            items = note.get("items") or []
+            if items:
+                prefix = note.get("prefix") or ""
+                joined = ", ".join(items)
+                if len(prefix) + len(joined) <= SUBLINE_MAX:
+                    out.append("   " + t.c(color, prefix + joined))
+                else:
+                    indent = " " * len(prefix)
+                    for i, item in enumerate(items):
+                        out.append("   " + t.c(color, (prefix if i == 0 else indent) + _trunc(item)))
+            elif note.get("text"):
+                out.append("   " + t.c(color, _trunc(note["text"])))
     err = pr.get("_error")
     if err:
         out.append("   " + t.c(t.RED, f"! {_trunc(err)}"))
