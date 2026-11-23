@@ -3,6 +3,8 @@
 # read .pi.packages at template render time.
 # Renovate scans this file for npm:pkg@version patterns.
 # The Pi coding agent itself is installed out of band, not via chezmoi.
+# The dd-pup extension is installed by pup itself, not by pi:
+# run_onchange_after_04-pup-skills.sh.tmpl.
 pi:
   packages:
   - "npm:pi-auto-theme@1.1.1"

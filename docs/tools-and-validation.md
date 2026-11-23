@@ -45,6 +45,10 @@ pup skills list && pup skills install      # from the pup binary
 # or: cp -r datadog-labs/agent-skills/<skill> ~/.pi/agent/skills/
 ```
 
+The `dd-pup` extension (the pup CLI as pi tools) is installed, unlike the skills:
+`run_onchange_after_04-pup-skills.sh.tmpl` runs `pup skills install pi --name=dd-pup-pi`
+and re-runs when the pup version in `mise/base.toml` changes.
+
 ## ⚠️ Boundaries
 
 ### ✅ Always do
