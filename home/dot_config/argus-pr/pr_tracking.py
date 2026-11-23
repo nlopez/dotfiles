@@ -619,7 +619,13 @@ def _review_comments(pr, env, cwd):
     if out.returncode != 0:
         raise RuntimeError(_short_error(out.stderr) or f"gh api review comments exited {out.returncode}")
     return [
-        {"id": item["id"], "author": {"login": (item.get("user") or {}).get("login") or "?"}}
+        {
+            "id": item["id"],
+            "author": {"login": (item.get("user") or {}).get("login") or "?"},
+            "body": item.get("body") or "",
+            "path": item.get("path") or "",
+            "line": item.get("line") or item.get("original_line"),
+        }
         for item in json.loads(out.stdout or "[]")
         if item.get("id") is not None
     ]
@@ -741,6 +747,14 @@ def _pushed_recently(session_id):
         return False
 
 
+def _brief(body, limit=600):
+    """A comment body without HTML comments, collapsed to one line and cut to limit characters."""
+    text = re.sub(r"<!--.*?-->", "", body or "", flags=re.S)
+    text = re.sub(r"</?sub>|\*\*", "", re.sub(r"!\[([^\]]*)\]\([^)]*\)", r"\1", text))
+    text = " ".join(text.split())
+    return text if len(text) <= limit else text[:limit] + "…"
+
+
 def _feedback(pr):
     """{id: login} of comments, inline review comments, and review bodies by non-authors, or None if not fetched."""
     if not any(k in pr for k in ("comments", "reviews", "reviewComments")):
@@ -752,7 +766,11 @@ def _feedback(pr):
         ("rc", pr.get("reviewComments") or []),
     )
     return {
-        f"{kind}:{i['id']}": (i.get("author") or {}).get("login", "?")
+        f"{kind}:{i['id']}": {
+            "who": (i.get("author") or {}).get("login", "?"),
+            "where": f" on {i['path']}:{i.get('line') or '?'}" if i.get("path") else "",
+            "body": _brief(i.get("body")),
+        }
         for kind, items in groups
         for i in items
         if i.get("id") is not None and (i.get("author") or {}).get("login") != me
@@ -821,9 +839,9 @@ def notice_changes(session_id, prs):
             )
         if fb and "feedback" in before:
             new = [i for i in fb if i not in set(before["feedback"])]
-            if new:
-                who = ", ".join(sorted({fb[i] for i in new}))
-                events.append((url, f"{len(new)} new comment{'s' * (len(new) > 1)} from {who}"))
+            for i in new:
+                c = fb[i]
+                events.append((url, f"new comment from {c['who']}{c['where']}: {c['body']}".rstrip(": ")))
         if before.get("state") == "OPEN" and state in ("MERGED", "CLOSED"):
             events.append((url, state.lower()))
         if state == "MERGED" and "merge_checks" in before:
