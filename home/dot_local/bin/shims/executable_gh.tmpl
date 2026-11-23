@@ -130,26 +130,5 @@ if [ -n "$route" ]; then
   fi
 fi
 
-# Add --draft after `pr create` (global flags such as -R may come first),
-# unless a draft flag is already present.
-draft=
-for a in "$@"; do
-  case "$a" in
-    --draft|--draft=true) draft=1 ;;
-    --*) ;;
-    -*d*) draft=1 ;;
-  esac
-done
-if [ -z "$draft" ]; then
-  n=$#; i=0; prev=; done_=
-  while [ "$i" -lt "$n" ]; do
-    a=$1; shift; i=$((i + 1))
-    set -- "$@" "$a"
-    if [ -z "$done_" ] && [ "$prev" = pr ] && [ "$a" = create ]; then
-      set -- "$@" --draft; done_=1
-    fi
-    prev=$a
-  done
-fi
 exec "$real" "$@"
 {{ end -}}
