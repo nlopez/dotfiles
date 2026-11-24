@@ -17,6 +17,8 @@ pi:
   - "npm:context-mode@2.2.1"
   - "npm:pi-intercom@0.18.1"
   - "npm:pi-subagents@0.90.0"
+  - "npm:@getpipher/vision@0.5.3"
+  - "npm:pi-worktree-extension@2.0.5"
   # Git-sourced packages; pi clones these itself. The reconcile script's
   # `pi update --extensions` installs or updates them; it prunes npm packages only.
   git_packages:
@@ -29,6 +31,5 @@ pi:
   # mcp-port-forward (pi >= 0.99 has built-in MCP), pi-npm-guard and
   # npm-update-cooldown (chezmoi/Renovate pin npm versions).
   work_packages:
-  - "npm:@getpipher/vision@0.5.3"
   # Installed only on personal (non-work) machines.
   personal_only_packages: []
