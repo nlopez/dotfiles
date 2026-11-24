@@ -1,9 +1,16 @@
+{{- /* Renders empty (chezmoi skips it) when installed mise tools already match
+   .chezmoitemplates/mise/*.toml; otherwise the plan below shows in `chezmoi diff`. */ -}}
+{{- $plan := output "python3" (joinPath .chezmoi.workingTree "scripts/package-plan.py") "mise" (includeTemplate "mise-tools" .) (joinPath .chezmoi.homeDir ".local/bin/mise") (joinPath .chezmoi.homeDir ".config/mise/config.toml") | trim }}
+{{- if $plan -}}
 #!/bin/bash
 
 # Installs the tools nixpkgs lacks (.chezmoitemplates/mise/*.toml). Runs after
-# 00-nix-packages so uv (used by mise's pypi backend) is on PATH. Re-run when
-# the declared tool set changes.
-# {{ includeTemplate "mise-tools" . | sha256sum }}
+# 00-nix-packages so uv (used by mise's pypi backend) is on PATH.
+#
+# Pending changes:
+{{- range splitList "\n" $plan }}
+#   {{ . }}
+{{- end }}
 
 set -eufo pipefail
 
@@ -19,3 +26,4 @@ MISE="{{ .chezmoi.homeDir }}/.local/bin/mise"
 {{- end }}
 "$MISE" prune --yes --tools
 "$MISE" reshim --force
+{{- end }}

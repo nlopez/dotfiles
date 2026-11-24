@@ -11,7 +11,7 @@ nix:
   - vault-bin
   # nixpkgs attribute paths ("python3Packages.foo" works). Installed into the
   # ~/.local/state/nix/profiles/dotfiles profile by
-  # .chezmoiscripts/run_onchange_after_00-nix-packages.sh.tmpl.
+  # .chezmoiscripts/run_after_00-nix-packages.sh.tmpl.
   #
   # Anything not packaged in nixpkgs goes to mise (.chezmoitemplates/mise/),
   # then Homebrew on macOS (.chezmoidata/darwin/packages.yaml) as a last resort.

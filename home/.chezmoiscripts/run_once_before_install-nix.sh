@@ -3,7 +3,7 @@
 # https://determinate.systems/nix
 #
 # Runs on macOS and Linux. Skips if Nix is already installed. Runs before
-# dotfiles are written so that nix is available for run_onchange_after_00-nix-packages.
+# dotfiles are written so that nix is available for run_after_00-nix-packages.
 
 set -eufo pipefail
 

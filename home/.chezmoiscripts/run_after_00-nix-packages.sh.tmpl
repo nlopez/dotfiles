@@ -1,3 +1,8 @@
+{{- /* Renders empty (chezmoi skips it) when the profile's manifest already
+   matches .chezmoidata/nix.yaml; otherwise the plan below shows in `chezmoi diff`. */ -}}
+{{- $profile := includeTemplate "nix-profile" . }}
+{{- $plan := output "python3" (joinPath .chezmoi.workingTree "scripts/package-plan.py") "nix" (includeTemplate "nix-manifest" .) $profile | trim }}
+{{- if $plan -}}
 #!/bin/bash
 
 # Build the package set declared in .chezmoidata/nix.yaml (rendered into
@@ -5,9 +10,10 @@
 # `nix build --profile` adds a new generation each time the set changes, so
 # `nix profile rollback --profile <profile>` undoes a bad bump.
 #
-# Re-run when the declared set or the flake template changes.
-# {{ list .nix (includeTemplate "nix-packages" .) | toJson | sha256sum }}
-# {{ include "dot_config/nix/packages/flake.nix.tmpl" | sha256sum }}
+# Pending changes:
+{{- range splitList "\n" $plan }}
+#   {{ . }}
+{{- end }}
 
 set -eufo pipefail
 
@@ -15,9 +21,10 @@ NIX=/nix/var/nix/profiles/default/bin/nix
 [ -x "$NIX" ] || NIX="$(command -v nix || true)"
 [ -n "$NIX" ] || { echo "nix not found, skipping (re-run chezmoi apply once Nix is installed)" >&2; exit 0; }
 
-PROFILE="{{ includeTemplate "nix-profile" . }}"
+PROFILE="{{ $profile }}"
 FLAKE="{{ joinPath .chezmoi.homeDir ".config/nix/packages" }}"
 
 mkdir -p "$(dirname "$PROFILE")"
 "$NIX" --extra-experimental-features "nix-command flakes" \
   build --no-link --print-build-logs --profile "$PROFILE" "path:${FLAKE}#default"
+{{- end }}

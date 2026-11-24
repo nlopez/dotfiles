@@ -1,0 +1,9 @@
+{{- /* What the dotfiles Nix profile should contain, as JSON. The flake writes it
+   into the profile as .dotfiles-manifest.json; scripts/package-plan.py diffs
+   the two so `chezmoi diff` shows pending package changes. */ -}}
+{{- dict
+      "packages" (includeTemplate "nix-packages" . | fromJson)
+      "rev" .nix.nixpkgs_rev
+      "unfree" .nix.unfree
+      "template" (include "dot_config/nix/packages/flake.nix.tmpl" | sha256sum)
+    | toJson -}}
