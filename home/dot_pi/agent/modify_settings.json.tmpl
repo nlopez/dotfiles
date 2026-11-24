@@ -36,6 +36,10 @@ host_packages = [
 current.setdefault("theme", "solarized-light")
 current["showHardwareCursor"] = True
 
+# supi-prompt-suggestions only offers models matched by enabledModels; "**" scopes every
+# available model, so cycling is unchanged.
+current.setdefault("enabledModels", ["**"])
+
 # Default model and thinking level are deliberately not managed here: the
 # /model picker saves them (Ctrl+S) and this file must not overwrite them.
 # Work machines' models.json is seeded by modify_models.json.tmpl and
