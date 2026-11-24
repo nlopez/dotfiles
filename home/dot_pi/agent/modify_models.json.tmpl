@@ -89,4 +89,23 @@ else:
     prov = current["providers"].setdefault("anthropic", {})
     prov.setdefault("modelOverrides", {})["claude-sonnet-5-5"] = {"contextWindow": 1000000}
 
+    # DigitalOcean serverless inference, launched through `doai pi`, which
+    # exports MODEL_ACCESS_KEY.
+    current["providers"]["digitalocean"] = {
+        "name": "DigitalOcean",
+        "baseUrl": "https://inference.do-ai.run/v1",
+        "api": "openai-completions",
+        "apiKey": "$MODEL_ACCESS_KEY",
+        "compat": {"supportsDeveloperRole": False},
+        "models": [
+            {"id": "anthropic-claude-opus-5.5", "name": "Claude Opus 5.5 (DO)", "input": ["text", "image"]},
+            {"id": "anthropic-claude-sonnet-5.5", "name": "Claude Sonnet 5.5 (DO)", "input": ["text", "image"]},
+            {"id": "anthropic-claude-5.5-haiku", "name": "Claude Haiku 5.5 (DO)", "input": ["text", "image"]},
+            {"id": "openai-gpt-6.2-sol", "name": "GPT-6.2 Sol (DO)"},
+            {"id": "kimi-k3.1-pro", "name": "Kimi K3.1 Pro (DO)"},
+            {"id": "glm-5.3", "name": "GLM 5.3 (DO)"},
+            {"id": "deepseek-v4.1-flash", "name": "DeepSeek V4.1 Flash (DO)"},
+        ],
+    }
+
 print(json.dumps(current, indent=2))
