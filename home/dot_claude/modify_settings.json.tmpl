@@ -7,7 +7,7 @@
 #
 # Configures: attribution (empty strings disable the Co-Authored-By trailer
 #             on commits and the "Generated with Claude Code" line on PRs),
-#             model (default = Sonnet 5.5),
+#             model (default Sonnet 5.5; a /model choice is kept),
 #             effortLevel (default thinking effort = medium),
 #             theme (auto = match the terminal's light/dark background),
 #             statusLine (pi-style bar, see statusline.py),
@@ -19,6 +19,8 @@ import json
 import os
 import sys
 
+{{ template "json-settings-emit.py" }}
+
 current_raw = sys.stdin.read()
 current = {}
 try:
@@ -29,8 +31,9 @@ except Exception:
 
 current["attribution"] = {"commit": "", "pr": ""}
 
-# Default model and effort (thinking depth) at session start.
-current["model"] = "claude-sonnet-5-5[1m]"
+# Default model and effort (thinking depth) at session start. The model is
+# only a default: a choice saved from /model is kept.
+current.setdefault("model", "claude-sonnet-5-5[1m]")
 current["effortLevel"] = "medium"
 
 # Follow the terminal's light/dark background, so diffs and the changes
@@ -191,4 +194,4 @@ if "allow" in permissions:
         p for p in permissions["allow"] if not p.startswith("mcp__plugin_engram_engram__")
     ]
 
-print(json.dumps(current, indent=2, ensure_ascii=False))
+emit_settings(current, current_raw, ensure_ascii=False)
