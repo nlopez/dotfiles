@@ -42,3 +42,6 @@
 .config/brave-origin-flags.conf
 .config/environment.d/hardware-video-accel.conf
 .config/environment.d/qt-theme.conf
+
+# rtk pi extension, retired (one-time migration)
+.pi/agent/extensions/rtk.ts
