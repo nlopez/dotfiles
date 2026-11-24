@@ -6,6 +6,11 @@ import { promisify } from "node:util";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const ENVIRONMENT_ID = "mwg7j3fv3sz4hl7unqawpqskoa";
+const CATALOG_URL = "https://inference.do-ai.run/v1/models";
+const CATALOG_TIMEOUT_MS = 5_000;
+// DO reports max_output_tokens equal to the whole context window for its own
+// hosted models, which is not a usable per-request output limit.
+const MAX_OUTPUT_TOKENS = 131072;
 const zeroCost = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
 
 const chat = (id: string, name: string, extra: object = {}) => ({
@@ -15,13 +20,58 @@ const chat = (id: string, name: string, extra: object = {}) => ({
   reasoning: false,
   input: ["text"] as ("text" | "image")[],
   cost: zeroCost,
-  contextWindow: 128000,
-  maxTokens: 16384,
+  contextWindow: 1048576,
+  maxTokens: 131072,
   ...extra,
 });
 
 const claude = (id: string, name: string) =>
-  chat(id, name, { reasoning: true, input: ["text", "image"], contextWindow: 200000, maxTokens: 64000 });
+  chat(id, name, { reasoning: true, input: ["text", "image"], contextWindow: 1000000, maxTokens: 128000 });
+
+type CatalogParams = { contextWindow: number; maxTokens: number };
+
+// Cached so a failed refresh keeps the last good values rather than dropping
+// back to the static defaults.
+let catalog = new Map<string, CatalogParams>();
+
+async function refreshCatalog(key: string, signal?: AbortSignal): Promise<Map<string, CatalogParams>> {
+  try {
+    const response = await fetch(CATALOG_URL, {
+      headers: { Authorization: `Bearer ${key}` },
+      signal: signal ?? AbortSignal.timeout(CATALOG_TIMEOUT_MS),
+    });
+    if (!response.ok) return catalog;
+    const { data } = (await response.json()) as {
+      data: { id: string; context_length?: number; max_output_tokens?: number }[];
+    };
+    catalog = new Map(
+      data.flatMap((model) =>
+        model.context_length
+          ? [
+              [
+                model.id,
+                {
+                  contextWindow: model.context_length,
+                  maxTokens: Math.min(model.max_output_tokens ?? MAX_OUTPUT_TOKENS, MAX_OUTPUT_TOKENS),
+                },
+              ] as [string, CatalogParams],
+            ]
+          : [],
+      ),
+    );
+  } catch {
+    // Offline. Keep whatever the last successful fetch produced.
+  }
+  return catalog;
+}
+
+// Only context window and output limit come from the catalog: it reports
+// neither reasoning support nor input modalities.
+const withCatalog = <T extends { id: string }>(models: T[], params: Map<string, CatalogParams>): T[] =>
+  models.map((model) => {
+    const live = params.get(model.id);
+    return live ? { ...model, ...live } : model;
+  });
 
 export default async function (pi: ExtensionAPI) {
   let key: string;
@@ -40,18 +90,27 @@ export default async function (pi: ExtensionAPI) {
   }
   if (!key) return;
 
+  const chatModels = [
+    chat("openai-gpt-6.2-sol", "GPT-6.2 Sol (DO)", { contextWindow: 1050000, maxTokens: 128000 }),
+    chat("kimi-k3.1-pro", "Kimi K3.1 Pro (DO)", { reasoning: true }),
+    chat("glm-5.3", "GLM 5.3 (DO)", { reasoning: true }),
+    chat("deepseek-v4.1-flash", "DeepSeek V4.1 Flash (DO)", { reasoning: true }),
+  ];
+  const claudeModels = [
+    claude("anthropic-claude-opus-5.5", "Claude Opus 5.5 (DO)"),
+    claude("anthropic-claude-sonnet-5.5", "Claude Sonnet 5.5 (DO)"),
+    claude("anthropic-claude-5.5-haiku", "Claude Haiku 5.5 (DO)"),
+  ];
+  const params = await refreshCatalog(key);
+
   pi.registerProvider("digitalocean", {
     name: "DigitalOcean",
     baseUrl: "https://inference.do-ai.run/v1",
     api: "openai-completions",
     apiKey: key,
     compat: { supportsDeveloperRole: false },
-    models: [
-      chat("openai-gpt-6.2-sol", "GPT-6.2 Sol (DO)"),
-      chat("kimi-k3.1-pro", "Kimi K3.1 Pro (DO)"),
-      chat("glm-5.3", "GLM 5.3 (DO)"),
-      chat("deepseek-v4.1-flash", "DeepSeek V4.1 Flash (DO)"),
-    ],
+    models: withCatalog(chatModels, params),
+    refreshModels: async ({ signal }) => withCatalog(chatModels, await refreshCatalog(key, signal)),
   });
 
   // Claude uses the Anthropic Messages API: the OpenAI path sends `store`,
@@ -61,10 +120,7 @@ export default async function (pi: ExtensionAPI) {
     baseUrl: "https://inference.do-ai.run",
     api: "anthropic-messages",
     apiKey: key,
-    models: [
-      claude("anthropic-claude-opus-5.5", "Claude Opus 5.5 (DO)"),
-      claude("anthropic-claude-sonnet-5.5", "Claude Sonnet 5.5 (DO)"),
-      claude("anthropic-claude-5.5-haiku", "Claude Haiku 5.5 (DO)"),
-    ],
+    models: withCatalog(claudeModels, params),
+    refreshModels: async ({ signal }) => withCatalog(claudeModels, await refreshCatalog(key, signal)),
   });
 }
