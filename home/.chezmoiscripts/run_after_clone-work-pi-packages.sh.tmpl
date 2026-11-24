@@ -1,3 +1,6 @@
+{{- /* Renders empty (chezmoi skips it) on machines without private work Pi packages. */ -}}
+{{- $pi := (includeTemplate "private-data" . | fromYaml).pi | default dict }}
+{{- if and .work $pi.local_repo -}}
 #!/bin/sh
 # Clone/update the private work Pi packages repo (pi.local_repo in the private
 # data; see docs/private-data.md). modify_settings.json.tmpl references its
@@ -7,8 +10,6 @@
 # Pi does not install dependencies for local packages, so this runs the repo's
 # own installer (`npm ci` from the committed lockfile) for each declared package
 # with runtime dependencies, whenever its lockfile is newer than node_modules.
-{{- $pi := (includeTemplate "private-data" . | fromYaml).pi | default dict }}
-{{- if and .work $pi.local_repo }}
 
 REPO_DIR={{ joinPath .chezmoi.homeDir $pi.local_repo.dir | squote }}
 REPO_URL={{ $pi.local_repo.url | squote }}
@@ -43,6 +44,4 @@ if [ -f "$INSTALLER" ] && command -v node >/dev/null 2>&1; then
     node "$INSTALLER" "$dir" >/dev/null || echo "Pi: dependency install failed for $pkg" >&2
   done
 fi
-{{- else }}
-# No private work packages on this machine — nothing to do.
-{{- end }}
+{{ end -}}

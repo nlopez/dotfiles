@@ -1,3 +1,18 @@
+{{- /* Renders empty (chezmoi skips it) when the plugin is installed and the
+   MCP server points at the current engram binary: the same check as the early
+   exit below, read from Claude's files instead of the slower claude CLI. */ -}}
+{{- $inSync := false }}
+{{- $engram := lookPath "engram" }}
+{{- $claudeJson := joinPath .chezmoi.homeDir ".claude.json" }}
+{{- $pluginsJson := joinPath .chezmoi.homeDir ".claude/plugins/installed_plugins.json" }}
+{{- if and $engram (stat $claudeJson) (stat $pluginsJson) }}
+{{-   $plugins := (include $pluginsJson | fromJson).plugins | default dict }}
+{{-   $mcp := index ((include $claudeJson | fromJson).mcpServers | default dict) "engram" | default dict }}
+{{-   $real := list $engram (output "readlink" "-f" $engram | trim) }}
+{{-   if lookPath "mise" }}{{ $real = append $real (output "sh" "-c" `mise which engram 2>/dev/null || true` | trim) }}{{ end }}
+{{-   $inSync = and (hasKey $plugins "engram@engram") (has ($mcp.command | default "") $real) }}
+{{- end }}
+{{- if not $inSync -}}
 #!/bin/bash
 
 # Installs/updates the Engram plugin and user-level MCP server for Claude Code
@@ -46,3 +61,4 @@ fi
 # entries it adds alongside the real mcp__engram__* ones are removed by
 # dot_claude/modify_settings.json.tmpl on the next apply.
 printf 'y\n' | engram setup claude-code
+{{ end -}}

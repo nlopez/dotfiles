@@ -1,3 +1,7 @@
+{{- /* Renders empty (chezmoi skips it) once neither XDG Pi directory is a real directory. */ -}}
+{{- $agent := lstat (joinPath (env "XDG_CONFIG_HOME" | default (joinPath .chezmoi.homeDir ".config")) "pi/agent") }}
+{{- $ctx := lstat (joinPath (env "XDG_STATE_HOME" | default (joinPath .chezmoi.homeDir ".local/state")) "pi/context-mode") }}
+{{- if or (and $agent $agent.isDir) (and $ctx $ctx.isDir) -}}
 #!/bin/bash
 
 # Moves Pi state from the XDG locations back to Pi's defaults before files are
@@ -51,3 +55,4 @@ migrate() {
 
 migrate "${XDG_CONFIG_HOME:-$HOME_DIR/.config}/pi/agent" "$HOME_DIR/.pi/agent"
 migrate "${XDG_STATE_HOME:-$HOME_DIR/.local/state}/pi/context-mode" "$HOME_DIR/.pi/context-mode"
+{{ end -}}

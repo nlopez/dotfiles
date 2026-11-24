@@ -1,3 +1,6 @@
+{{- /* Renders empty (chezmoi skips it) unless ~/.codex is still a real directory. */ -}}
+{{- $old := lstat (joinPath .chezmoi.homeDir ".codex") }}
+{{- if and $old $old.isDir -}}
 #!/bin/bash
 
 # Replace ~/.codex (a real directory, recreated by tools that ignore
@@ -43,3 +46,4 @@ done
 
 rm -rf "$OLD"
 exit 0
+{{ end -}}

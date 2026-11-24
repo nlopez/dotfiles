@@ -1,3 +1,9 @@
+{{- /* Renders empty (chezmoi skips it) when the hooks are already installed:
+   the same check as the early exit below. */ -}}
+{{- $hooksDir := joinPath .chezmoi.workingTree ".git/hooks" }}
+{{- $hookFile := joinPath $hooksDir "pre-commit" }}
+{{- $hooksPath := output "sh" "-c" `git -C "$1" config --local --get core.hooksPath || true` "sh" .chezmoi.workingTree | trim }}
+{{- if not (and (eq $hooksPath $hooksDir) (stat $hookFile) (contains "pre-commit" (include $hookFile))) -}}
 #!/usr/bin/env bash
 # Install this repo's pre-commit hooks (gitleaks, private-patterns, ...) into the
 # source checkout. A clone does not carry .git/hooks, so check on every apply.
@@ -17,3 +23,4 @@ cd "$repo"
 git config --local core.hooksPath ""
 pre-commit install --install-hooks
 git config --local core.hooksPath "$hooks"
+{{ end -}}

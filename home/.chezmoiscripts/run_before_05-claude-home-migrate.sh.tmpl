@@ -1,3 +1,17 @@
+{{- /* Renders empty (chezmoi skips it) unless ~/.config/claude is still a real
+   directory or, on macOS, the Keychain tokens still need copying (same check
+   as the script body). */ -}}
+{{- $oldPath := joinPath (env "XDG_CONFIG_HOME" | default (joinPath .chezmoi.homeDir ".config")) "claude" }}
+{{- $old := lstat $oldPath }}
+{{- $needKeychain := false }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $needKeychain = output "bash" "-c" `old="Claude Code-credentials-$(printf '%s' "$1" | shasum -a 256 | cut -c1-8)"
+security find-generic-password -a "$USER" -s "$old" >/dev/null 2>&1 || exit 0
+security find-generic-password -a "$USER" -s "Claude Code-credentials" -w 2>/dev/null |
+  PATH="$2:$PATH" jq -e '[.. | objects | .accessToken? | strings | select(length > 0)] | length > 0' >/dev/null 2>&1 ||
+  echo yes` "bash" $oldPath (printf "%s/bin" (includeTemplate "nix-profile" .)) | trim | eq "yes" }}
+{{- end }}
+{{- if or (and $old $old.isDir) $needKeychain -}}
 #!/bin/bash
 
 # Moves Claude Code state from ~/.config/claude back to its default locations,
@@ -66,3 +80,4 @@ for f in "$NEW/settings.json" "$NEW/plugins/installed_plugins.json" "$NEW/plugin
 done
 
 echo "claude-home-migrate: moved $OLD to $NEW"
+{{ end -}}
