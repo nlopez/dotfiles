@@ -92,13 +92,23 @@ export default async function (pi: ExtensionAPI) {
 
   const chatModels = [
     chat("openai-gpt-6.2-sol", "GPT-6.2 Sol (DO)", { contextWindow: 1050000, maxTokens: 128000 }),
+    chat("openai-gpt-6.2-astra", "GPT-6.2 Astra (DO)", { contextWindow: 1050000, maxTokens: 128000 }),
+    chat("openai-gpt-5.3-codex", "GPT-5.3 Codex (DO)", { contextWindow: 400000, maxTokens: 128000 }),
     chat("kimi-k3.1-pro", "Kimi K3.1 Pro (DO)", { reasoning: true }),
     chat("glm-5.3", "GLM 5.3 (DO)", { reasoning: true }),
+    chat("glm-5.3-flash", "GLM 5.3 Flash (DO)", { reasoning: true }),
     chat("deepseek-v4.1-flash", "DeepSeek V4.1 Flash (DO)", { reasoning: true }),
+    chat("deepseek-v4-pro-0813", "DeepSeek V4 Pro (DO)", { reasoning: true }),
+    chat("qwen3.8-max", "Qwen3.8 Max (DO)"),
+    chat("minimax-m3.1-flash", "MiniMax M3.1 Flash (DO)", { reasoning: true }),
+    chat("router:software-engineering", "Router: Software Engineering (DO)", { reasoning: true }),
   ];
   const claudeModels = [
     claude("anthropic-claude-opus-5.5", "Claude Opus 5.5 (DO)"),
+    claude("anthropic-claude-opus-5", "Claude Opus 5 (DO)"),
+    claude("anthropic-claude-opus-4.8", "Claude Opus 4.8 (DO)"),
     claude("anthropic-claude-sonnet-5.5", "Claude Sonnet 5.5 (DO)"),
+    claude("anthropic-claude-5-sonnet", "Claude Sonnet 5 (DO)"),
     claude("anthropic-claude-5.5-haiku", "Claude Haiku 5.5 (DO)"),
   ];
   const params = await refreshCatalog(key);
