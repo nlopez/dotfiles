@@ -21,6 +21,7 @@ pi:
   # `pi update --extensions` installs or updates them; it prunes npm packages only.
   git_packages:
   - "git:github.com/ayghri/i-have-adhd@v0.4.1"
+  - "git:github.com/AjayPoshak/pi-worktree-extension@v2.0.5"
   - "git:github.com/odfalik/pi-transcript-search@a6f6e87e8c290d8cd2e46154d5e5616a8f4bc25d"
   # Installed only on work machines, together with the private work packages
   # (pi.packages and pi.local_packages in the private data; see
