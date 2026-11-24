@@ -30,7 +30,10 @@ def run(args: list[str], stdin: str | None = None, stderr: bool = False) -> str:
 
 
 def nix(declared: str, profile: str) -> list[str]:
-    want = json.loads(declared)
+    return nix_dotfiles(json.loads(declared), profile) + nix_user_profile()
+
+
+def nix_dotfiles(want: dict, profile: str) -> list[str]:
     try:
         with open(os.path.join(profile, NIX_MANIFEST)) as f:
             have = json.load(f)
@@ -47,6 +50,36 @@ def nix(declared: str, profile: str) -> list[str]:
         lines.append("unfree allowlist changed")
     if have.get("template") != want["template"] and len(lines) == 0:
         lines.append("flake template changed")
+    return lines
+
+
+def nix_user_profile() -> list[str]:
+    """Packages installed by hand with `nix profile install` (~/.nix-profile).
+
+    Apply never touches them; they are listed as drift so they get declared in
+    .chezmoidata/nix.yaml or removed with `nix profile remove`.
+    """
+    user_profile = os.path.expanduser("~/.nix-profile")
+    nix_bin = "/nix/var/nix/profiles/default/bin/nix"
+    if not (os.path.exists(user_profile) and os.access(nix_bin, os.X_OK)):
+        return []
+    out = run(
+        [
+            nix_bin,
+            "--extra-experimental-features",
+            "nix-command flakes",
+            "profile",
+            "list",
+            "--json",
+            "--profile",
+            user_profile,
+        ]
+    )
+    elements = json.loads(out or "{}").get("elements", {})
+    if not elements:
+        return []
+    lines = [f"? ~/.nix-profile {name}" for name in sorted(elements)]
+    lines.append("? = installed with `nix profile install`, not declared in nix.yaml")
     return lines
 
 
