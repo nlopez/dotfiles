@@ -1,3 +1,5 @@
+{{- /* Personal machines only; renders empty (so chezmoi removes it) elsewhere. */ -}}
+{{- if .personal -}}
 // DigitalOcean inference providers. The key is read once from a 1Password
 // Environment at startup and held in memory only, so child processes
 // (bash tool, MCP servers) never see it.
@@ -134,3 +136,4 @@ export default async function (pi: ExtensionAPI) {
     refreshModels: async ({ signal }) => withCatalog(claudeModels, await refreshCatalog(key, signal)),
   });
 }
+{{ end -}}
