@@ -24,11 +24,6 @@ If you run into a surprising issue, search online for similar issues before purs
 - Clone with `ghq get <owner>/<repo>` (or a full URL), never `git clone`. ghq puts the clone at `~/src/<host>/<owner>/<repo>`, which the git identity depends on.
 - Before cloning, run `ghq list -p <repo>` to check for an existing clone, and use it if found.
 
-### Worktrees (worktrunk)
-
-- Create a worktree with `wt switch --create --no-cd <branch>` and run commands with `git -C <path>` or by `cd`-ing in the command.
-- To delegate a separate task, create its worktree the same way, then start `/rex-agent`-style work with the `subagent` tool and pass the worktree path as `cwd`. The result returns to you automatically. Call `rex_finish` after reviewing it to close the tab.
-
 ### Shell history (atuin)
 
 - Every command run on this user's machines, by the user or by agents, is in atuin history with exit code, directory, duration, host, and author, synced across machines.
