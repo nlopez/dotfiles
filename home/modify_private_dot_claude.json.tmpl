@@ -15,7 +15,12 @@ import json
 import os
 import sys
 
-TRUSTED_ROOTS = {{ includeTemplate "trusted-dirs.tmpl" . }}
+# Central worktree roots are skipped: a worktree's trust comes from its
+# canonical repo, which is already listed.
+TRUSTED_ROOTS = [
+    r for r in {{ includeTemplate "trusted-dirs.tmpl" . }}
+    if "/.worktrees/" not in r
+]
 
 
 def trust_keys(root):
