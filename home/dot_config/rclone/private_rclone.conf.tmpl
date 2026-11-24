@@ -1,7 +1,0 @@
-{{- if not .headless -}}
-{{- $op := "op" -}}
-{{- if and .personal (not .work) (eq .chezmoi.os "darwin") -}}
-{{-   $op = joinPath .chezmoi.workingTree "scripts/op-automation.sh" -}}
-{{- end -}}
-{{ output $op "inject" "--account" "my.1password.com" "-i" (joinPath .chezmoi.workingTree "scripts/op-templates/rclone.conf.optpl") }}
-{{- end }}
