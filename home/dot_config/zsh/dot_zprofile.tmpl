@@ -3,8 +3,6 @@
    prompts, zle bindings) stays in zshrc.
 */ -}}
 
-typeset -U path
-
 # XDG Base Directory Specification — set early; everything below depends on them.
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
@@ -40,21 +38,11 @@ eval "$({{ $foundBrewPrefix }}/bin/brew shellenv)"
 # (and frozen into long-lived tmux servers), where it *replaces* that zsh's
 # built-in fpath — so a different/removed zsh can't find compinit, colors, ...
 typeset +x FPATH
-{{ end }}
-{{- end }}
 
-{{- if eq .chezmoi.os "darwin" }}
-{{- $darwinBrewPrefix := "" -}}
-{{- range (list "/opt/homebrew" "/usr/local") -}}
-  {{- if and (not $darwinBrewPrefix) (stat (printf "%s/bin/brew" .)) -}}
-    {{- $darwinBrewPrefix = . -}}
-  {{- end -}}
-{{- end }}
-{{- if $darwinBrewPrefix }}
 # keg-only brew formulae that need to shadow system versions. Also applied
 # in .zshenv (all zsh shells) since .zprofile only runs for login shells;
 # re-applying here re-prepends after path_helper -s rebuilds PATH below.
-{{ template "keg-only-brew-formulae.tmpl" (dict "prefix" $darwinBrewPrefix) }}
+{{ template "keg-only-brew-formulae.tmpl" (dict "prefix" $foundBrewPrefix) }}
 {{- end }}
 {{- end }}
 {{- $homeDir := .chezmoi.homeDir }}
@@ -93,11 +81,9 @@ PATH="{{ joinPath $homeDir ".local/bin" }}:$PATH"
 # Prepend shims last so they take priority over everything else.
 PATH="{{ joinPath $homeDir ".local/bin/shims" }}:$PATH"
 
-typeset -U path
 export TENV_AUTO_INSTALL=true
-export TFENV_AUTO_INSTALL=true
 export GOPATH="${XDG_DATA_HOME}/go"
-export VISUAL="zed"
+export VISUAL="code --wait"
 export EDITOR="vim"
 
 {{- if .work }}

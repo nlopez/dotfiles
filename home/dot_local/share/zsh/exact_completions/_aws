@@ -2,9 +2,6 @@
 # zsh completion for the aws shim at ~/.local/bin/aws.
 #
 # --profile / -p: reads profiles from ~/.aws/config and offers them via compadd.
-#                 fzf integration is handled separately by the _aws_profile_fzf
-#                 ZLE widget defined in 00_custom.zsh, which intercepts Tab before
-#                 this completion function is ever called.
 # Everything else: delegates to aws_completer for full sub-command/flag completion.
 #   Results are cached per-subcommand so aws_completer only runs once per context.
 

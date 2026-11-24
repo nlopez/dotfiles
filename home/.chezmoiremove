@@ -15,6 +15,13 @@
 .zcompdump-*
 .zcompdump-local-*
 
+# Stale zsh caches: Oh My Zsh's completion cache and pre-generated init
+# scripts that .zshrc now evals live; one-time cleanup
+.cache/zsh/compcache/
+.cache/zsh/atuin.zsh
+.cache/zsh/zabrze.zsh
+.cache/zsh/zoxide.zsh
+
 # Stray Engram store created when a process runs without ENGRAM_DATA_DIR (real
 # store is ~/.local/share/engram)
 .engram

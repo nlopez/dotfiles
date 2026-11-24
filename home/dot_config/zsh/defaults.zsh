@@ -123,21 +123,4 @@ else
 fi
 function diff { command diff --color "$@" }
 
-alias -g ...='../..'
-alias -g ....='../../..'
-alias -g .....='../../../..'
-alias -g ......='../../../../..'
 alias -- -='cd -'
-alias md='mkdir -p'
-alias rd=rmdir
-alias lsa='ls -lah'
-alias l='ls -lah'
-alias ll='ls -lh'
-alias la='ls -lAh'
-alias _='sudo '
-for _n in {1..9}; do alias "$_n"="cd -$_n"; done; unset _n
-
-# d: list the directory stack (or pass dirs(1) args)
-function d() {
-  if [[ -n $1 ]]; then dirs "$@"; else dirs -v | head -n 10; fi
-}
