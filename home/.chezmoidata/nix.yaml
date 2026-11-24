@@ -35,7 +35,6 @@ nix:
     - docker-client
     - fd
     - forgejo-cli
-    - fx
     - fzf
     - gh
     - ghq
@@ -44,7 +43,6 @@ nix:
     # discover gh-<name> binaries on PATH, only its extensions dir.
     - gh-stack
     - git
-    - git-lfs
     - go_latest
     - hyperfine
     - jq
@@ -52,7 +50,6 @@ nix:
     - kubectl
     - kubectx
     - kubernetes-helm
-    - lazygit
     - lima
     - mermaid-cli
     - ncdu
@@ -67,14 +64,12 @@ nix:
     # itself is installed by run_onchange_after_01-rustup-toolchain.sh.tmpl.
     - rustup
     - shellcheck
-    - tabiew
     - tenv
     - tmux
     - uv
     - velero
     - worktrunk
     - yamlfmt
-    - yazi
     - yq-go
     - zoxide
     # zsh plugins (no framework): sourced explicitly from ~/.config/zsh/dot_zshrc.
@@ -112,22 +107,14 @@ nix:
       - darwin.trash
       - duti
       - e2fsprogs
-      - flock
       - git-credential-manager
-      - graphviz
-      - krunkit
-      - kubevirt
       - mas
       - pass
       - pv
-      - qemu
       - skopeo
-      - sql-formatter
-      - sshpass
       - terminal-notifier
       - testssl
       - tree
-      - watchman
       - wget
       - zsh
       # GNU userland (formerly brew gnubin dirs). Nix installs these under

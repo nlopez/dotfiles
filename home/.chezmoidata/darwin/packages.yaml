@@ -34,7 +34,6 @@ packages:
         - obsidian
         - fsmonitor
         - wireshark-app
-        - linearmouse
         - ghostty
         - tailscale-app
         - 1password
@@ -47,14 +46,12 @@ packages:
         - macfuse
         - brave-origin
         - espanso
-        - balenaetcher
         - stolendata-mpv
         - losslesscut
         - mediainfo
         - proton-mail-bridge
         - signal
         - telegram-desktop
-        - zen
         - rustdesk
         work:
         - slack
