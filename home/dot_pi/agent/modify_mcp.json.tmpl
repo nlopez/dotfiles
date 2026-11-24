@@ -74,7 +74,8 @@ else
       .value |= del(.directTools, .auth, .exposure)
     ) |
     .mcpServers |= with_entries(
-      .value.description //= $desc[.key]
+      .value.description //= $desc[.key] |
+      if .value.description == null then del(.value.description) else . end
     ) |
     reduce $drop[] as $k (.; del(.mcpServers[$k]))
   '

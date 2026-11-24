@@ -15,3 +15,4 @@ mcp_descriptions:
   slack: "Read Slack messages, threads, channels and links"
   google-calendar: "Read and manage Google Calendar events"
   "1password": "1Password item lookup"
+  datadog: "Query Datadog logs, metrics, traces, monitors and dashboards"
