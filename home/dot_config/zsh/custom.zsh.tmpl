@@ -42,6 +42,19 @@ chezmoi() {
   fi
 }
 
+# `pi -w <name>`: open a pi-worktree-extension worktree. pi picks its cwd before
+# extensions load, so the extension needs this shell-side dispatcher.
+pi() {
+  if [[ $1 == (-w|--worktree) ]]; then
+    (( $# >= 2 )) || { echo "usage: pi -w <name> [Pi args...]" >&2; return 2; }
+    shift
+    PI_WORKTREE_REAL_PI=${commands[pi]} \
+      command ~/.pi/agent/npm/node_modules/.bin/pi-worktree "$@"
+  else
+    command pi "$@"
+  fi
+}
+
 # Make Ctrl+L also run stty sane (clear-screen widget bypasses the function above)
 _clear_screen_sane() { stty sane; zle clear-screen }
 zle -N _clear_screen_sane
