@@ -90,10 +90,3 @@ export EDITOR="vim"
 # Source work-specific env vars (age-encrypted in source tree, decrypted on apply).
 [[ -r "${XDG_CONFIG_HOME}/work-secrets/env" ]] && source "${XDG_CONFIG_HOME}/work-secrets/env"
 {{- end }}
-
-{{- if and (not .headless) (not (env "CHEZMOI_SKIP_SECRETS")) }}
-{{- if .personal }}
-# Automation vault — personal machine secrets
-export HF_TOKEN={{ output (joinPath .chezmoi.workingTree "scripts/op-automation.sh") "read" "--no-newline" "op://evjh25ux2mnoufaut6qhvm2pdi/rngar3p7k7q7uki2wrhmx4eb3e/credential" }}
-{{- end }}
-{{- end }}
