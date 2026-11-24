@@ -47,6 +47,13 @@ except Exception:
 
 projects = current.setdefault("projects", {})
 changed = False
+
+# Drop entries for central worktrees that have since been removed.
+worktree_root = os.path.expanduser("~/src/.worktrees") + os.sep
+for path in list(projects):
+    if path.startswith(worktree_root) and not os.path.isdir(path):
+        del projects[path]
+        changed = True
 for root in TRUSTED_ROOTS:
     for path in trust_keys(root):
         entry = projects.setdefault(path, {})
