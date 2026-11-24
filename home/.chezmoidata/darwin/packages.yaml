@@ -5,11 +5,11 @@ packages:
     brew:
       # When true, `brew bundle` also uninstalls anything not declared here
       # (--cleanup --force). Preview first with `brew-cleanup`.
-      cleanup: false
+      cleanup: true
+      # Taps are inferred from fully qualified names (owner/repo/name). List one
+      # here only when its repo is not github.com/<owner>/homebrew-<repo>.
       taps:
-        8ta4/plist: "https://github.com/8ta4/homebrew-plist"
         jundot/omlx: "https://github.com/jundot/omlx"
-        smittytone/smittytone: "https://github.com/smittytone/homebrew-smittytone"
       # CLI tools live in Nix (.chezmoidata/nix.yaml), then mise
       # (.chezmoitemplates/mise/). Only formulae neither can install belong here.
       brews:
@@ -20,6 +20,7 @@ packages:
         - engram
         personal:
         - jundot/omlx/omlx
+        - libtiff
         work: []
       brew_options:
         jundot/omlx/omlx:
@@ -53,6 +54,7 @@ packages:
         - signal
         - telegram-desktop
         - rustdesk
+        - claude
         - copyq
         - equibop
         - firefox
@@ -88,6 +90,8 @@ packages:
       personal:
       - name: "1Blocker"
         id: 1365531024
+      - name: "1Password for Safari"
+        id: 1569813296
       - name: "Kagi for Safari"
         id: 1622835804
       - name: "StopTheMadness Pro"

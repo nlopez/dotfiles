@@ -22,9 +22,18 @@
 {{-   $masApps  = concat $masApps  (index ($darwin.mas | default dict) $g | default list) -}}
 {{- end -}}
 
-# Taps (custom repos) — trusted: true so brew bundle handles tap trust declaratively
-{{ range $key, $url := ($brewConfig.taps | default dict) -}}
-tap {{ $key | quote }}, {{ $url | quote }}, trusted: true
+{{- /* Taps come from fully qualified names (owner/repo/name). taps: only
+   supplies a clone URL for repos not at github.com/<owner>/homebrew-<repo>. */ -}}
+{{- $tapUrls := $brewConfig.taps | default dict -}}
+{{- $taps := keys $tapUrls -}}
+{{- range (concat $brews $casks $unsigned) -}}
+{{-   $parts := splitList "/" . -}}
+{{-   if eq (len $parts) 3 }}{{ $taps = append $taps (printf "%s/%s" (index $parts 0) (index $parts 1)) }}{{ end -}}
+{{- end }}
+
+# Taps — trusted: true so brew bundle handles tap trust declaratively
+{{ range ($taps | sortAlpha | uniq) -}}
+tap {{ . | quote }}{{ with index $tapUrls . }}, {{ . | quote }}{{ end }}, trusted: true
 {{ end }}
 
 {{ range ($brews | sortAlpha | uniq) }}
