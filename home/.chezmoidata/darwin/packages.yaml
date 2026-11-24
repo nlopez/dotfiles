@@ -53,6 +53,19 @@ packages:
         - signal
         - telegram-desktop
         - rustdesk
+        - copyq
+        - equibop
+        - firefox
+        - google-chrome
+        - libreoffice
+        - proton-drive
+        - protonvpn
+        - seadrive
+        - slack
+        - standard-notes
+        - steam
+        - syncthing-app
+        - zed
         work:
         - slack
         - google-drive
