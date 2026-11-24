@@ -57,6 +57,8 @@ source "$_zdir/custom.zsh"
 zstyle ':prompt:pure:title' show no
 autoload -U promptinit && promptinit
 prompt pure
+# Draw time on the right, so terminal output read by an agent shows when each command ran.
+RPROMPT='%D{%H:%M:%S}'
 
 unset _zdir _nix_profile
 
