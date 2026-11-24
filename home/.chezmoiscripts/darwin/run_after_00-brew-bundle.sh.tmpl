@@ -1,6 +1,6 @@
-{{- /* Renders empty (chezmoi skips it) when nothing declared in
-   .chezmoidata/darwin/packages.yaml is missing and, with brew.cleanup on,
-   nothing undeclared is installed. Otherwise the plan shows in `chezmoi diff`. */ -}}
+{{- /* Renders empty (chezmoi skips it) when the installed set matches
+   .chezmoidata/darwin/packages.yaml exactly: nothing missing, nothing undeclared.
+   Otherwise the plan shows in `chezmoi diff`. */ -}}
 {{- $nixBin := printf "%s/bin" (includeTemplate "nix-profile" .) }}
 {{- $cleanup := .packages.darwin.brew.cleanup | toString }}
 {{- $plan := output "sh" "-c" "PATH=\"$1:$PATH\"; printf '%s' \"$5\" | python3 \"$2\" brew \"$3\" \"$4\"" "sh" $nixBin (joinPath .chezmoi.workingTree "scripts/package-plan.py") (printf "%s/bin/brew" .packages.brew_prefix) $cleanup (includeTemplate "Brewfile" .) | trim }}

@@ -87,17 +87,24 @@ def brew(brew_bin: str, cleanup: str) -> list[str]:
     check = run([brew_bin, "bundle", "check", "--verbose", "--no-upgrade", "--file=-"], brewfile, stderr=True)
     for m in re.finditer(r"^→ (\S+) (\S+) needs to be installed", check, re.M):
         lines.append(f"+ {m.group(1).lower()} {m.group(2)}")
-    if cleanup == "true":
-        out = run([brew_bin, "bundle", "cleanup", "--file=-"], brewfile)
-        section = None
-        for line in out.splitlines():
-            if line.startswith("Would `brew cleanup`"):
-                break
-            m = re.match(r"^Would (\w+)(?: (\w+?)s?)?:$", line)
-            if m:
-                section = (m.group(2) or "tap").lower()
-            elif section and line.strip():
-                lines += [f"- {section} {name}" for name in line.split()]
+    # Undeclared installs are drift either way; only brew.cleanup decides
+    # whether apply removes them.
+    kinds = {"untap": "tap", "casks": "cask", "formulae": "formula", "Mac App Store apps": "mas"}
+    out = run([brew_bin, "bundle", "cleanup", "--file=-"], brewfile)
+    mark = "-" if cleanup == "true" else "?"
+    section = None
+    extras = []
+    for line in out.splitlines():
+        if line.startswith("Would `brew cleanup`"):
+            break
+        m = re.match(r"^Would (\w+)(?: (.+))?:$", line)
+        if m:
+            section = kinds.get(m.group(2) or m.group(1), m.group(2) or m.group(1))
+        elif section and line.strip():
+            extras.append(f"{mark} {section} {line.strip()}")
+    lines += extras
+    if extras and cleanup != "true":
+        lines.append("? = installed but undeclared; kept because brew.cleanup is false")
     return lines
 
 
