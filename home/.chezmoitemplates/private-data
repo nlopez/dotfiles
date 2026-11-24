@@ -8,6 +8,7 @@ onepassword_account: ""
 mcp_servers: {}
 mcp_workspace_exclude: []
 mcp_retired: []
+mcp_descriptions: {}
 pi:
   packages: []
   local_packages: []

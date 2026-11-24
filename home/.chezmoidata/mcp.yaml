@@ -6,3 +6,12 @@
 # see docs/private-data.md and .chezmoitemplates/private-mcp-servers.
 mcp:
   playwright: "npm:@playwright/mcp@0.0.85"
+# One line per server, shown to the model in Pi's system prompt so it knows what
+# each server is for. Private servers' lines live in the private data
+# (mcp_descriptions) and are merged over these.
+mcp_descriptions:
+  playwright: "Drive a real browser: navigate, click, fill forms, screenshot pages"
+  kagi: "Kagi web search and page summarization"
+  slack: "Read Slack messages, threads, channels and links"
+  google-calendar: "Read and manage Google Calendar events"
+  "1password": "1Password item lookup"
