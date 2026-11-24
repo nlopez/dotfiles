@@ -93,7 +93,7 @@ def brew(brew_bin: str, cleanup: str) -> list[str]:
     out = run([brew_bin, "bundle", "cleanup", "--file=-"], brewfile)
     mark = "-" if cleanup == "true" else "?"
     section = None
-    extras = []
+    extras: dict[str, list[str]] = {}
     for line in out.splitlines():
         if line.startswith("Would `brew cleanup`"):
             break
@@ -101,11 +101,37 @@ def brew(brew_bin: str, cleanup: str) -> list[str]:
         if m:
             section = kinds.get(m.group(2) or m.group(1), m.group(2) or m.group(1))
         elif section and line.strip():
-            extras.append(f"{mark} {section} {line.strip()}")
-    lines += extras
+            extras.setdefault(section, []).append(line.strip())
+
+    deps = brew_group_deps(brew_bin, extras.get("formula", []))
+    for kind, names in extras.items():
+        for name in names:
+            if kind == "formula" and name not in deps:
+                continue
+            under = f"  (+ {', '.join(deps[name])})" if kind == "formula" and deps[name] else ""
+            lines.append(f"{mark} {kind} {name}{under}")
     if extras and cleanup != "true":
         lines.append("? = installed but undeclared; kept because brew.cleanup is false")
     return lines
+
+
+def brew_group_deps(brew_bin: str, formulae: list[str]) -> dict[str, list[str]]:
+    """Map each undeclared top-level formula to the undeclared formulae it pulls in.
+
+    A formula that another undeclared formula depends on appears only under its
+    top-level parents. Deps come from the formula definitions: `brew deps
+    --installed` reads install receipts, which miss some (hf -> certifi).
+    """
+    if not formulae:
+        return {}
+    out = run([brew_bin, "deps", "--for-each", "--full-name", *formulae])
+    deps = {}
+    for line in out.splitlines():
+        name, _, rest = line.partition(":")
+        deps[name.strip()] = set(rest.split())
+    pending = set(formulae)
+    nested = set().union(*(deps.get(name, set()) for name in formulae)) & pending
+    return {name: sorted(deps.get(name, set()) & pending) for name in formulae if name not in nested}
 
 
 def main() -> None:
