@@ -9,7 +9,7 @@
 # refreshed by a detached `python3 pr_tracking.py refresh ...` so the status
 # line never waits on the network.
 # PR notifications: while the box is open, pr_float.py calls notice_changes on
-# every tick; CI failing (as soon as a check fails) or passing, an approval or
+# every tick; CI finishing (passed, or failed once every check is done), an approval or
 # change request, a merge or close, post-merge CI failing or passing, or a
 # commit pushed from outside the session is appended to the `events` table and
 # touches `notify` so agent adapters wake and advance their cursor with drain
@@ -868,10 +868,21 @@ def read_comments(session_id, url=None, unread=True):
     return "\n".join(out).strip()
 
 
+def _ci_event(pr, settled, key="statusCheckRollup"):
+    """The event text for CI that just finished, or '' while checks still run."""
+    if settled == "pass":
+        passed, total = check_counts(pr, key)
+        return f"CI passed ({passed}/{total})"
+    if settled == "fail":
+        failed = sorted(set(_failed_names(pr, key)))
+        return f"CI failed ({', '.join(failed)})" if failed else "CI failed"
+    return ""
+
+
 def notice_changes(session_id, prs):
     """Record an event for each PR that was just merged or closed, and for each
-    open PR whose CI check just failed (even while other checks still run),
-    whose CI passed, that was just approved or had changes requested, or whose
+    open PR whose CI just finished (every check done: passed, or failed with the
+    failing checks named), that was just approved or had changes requested, or whose
     head moved to a commit the session did not push.
 
     Each PR's last seen state, head, CI and review state is kept per session; a PR
@@ -898,16 +909,12 @@ def notice_changes(session_id, prs):
             continue
         state = pr.get("state") or ""
         head = pr.get("headRefOid") or ""
-        failed_checks = sorted(set(_failed_names(pr)))
-        post_merge_failed = sorted(set(_failed_names(pr, "mergeChecks")))
         cur = {
             "checks": checks_settled(pr),
             "review": review_state(pr),
             "state": state,
             "head": head,
             "merge_checks": checks_settled(pr, "mergeChecks"),
-            "failed_checks": failed_checks,
-            "post_merge_failed": post_merge_failed,
         }
         arp = pr.get("_arp") or {}
         cur["arp"] = [arp.get("id"), arp.get("state")]
@@ -941,30 +948,19 @@ def notice_changes(session_id, prs):
                 events.append((url, f"new comment from {c['who']}{where}: {_brief(c['body'], 200)}".rstrip(": ")))
         if before.get("state") == "OPEN" and state in ("MERGED", "CLOSED"):
             events.append((url, state.lower()))
-        if state == "MERGED" and "merge_checks" in before:
-            passed, total = check_counts(pr, "mergeChecks")
-            prev_pm_failed = set(before.get("post_merge_failed") or [])
-            new_pm_failed = [c for c in post_merge_failed if c not in prev_pm_failed]
-            if new_pm_failed:
-                events.append((url, f"post-merge CI failed ({', '.join(new_pm_failed)})"))
-            elif cur["merge_checks"] == "fail" and before["merge_checks"] != "fail" and not post_merge_failed:
-                events.append((url, "post-merge CI failed"))
-            elif cur["merge_checks"] == "pass" and before["merge_checks"] != "pass":
-                events.append((url, f"post-merge CI passed ({passed}/{total})"))
+        if state == "MERGED" and "merge_checks" in before and cur["merge_checks"] != before["merge_checks"]:
+            text = _ci_event(pr, cur["merge_checks"], "mergeChecks")
+            if text:
+                events.append((url, f"post-merge {text}"))
         if state != "OPEN":
             continue
         head_changed = bool(head and before.get("head") and head != before["head"])
-        if cur["checks"] == "pass" and (before.get("checks") != "pass" or head_changed):
-            passed, total = check_counts(pr)
-            events.append((url, f"CI passed ({passed}/{total})"))
         if head_changed and not pushed_recently:
             events.append((url, f"new commit {head[:10]} pushed from outside this session"))
-        prev_failed = set() if head_changed else set(before.get("failed_checks") or [])
-        new_failed = [c for c in failed_checks if c not in prev_failed]
-        if new_failed:
-            events.append((url, f"CI failed ({', '.join(new_failed)})"))
-        elif cur["checks"] == "fail" and (before.get("checks") != "fail" or head_changed) and not failed_checks:
-            events.append((url, "CI failed"))
+        if cur["checks"] != before.get("checks") or head_changed:
+            text = _ci_event(pr, cur["checks"])
+            if text:
+                events.append((url, text))
         prev_review = _LEGACY_REVIEW.get(before.get("review"), before.get("review"))
         became_ready_after_ci = (
             cur["review"] == "ready"
