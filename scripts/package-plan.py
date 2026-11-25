@@ -89,7 +89,7 @@ def brew(brew_bin: str, cleanup: str) -> list[str]:
         lines.append(f"+ {m.group(1).lower()} {m.group(2)}")
     # Undeclared installs are drift either way; only brew.cleanup decides
     # whether apply removes them.
-    kinds = {"untap": "tap", "casks": "cask", "formulae": "formula", "Mac App Store apps": "mas"}
+    kinds = {"untap": "tap", "casks": "cask", "formulae": "formula", "Mac App Store apps": "mas", "uv tools": "uv"}
     out = run([brew_bin, "bundle", "cleanup", "--file=-"], brewfile)
     mark = "-" if cleanup == "true" else "?"
     section = None
