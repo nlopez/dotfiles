@@ -25,9 +25,10 @@ idempotent, tracked by git (not `chezmoi add`). Never invoke `chezmoi` from a ho
 Nix > mise > Homebrew. CLI tools go in `.chezmoidata/nix.yaml`; not in nixpkgs →
 `.chezmoitemplates/mise/`. Homebrew (macOS only) for GUI apps, Mac App Store (`mas`), kernel
 extensions, and things neither can install (or unfree packages missing from
-cache.nixos.org). Remove a migrated Homebrew copy declaratively with the
-`run_onchange_after_05/06-brew-remove-*` scripts, never `brew uninstall`. Linux system
-packages are out of band; no Linuxbrew.
+cache.nixos.org). To retire a Homebrew package, delete it from
+`.chezmoidata/darwin/packages.yaml`; `brew.cleanup` uninstalls anything undeclared on apply
+(`chezmoi diff` lists it first), never `brew uninstall`. Linux system packages are out of
+band; no Linuxbrew.
 
 ## 1Password
 
