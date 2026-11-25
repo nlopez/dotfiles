@@ -47,9 +47,6 @@ current.setdefault("enabledModels", ["**"])
 # Work machines' models.json is seeded by modify_models.json.tmpl and
 # refreshed with /refresh-models.
 
-# Skip the blocking 30s welcome countdown (pi-powerline-footer);
-# quiet startup shows the non-blocking header instead.
-current["quietStartup"] = True
 
 # Notices for significant prompt-cache misses.
 current["showCacheMissNotices"] = True
@@ -103,27 +100,9 @@ current["skills"] = [s for s in current.get("skills", []) if s not in stale]
 # Enable /skill: slash commands in Pi sessions.
 current["enableSkillCommands"] = True
 
-# pi-powerline-footer layout: the default preset's left row, minus the model
-# (the trajectory status line already shows it), with the
-# pi-session-prs status (key "pr") placed right after the git branch.
-powerline = current.get("powerline")
-if not isinstance(powerline, dict):
-    powerline = {}
-powerline.setdefault("preset", "default")
-powerline.setdefault("layout", {})["left"] = [
-    "thinking", "shell_mode", "path", "git",
-    "custom:pr",
-    "queue", "context_pct", "cache_read", "cost",
-]
-items = [i for i in powerline.get("customItems", []) if i.get("id") != "pr"]
-items.append({"id": "pr", "statusKey": "pr", "position": "left", "selfColorize": True})
-powerline["customItems"] = items
-# Hide the i-have-adhd extension status from the footer.
-hidden = powerline.get("hiddenExtensionStatusKeys", [])
-if "i-have-adhd" not in hidden:
-    hidden.append("i-have-adhd")
-powerline["hiddenExtensionStatusKeys"] = hidden
-current["powerline"] = powerline
+# Footer extension removed; drop its leftover settings.
+current.pop("powerline", None)
+current.pop("quietStartup", None)
 
 current["defaultTools"] = ["+codemode"]
 

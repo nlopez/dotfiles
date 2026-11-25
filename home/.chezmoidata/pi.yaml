@@ -8,7 +8,6 @@
 pi:
   packages:
   - "npm:pi-auto-theme@1.1.1"
-  - "npm:pi-powerline-footer@0.22.0"
   - "npm:pi-interrupt-steer@0.1.0"
   - "npm:pi-away@0.1.4"
   - "npm:pi-cc-monitor@0.13.1"
