@@ -1,5 +1,5 @@
 #!/bin/bash
-# Preview what brew bundle --cleanup would install/remove by comparing
+# Preview what brew bundle install + cleanup would install/remove by comparing
 # the current installed state (brew bundle dump) vs the generated config.
 #
 # Outputs like a git/chezmoi diff: "-" for removals (red), "+" for additions (green).
@@ -95,4 +95,4 @@ for TYPE in tap brew cask mas vscode uv; do
 done
 
 echo ""
-echo "To apply: chezmoi apply && brew bundle --global --cleanup"
+echo "To apply: chezmoi apply && brew bundle install --global && brew bundle cleanup --global --force"

@@ -4,7 +4,7 @@ packages:
     brew_prefix: /opt/homebrew
     brew:
       # When true, `brew bundle` also uninstalls anything not declared here
-      # (--cleanup --force). Preview first with `brew-cleanup`.
+      # (brew bundle cleanup --force). Preview first with `brew-cleanup`.
       cleanup: true
       # Taps are inferred from fully qualified names (owner/repo/name). List one
       # here only when its repo is not github.com/<owner>/homebrew-<repo>.

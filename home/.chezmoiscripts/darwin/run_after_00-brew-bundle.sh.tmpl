@@ -8,7 +8,7 @@
 #!/bin/bash
 
 # Installs everything in ~/.config/brew/Brewfile. With brew.cleanup on, also
-# uninstalls anything undeclared (--cleanup --force); preview with `brew-cleanup`.
+# uninstalls anything undeclared (brew bundle cleanup --force); preview with `brew-cleanup`.
 #
 # Pending changes:
 {{- range splitList "\n" $plan }}
@@ -26,5 +26,8 @@ export PATH="{{ $nixBin }}:$PATH"
 
 # HOMEBREW_BUNDLE_FILE is exported in .zprofile → ~/.config/brew/Brewfile
 BREWFILE="${HOMEBREW_BUNDLE_FILE:-{{ .chezmoi.homeDir }}/.config/brew/Brewfile}"
-brew bundle{{ if .packages.darwin.brew.cleanup }} --cleanup --force{{ end }} --file="${BREWFILE}"
+brew bundle install --file="${BREWFILE}"
+{{- if .packages.darwin.brew.cleanup }}
+brew bundle cleanup --force --file="${BREWFILE}"
+{{- end }}
 {{- end }}
