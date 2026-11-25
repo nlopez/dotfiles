@@ -1,0 +1,42 @@
+{{- if .work -}}
+#!/bin/bash
+
+# Installs a root LaunchDaemon that sets net.cfil.close_wait_timeout at boot.
+# sysctl -w needs root, so the plist lives in /Library/LaunchDaemons (outside ~)
+# and this script installs it with sudo.
+
+set -eufo pipefail
+
+LABEL="com.local.cfil-sysctl"
+PLIST="/Library/LaunchDaemons/${LABEL}.plist"
+
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+cat >"$tmp" <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.local.cfil-sysctl</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/sbin/sysctl</string>
+    <string>-w</string>
+    <string>net.cfil.close_wait_timeout=50</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
+EOF
+
+sudo install -m 0644 -o root -g wheel "$tmp" "$PLIST"
+sudo launchctl bootout "system/${LABEL}" 2>/dev/null || true
+# bootout returns before the old job is fully gone; retry bootstrap briefly.
+for _ in 1 2 3 4 5; do
+  sudo launchctl bootstrap system "$PLIST" && exit 0
+  sleep 1
+done
+sudo launchctl bootstrap system "$PLIST"
+{{- end }}

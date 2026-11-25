@@ -135,6 +135,10 @@ def handlers_cmd(mode: str, declared: dict[str, dict[str, str]]) -> int:
         args = ["duti", "-s", want, target] + (["all"] if kind == "types" else [])
         proc = run(args)
         if proc.returncode != 0:
+            # No installed app declares this UTI on this host; nothing to set yet.
+            if "does not conform to any UTI hierarchy" in proc.stderr:
+                print(f"skipping {target}: no app on this Mac registers it", file=sys.stderr)
+                continue
             print(f"{' '.join(args)} failed: {proc.stderr.strip()}", file=sys.stderr)
             status = 1
     return status
