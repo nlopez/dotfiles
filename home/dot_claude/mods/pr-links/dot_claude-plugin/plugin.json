@@ -1,0 +1,5 @@
+{
+  "name": "pr-links",
+  "version": "0.1.0",
+  "description": "Draws GitHub PR references (owner/repo#123, #123) in assistant replies as clickable links."
+}

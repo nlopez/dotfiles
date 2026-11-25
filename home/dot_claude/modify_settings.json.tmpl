@@ -188,6 +188,15 @@ current["env"].pop("ENGRAM_CLOUD_AUTOSYNC", None)
 xdg_state = os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state")
 current["env"]["CONTEXT_MODE_DIR"] = os.path.join(xdg_state, "claude", "context-mode")
 
+# Local mods (function-hook plugins) deployed from dot_claude/mods/, loaded
+# from their folders; other folders already listed are kept.
+mods_dir = os.path.expanduser("~/.claude/mods")
+mod_dirs = [os.path.join(mods_dir, name) for name in ("pr-links",)]
+plugin_dirs = [d for d in current["env"].get("CLAUDE_CODE_PLUGIN_DIRS", "").split(os.pathsep) if d]
+current["env"]["CLAUDE_CODE_PLUGIN_DIRS"] = os.pathsep.join(
+    plugin_dirs + [d for d in mod_dirs if d not in plugin_dirs]
+)
+
 permissions = current.get("permissions", {})
 if "allow" in permissions:
     permissions["allow"] = [
