@@ -14,6 +14,7 @@
 # commit pushed from outside the session is appended to the `events` table and
 # touches `notify` so agent adapters wake and advance their cursor with drain
 # (Claude: hooks/pr-notify.py, pi: the pr-tracker extension).
+import base64
 import calendar
 import contextlib
 import glob
@@ -769,6 +770,47 @@ def _brief(body, limit=600):
     return text if len(text) <= limit else text[:limit] + "…"
 
 
+def _database_id(node_id):
+    """GitHub's numeric id for a GraphQL node id such as PRR_kwDO…, or node_id unchanged.
+
+    gh pr view returns node ids; REST and the plugins return numeric ids. A node id
+    is a type prefix and base64url msgpack of [0, repository id, object id]."""
+    m = re.fullmatch(r"[A-Z]+_(kw[\w-]+)", str(node_id))
+    if not m:
+        return node_id
+    try:
+        raw = base64.urlsafe_b64decode(m.group(1) + "=" * (-len(m.group(1)) % 4))
+    except ValueError:
+        return node_id
+    sizes = {0xCC: 1, 0xCD: 2, 0xCE: 4, 0xCF: 8}
+    if len(raw) < 2 or raw[0] != 0x93:
+        return node_id
+    values, pos = [], 1
+    while pos < len(raw):
+        tag = raw[pos]
+        if tag < 0x80:
+            values.append(tag)
+            pos += 1
+        elif tag in sizes and pos + 1 + sizes[tag] <= len(raw):
+            values.append(int.from_bytes(raw[pos + 1 : pos + 1 + sizes[tag]], "big"))
+            pos += 1 + sizes[tag]
+        else:
+            return node_id
+    return values[2] if len(values) == 3 else node_id
+
+
+def _login(author):
+    """An author's login without the [bot] suffix that gh pr view leaves off."""
+    login = (author or {}).get("login") or ""
+    return login[: -len("[bot]")] if login.endswith("[bot]") else login
+
+
+def _comment_key(key):
+    """A stored kind:id comment key with any node id swapped for the numeric id."""
+    kind, _, cid = key.partition(":")
+    return f"{kind}:{_database_id(cid)}"
+
+
 def _comments(pr):
     """{kind:id: comment} of a PR's comments, inline review comments and review bodies, or None if not fetched."""
     if not any(k in pr for k in ("comments", "reviews", "reviewComments")):
@@ -779,8 +821,8 @@ def _comments(pr):
         ("rc", pr.get("reviewComments") or []),
     )
     return {
-        f"{kind}:{i['id']}": {
-            "who": (i.get("author") or {}).get("login") or "?",
+        f"{kind}:{_database_id(i['id'])}": {
+            "who": _login(i.get("author")) or "?",
             "path": i.get("path") or "",
             "line": i.get("line"),
             "created": i.get("createdAt") or i.get("submittedAt") or "",
@@ -794,7 +836,7 @@ def _comments(pr):
 
 def _feedback(pr, comments):
     """The comments not written by the PR's author."""
-    me = (pr.get("author") or {}).get("login")
+    me = _login(pr.get("author"))
     return {k: v for k, v in comments.items() if v["who"] != me}
 
 
@@ -975,6 +1017,11 @@ def notice_changes(session_id, prs):
             cur["feedback"] = sorted(fb)
         now_map[url] = cur
         before = seen.get(url)
+        if before:
+            before = {
+                **before,
+                **{k: [_comment_key(i) for i in before[k]] for k in ("feedback", "arp_shown") if k in before},
+            }
         if comments is not None and (before is None or "feedback" not in before):
             mark_comments_read(session_id, url)
         arp_ids = sorted(i for i in (fb or {}) if _is_arp(fb[i]))
