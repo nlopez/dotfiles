@@ -59,6 +59,8 @@ nix:
     - pnpm
     - pre-commit
     - pure-prompt
+    # The python3 on PATH for hooks and render-time scripts; macOS's own is 3.9.
+    - python3
     - ripgrep
     # rustup provides the cargo/rustc/rustfmt/clippy proxies; the toolchain
     # itself is installed by run_onchange_after_01-rustup-toolchain.sh.tmpl.
