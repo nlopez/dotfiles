@@ -32,3 +32,11 @@ macos:
       http: org.mozilla.firefox
       https: org.mozilla.firefox
       mailto: org.mozilla.firefox
+  # Work machines: overrides merged over `handlers`. Finicky routes links to the
+  # right browser (~/.finicky.js).
+  work_handlers:
+    types:
+      public.html: se.johnste.finicky
+    schemes:
+      http: se.johnste.finicky
+      https: se.johnste.finicky

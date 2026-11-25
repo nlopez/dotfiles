@@ -111,10 +111,30 @@ def current_handler(target: str) -> str | None:
     return out if proc.returncode == 0 and out else None
 
 
+INSTALLED_JXA = """
+ObjC.import("AppKit");
+function run(ids) {
+  const ws = $.NSWorkspace.sharedWorkspace;
+  return ids.filter(i => !ws.URLForApplicationWithBundleIdentifier(i).isNil()).join("\\n");
+}
+"""
+
+
+def installed_apps(bundle_ids: set[str]) -> set[str]:
+    # NSWorkspace lookup: unlike AppleScript `application id`, it never shows a "Where is …?" dialog.
+    proc = run(["osascript", "-l", "JavaScript", "-e", INSTALLED_JXA, *sorted(bundle_ids)])
+    return set(proc.stdout.split()) if proc.returncode == 0 else set(bundle_ids)
+
+
 def handlers_drift(declared: dict[str, dict[str, str]]) -> list[tuple[str, str, str | None, str]]:
     drift = []
+    wanted = {want for kind in ("types", "schemes") for want in (declared.get(kind) or {}).values()}
+    installed = installed_apps(wanted)
     for kind in ("types", "schemes"):
         for target, want in (declared.get(kind) or {}).items():
+            # Apps a host does not install (e.g. personal-only casks) cannot be set there.
+            if want not in installed:
+                continue
             have = current_handler(target)
             # LaunchServices stores bundle IDs lowercased.
             if (have or "").lower() != want.lower():

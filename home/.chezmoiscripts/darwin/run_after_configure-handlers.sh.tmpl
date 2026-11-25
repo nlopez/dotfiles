@@ -3,7 +3,9 @@
    Otherwise the drift shows in `chezmoi diff`. */ -}}
 {{- $nixBin := printf "%s/bin" (includeTemplate "nix-profile" .) }}
 {{- $script := joinPath .chezmoi.workingTree "scripts/macos-plan.py" }}
-{{- $declared := .macos.handlers | toJson }}
+{{- $handlers := deepCopy .macos.handlers }}
+{{- if .work }}{{ $handlers = mergeOverwrite $handlers .macos.work_handlers }}{{ end }}
+{{- $declared := $handlers | toJson }}
 {{- $plan := output "sh" "-c" "PATH=\"$1:$PATH\" exec python3 \"$2\" handlers plan \"$3\"" "sh" $nixBin $script $declared | trim }}
 {{- if $plan -}}
 #!/bin/bash
