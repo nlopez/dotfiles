@@ -2,7 +2,9 @@
    .chezmoidata/darwin/defaults.yaml already has its declared value.
    Otherwise the drift shows in `chezmoi diff`. */ -}}
 {{- $script := joinPath .chezmoi.workingTree "scripts/macos-plan.py" }}
-{{- $declared := .macos.defaults | toJson }}
+{{- $defaults := deepCopy .macos.defaults }}
+{{- $_ := set (index $defaults "com.knollsoft.Rectangle") "launchOnLogin" (not .headless) }}
+{{- $declared := $defaults | toJson }}
 {{- $plan := output "python3" $script "defaults" "plan" $declared | trim }}
 {{- if $plan -}}
 #!/bin/bash

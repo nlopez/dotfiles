@@ -107,3 +107,28 @@ macos:
     # "Displays have separate Spaces" on
     com.apple.spaces:
       spans-displays: false
+    # launchOnLogin is set per host in run_after_configure-defaults.sh.tmpl (off when headless).
+    # Shortcuts are {keyCode, modifierFlags}; an empty map means no shortcut.
+    com.knollsoft.Rectangle:
+      SUEnableAutomaticChecks: false
+      allowAnyShortcut: true
+      # Ctrl+Shift (393216)
+      bottomHalf: {keyCode: 38, modifierFlags: 393216}
+      bottomLeft: {keyCode: 41, modifierFlags: 393216}
+      bottomRight: {keyCode: 39, modifierFlags: 393216}
+      leftHalf: {keyCode: 4, modifierFlags: 393216}
+      maximize: {keyCode: 18, modifierFlags: 393216}
+      rightHalf: {keyCode: 37, modifierFlags: 393216}
+      topHalf: {keyCode: 40, modifierFlags: 393216}
+      topLeft: {keyCode: 33, modifierFlags: 393216}
+      topRight: {keyCode: 30, modifierFlags: 393216}
+      # Ctrl+Opt (786432): Todo mode
+      reflowTodo: {keyCode: 45, modifierFlags: 786432}
+      toggleTodo: {keyCode: 11, modifierFlags: 786432}
+      center: {}
+      larger: {}
+      maximizeHeight: {}
+      nextDisplay: {}
+      previousDisplay: {}
+      restore: {}
+      smaller: {}
