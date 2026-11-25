@@ -24,14 +24,6 @@ try:
         current = json.loads(current_raw)
 except Exception:
     pass
-{{- if .workspace }}
-
-# Dogpark registers its own Pi package on workspaces; keep it in the list.
-host_packages = [
-    p for p in current.get("packages", [])
-    if isinstance(p, str) and ".local/share/dogpark/" in p
-]
-{{- end }}
 
 
 # Theme: sensible default; auto-theme extension syncs with macOS appearance.
@@ -87,9 +79,6 @@ current["packages"] = [
 {{- end }}
 {{- end }}
 ]
-{{- if .workspace }}
-current["packages"] += [p for p in host_packages if p not in current["packages"]]
-{{- end }}
 
 # Skills: Pi discovers ~/.pi/agent/skills and ~/.agents/skills on its own.
 # ~/.claude/skills is deliberately excluded: Claude Code refills its reserved
