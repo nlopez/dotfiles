@@ -32,6 +32,7 @@ packages:
         - gimme
         # Jodies ipcalc; nixpkgs' ipcalc is the unrelated Red Hat tool.
         - ipcalc
+        - libtiff
         # macOS (libkrun) build; nixpkgs' buildah is Linux-only.
         - libkrun/krun/buildah
       brew_options:
@@ -98,6 +99,7 @@ packages:
         - knockknock
         - oversight
         - reikey
+        - standard-notes
         - taskexplorer
       # Casks that intentionally have no SHA (autoupdate or :latest). Installed
       # without --require-sha. Add entries here when a normal install fails with
