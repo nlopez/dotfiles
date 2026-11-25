@@ -29,6 +29,7 @@ const cases: [string, string, Parameters<typeof linkifyPrRefs>[1]?][] = [
   [`opened ${pr("x/y", 2)}: PR #2`, `opened ${pr("x/y", 2)}: [PR #2](${pr("x/y", 2)})`, ctx],
   ["x/y#1 then #2", `[x/y#1](${pr("x/y", 1)}) then [#2](${pr("x/y", 2)})`, ctx],
   // several repos named: bare refs stay plain
+  ["- `PR 5` → `x/y/pull/5`, SDP#7", `- \`PR 5\` → \`x/y/pull/5\`, [SDP#7](${pr("acme/sdp", 7)})`, ctx],
   ["x/y#1 and z/w#2, also #3", `[x/y#1](${pr("x/y", 1)}) and [z/w#2](${pr("z/w", 2)}), also #3`, ctx],
   // repo#N without owner, by name or initials of a known clone
   ["cloud-inventory#1204", `[cloud-inventory#1204](${pr("acme/cloud-inventory", 1204)})`, ctx],

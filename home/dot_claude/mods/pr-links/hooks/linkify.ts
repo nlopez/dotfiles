@@ -59,8 +59,11 @@ const REF_BODY =
 const TOKEN = new RegExp(`${PROTECTED}|${NOT_AFTER}(?:${REF_BODY})`, "g");
 const CODE_REF = new RegExp(`^\\s*${NOT_AFTER}(?:${REF_BODY})\\s*$`);
 
+// Repos a text names: `[github.com/]owner/repo/pull/N` (or issues) and
+// `owner/repo#N`.
 const NAMED_REPOS = new RegExp(
-  String.raw`github\.com\/(${OWNER}\/${NAME})\/(?:pull|issues)\/\d` + `|${NOT_AFTER}(${OWNER}\\/${NAME})#\\d`,
+  String.raw`(?:github\.com\/|(?<![\w./-]))(${OWNER}\/${NAME})\/(?:pull|issues)\/\d` +
+    `|${NOT_AFTER}(${OWNER}\\/${NAME})#\\d`,
   "g",
 );
 
