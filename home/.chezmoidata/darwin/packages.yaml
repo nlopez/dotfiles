@@ -21,7 +21,19 @@ packages:
         personal:
         - jundot/omlx/omlx
         - libtiff
-        work: []
+        work:
+        # docker-buildx: ~/.docker/cli-plugins/docker-buildx links to the
+        # Homebrew build; the Nix docker-client does not ship it.
+        - docker-buildx
+        # gcc and make install as gcc-N/gmake here; Nix's would shadow Apple's cc/make.
+        - gcc
+        - make
+        # Not in nixpkgs.
+        - gimme
+        # Jodies ipcalc; nixpkgs' ipcalc is the unrelated Red Hat tool.
+        - ipcalc
+        # macOS (libkrun) build; nixpkgs' buildah is Linux-only.
+        - libkrun/krun/buildah
       brew_options:
         jundot/omlx/omlx:
         - "with-grammar"
@@ -77,6 +89,16 @@ packages:
         # CLI-only cask: packaged in nixpkgs, but its python3Packages.fabric
         # dependency is marked broken there.
         - azure-cli
+        - claude
+        - cursor-cli
+        # Default browser (.chezmoidata/darwin/handlers.yaml).
+        - firefox
+        - github
+        - kextviewr
+        - knockknock
+        - oversight
+        - reikey
+        - taskexplorer
       # Casks that intentionally have no SHA (autoupdate or :latest). Installed
       # without --require-sha. Add entries here when a normal install fails with
       # "no checksum".

@@ -139,5 +139,16 @@ nix:
       # osxphotos is marked broken on darwin in nixpkgs; it comes from brew
       # bundle's `uv` entries instead (.chezmoidata/darwin/packages.yaml).
       work:
+      - crossplane-cli
+      - jujutsu
+      - kind
+      - nbping
+      - ninja
       - postgresql
+      - protobuf
+      - pyenv
+      - rbenv
+      - regal
+      - shfmt
       - socat
+      - watch
