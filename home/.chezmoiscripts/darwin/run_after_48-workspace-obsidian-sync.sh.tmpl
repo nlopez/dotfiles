@@ -2,7 +2,7 @@
 #!/bin/bash
 
 # Keeps one Mutagen two-way-safe sync session per workspace between the
-# Obsidian vault (~/Documents/workspaces) and ~/notes on the workspace.
+# Obsidian vault at ~/notes and the same path on the workspace.
 # Workspaces come and go, so this runs on every apply: it creates sessions for
 # workspaces the workspaces CLI has SSH config for and terminates sessions for
 # workspaces that are gone. A paused workspace can't be reached (see
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 MUTAGEN="$HOME/.local/state/nix/profiles/dotfiles/bin/mutagen"
-VAULT="$HOME/Documents/workspaces"
+VAULT="$HOME/notes"
 LABEL="dotfiles=obsidian-vault"
 
 [ -x "$MUTAGEN" ] || { echo "obsidian-sync: mutagen not found, skipping" >&2; exit 0; }
