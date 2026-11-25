@@ -103,14 +103,15 @@ current["skills"] = [s for s in current.get("skills", []) if s not in stale]
 # Enable /skill: slash commands in Pi sessions.
 current["enableSkillCommands"] = True
 
-# pi-powerline-footer layout: the default preset's left row with the
+# pi-powerline-footer layout: the default preset's left row, minus the model
+# (the trajectory status line already shows it), with the
 # pi-session-prs status (key "pr") placed right after the git branch.
 powerline = current.get("powerline")
 if not isinstance(powerline, dict):
     powerline = {}
 powerline.setdefault("preset", "default")
 powerline.setdefault("layout", {})["left"] = [
-    "model", "thinking", "shell_mode", "path", "git",
+    "thinking", "shell_mode", "path", "git",
     "custom:pr",
     "queue", "context_pct", "cache_read", "cost",
 ]
