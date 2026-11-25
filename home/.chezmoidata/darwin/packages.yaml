@@ -43,6 +43,8 @@ packages:
         - rectangle
         - lulu
         - smittytone/smittytone/utitool
+        # Not in nixpkgs or mise; Electron app shipped as a cask.
+        - terminal-browser
         personal:
         - macfuse
         - brave-origin
