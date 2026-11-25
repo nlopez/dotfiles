@@ -51,6 +51,9 @@ current.setdefault("enabledModels", ["**"])
 # quiet startup shows the non-blocking header instead.
 current["quietStartup"] = True
 
+# Notices for significant prompt-cache misses.
+current["showCacheMissNotices"] = True
+
 # Use npm for package operations. pnpm's strict linking breaks Pi's
 # extension loader which resolves modules from the literal symlink path,
 # not the realpath inside .pnpm/. npm hoists by default.
