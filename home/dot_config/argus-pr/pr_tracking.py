@@ -879,6 +879,54 @@ def _ci_event(pr, settled, key="statusCheckRollup"):
     return ""
 
 
+ARP_AUTHOR = "dd-agentic-review-platform"
+ARP_WAIT = 120  # how long a finished review may wait for its inline comments to load
+
+
+def _is_arp(comment):
+    return comment["who"].startswith(ARP_AUTHOR)
+
+
+def _notice_arp(arp, fb, arp_ids, before, cur, now_ts):
+    """One event per finished ARP review, sent once its inline comments have loaded
+    and listing them, or ''. ARP comments are kept out of the per-comment events:
+    inline ones until the review's event carries them, summary bodies always.
+
+    Sets cur's arp_reported (review id already announced), arp_since (when the
+    unannounced review was first seen finished) and arp_shown (ARP comment ids
+    that need no event of their own)."""
+    shown = set(before.get("arp_shown", arp_ids))
+    reported = before.get("arp_reported", arp.get("id") if before.get("arp") == cur["arp"] else None)
+    rid, state = arp.get("id"), arp.get("state")
+    cur["arp_reported"] = reported
+    cur["arp_shown"] = sorted(shown | {i for i in arp_ids if not fb[i]["path"]})
+    if not rid or rid == reported or state in (None, "", "queued", "running"):
+        return ""
+    since = before.get("arp_since") if before.get("arp") == cur["arp"] else None
+    since = since or now_ts
+    n = arp.get("findings") or 0
+    inline = [i for i in arp_ids if fb[i]["path"] and i not in shown]
+    loaded = len(inline) >= n or state != "issues_found"
+    if not loaded and now_ts - since < ARP_WAIT:
+        cur["arp_since"] = since
+        return ""
+    cur["arp_reported"] = rid
+    cur["arp_shown"] = sorted(shown | set(arp_ids))
+    if state == "failed":
+        return "ARP review failed"
+    if not n:
+        return "ARP review: no findings"
+    text = f"ARP review: {n} finding{'s' * (n != 1)}"
+    if state == "completed_no_post":
+        return f"{text} (not posted to GitHub; read them with agentic_review_get_findings)"
+    if not loaded:
+        text += f" ({len(inline)} loaded)"
+    for i in inline:
+        c = fb[i]
+        text += f"\n  - {c['path']}:{c['line'] or '?'}: {_brief(c['body'], 200)}"
+    return text
+
+
 def notice_changes(session_id, prs):
     """Record an event for each PR that was just merged or closed, and for each
     open PR whose CI just finished (every check done: passed, or failed with the
@@ -918,6 +966,7 @@ def notice_changes(session_id, prs):
         }
         arp = pr.get("_arp") or {}
         cur["arp"] = [arp.get("id"), arp.get("state")]
+        now_ts = time.time()
         comments = _comments(pr)
         fb = None
         if comments is not None:
@@ -928,20 +977,17 @@ def notice_changes(session_id, prs):
         before = seen.get(url)
         if comments is not None and (before is None or "feedback" not in before):
             mark_comments_read(session_id, url)
+        arp_ids = sorted(i for i in (fb or {}) if _is_arp(fb[i]))
         if before is None:
+            cur["arp_reported"] = arp.get("id")
+            cur["arp_shown"] = arp_ids
             continue
-        if arp.get("state") not in (None, "", "queued", "running") and "arp" in before and cur["arp"] != before["arp"]:
-            n = arp.get("findings") or 0
-            events.append(
-                (
-                    url,
-                    "ARP review failed"
-                    if arp["state"] == "failed"
-                    else f"ARP review done: {n} finding{'s' * (n != 1)}",
-                )
-            )
+        arp_text = _notice_arp(arp, fb, arp_ids, before, cur, now_ts)
+        if arp_text:
+            events.append((url, arp_text))
         if fb and "feedback" in before:
-            new = [i for i in fb if i not in set(before["feedback"])]
+            shown = set(cur["arp_shown"])
+            new = [i for i in fb if i not in set(before["feedback"]) and not (_is_arp(fb[i]) and i in shown)]
             for i in new:
                 c = fb[i]
                 where = f" on {c['path']}:{c['line'] or '?'}" if c["path"] else ""
@@ -1038,7 +1084,7 @@ def drain(session_id, consumer="agent"):
             f"\nFull comment text: python3 ~/.config/argus-pr/argus_pr.py comments {session_id}"
             ' (pi: pr_status with comments: "new"). Once a review comment is addressed and pushed, reply on its'
             " thread with what changed (or why not) and resolve it."
-            if any(text.startswith("new comment") for _, _, text in rows)
+            if any(text.startswith("new comment") or "\n  - " in text for _, _, text in rows)
             else ""
         )
     )
