@@ -9,3 +9,5 @@ claude:
     repo: mksglu/context-mode
   - name: i-have-adhd@i-have-adhd
     repo: ayghri/i-have-adhd
+  - name: cache-miss-detector@cache-miss-detector
+    repo: Moishe/claude-cache-miss-detector
