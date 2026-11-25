@@ -26,7 +26,10 @@ export PATH="{{ $nixBin }}:$PATH"
 
 # HOMEBREW_BUNDLE_FILE is exported in .zprofile → ~/.config/brew/Brewfile
 BREWFILE="${HOMEBREW_BUNDLE_FILE:-{{ .chezmoi.homeDir }}/.config/brew/Brewfile}"
-brew bundle install --file="${BREWFILE}"
+# --no-upgrade: apply installs what is missing and never upgrades, matching the
+# plan above. Self-updating casks always look outdated to Homebrew; upgrade
+# with `brew upgrade` when you choose to.
+brew bundle install --no-upgrade --file="${BREWFILE}"
 {{- if .packages.darwin.brew.cleanup }}
 brew bundle cleanup --force --file="${BREWFILE}"
 {{- end }}
