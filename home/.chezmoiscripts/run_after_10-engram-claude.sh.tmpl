@@ -1,5 +1,5 @@
 {{- /* Renders empty (chezmoi skips it) when the plugin is installed and the
-   MCP server points at the current engram binary: the same check as the early
+   MCP server's registered binary still exists: the same check as the early
    exit below, read from Claude's files instead of the slower claude CLI. */ -}}
 {{- $inSync := false }}
 {{- $engram := lookPath "engram" }}
@@ -8,9 +8,8 @@
 {{- if and $engram (stat $claudeJson) (stat $pluginsJson) }}
 {{-   $plugins := (include $pluginsJson | fromJson).plugins | default dict }}
 {{-   $mcp := index ((include $claudeJson | fromJson).mcpServers | default dict) "engram" | default dict }}
-{{-   $real := list $engram (output "readlink" "-f" $engram | trim) }}
-{{-   if lookPath "mise" }}{{ $real = append $real (output "sh" "-c" `mise which engram 2>/dev/null || true` | trim) }}{{ end }}
-{{-   $inSync = and (hasKey $plugins "engram@engram") (has ($mcp.command | default "") $real) }}
+{{-   $cmd := $mcp.command | default "" }}
+{{-   $inSync = and (hasKey $plugins "engram@engram") $cmd (stat $cmd) }}
 {{- end }}
 {{- if not $inSync -}}
 #!/bin/bash
@@ -18,11 +17,10 @@
 # Installs/updates the Engram plugin and user-level MCP server for Claude Code
 # (user scope). Pi gets Engram from the gentle-engram package in pi.yaml.
 #
-# `engram setup claude-code` registers the *resolved* binary path
-# (e.g. .../engram/<version>/engram) with Claude, which goes stale when mise
-# upgrades engram. So this runs every apply but only
-# calls setup when the plugin is missing or the registered path no longer
-# matches the installed binary.
+# `engram setup claude-code` registers a binary path with Claude (e.g.
+# /opt/homebrew/bin/engram, or .../engram/<version>/engram under mise), which
+# goes stale when that install is removed. So this runs every apply but only
+# calls setup when the plugin is missing or the registered binary is gone.
 
 set -eufo pipefail
 
@@ -32,19 +30,12 @@ export ENGRAM_DATA_DIR="${XDG_DATA_HOME:-{{ .chezmoi.homeDir }}/.local/share}/en
 command -v engram >/dev/null 2>&1 || { echo "engram not found, skipping" >&2; exit 0; }
 command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
 
-engram_path="$(command -v engram)"
-# A mise shim is a symlink to the mise binary, so readlink -f would resolve to
-# mise itself; ask mise for the real install path instead.
-engram_real="$(mise which engram 2>/dev/null || readlink -f "$engram_path")"
-
 plugins="$(claude plugin list 2>/dev/null || true)"
 mcp="$(claude mcp get engram 2>/dev/null || true)"
 
-# `engram setup` registers the unresolved path (e.g. /opt/homebrew/bin/engram),
-# so accept either that or the fully resolved one.
+registered="$(printf '%s\n' "$mcp" | sed -n 's/^  Command: //p')"
 if printf '%s\n' "$plugins" | grep -q 'engram@engram' &&
-  { printf '%s\n' "$mcp" | grep -qxF "  Command: $engram_path" ||
-    printf '%s\n' "$mcp" | grep -qxF "  Command: $engram_real"; }; then
+  [ -n "$registered" ] && [ -x "$registered" ]; then
   exit 0
 fi
 
@@ -60,5 +51,10 @@ fi
 # setup has no non-interactive flag. The duplicate mcp__plugin_engram_engram__*
 # entries it adds alongside the real mcp__engram__* ones are removed by
 # dot_claude/modify_settings.json.tmpl on the next apply.
-printf 'y\n' | engram setup claude-code
+if out="$(printf 'y\n' | engram setup claude-code 2>&1)"; then
+  echo "Engram: Claude Code plugin registered ✓"
+else
+  printf '%s\n' "$out" >&2
+  exit 1
+fi
 {{ end -}}

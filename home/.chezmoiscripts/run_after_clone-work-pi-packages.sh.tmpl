@@ -24,9 +24,7 @@ else
     git -C "$REPO_DIR" remote set-url origin "$REPO_URL"
   fi
 
-  if git -C "$REPO_DIR" pull --ff-only --quiet; then
-    echo "Pi: work packages up to date ✓"
-  else
+  if ! git -C "$REPO_DIR" pull --ff-only --quiet; then
     echo "Pi: work packages pull failed; using existing checkout" >&2
   fi
 fi
