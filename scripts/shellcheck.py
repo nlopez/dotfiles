@@ -14,6 +14,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from chezmoi_lib import OSES, build_data, chezmoi_root, print_verbose, render_template
 
+HOST_OS = "darwin" if sys.platform == "darwin" else "linux"
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Render chezmoi templates and shellcheck .sh files")
@@ -57,6 +59,10 @@ def render_and_check(tmpl: Path, data: dict, os_name: str, verbose: bool) -> int
 
     output, error = render_template(tmpl, data)
     if error is not None or output is None:
+        if os_name != HOST_OS:
+            # Some templates query the target OS at render time (e.g. `defaults`, `osascript`).
+            print(f"shellcheck: {label} (cannot render on {HOST_OS}, skipped)")
+            return 0
         print(f"RENDER FAILED: {label}\n{error}", file=sys.stderr)
         return 1
 

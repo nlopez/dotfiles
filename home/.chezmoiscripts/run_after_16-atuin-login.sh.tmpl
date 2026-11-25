@@ -20,9 +20,13 @@ for f in ATUIN_USERNAME ATUIN_PASSWORD ATUIN_KEY; do
   [ -s "$SECRETS_DIR/$f" ] || exit 0
 done
 
-# Pass password and key via env so neither appears in process argv.
-ATUIN_PASSWORD="$(cat "$SECRETS_DIR/ATUIN_PASSWORD")" \
-ATUIN_ENCRYPTION_KEY="$(cat "$SECRETS_DIR/ATUIN_KEY")" \
-  atuin login -u "$(cat "$SECRETS_DIR/ATUIN_USERNAME")" \
-  || { echo "atuin-login: skipped (SSH tunnel to 127.0.0.1:18888 not open?)" >&2; exit 0; }
+# Pass password and key via env so neither appears in process argv. Atuin 18
+# keeps the session in meta.db rather than the session file checked above, so
+# this runs on every apply; output is shown only on failure.
+if ! out="$(ATUIN_PASSWORD="$(cat "$SECRETS_DIR/ATUIN_PASSWORD")" \
+  ATUIN_ENCRYPTION_KEY="$(cat "$SECRETS_DIR/ATUIN_KEY")" \
+  atuin login -u "$(cat "$SECRETS_DIR/ATUIN_USERNAME")" 2>&1)"; then
+  printf '%s\n' "$out" >&2
+  echo "atuin-login: skipped (SSH tunnel to 127.0.0.1:18888 not open?)" >&2
+fi
 {{- end }}
