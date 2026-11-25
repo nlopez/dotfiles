@@ -50,7 +50,7 @@ MAX_SHARE = 0.30
 HANDOFF = 15
 # Shown in the pane's label so one still running older code is easy to spot.
 # Bump it whenever pr_float.py or pr_tracking.py changes behaviour.
-VERSION = 32
+VERSION = 33
 LABEL = f"👁 Argus v{VERSION}"
 SUBLINE_MAX = 48
 # The code a running wait or watch reloads when it changes on disk.
@@ -260,28 +260,60 @@ def lines(found, here, max_rows=None):
         widths = [max(visible(row[i]) for row in body) for i in range(4)]
         return [" " + "  ".join(pad(col, w) for col, w in zip(cols, widths, strict=True)) for cols in body]
     header = [t.c(t.BOLD, "PR"), t.c(t.BOLD, "CI"), t.c(t.BOLD, "Review"), t.c(t.BOLD, "Next")]
-    grouped_rows = []
-    all_rows = [header]
+    # Items in display order: ("row", cells), ("span", text) or ("rule", repo label).
+    items = [("row", header)]
     for repo in ordered_repos:
-        rows = []
+        items.append(("rule", repo))
         for pr, current in groups[repo]:
             pr_cell, ci, review, nxt = cells(pr, "")
-            row = [mark[current] + pr_cell, ci, review, nxt]
-            rows.append((row, pr))
-            all_rows.append(row)
-        grouped_rows.append((repo, rows))
-    widths = [max(visible(row[i]) for row in all_rows) for i in range(4)]
+            items.append(("row", [mark[current] + pr_cell, ci, review, nxt]))
+            items.extend(("span", "  " + note) for note in _sublines(pr))
+    return grid(items)
 
-    def fmt(cols):
-        return " " + "  ".join(pad(col, w) for col, w in zip(cols, widths, strict=True))
 
-    out = [fmt(header)]
-    for repo, rows in grouped_rows:
-        if repo:
-            out.append(" " + t.c(t.CYAN, repo))
-        for row, pr in rows:
-            out.append(fmt(row))
-            out.extend(_sublines(pr))
+def grid(items):
+    """Draw items as a box-drawn table; spans and repo labels cover every column."""
+    t = pr_tracking
+    rows = [cols for kind, cols in items if kind == "row"]
+    widths = [max(visible(row[i]) for row in rows) for i in range(4)]
+    # Repo labels sit inside the PR column's rule so no junction is covered.
+    widths[0] = max([widths[0]] + [len(text) + 2 for kind, text in items if kind == "rule" and text])
+    inner = sum(w + 2 for w in widths) + len(widths) - 1
+    need = max((visible(text) + 2 for kind, text in items if kind == "span"), default=0)
+    if need > inner:
+        widths[0] += need - inner
+        inner = need
+
+    def border(text):
+        return t.c(t.DIM, text)
+
+    def rule(above, below, left, right, label=""):
+        joint = {(True, True): "┼", (True, False): "┴", (False, True): "┬"}.get((above, below), "─")
+        line = joint.join("─" * (w + 2) for w in widths)
+        if not label:
+            return border(left + line + right)
+        rest = line[len(label) + 3 :]
+        return border(left + "─ ") + t.c(t.CYAN, label) + border(" " + rest + right)
+
+    out = []
+    prev = label = None
+    for kind, value in items:
+        if kind == "rule":
+            label = value
+            continue
+        is_row = kind == "row"
+        if prev is None:
+            out.append(rule(False, is_row, "╭", "╮"))
+        elif label is not None or prev != kind:
+            out.append(rule(prev == "row", is_row, "├", "┤", label or ""))
+        label = None
+        if is_row:
+            bar = border("│")
+            out.append(bar + bar.join(" " + pad(col, w) + " " for col, w in zip(value, widths, strict=True)) + bar)
+        else:
+            out.append(border("│") + " " + pad(value, inner - 1) + border("│"))
+        prev = kind
+    out.append(rule(prev == "row", False, "╰", "╯"))
     return out
 
 
@@ -301,16 +333,16 @@ def _sublines(pr):
                 prefix = note.get("prefix") or ""
                 joined = ", ".join(items)
                 if len(prefix) + len(joined) <= SUBLINE_MAX:
-                    out.append("   " + t.c(color, prefix + joined))
+                    out.append(t.c(color, prefix + joined))
                 else:
                     indent = " " * len(prefix)
                     for i, item in enumerate(items):
-                        out.append("   " + t.c(color, (prefix if i == 0 else indent) + _trunc(item)))
+                        out.append(t.c(color, (prefix if i == 0 else indent) + _trunc(item)))
             elif note.get("text"):
-                out.append("   " + t.c(color, _trunc(note["text"])))
+                out.append(t.c(color, _trunc(note["text"])))
     err = pr.get("_error")
     if err:
-        out.append("   " + t.c(t.RED, f"! {_trunc(err)}"))
+        out.append(t.c(t.RED, f"! {_trunc(err)}"))
     return out
 
 
