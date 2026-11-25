@@ -1,0 +1,42 @@
+{{- if and .work (not .headless) (not .workspace) -}}
+#!/bin/bash
+
+# Keeps one Mutagen two-way-safe sync session per workspace between the
+# Obsidian vault (~/Documents/workspaces) and ~/notes on the workspace.
+# Workspaces come and go, so this runs on every apply: it creates sessions for
+# workspaces the workspaces CLI has SSH config for and terminates sessions for
+# workspaces that are gone. A paused workspace can't be reached (see
+# ~/.local/libexec/mutagen-ssh/ssh); its session is created on a later apply.
+
+set -euo pipefail
+
+MUTAGEN="$HOME/.local/state/nix/profiles/dotfiles/bin/mutagen"
+VAULT="$HOME/Documents/workspaces"
+LABEL="dotfiles=obsidian-vault"
+
+[ -x "$MUTAGEN" ] || { echo "obsidian-sync: mutagen not found, skipping" >&2; exit 0; }
+[ -d "$VAULT" ] || { echo "obsidian-sync: $VAULT not found, skipping" >&2; exit 0; }
+
+shopt -s nullglob
+configs=("$HOME"/.ssh/workspaces/*.config)
+wanted=$( (( ${#configs[@]} )) && sed -n 's/^Host workspace-\([^ ]*\).*/\1/p' "${configs[@]}" | sort -u || true)
+existing=$("$MUTAGEN" sync list --label-selector="$LABEL" | sed -n 's/^Name: obsidian-//p' | sort -u)
+
+for ws in $(comm -23 <(printf '%s\n' "$wanted") <(printf '%s\n' "$existing")); do
+  "$MUTAGEN" sync create \
+    --name="obsidian-$ws" \
+    --label="$LABEL" \
+    --mode=two-way-safe \
+    --ignore-vcs \
+    --ignore=.obsidian/workspace.json \
+    --ignore=.obsidian/workspace-mobile.json \
+    --ignore=.trash/ \
+    --ignore=.DS_Store \
+    "$VAULT" "workspace-$ws:~/notes" \
+    || echo "obsidian-sync: $ws unreachable (paused?), retrying next apply" >&2
+done
+
+for ws in $(comm -13 <(printf '%s\n' "$wanted") <(printf '%s\n' "$existing")); do
+  "$MUTAGEN" sync terminate "obsidian-$ws"
+done
+{{- end }}

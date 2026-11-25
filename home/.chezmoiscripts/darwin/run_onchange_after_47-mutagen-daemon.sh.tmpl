@@ -1,0 +1,30 @@
+{{- if and .work (not .headless) (not .workspace) -}}
+#!/bin/bash
+
+# Supervises the Mutagen daemon under launchd, so it carries MUTAGEN_SSH_PATH
+# (an auto-started `mutagen` daemon would not). Reloads when the plist or the
+# ssh wrappers change.
+# {{ include "Library/LaunchAgents/com.local.mutagen.plist.tmpl" | sha256sum }}
+# {{ include "dot_local/libexec/mutagen-ssh/executable_ssh.tmpl" | sha256sum }}
+# {{ include "dot_local/libexec/mutagen-ssh/executable_scp.tmpl" | sha256sum }}
+
+set -euo pipefail
+
+MUTAGEN="$HOME/.local/state/nix/profiles/dotfiles/bin/mutagen"
+[ -x "$MUTAGEN" ] || { echo "mutagen-daemon: mutagen not found, skipping" >&2; exit 0; }
+
+DOMAIN="gui/$(id -u)"
+LABEL="com.local.mutagen"
+PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+
+mkdir -p "${XDG_STATE_HOME:-$HOME/.local/state}/mutagen"
+
+launchctl bootout "$DOMAIN/$LABEL" 2>/dev/null || true
+# Stop any daemon the CLI auto-started outside launchd; it holds the daemon lock.
+"$MUTAGEN" daemon stop 2>/dev/null || true
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  launchctl bootstrap "$DOMAIN" "$PLIST" && exit 0
+  sleep 1
+done
+launchctl bootstrap "$DOMAIN" "$PLIST"
+{{- end }}

@@ -1,0 +1,15 @@
+{{- if and (eq .chezmoi.os "darwin") .work (not .headless) -}}
+#!/bin/sh
+# ssh for the Mutagen daemon (MUTAGEN_SSH_PATH, set in
+# ~/Library/LaunchAgents/com.local.mutagen.plist). Connects straight to the
+# workspace: without the workspaces CLI's resume-if-paused ProxyCommand, a
+# paused workspace stays paused instead of being resumed by every reconnect.
+# No agent, port forwards, or ControlMaster shared with interactive sessions.
+exec /usr/bin/ssh \
+  -o ProxyCommand=none \
+  -o ClearAllForwardings=yes \
+  -o ForwardAgent=no \
+  -o ControlMaster=no \
+  -o ControlPath=none \
+  "$@"
+{{- end }}

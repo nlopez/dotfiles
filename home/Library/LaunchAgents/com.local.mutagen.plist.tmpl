@@ -1,0 +1,31 @@
+{{- if and (eq .chezmoi.os "darwin") .work (not .headless) -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.local.mutagen</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>{{ .chezmoi.homeDir }}/.local/state/nix/profiles/dotfiles/bin/mutagen</string>
+        <string>daemon</string>
+        <string>run</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>MUTAGEN_SSH_PATH</key>
+        <string>{{ .chezmoi.homeDir }}/.local/libexec/mutagen-ssh</string>
+    </dict>
+    <key>WorkingDirectory</key>
+    <string>{{ .chezmoi.homeDir }}</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/mutagen/daemon.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/mutagen/daemon.log</string>
+</dict>
+</plist>
+{{- end }}

@@ -142,6 +142,9 @@ nix:
       - crossplane-cli
       - jujutsu
       - kind
+      # mutagen: syncs ~/Documents/workspaces (Obsidian vault) to workspaces;
+      # see .chezmoiscripts/darwin/run_after_48-workspace-obsidian-sync.sh.tmpl.
+      - mutagen
       - nbping
       - ninja
       - postgresql
