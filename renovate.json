@@ -4,7 +4,6 @@
   "timezone": "America/New_York",
   "schedule": ["before 9am"],
   "semanticCommits": "enabled",
-  "minimumReleaseAge": "7 days",
   "internalChecksFilter": "strict",
   "mise": {
     "managerFilePatterns": ["/(^|/)home/\\.chezmoitemplates/mise/[^/]+\\.toml$/"]
@@ -52,10 +51,9 @@
       "groupName": "pi packages"
     },
     {
-      "description": "nixpkgs-unstable is already gated by Hydra; git-refs digests have no release timestamp, so the global minimumReleaseAge would block every bump. Batch weekly instead.",
+      "description": "nixpkgs-unstable moves daily; batch its bumps weekly.",
       "matchManagers": ["custom.regex"],
       "matchDepNames": ["nixpkgs"],
-      "minimumReleaseAge": null,
       "schedule": ["before 9am on monday"]
     }
   ]
