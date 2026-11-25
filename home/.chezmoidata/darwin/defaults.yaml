@@ -1,0 +1,109 @@
+# macOS user defaults, applied by .chezmoiscripts/darwin/run_after_configure-defaults.sh.tmpl.
+# `chezmoi diff` lists every key whose live value differs from the one here.
+#
+# Value types follow YAML: true/false → bool, 15 → int, "Nlsv" → string, a map → dict.
+# Write floats as {float: <n>}; chezmoi data passes 0.0 through as an integer.
+macos:
+  defaults:
+    NSGlobalDomain:
+      # Keyboard
+      InitialKeyRepeat: 15
+      KeyRepeat: 2
+      # Key repeat instead of press-and-hold accents
+      ApplePressAndHoldEnabled: false
+      # Use F1, F2, etc. keys as standard function keys
+      com.apple.keyboard.fnState: false
+      # Full keyboard access for all controls (e.g. Tab in modal dialogs)
+      AppleKeyboardUIMode: 2
+      # Disable auto everything
+      NSAutomaticCapitalizationEnabled: 0
+      NSAutomaticDashSubstitutionEnabled: 0
+      NSAutomaticInlinePredictionEnabled: 0
+      NSAutomaticPeriodSubstitutionEnabled: 0
+      NSAutomaticQuoteSubstitutionEnabled: 0
+      NSAutomaticSpellingCorrectionEnabled: 0
+      NSAutomaticTextCorrectionEnabled: 0
+      NSAutomaticWindowAnimationsEnabled: 0
+      WebAutomaticSpellingCorrectionEnabled: 0
+      # Ctrl+Cmd drag windows from anywhere, not just the title bar
+      NSWindowShouldDragOnGesture: true
+      # Trackpad: unnatural scrolling, no force click, no smooth scrolling
+      com.apple.swipescrolldirection: false
+      com.apple.trackpad.forceClick: 0
+      NSScrollAnimationEnabled: false
+      # Finder
+      AppleShowAllExtensions: true
+      AppleShowAllFiles: true
+      # Prefer local disk over iCloud
+      NSDocumentSaveNewDocumentsToCloud: false
+      # Reduce menu bar item spacing
+      NSStatusItemSpacing: 6
+      NSStatusItemSelectionPadding: 6
+      # Window title bar double-click action: No Action
+      AppleActionOnDoubleClick: None
+      # 24-hour time
+      AppleICUForce24HourTime: true
+      # Play feedback (sound) when volume is changed
+      com.apple.sound.beep.feedback: 1
+      # Don't switch to a Space on application activate
+      AppleSpacesSwitchOnActivate: false
+    com.apple.finder:
+      ShowPathbar: true
+      # Details list view
+      FXPreferredViewStyle: Nlsv
+      _FXSortFoldersFirst: true
+      # Search the current folder by default
+      FXDefaultSearchScope: SCcf
+      FXEnableExtensionChangeWarning: false
+      # Expanded Get Info panes
+      FXInfoPanesExpanded:
+        General: true
+        OpenWith: true
+        Preview: true
+        Privileges: true
+    # No .DS_Store files on network or USB volumes
+    com.apple.desktopservices:
+      DSDontWriteNetworkStores: true
+      DSDontWriteUSBStores: true
+    com.apple.WindowManager:
+      # Hide desktop widgets (standard and Stage Manager modes)
+      StandardHideWidgets: true
+      StageManagerHideWidgets: true
+      # Stage Manager off
+      GloballyEnabled: false
+    com.apple.dock:
+      # Trackpad window management gestures
+      showDesktopGestureEnabled: false
+      showLaunchpadGestureEnabled: true
+      showMissionControlGestureEnabled: true
+      orientation: bottom
+      static-only: true
+      show-process-indicators: false
+      contents-immutable: true
+      size-immutable: true
+      position-immutable: true
+      show-recents: false
+      tilesize: 64
+      autohide: true
+      autohide-delay: {float: 0}
+      autohide-time-modifier: {float: 0}
+      mineffect: scale
+      minimize-to-application: true
+      launchanim: false
+      # Spaces: keep order, don't group windows by app, no Mission Control via top drag
+      mru-spaces: false
+      expose-group-apps: false
+      enterMissionControlByTopWindowDrag: false
+      # Hot corners off (1 = no action)
+      wvous-tl-corner: 1
+      wvous-bl-corner: 1
+      wvous-tr-corner: 1
+      wvous-br-corner: 1
+    com.apple.menuextra.clock:
+      ShowAMPM: false
+      Show24Hour: true
+    com.apple.Accessibility:
+      ReduceMotionEnabled: 1
+    # "Displays have separate Spaces" on
+    com.apple.spaces:
+      spans-displays: false

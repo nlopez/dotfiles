@@ -1,0 +1,24 @@
+{{- /* Renders empty (chezmoi skips it) when every default app in
+   .chezmoidata/darwin/handlers.yaml is already set.
+   Otherwise the drift shows in `chezmoi diff`. */ -}}
+{{- $nixBin := printf "%s/bin" (includeTemplate "nix-profile" .) }}
+{{- $script := joinPath .chezmoi.workingTree "scripts/macos-plan.py" }}
+{{- $declared := .macos.handlers | toJson }}
+{{- $plan := output "sh" "-c" "PATH=\"$1:$PATH\" exec python3 \"$2\" handlers plan \"$3\"" "sh" $nixBin $script $declared | trim }}
+{{- if $plan -}}
+#!/bin/bash
+
+# Sets the default apps that differ from .chezmoidata/darwin/handlers.yaml (duti).
+#
+# Pending changes:
+{{- range splitList "\n" $plan }}
+#   {{ . }}
+{{- end }}
+
+set -eufo pipefail
+
+export PATH="{{ $nixBin }}:$PATH"
+python3 {{ $script | quote }} handlers apply <<'JSON'
+{{ $declared }}
+JSON
+{{- end }}

@@ -1,0 +1,34 @@
+# Default apps, applied by .chezmoiscripts/darwin/run_after_configure-handlers.sh.tmpl
+# with duti. `chezmoi diff` lists every entry whose live handler differs.
+#
+# Look up a file's UTI with `mdls -raw -name kMDItemContentType <file>` and an app's
+# bundle ID with `osascript -e 'id of app "<Name>"'`. URL schemes that apps register
+# for themselves (slack:, steam:, …) are left to the apps.
+macos:
+  handlers:
+    # UTI → bundle ID (role: all)
+    types:
+      public.plain-text: dev.zed.Zed
+      public.text: dev.zed.Zed
+      public.source-code: dev.zed.Zed
+      public.script: dev.zed.Zed
+      public.shell-script: dev.zed.Zed
+      public.json: dev.zed.Zed
+      public.yaml: dev.zed.Zed
+      public.xml: dev.zed.Zed
+      public.comma-separated-values-text: dev.zed.Zed
+      net.daringfireball.markdown: dev.zed.Zed
+      com.adobe.xmp: dev.zed.Zed
+      org.w3.webvtt: com.microsoft.VSCode
+      public.x509-certificate: com.microsoft.VSCode
+      # .ts files: macOS types them as MPEG transport streams, not TypeScript
+      public.mpeg-2-transport-stream: dev.zed.Zed
+      public.unix-executable: com.mitchellh.ghostty
+      public.mpeg-4: io.mpv
+      com.microsoft.waveform-audio: io.mpv
+      public.html: org.mozilla.firefox
+    # URL scheme → bundle ID
+    schemes:
+      http: org.mozilla.firefox
+      https: org.mozilla.firefox
+      mailto: org.mozilla.firefox
