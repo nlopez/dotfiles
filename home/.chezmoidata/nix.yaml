@@ -39,8 +39,8 @@ nix:
     - gh
     - ghq
     # gh-stack: wired as a gh extension via
-    # dot_config/gh/extensions/symlink_tmpl_gh-stack — gh 2.56 does not
-    # discover gh-<name> binaries on PATH, only its extensions dir.
+    # dot_local/share/gh/extensions/gh-stack/symlink_gh-stack.tmpl — gh does
+    # not discover gh-<name> binaries on PATH, only $XDG_DATA_HOME/gh/extensions.
     - gh-stack
     - git
     - go_latest

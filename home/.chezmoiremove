@@ -52,3 +52,6 @@
 
 # rtk pi extension, retired (one-time migration)
 .pi/agent/extensions/rtk.ts
+
+# gh-stack extension link, moved to ~/.local/share/gh/extensions (one-time migration)
+.config/gh/extensions
