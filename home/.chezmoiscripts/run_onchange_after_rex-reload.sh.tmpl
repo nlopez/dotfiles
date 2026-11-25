@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# Reload Rex's local server when ~/.config/rex/init.lua changes.
+# Reload Rex's local server when ~/.config/rex/init.lua or the Rex Annotate
+# module changes.
 # {{ include "dot_config/rex/init.lua" | sha256sum }}
+# {{ includeTemplate "rex-annotate" . | sha256sum }}
 
 set -eufo pipefail
 

@@ -6,6 +6,12 @@
 -- `rex config reload` when it changes. Absent on machines without workspaces.
 pcall(require, "workspaces_rex")
 
+-- Rex Annotate: review agent replies and diffs in plannotator-tui. The module
+-- is rendered by chezmoi (.chezmoitemplates/rex-annotate) once mise installs
+-- plannotator-tui; until then this is a no-op.
+local annotate_ok, annotate = pcall(require, "plannotator.annotate")
+if annotate_ok then annotate.setup {} end
+
 rex.unbind("cmd+n")
 
 local function is_fg(p, name)

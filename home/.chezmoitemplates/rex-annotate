@@ -1,0 +1,8 @@
+{{- /* Rex Annotate Lua module from `plannotator-tui rex install --print`. Empty
+   until mise has installed plannotator-tui. M.bin points at the mise shim, which
+   survives upgrades and `mise prune`; Rex runs actions with a bare PATH. */ -}}
+{{- $shim := joinPath .chezmoi.homeDir ".local/share/mise/shims/plannotator-tui" -}}
+{{- if stat $shim -}}
+{{-   output "sh" "-c" "\"$1\" rex install --print 2>/dev/null || true" "sh" $shim
+      | regexReplaceAll "(?m)^M\\.bin = .*$" (printf "M.bin = %q" $shim) -}}
+{{- end -}}
