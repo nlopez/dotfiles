@@ -4,6 +4,11 @@
 
 If you run into a surprising issue, search online for similar issues before pursuing your own solution.
 
+### Web search and page reading
+
+- Search the web with Kagi's `kagi_search_fetch` and read pages with `kagi_extract`, not the built-in WebSearch or WebFetch tools. If they are deferred, load them first (`ToolSearch` with `select:mcp__kagi__kagi_search_fetch,mcp__kagi__kagi_extract`).
+- Fall back to the built-in tools only when a Kagi call errors or Kagi is not connected.
+
 ### General Principles
 
 - Before adding complexity for a speculative or vanishingly unlikely race or security edge case, explain the concrete failure mode, likelihood, and complexity cost to the user and get their buy-in. Do not silently expand scope for theoretical robustness.
