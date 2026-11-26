@@ -144,7 +144,16 @@ track_prs_resume = [{
         "timeout": 5,
     }],
 }]
-current["hooks"]["SessionStart"] = surviving_rex + rex_hook + track_prs_resume + cache_heal
+# Give Claude its Engram session ID so writes work with several sessions open
+# in one directory (script managed in hooks/executable_engram-session-id.sh).
+engram_session_id = [{
+    "hooks": [{
+        "type": "command",
+        "command": os.path.expanduser("~/.claude/hooks/engram-session-id.sh"),
+        "timeout": 5,
+    }],
+}]
+current["hooks"]["SessionStart"] = surviving_rex + rex_hook + track_prs_resume + engram_session_id + cache_heal
 
 # PR notifications from the Rex PR box (CI failed, approved, changes requested), script managed
 # in hooks/executable_pr-notify.py. The Stop hook waits in the background and
