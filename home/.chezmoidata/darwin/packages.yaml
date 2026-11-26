@@ -55,7 +55,6 @@ packages:
         - visual-studio-code
         - jordanbaird-ice
         - rectangle
-        - lulu
         - smittytone/smittytone/utitool
         # Not in nixpkgs or mise; Electron app shipped as a cask.
         - terminal-browser
