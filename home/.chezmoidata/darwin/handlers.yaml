@@ -19,6 +19,8 @@ macos:
       public.comma-separated-values-text: com.microsoft.VSCode
       net.daringfireball.markdown: com.microsoft.VSCode
       com.adobe.xmp: com.microsoft.VSCode
+      # .xmp where no app declares com.adobe.xmp: macOS derives this ID from the extension
+      dyn.ah62d4rv4ge81u5pu: com.microsoft.VSCode
       org.w3.webvtt: com.microsoft.VSCode
       public.x509-certificate: com.microsoft.VSCode
       # .ts files: macOS types them as MPEG transport streams, not TypeScript
