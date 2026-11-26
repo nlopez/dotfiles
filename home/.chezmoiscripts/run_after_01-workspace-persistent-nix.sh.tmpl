@@ -1,0 +1,37 @@
+{{ if .workspace -}}
+#!/bin/bash
+
+# Keep the Nix store on the workspace's EBS disk. The image bind-mounts /nix
+# from /instance_storage, which is wiped whenever the workspace stops, leaving
+# the dotfiles profile pointing at deleted store paths (and `age`, which
+# chezmoi needs to decrypt, missing). This repoints the image's boot-time
+# mount at a directory on the root disk and moves the live store there once.
+
+set -eufo pipefail
+
+MOUNT_SCRIPT=/usr/local/share/nix-mount.sh
+EPHEMERAL=/instance_storage/nix
+PERSIST=/var/lib/nix-persist
+
+[ -f "$MOUNT_SCRIPT" ] || exit 0
+sudo -n true 2>/dev/null || { echo "persistent-nix: no passwordless sudo, skipping" >&2; exit 0; }
+
+if grep -q "$EPHEMERAL" "$MOUNT_SCRIPT"; then
+  echo "persistent-nix: pointing $MOUNT_SCRIPT at $PERSIST"
+  sudo sed -i "s#$EPHEMERAL#$PERSIST#g" "$MOUNT_SCRIPT"
+fi
+
+# findmnt lists stacked mounts oldest first; the last entry is the visible one.
+if findmnt -no SOURCE /nix | tail -n1 | grep -q '\[/nix\]$'; then
+  echo "persistent-nix: copying /nix to $PERSIST (one time, a few minutes)"
+  svc=/run/service/nix-daemon
+  sudo mkdir -p "$PERSIST"
+  sudo /command/s6-svc -d "$svc"
+  trap 'sudo /command/s6-svc -u "$svc"' EXIT
+  sudo /command/s6-svwait -D "$svc"
+  sudo rsync -aHX --delete /nix/ "$PERSIST/"
+  # Processes already running from /nix keep the files they opened; the
+  # contents are identical, so stacking the new mount on top is safe.
+  sudo mount --bind "$PERSIST" /nix
+fi
+{{ end -}}
