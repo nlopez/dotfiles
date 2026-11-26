@@ -70,6 +70,7 @@ Library/*
 # ── Personal-only files ────────────────────────────────────────────────────────
 {{ if not .personal -}}
 .config/rclone/rclone.conf
+.ssh/authorized_keys
 {{ end -}}
 # Engram Cloud client config:
 # - personal, non-headless (1Password token; skipped under CHEZMOI_SKIP_SECRETS)
