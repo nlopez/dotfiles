@@ -33,13 +33,11 @@
 {{- if eq .chezmoi.os "darwin" }}
   credentialStore = keychain
 {{- end }}
-{{- if .workspace }}
 
-{{- /* Workspaces only route work orgs over SSH; personal HTTPS remotes      */}}
-{{- /* (e.g. this repo) authenticate through gh. The empty helper clears any */}}
-{{- /* inherited helpers so gh is the only one consulted.                     */}}
-{{- /* Don't use `gh auth setup-git` / `git config --global` on workspaces:  */}}
-{{- /* they write into the workspaces-owned ~/.gitconfig. Declare it here.  */}}
+{{- /* GitHub HTTPS remotes authenticate through gh. The empty helper clears  */}}
+{{- /* inherited helpers (e.g. Nix git's system osxkeychain) so gh is the    */}}
+{{- /* only one consulted. Declared here rather than via `gh auth setup-git`, */}}
+{{- /* which writes ~/.gitconfig (workspace-owned on workspaces).             */}}
 [credential "https://github.com"]
   helper =
   helper = !gh auth git-credential
@@ -47,7 +45,6 @@
 [credential "https://gist.github.com"]
   helper =
   helper = !gh auth git-credential
-{{- end }}
 
 [pull]
   rebase = true
