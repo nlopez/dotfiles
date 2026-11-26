@@ -1,0 +1,54 @@
+{{- if and .personal (not .work) -}}
+#!/bin/bash
+
+# macOS Screen Sharing has no listen-address setting, so a pf anchor limits
+# port 5900 to tailnet addresses and loopback. A root LaunchDaemon enables pf
+# and reloads the anchor at boot; /etc/pf.conf already includes com.apple/*.
+
+set -eufo pipefail
+
+LABEL="com.local.tailnet-only-pf"
+PLIST="/Library/LaunchDaemons/${LABEL}.plist"
+ANCHOR_FILE="/etc/pf.anchors/${LABEL}"
+ANCHOR="com.apple/900.${LABEL}"
+
+rules="$(mktemp)"
+plist="$(mktemp)"
+trap 'rm -f "$rules" "$plist"' EXIT
+
+cat >"$rules" <<'EOF'
+pass in quick on lo0 proto { tcp udp } to any port 5900
+pass in quick proto { tcp udp } from { 100.64.0.0/10, fd7a:115c:a1e0::/48 } to any port 5900
+block in quick proto { tcp udp } to any port 5900
+EOF
+
+cat >"$plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>${LABEL}</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>/sbin/pfctl -E -f /etc/pf.conf; /sbin/pfctl -a ${ANCHOR} -f ${ANCHOR_FILE}</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
+EOF
+
+/sbin/pfctl -n -f "$rules"
+sudo install -m 0644 -o root -g wheel "$rules" "$ANCHOR_FILE"
+sudo install -m 0644 -o root -g wheel "$plist" "$PLIST"
+sudo launchctl bootout "system/${LABEL}" 2>/dev/null || true
+# bootout returns before the old job is fully gone; retry bootstrap briefly.
+for _ in 1 2 3 4 5; do
+  sudo launchctl bootstrap system "$PLIST" && exit 0
+  sleep 1
+done
+sudo launchctl bootstrap system "$PLIST"
+{{- end }}

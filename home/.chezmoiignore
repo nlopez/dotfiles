@@ -45,6 +45,10 @@ Library/*
 {{ if eq .chezmoi.os "darwin" -}}
 .chezmoiscripts/linux/**
 {{ end -}}
+# RustDesk is a personal-only cask.
+{{ if or (ne .chezmoi.os "darwin") (not .personal) -}}
+Library/Preferences/com.carriez.RustDesk
+{{ end -}}
 
 # ── Headless machines: no GUI config ──────────────────────────────────────────
 {{ if .headless -}}
