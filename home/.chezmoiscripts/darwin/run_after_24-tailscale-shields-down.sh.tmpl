@@ -1,7 +1,11 @@
 {{- /* Renders only while shields-up is on, so a correct machine adds no diff noise. */ -}}
 {{- $shieldsUp := false -}}
 {{- if and .personal (not .work) (lookPath "tailscale") -}}
-{{-   $shieldsUp = (output "tailscale" "debug" "prefs" | fromJson).ShieldsUp -}}
+{{- /* Empty when no daemon is reachable yet (tailscaled starts later in the apply). */ -}}
+{{-   $prefs := output "sh" "-c" "tailscale debug prefs 2>/dev/null || true" | trim -}}
+{{-   if $prefs -}}
+{{-     $shieldsUp = ($prefs | fromJson).ShieldsUp -}}
+{{-   end -}}
 {{- end -}}
 {{- if $shieldsUp -}}
 #!/bin/bash
