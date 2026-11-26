@@ -82,8 +82,13 @@ PATH="{{ joinPath $homeDir ".local/bin/shims" }}:$PATH"
 
 export TENV_AUTO_INSTALL=true
 export GOPATH="${XDG_DATA_HOME}/go"
-export VISUAL="code --wait"
+{{- if .headless }}
+export VISUAL="vim"
 export EDITOR="vim"
+{{- else }}
+export VISUAL="code --wait"
+export EDITOR="code --wait"
+{{- end }}
 
 {{- if .work }}
 # Source work-specific env vars (age-encrypted in source tree, decrypted on apply).

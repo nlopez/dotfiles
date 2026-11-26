@@ -20,7 +20,11 @@
   autocrlf = input
   safecrlf = false
   symlinks = true
+{{- if .headless }}
   editor = vim
+{{- else }}
+  editor = code --wait
+{{- end }}
 
 [feature]
   manyFiles = true
