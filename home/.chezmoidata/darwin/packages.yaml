@@ -81,7 +81,6 @@ packages:
         - standard-notes
         - steam
         - syncthing-app
-        - zed
         work:
         - slack
         - google-drive

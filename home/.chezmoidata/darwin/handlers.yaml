@@ -8,21 +8,21 @@ macos:
   handlers:
     # UTI → bundle ID (role: all)
     types:
-      public.plain-text: dev.zed.Zed
-      public.text: dev.zed.Zed
-      public.source-code: dev.zed.Zed
-      public.script: dev.zed.Zed
-      public.shell-script: dev.zed.Zed
-      public.json: dev.zed.Zed
-      public.yaml: dev.zed.Zed
-      public.xml: dev.zed.Zed
-      public.comma-separated-values-text: dev.zed.Zed
-      net.daringfireball.markdown: dev.zed.Zed
-      com.adobe.xmp: dev.zed.Zed
+      public.plain-text: com.microsoft.VSCode
+      public.text: com.microsoft.VSCode
+      public.source-code: com.microsoft.VSCode
+      public.script: com.microsoft.VSCode
+      public.shell-script: com.microsoft.VSCode
+      public.json: com.microsoft.VSCode
+      public.yaml: com.microsoft.VSCode
+      public.xml: com.microsoft.VSCode
+      public.comma-separated-values-text: com.microsoft.VSCode
+      net.daringfireball.markdown: com.microsoft.VSCode
+      com.adobe.xmp: com.microsoft.VSCode
       org.w3.webvtt: com.microsoft.VSCode
       public.x509-certificate: com.microsoft.VSCode
       # .ts files: macOS types them as MPEG transport streams, not TypeScript
-      public.mpeg-2-transport-stream: dev.zed.Zed
+      public.mpeg-2-transport-stream: com.microsoft.VSCode
       public.unix-executable: com.mitchellh.ghostty
       public.mpeg-4: io.mpv
       com.microsoft.waveform-audio: io.mpv

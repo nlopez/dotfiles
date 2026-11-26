@@ -29,7 +29,7 @@ snippet)
   file=$repo/home/.private/$class/$2.age
   tmp=$(mktemp); trap 'rm -f "$tmp"' EXIT
   [[ -f $file ]] && cz decrypt "$file" >"$tmp"
-  # shellcheck disable=SC2086 # EDITOR may carry flags, e.g. "zed --wait"
+  # shellcheck disable=SC2086 # EDITOR may carry flags, e.g. "code --wait"
   ${EDITOR:-vi} "$tmp"
   mkdir -p "$(dirname "$file")"
   cz encrypt "$tmp" >"$file.new" && mv "$file.new" "$file"
