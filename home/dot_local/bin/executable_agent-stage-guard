@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Refuse agent git commands that stage every change in the work tree.
+
+Several agent sessions can share one checkout, and a blanket stage commits
+another session's unfinished edits. Used as a Claude Code PreToolUse hook (Bash
+matcher) and by the pi extension stage-guard.ts. Reads the hook JSON on stdin
+({"tool_input": {"command": ...}}); exits 2 with the reason on stderr to block,
+0 to allow.
+
+Blocks `git add` with -A/--all/-u/--update or a whole-tree pathspec (., ./, :/,
+*), and `git commit` with -a/--all. Heredoc bodies and commit/PR message
+arguments are ignored.
+"""
+
+import json
+import re
+import sys
+
+REASON = (
+    "Blocked: this stages every change in the work tree, including other "
+    "sessions' unfinished edits. Stage only the files you changed: "
+    "`git add <path>...` (check with `git status --short` first), then commit "
+    "without -a."
+)
+
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1.*?\n\2\b", re.S)
+MESSAGE_ARG = re.compile(
+    r"""(?:\s(?:-m|-b|-t|-F|--message|--body|--title|--file)(?:=|\s+))"""
+    r"""(?:"(?:[^"\\]|\\.)*"|'[^']*'|\$'(?:[^'\\]|\\.)*'|\S+)"""
+)
+
+# `git` plus global options (-C <dir>, -c <k=v>, --no-pager, ...), then the subcommand.
+GIT = r"\bgit(?:\s+(?:-[Cc]\s+\S+|--[\w-]+(?:=\S+)?))*\s+"
+ARGS = r"(?P<args>[^;&|\n)]*)"
+ADD = re.compile(GIT + r"(?:add|stage)\b" + ARGS)
+COMMIT = re.compile(GIT + r"commit\b" + ARGS)
+
+ADD_ALL = re.compile(
+    r"(?:^|\s)(?:--all|--update|-(?!-)[a-zA-Z]*[Au][a-zA-Z]*"
+    r"|['\"]?(?:\.|\./|:/|:\(top\)|\*)['\"]?)(?=\s|$)"
+)
+COMMIT_ALL = re.compile(r"(?:^|\s)(?:--all|-(?!-)[a-zA-Z]*a[a-zA-Z]*)(?=\s|$)")
+
+
+def blocked(command: str) -> bool:
+    text = HEREDOC.sub(" ", command)
+    text = MESSAGE_ARG.sub(" ", text)
+    return any(ADD_ALL.search(m.group("args")) for m in ADD.finditer(text)) or any(
+        COMMIT_ALL.search(m.group("args")) for m in COMMIT.finditer(text)
+    )
+
+
+def main() -> int:
+    try:
+        command = json.load(sys.stdin).get("tool_input", {}).get("command") or ""
+    except (ValueError, AttributeError):
+        return 0
+    if blocked(command):
+        print(REASON, file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

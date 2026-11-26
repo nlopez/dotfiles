@@ -15,6 +15,7 @@ If you run into a surprising issue, search online for similar issues before purs
 
 - Every commit must be signed and every git hook must run. Never use `--no-verify`, `-n` on `git commit`, `--no-gpg-sign`, `-c commit.gpgsign=false`, `git config commit.gpgsign false`, `GIT_CONFIG_*` overrides, or any other way to skip hooks or signing.
 - If signing fails (for example, 1Password is locked or `op-ssh-sign` errors) or a hook rejects the commit or push, stop and report the exact error to the user. Do not retry with signing or hooks disabled.
+- Stage only the files you changed: `git add <path>...`. Never `git add -A`, `git add .`, `git add -u`, or `git commit -a`; other sessions may have unfinished edits in the same checkout. A hook blocks these.
 
 ### Deleting files
 

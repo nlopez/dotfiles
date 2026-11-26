@@ -11,7 +11,7 @@
 #             effortLevel (default medium; an /effort choice is kept),
 #             theme (auto = match the terminal's light/dark background),
 #             statusLine (pi-style bar, see statusline.py),
-#             hooks (atuin, no-chat-comments, agent-bypass-guard, agent-rm-guard, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
+#             hooks (atuin, no-chat-comments, agent-bypass-guard, agent-rm-guard, agent-stage-guard, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
 # Removes:    ECC env, and all plugin/marketplace entries
 #             except engram, context-mode, worktrunk and i-have-adhd (Claude is kept close to stock). Plugins themselves are
 #             uninstalled by .chezmoiscripts/run_onchange_after_20-claude-plugins-remove.sh.tmpl.
@@ -78,6 +78,15 @@ current["hooks"]["PreToolUse"] = atuin_hook + [{
     "hooks": [{
         "type": "command",
         "command": os.path.expanduser("~/.local/bin/agent-rm-guard"),
+    }],
+}, {
+    # Block blanket staging (git add -A/./-u, git commit -a) so parallel
+    # sessions in one checkout don't commit each other's edits
+    # (script managed in dot_local/bin/executable_agent-stage-guard, shared with pi).
+    "matcher": "Bash",
+    "hooks": [{
+        "type": "command",
+        "command": os.path.expanduser("~/.local/bin/agent-stage-guard"),
     }],
 }]
 
