@@ -1,5 +1,6 @@
-# Engram Cloud — personal and work non-headless machines enroll every local project for
-# autosync (~/.local/bin/engram-cloud-enroll, rerun by a LaunchAgent every 5
-# minutes). List project names here to keep them local-only.
+# Engram Cloud — personal and work non-headless machines enroll every repo
+# under ~/src (ghq) and every project in the local store for autosync, and
+# notify on drift (~/.local/bin/engram-cloud-enroll, rerun by a LaunchAgent
+# every 5 minutes). List project names here to keep them local-only.
 engram:
   cloud_exclude: []
