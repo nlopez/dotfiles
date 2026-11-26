@@ -79,14 +79,20 @@ local function find_step(forward)
       end
     else
       local footer = last_line(content)
-      if footer:find("n/N to navigate", 1, true) then
-        write(forward and "n" or "N")
-        return
-      end
-      if footer:match("^%s*/") then
-        write("\r") -- commit the query; n/N only step once the input closes
-        rex.exec({ "sleep", "0.05" })
-        write(forward and "n" or "N")
+      local input = footer:match("^%s*/") ~= nil
+      if input or footer:find("n/N to navigate", 1, true) then
+        if input then
+          write("\r") -- commit the query; n/N only step once the input closes
+          rex.exec({ "sleep", "0.05" })
+        end
+        -- Claude stops at either end, so step back to the other end to wrap.
+        local i, n = footer:match("(%d+)/(%d+)%s*$")
+        i, n = tonumber(i), tonumber(n)
+        if i and n > 1 and i == (forward and n or 1) then
+          write(string.rep(forward and "N" or "n", n - 1))
+        else
+          write(forward and "n" or "N")
+        end
         return
       end
     end
