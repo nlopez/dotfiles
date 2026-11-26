@@ -8,7 +8,7 @@
 {{- if and $engram (stat $claudeJson) (stat $pluginsJson) }}
 {{-   $plugins := (include $pluginsJson | fromJson).plugins | default dict }}
 {{-   $mcp := index ((include $claudeJson | fromJson).mcpServers | default dict) "engram" | default dict }}
-{{-   $cmd := $mcp.command | default "" }}
+{{-   $cmd := get $mcp "command" }}
 {{-   $inSync = and (hasKey $plugins "engram@engram") $cmd (stat $cmd) }}
 {{- end }}
 {{- if not $inSync -}}
