@@ -1,0 +1,15 @@
+{{- /* Renders only while shields-up is on, so a correct machine adds no diff noise. */ -}}
+{{- $shieldsUp := false -}}
+{{- if and .personal (not .work) (lookPath "tailscale") -}}
+{{-   $shieldsUp = (output "tailscale" "debug" "prefs" | fromJson).ShieldsUp -}}
+{{- end -}}
+{{- if $shieldsUp -}}
+#!/bin/bash
+
+# Allow incoming tailnet connections (Screen Sharing, SSH) on personal Macs;
+# the tailnet policy decides who may connect.
+
+set -euo pipefail
+
+tailscale set --shields-up=false
+{{- end }}
