@@ -31,6 +31,7 @@ RESTART = {
     "com.apple.spaces": ["Dock"],
     "com.apple.WindowManager": ["Dock"],
     "com.apple.menuextra.clock": ["SystemUIServer"],
+    "com.apple.screencapture": ["SystemUIServer"],
 }
 
 

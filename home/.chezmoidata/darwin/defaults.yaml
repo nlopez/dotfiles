@@ -104,6 +104,8 @@ macos:
       Show24Hour: true
     com.apple.Accessibility:
       ReduceMotionEnabled: 1
+    com.apple.screencapture:
+      target: clipboard
     # "Displays have separate Spaces" on
     com.apple.spaces:
       spans-displays: false
