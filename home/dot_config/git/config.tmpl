@@ -29,11 +29,6 @@
   threads = true
   version = 4
 
-[credential]
-{{- if eq .chezmoi.os "darwin" }}
-  credentialStore = keychain
-{{- end }}
-
 {{- /* GitHub HTTPS remotes authenticate through gh. The empty helper clears  */}}
 {{- /* inherited helpers (e.g. Nix git's system osxkeychain) so gh is the    */}}
 {{- /* only one consulted. Declared here rather than via `gh auth setup-git`, */}}

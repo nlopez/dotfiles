@@ -109,7 +109,6 @@ nix:
       - darwin.trash
       - duti
       - e2fsprogs
-      - git-credential-manager
       - mas
       - pass
       - pv
