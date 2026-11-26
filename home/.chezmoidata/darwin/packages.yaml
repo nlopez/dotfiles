@@ -63,7 +63,6 @@ packages:
         - macfuse
         - brave-origin
         - espanso
-        - stolendata-mpv
         - losslesscut
         - mediainfo
         - proton-mail-bridge
@@ -71,7 +70,6 @@ packages:
         - telegram-desktop
         - rustdesk
         - claude
-        - copyq
         - equibop
         - firefox
         - google-chrome
