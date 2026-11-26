@@ -12,8 +12,6 @@ pcall(require, "workspaces_rex")
 local annotate_ok, annotate = pcall(require, "plannotator.annotate")
 if annotate_ok then annotate.setup {} end
 
-rex.unbind("cmd+n")
-
 local function is_fg(p, name)
   local fg = p and p.foreground
   if not fg then return false end
