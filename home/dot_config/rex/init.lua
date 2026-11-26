@@ -50,13 +50,67 @@ rex.action {
   end,
 }
 
--- Mirror any init.lua bindings for client.find.open, falling back to Rex's default cmd+f.
-local find_bindings = rex.bindings { action = "client.find.open" }
-if #find_bindings > 0 then
-  for _, b in ipairs(find_bindings) do
-    local key = b.mode and (b.mode .. "/" .. b.key) or b.key
-    rex.bind(key, "smart_find")
-  end
-else
-  rex.bind("cmd+f", "smart_find")
+local function term(method, args)
+  return pcall(rex.block.call, "com.superlogical.terminal", method, args)
 end
+
+local function write(data)
+  rex.block.call("com.superlogical.terminal", "write", { data = data })
+end
+
+-- Step through pi/Claude transcript search matches, or Rex Find matches elsewhere.
+local function find_step(forward)
+  local ok_p, p = term("process")
+  local ok_m, m = term("modes")
+  if ok_p and ok_m and m and m.screen == "alternate" and (is_fg(p, "pi") or is_fg(p, "claude")) then
+    local ok_f, f = term("format")
+    local content = (ok_f and f and type(f.content) == "string") and f.content or ""
+    if is_fg(p, "pi") then
+      -- shortcut: the box hides its buttons in very narrow panes, so cmd+g falls through to Rex Find there.
+      if content:find("↓ Enter", 1, true) or content:find("Find in transcript", 1, true) then
+        write(forward and "\7" or "\27[103;6u") -- ctrl+g / CSI-u ctrl+shift+g
+        return
+      end
+    else
+      local footer = content:gsub("%s+$", ""):match("([^\n]*)$") or ""
+      if footer:find("n/N to navigate", 1, true) then
+        write(forward and "n" or "N")
+        return
+      end
+      if footer:match("^%s*/") then
+        write("\r") -- commit the query; n/N only step once the input closes
+        rex.exec({ "sleep", "0.05" })
+        write(forward and "n" or "N")
+        return
+      end
+    end
+  end
+  rex.client.queue(forward and "client.find.next" or "client.find.previous")
+end
+
+rex.action {
+  name = "smart_find_next",
+  title = "Find Next (Agent-Aware)",
+  description = "Next transcript search match in fullscreen pi/Claude panes, or Rex Find Next elsewhere.",
+  run = function() find_step(true) end,
+}
+
+rex.action {
+  name = "smart_find_previous",
+  title = "Find Previous (Agent-Aware)",
+  description = "Previous transcript search match in fullscreen pi/Claude panes, or Rex Find Previous elsewhere.",
+  run = function() find_step(false) end,
+}
+
+-- Mirror any init.lua bindings for the Rex Find actions, falling back to Rex's defaults.
+local function mirror(action, default, smart)
+  local bindings = rex.bindings { action = action }
+  if #bindings == 0 then return rex.bind(default, smart) end
+  for _, b in ipairs(bindings) do
+    rex.bind(b.mode and (b.mode .. "/" .. b.key) or b.key, smart)
+  end
+end
+
+mirror("client.find.open", "cmd+f", "smart_find")
+mirror("client.find.next", "cmd+g", "smart_find_next")
+mirror("client.find.previous", "cmd+shift+g", "smart_find_previous")
