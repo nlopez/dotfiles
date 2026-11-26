@@ -10,7 +10,8 @@
 #    every project already in the local store, except engram.cloud_exclude
 #    (.chezmoidata/engram.yaml).
 # 2. Reports drift: a repo whose project stays unenrolled or has an alias
-#    conflict, or a project with local memories but nothing on the server.
+#    conflict, a project with local memories but nothing on the server, or
+#    a push the server has not acknowledged for 15 minutes.
 #    Problems go to stdout (the LaunchAgent log) and to a desktop notification
 #    once they persist across two runs.
 
@@ -97,6 +98,21 @@ while read -r project obs; do
     problems+=("nothing on server: $project ($obs local memories)")
   fi
 done <"$work/store"
+
+# Stuck pushes: local changes the server hasn't acknowledged for 15 minutes.
+# Autosync retries transient failures within a few minutes, so anything older
+# is stuck. occurred_at is UTC.
+if command -v sqlite3 >/dev/null 2>&1 && [ -f "$ENGRAM_DATA_DIR/engram.db" ]; then
+  while IFS='|' read -r project count oldest; do
+    [ -n "$project" ] || continue
+    excluded "$project" && continue
+    problems+=("push stuck: $project ($count unacked since ${oldest%.*} UTC)")
+  done < <(sqlite3 -readonly "$ENGRAM_DATA_DIR/engram.db" \
+    "SELECT project, count(*), min(occurred_at) FROM sync_mutations
+     WHERE target_key = 'cloud' AND acked_at IS NULL
+       AND occurred_at < datetime('now', '-15 minutes')
+     GROUP BY project" 2>/dev/null)
+fi
 
 current="$(printf '%s\n' "${problems[@]+"${problems[@]}"}" | sed '/^$/d' | sort -u)"
 if [ -n "$current" ]; then
