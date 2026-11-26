@@ -114,6 +114,8 @@ macos:
       Workspace.tabStyle: vertical
       Workspace.sidebarPosition: left
       Workspace.focusFollowsMouse: true
+      Workspace.lightThemeID: porcelain-morning
+      Workspace.darkThemeID: cathode-amber
     # launchOnLogin is set per host in run_after_configure-defaults.sh.tmpl (off when headless).
     # Shortcuts are {keyCode, modifierFlags}; an empty map means no shortcut.
     com.knollsoft.Rectangle:
