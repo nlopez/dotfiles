@@ -37,7 +37,6 @@ claude:
 engram_cloud:
   token: ""
   jwt_secret: ""
-  projects: []
   tls_cert: ""
   tls_key: ""
 ` | fromYaml -}}

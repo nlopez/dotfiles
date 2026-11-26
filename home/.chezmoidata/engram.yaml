@@ -1,4 +1,4 @@
-# Engram Cloud — personal, non-headless machines enroll every local project for
+# Engram Cloud — personal and work non-headless machines enroll every local project for
 # autosync (~/.local/bin/engram-cloud-enroll, rerun by a LaunchAgent every 5
 # minutes). List project names here to keep them local-only.
 engram:

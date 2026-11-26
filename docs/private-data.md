@@ -57,7 +57,7 @@ without the hook.
 | `scan_patterns`                                                           | `dot_config/dotfiles/private-patterns.txt.tmpl` (pre-commit hook)                                                                  |
 | `local_models.omlx_api_key`                                               | Pi `extensions/local-models/config.ts.tmpl`                                                                                        |
 | `nix.packages`                                                            | `.chezmoitemplates/nix-packages` (extra nixpkgs attributes for the Nix profile)                                                    |
-| `engram_cloud.*`                                                          | `dot_local/share/private_engram/private_cloud*.tmpl`, `dot_local/bin/executable_engram-cloud-enroll.tmpl`                          |
+| `engram_cloud.*`                                                          | `dot_local/share/private_engram/private_cloud*.tmpl`                                                                               |
 
 Add a new key to the defaults in `.chezmoitemplates/private-data` too.
 
