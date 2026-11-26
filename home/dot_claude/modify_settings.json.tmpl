@@ -12,9 +12,8 @@
 #             theme (auto = match the terminal's light/dark background),
 #             statusLine (pi-style bar, see statusline.py),
 #             hooks (atuin, no-chat-comments, agent-bypass-guard, agent-rm-guard, agent-stage-guard, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
-# Removes:    ECC env, and all plugin/marketplace entries
-#             except engram, context-mode, worktrunk and i-have-adhd (Claude is kept close to stock). Plugins themselves are
-#             uninstalled by .chezmoiscripts/run_onchange_after_20-claude-plugins-remove.sh.tmpl.
+# Removes:    ECC env. Undeclared plugins and marketplaces are removed by
+#             .chezmoiscripts/run_after_20-claude-plugins-prune.sh.tmpl.
 import json
 import os
 import sys
@@ -168,17 +167,6 @@ current["statusLine"] = {
 }
 for key in ("ECC_DISABLED_MCPS", "_ZO_DOCTOR"):
     current.get("env", {}).pop(key, None)
-for plugin in (
-    "ecc@ecc",
-    "gopls-lsp@claude-plugins-official",
-    "pr-review-toolkit@claude-plugins-official",
-    "frontend-design@claude-plugins-official",
-    "datadog@claude-plugins-official",
-    "datadog@anthropic-plugin-directory",
-):
-    current.get("enabledPlugins", {}).pop(plugin, None)
-for marketplace in ("ecc", "cloudflare"):
-    current.get("extraKnownMarketplaces", {}).pop(marketplace, None)
 
 # Engram: pin one data dir so hooks and the MCP server never fall back to ~/.engram
 # when Claude isn't launched from a shell that exports ENGRAM_DATA_DIR (see

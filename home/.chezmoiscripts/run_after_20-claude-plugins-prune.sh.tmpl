@@ -1,0 +1,56 @@
+{{- /* Renders empty (chezmoi skips it) when every user-scope plugin and known
+   marketplace is declared. Otherwise the plan shows in `chezmoi diff`.
+   Declared: .chezmoidata/claude.yaml, the private claude.plugins (personal
+   machines), engram (run_after_10-engram-claude.sh.tmpl) and worktrunk
+   (run_onchange_after_19-worktrunk-plugins.sh.tmpl), plus the marketplaces
+   they come from and the official one. */ -}}
+{{- $p := includeTemplate "private-data" . | fromYaml -}}
+{{- $private := and .personal (not .work) (not .headless) -}}
+{{- $keep := list "engram@engram" "worktrunk@worktrunk" -}}
+{{- range .claude.plugins }}{{ $keep = append $keep .name }}{{ end -}}
+{{- if $private }}{{ range ($p.claude.plugins | default list) }}{{ $keep = append $keep . }}{{ end }}{{ end -}}
+{{- $keepMarketplaces := list "claude-plugins-official" -}}
+{{- range $keep }}{{ $keepMarketplaces = append $keepMarketplaces (splitList "@" . | last) }}{{ end -}}
+{{- $installedJson := joinPath .chezmoi.homeDir ".claude/plugins/installed_plugins.json" -}}
+{{- $knownJson := joinPath .chezmoi.homeDir ".claude/plugins/known_marketplaces.json" -}}
+{{- $plugins := list -}}
+{{- if stat $installedJson -}}
+{{-   range $name, $installs := (include $installedJson | fromJson).plugins | default dict -}}
+{{-     range $installs -}}
+{{-       if and (eq (get . "scope") "user") (not (has $name $keep)) }}{{ $plugins = append $plugins $name }}{{ end -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- $plugins = $plugins | uniq | sortAlpha -}}
+{{- $marketplaces := list -}}
+{{- if stat $knownJson -}}
+{{-   range $name, $_ := include $knownJson | fromJson -}}
+{{-     if not (has $name $keepMarketplaces) }}{{ $marketplaces = append $marketplaces $name }}{{ end -}}
+{{-   end -}}
+{{- end -}}
+{{- if or $plugins $marketplaces -}}
+#!/bin/bash
+
+# Uninstalls every user-scope Claude Code plugin and removes every marketplace
+# that isn't declared. Declare a plugin in .chezmoidata/claude.yaml to keep it.
+#
+# Pending changes:
+{{- range $plugins }}
+#   uninstall plugin {{ . }}
+{{- end }}
+{{- range $marketplaces }}
+#   remove marketplace {{ . }}
+{{- end }}
+
+set -eufo pipefail
+
+export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+{{ range $plugins }}
+claude plugin uninstall {{ . | squote }} --scope user
+{{- end }}
+{{- range $marketplaces }}
+claude plugin marketplace remove {{ . | squote }}
+{{- end }}
+{{- end }}
