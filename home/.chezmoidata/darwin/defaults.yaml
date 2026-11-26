@@ -143,9 +143,18 @@ macos:
       restore: {}
       smaller: {}
     # Firefox enterprise policies from the user's plist (no sudo). Restart Firefox to apply.
-    # https://firefox-admin-docs.mozilla.org/reference/policies/searchengines/
+    # Every policy, with macOS plist examples: https://firefox-admin-docs.mozilla.org/reference/policies/
+    # about:policies in Firefox shows which ones are active.
     org.mozilla.firefox:
       EnterprisePoliciesEnabled: true
+      # Only prefs under the prefixes listed at
+      # https://firefox-admin-docs.mozilla.org/reference/policies/preferences/
+      # Status "user" persists after removal here; remove with Status "clear".
+      Preferences:
+        # Load chrome/userChrome.css
+        toolkit.legacyUserProfileCustomizations.stylesheets:
+          Value: true
+          Status: user
       SearchEngines:
         Add:
         - Name: Kagi
