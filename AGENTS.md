@@ -39,6 +39,10 @@ never `onepasswordRead` (it runs `op signin`). Reference items by UUID, not name
 vault `evjh25ux2mnoufaut6qhvm2pdi`). Writes and app auth: `OP_APP_AUTH=1 op …`. Work machines:
 `op signin` first.
 
+## Pending work
+
+On a work host, check `docs/todo.md` for tasks only that machine class can do.
+
 ## Ask first
 
 `.chezmoiroot`, `.chezmoiignore`, age recipients or keys, removing config deployed to several
