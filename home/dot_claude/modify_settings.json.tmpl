@@ -94,13 +94,6 @@ current["hooks"]["PreToolUse"] = atuin_hook + [{
         "type": "command",
         "command": "echo 'Blocked: use mcp__kagi__kagi_search_fetch to search and mcp__kagi__kagi_extract to read pages (load them with ToolSearch select:mcp__kagi__kagi_search_fetch,mcp__kagi__kagi_extract if deferred). If Kagi is unavailable, tell the user.' >&2; exit 2",
     }],
-}, {
-    # The web-fetch subagent only has WebFetch, which the hook above blocks.
-    "matcher": "^(Agent|Task)$",
-    "hooks": [{
-        "type": "command",
-        "command": "{{ includeTemplate "nix-profile" . }}/bin/jq -e '.tool_input.subagent_type == \"web-fetch\"' >/dev/null || exit 0; echo 'Blocked: the web-fetch subagent cannot read pages here. Call mcp__kagi__kagi_extract yourself (load it with ToolSearch select:mcp__kagi__kagi_extract if deferred).' >&2; exit 2",
-    }],
 }]
 
 # PostToolUse: record PRs this session opens or pushes to, for the status line
