@@ -53,6 +53,8 @@ source "$_zdir/custom.zsh"
 zstyle ':prompt:pure:title' show no
 autoload -U promptinit && promptinit
 prompt pure
+# Always show user@host (pure shows it only over SSH), so pasted output names its machine.
+psvar[13]=1
 # Draw time on the right, so terminal output read by an agent shows when each command ran.
 RPROMPT='%F{242}%D{%H:%M:%S}%f'
 
