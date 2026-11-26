@@ -129,7 +129,7 @@ if [ -n "$new" ] && command -v osascript >/dev/null 2>&1; then
   first="$(printf '%s\n' "$ranked" | head -1)"
   subtitle="$count problem(s), see ~/.local/state/engram/cloud-enroll.log"
   esc() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
-  osascript -e "display notification \"$(esc "$first")\" with title \"Engram sync drift\" subtitle \"$(esc "$subtitle")\"" >/dev/null 2>&1 || true
+  osascript -e "display notification \"$(esc "$first")\" with title \"🧠 Engram sync drift\" subtitle \"$(esc "$subtitle")\"" >/dev/null 2>&1 || true
 fi
 printf '%s\n' "$current" | sed '/^$/d' >"$prev"
 printf '%s\n' "$persisting" | sed '/^$/d' >"$notified"
