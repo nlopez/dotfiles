@@ -1,4 +1,4 @@
-{{- if has .hostname (.packages.darwin.tailscaled_hosts | default list) -}}
+{{- if has (includeTemplate "hostname" .) (.packages.darwin.tailscaled_hosts | default list) -}}
 #!/bin/bash
 
 # Runs the Homebrew tailscaled as a root launchd daemon (Tailscale SSH needs the

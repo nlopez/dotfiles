@@ -1,0 +1,8 @@
+{{- /* This machine's short hostname, read on every apply so a rename takes
+   effect without `chezmoi init`. On darwin .chezmoi.hostname can come from
+   DHCP or reverse DNS, so use the LocalHostName set in System Settings. */ -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   output "scutil" "--get" "LocalHostName" | trim -}}
+{{- else -}}
+{{-   .chezmoi.hostname -}}
+{{- end -}}

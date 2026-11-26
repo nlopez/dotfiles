@@ -21,7 +21,7 @@
 {{-   $uvTools  = concat $uvTools  (index $uvCfg $g             | default list) -}}
 {{-   $masApps  = concat $masApps  (index ($darwin.mas | default dict) $g | default list) -}}
 {{- end -}}
-{{- if has .hostname ($darwin.tailscaled_hosts | default list) -}}
+{{- if has (includeTemplate "hostname" .) ($darwin.tailscaled_hosts | default list) -}}
 {{-   $casks = without $casks "tailscale-app" -}}
 {{-   $brews = append $brews "tailscale" -}}
 {{- end -}}
