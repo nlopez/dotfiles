@@ -119,20 +119,12 @@ nix:
       - tree
       - wget
       - zsh
-      # GNU userland (formerly brew gnubin dirs). Nix installs these under
-      # their plain names, so the profile's bin/ shadows the BSD tools.
-      - coreutils
+      # No GNU userland (coreutils, findutils, gnused, gnugrep, ...): Nix
+      # installs them under their plain names, and the profile's bin/ comes
+      # before /usr/bin, so they would shadow the BSD tools agents expect on
+      # macOS.
       - curl
-      - diffutils
-      - findutils
-      - gawk
-      - getopt
-      - gnugrep
-      - gnused
-      - gnutar
       - indent
-      - time
-      - which
       personal:
       - ffmpeg
       - mediainfo

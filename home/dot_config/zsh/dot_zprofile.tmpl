@@ -61,9 +61,8 @@ unset _d
 export PNPM_HOME="${XDG_DATA_HOME}/pnpm"
 PATH="$PNPM_HOME/bin:$PATH"
 
-# Nix profile (.chezmoidata/nix.yaml) — CLI tools, including the GNU userland
-# that shadows the BSD tools on macOS. Must sit ahead of Homebrew and, on
-# macOS, be re-prepended here after path_helper -s rebuilds PATH.
+# Nix profile (.chezmoidata/nix.yaml) — CLI tools. Must sit ahead of Homebrew
+# and, on macOS, be re-prepended here after path_helper -s rebuilds PATH.
 PATH="{{ includeTemplate "nix-profile" . }}/bin:$PATH"
 fpath=("{{ includeTemplate "nix-profile" . }}/share/zsh/site-functions" $fpath)
 
