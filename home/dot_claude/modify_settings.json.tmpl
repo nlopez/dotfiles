@@ -173,6 +173,8 @@ for plugin in (
     "gopls-lsp@claude-plugins-official",
     "pr-review-toolkit@claude-plugins-official",
     "frontend-design@claude-plugins-official",
+    "datadog@claude-plugins-official",
+    "datadog@anthropic-plugin-directory",
 ):
     current.get("enabledPlugins", {}).pop(plugin, None)
 for marketplace in ("ecc", "cloudflare"):

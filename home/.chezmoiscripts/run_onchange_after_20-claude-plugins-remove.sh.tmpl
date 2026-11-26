@@ -4,9 +4,9 @@
 # engram, worktrunk and the ones in .chezmoidata/claude.yaml (see
 # run_after_10-engram-claude.sh.tmpl, run_after_19-worktrunk-plugins.sh.tmpl and
 # run_onchange_after_18-claude-plugins.sh.tmpl) and removes the third-party ECC,
-# Cloudflare and Dogpark marketplaces.
+# Cloudflare and Dogpark marketplaces. Datadog goes through the pup CLI instead.
 # Re-run by bumping the revision below.
-# plugins-removal-revision: 4
+# plugins-removal-revision: 5
 
 set -eufo pipefail
 
@@ -15,7 +15,7 @@ export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
 command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
 
 installed="$(claude plugin list 2>/dev/null || true)"
-for plugin in ecc@ecc gopls-lsp@claude-plugins-official pr-review-toolkit@claude-plugins-official frontend-design@claude-plugins-official slack-relay@dogpark; do
+for plugin in ecc@ecc gopls-lsp@claude-plugins-official pr-review-toolkit@claude-plugins-official frontend-design@claude-plugins-official slack-relay@dogpark datadog@claude-plugins-official datadog@anthropic-plugin-directory; do
   if printf '%s\n' "$installed" | grep -q "$plugin"; then
     claude plugin uninstall "$plugin" --scope user
   fi
