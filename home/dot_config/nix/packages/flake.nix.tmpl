@@ -23,6 +23,16 @@
 {{- end }}
           ];
       };
+      # Packages defined here rather than in nixpkgs, named `dotfiles.<attr>`
+      # in .chezmoidata/nix.yaml.
+      dotfiles = {
+        # GNU sed and grep as gsed and ggrep, without shadowing the BSD tools.
+        gnu-prefixed = pkgs.runCommand "gnu-prefixed" { } ''
+          mkdir -p $out/bin
+          ln -s ${pkgs.gnused}/bin/sed $out/bin/gsed
+          ln -s ${pkgs.gnugrep}/bin/grep $out/bin/ggrep
+        '';
+      };
       manifest = {{ includeTemplate "nix-manifest" . | quote }};
       names = [
 {{- range (includeTemplate "nix-packages" . | fromJson) }}
@@ -33,7 +43,7 @@
     {
       packages.${system}.default = pkgs.buildEnv {
         name = "dotfiles-packages";
-        paths = map (name: lib.getAttrFromPath (lib.splitString "." name) pkgs) names;
+        paths = map (name: lib.getAttrFromPath (lib.splitString "." name) (pkgs // { inherit dotfiles; })) names;
         # Only link what a shell needs; each package still reads its own store
         # path for everything else. Keeps unrelated lib/ trees from colliding.
         pathsToLink = [
