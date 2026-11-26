@@ -122,7 +122,8 @@ nix:
       # No GNU userland (coreutils, findutils, gnused, gnugrep, ...): Nix
       # installs them under their plain names, and the profile's bin/ comes
       # before /usr/bin, so they would shadow the BSD tools agents expect on
-      # macOS.
+      # macOS. coreutils-prefixed provides GNU coreutils as gls, gdate, ...
+      - coreutils-prefixed
       - curl
       - indent
       personal:
