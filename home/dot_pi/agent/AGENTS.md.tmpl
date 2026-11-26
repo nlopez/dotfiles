@@ -7,7 +7,7 @@ If you run into a surprising issue, search online for similar issues before purs
 ### Web search and page reading
 
 - Search the web with Kagi's `kagi_search_fetch` and read pages with `kagi_extract`, not the built-in WebSearch or WebFetch tools. If they are deferred, load them first (`ToolSearch` with `select:mcp__kagi__kagi_search_fetch,mcp__kagi__kagi_extract`).
-- Fall back to the built-in tools only when a Kagi call errors or Kagi is not connected.
+- If Kagi errors or is not connected, tell the user instead of switching tools.
 
 ### General Principles
 

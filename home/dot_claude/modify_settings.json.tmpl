@@ -11,7 +11,7 @@
 #             effortLevel (default medium; an /effort choice is kept),
 #             theme (auto = match the terminal's light/dark background),
 #             statusLine (pi-style bar, see statusline.py),
-#             hooks (atuin, no-chat-comments, agent-bypass-guard, agent-rm-guard, agent-stage-guard, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
+#             hooks (atuin, no-chat-comments, agent-bypass-guard, agent-rm-guard, agent-stage-guard, kagi web redirect, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
 # Removes:    ECC env. Undeclared plugins and marketplaces are removed by
 #             .chezmoiscripts/run_after_20-claude-plugins-prune.sh.tmpl.
 import json
@@ -86,6 +86,13 @@ current["hooks"]["PreToolUse"] = atuin_hook + [{
     "hooks": [{
         "type": "command",
         "command": os.path.expanduser("~/.local/bin/agent-stage-guard"),
+    }],
+}, {
+    # Route web search and page reads through Kagi's MCP tools.
+    "matcher": "^(WebSearch|WebFetch)$",
+    "hooks": [{
+        "type": "command",
+        "command": "echo 'Blocked: use mcp__kagi__kagi_search_fetch to search and mcp__kagi__kagi_extract to read pages (load them with ToolSearch select:mcp__kagi__kagi_search_fetch,mcp__kagi__kagi_extract if deferred). If Kagi is unavailable, tell the user.' >&2; exit 2",
     }],
 }]
 
