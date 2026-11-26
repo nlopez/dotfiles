@@ -1,0 +1,44 @@
+{{- $projects := list -}}
+{{- $all := false -}}
+{{- if and .personal (not .headless) -}}
+{{-   $all = true -}}
+{{- else if .work -}}
+{{-   $p := includeTemplate "private-data" . | fromYaml -}}
+{{-   $projects = $p.engram_cloud.projects -}}
+{{- end -}}
+{{- if or $all $projects -}}
+#!/bin/bash
+
+# Enrolls projects for Engram Cloud autosync. Enrollment lives in the local
+# SQLite store (not on the server) and autosync only replicates enrolled
+# projects, so this runs on every apply and from the com.local.engram-cloud-enroll
+# LaunchAgent to pick up new projects and survive store rebuilds.
+{{- if $all }}
+# Personal: every local project except engram.cloud_exclude (.chezmoidata/engram.yaml).
+{{- else }}
+# Work: engram_cloud.projects in .private/work.yaml.age.
+{{- end }}
+
+set -eufo pipefail
+
+export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
+export ENGRAM_DATA_DIR="${XDG_DATA_HOME:-{{ .chezmoi.homeDir }}/.local/share}/engram"
+
+command -v engram >/dev/null 2>&1 || { echo "engram not found, skipping" >&2; exit 0; }
+
+{{ if $all -}}
+exclude=({{ range .engram.cloud_exclude | default list }}{{ . | quote }} {{ end }})
+
+# `engram projects list`: a "Projects (N):" header, then "  <name>  <counts>".
+engram projects list | awk 'NR > 1 && NF { print $1 }' | while read -r project; do
+  for x in "${exclude[@]+"${exclude[@]}"}"; do
+    [ "$project" = "$x" ] && continue 2
+  done
+  engram cloud enroll "$project" >/dev/null
+done
+{{- else -}}
+{{ range $projects -}}
+engram cloud enroll {{ . | quote }} >/dev/null
+{{ end -}}
+{{- end }}
+{{ end -}}

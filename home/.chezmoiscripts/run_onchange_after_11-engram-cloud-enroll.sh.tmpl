@@ -1,29 +1,28 @@
-{{- $projects := list -}}
-{{- if and .personal (not .headless) -}}
-{{-   $projects = .engram.cloud_projects -}}
-{{- else if .work -}}
-{{-   $p := includeTemplate "private-data" . | fromYaml -}}
-{{-   $projects = $p.engram_cloud.projects -}}
-{{- end -}}
-{{- if $projects -}}
+{{- if and (or .personal .work) (not .headless) -}}
 #!/bin/bash
 
-# Enrolls projects for Engram Cloud autosync (personal: .chezmoidata/engram.yaml;
-# work: engram_cloud.projects in .private/work.yaml.age).
-# Enrollment lives in each host's local store (not on the server), and autosync
-# only replicates enrolled projects. Server URL + token come from cloud.json
-# (dot_local/share/private_engram/private_cloud.json.tmpl).
-# Re-runs when the project list changes; `cloud enroll` is idempotent.
-# Projects: {{ join ", " $projects }}
+# Runs ~/.local/bin/engram-cloud-enroll now and (macOS) (re)loads the
+# com.local.engram-cloud-enroll LaunchAgent, which reruns it every 5 minutes so
+# new projects get enrolled for Engram Cloud autosync without an apply.
+# {{ include "dot_local/bin/executable_engram-cloud-enroll.tmpl" | sha256sum }}
+# {{ include "Library/LaunchAgents/com.local.engram-cloud-enroll.plist.tmpl" | sha256sum }}
+# {{ .engram | toJson | sha256sum }}
 
 set -eufo pipefail
 
-export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
-export ENGRAM_DATA_DIR="${XDG_DATA_HOME:-{{ .chezmoi.homeDir }}/.local/share}/engram"
+script="$HOME/.local/bin/engram-cloud-enroll"
+[ -x "$script" ] || exit 0
+mkdir -p "${XDG_STATE_HOME:-$HOME/.local/state}/engram"
+"$script"
 
-command -v engram >/dev/null 2>&1 || { echo "engram not found, skipping" >&2; exit 0; }
-
-{{ range $projects -}}
-engram cloud enroll {{ . | quote }}
-{{ end -}}
-{{ end -}}
+{{ if eq .chezmoi.os "darwin" -}}
+DOMAIN="gui/$(id -u)"
+PLIST="$HOME/Library/LaunchAgents/com.local.engram-cloud-enroll.plist"
+launchctl bootout "$DOMAIN/com.local.engram-cloud-enroll" 2>/dev/null || true
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  launchctl bootstrap "$DOMAIN" "$PLIST" && exit 0
+  sleep 1
+done
+launchctl bootstrap "$DOMAIN" "$PLIST"
+{{- end }}
+{{- end }}

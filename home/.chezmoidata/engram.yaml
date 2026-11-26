@@ -1,11 +1,5 @@
-# Engram Cloud — projects each host replicates via autosync. Enrollment is
-# per-host (stored in the local SQLite store), so run_onchange_after_11-engram-cloud-enroll.sh.tmpl
-# enrolls these on every personal, non-headless machine.
+# Engram Cloud — personal, non-headless machines enroll every local project for
+# autosync (~/.local/bin/engram-cloud-enroll, rerun by a LaunchAgent every 5
+# minutes). List project names here to keep them local-only.
 engram:
-  cloud_projects:
-  - k8s_home
-  - dotfiles
-  - timekeeper
-  - tailnet
-  - dns
-  - ansible_home
+  cloud_exclude: []
