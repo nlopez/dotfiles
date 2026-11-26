@@ -11,3 +11,5 @@ claude:
     repo: ayghri/i-have-adhd
   - name: cache-miss-detector@cache-miss-detector
     repo: Moishe/claude-cache-miss-detector
+  - name: ponytail@ponytail
+    repo: DietrichGebert/ponytail
