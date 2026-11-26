@@ -1,0 +1,20 @@
+{{- /* Renders once RustDesk's root service is installed (Settings → General). */ -}}
+{{- if and .personal (stat "/Library/LaunchDaemons/com.carriez.RustDesk_service.plist") -}}
+#!/bin/bash
+
+# RustDesk's root service holds the authoritative options and copies them to
+# the per-user server when it starts, so set them as root, then restart it.
+
+set -euo pipefail
+
+R=/Applications/RustDesk.app/Contents/MacOS/RustDesk
+
+sudo "$R" --option direct-server Y
+sudo "$R" --option stop-service N
+sudo "$R" --option verification-method use-permanent-password
+# Tailscale's IPv4 and IPv6 ranges. Relayed (ID) connections arrive from the
+# relay's address, so they are refused too.
+sudo "$R" --option whitelist 100.64.0.0/10,fd7a:115c:a1e0::/48
+
+launchctl kickstart -k "gui/$(id -u)/com.carriez.RustDesk_server"
+{{- end }}
