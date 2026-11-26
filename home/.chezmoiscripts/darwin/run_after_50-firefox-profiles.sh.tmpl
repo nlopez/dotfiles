@@ -1,0 +1,29 @@
+{{- /* Copies .chezmoitemplates/firefox/ into every Firefox profile. Profile
+   directory names are random per machine, so these can't be plain target files.
+   Renders empty (chezmoi skips it) when every profile already matches. */ -}}
+{{- /* shortcut: only profiles under Profiles/, not ones profiles.ini points elsewhere (IsRelative=0); parse profiles.ini if that ever happens. */ -}}
+{{- $files := dict "user.js" (include ".chezmoitemplates/firefox/user.js") "chrome/userChrome.css" (include ".chezmoitemplates/firefox/userChrome.css") }}
+{{- $pending := list }}
+{{- range glob (joinPath .chezmoi.homeDir "Library/Application Support/Firefox/Profiles/*") }}
+{{-   $profile := . }}
+{{-   range $rel, $want := $files }}
+{{-     $path := joinPath $profile $rel }}
+{{-     if or (not (stat $path)) (ne (include $path) $want) }}
+{{-       $pending = append $pending (dict "path" $path "body" $want) }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+{{- if $pending -}}
+#!/bin/bash
+
+# Writes Firefox profile files declared in .chezmoitemplates/firefox/.
+# Restart Firefox to pick up userChrome.css.
+
+set -euo pipefail
+{{ range $pending }}
+mkdir -p {{ dir .path | quote }}
+cat > {{ .path | quote }} <<'CHEZMOI_EOF'
+{{ .body }}CHEZMOI_EOF
+echo "firefox: wrote {{ .path }}"
+{{- end }}
+{{- end }}

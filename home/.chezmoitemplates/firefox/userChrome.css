@@ -1,0 +1,9 @@
+/* Hide the tab close button */
+.tabbrowser-tab .tab-close-button {
+  visibility: collapse !important;
+}
+
+/* Disable click-to-mute on the tab audio icon */
+.tab-icon-overlay:is([soundplaying], [muted], [activemedia-blocked]) {
+  pointer-events: none !important;
+}
