@@ -7,11 +7,13 @@
 {{- $pending := list }}
 {{- range glob (joinPath .chezmoi.homeDir "Library/Application Support/Firefox/Profiles/*") }}
 {{-   $profile := . }}
+{{-   if (stat $profile).isDir }}
 {{-   range $rel, $want := $files }}
 {{-     $path := joinPath $profile $rel }}
 {{-     if or (not (stat $path)) (ne (include $path) $want) }}
 {{-       $pending = append $pending (dict "path" $path "body" $want) }}
 {{-     end }}
+{{-   end }}
 {{-   end }}
 {{- end }}
 {{- if $pending -}}
