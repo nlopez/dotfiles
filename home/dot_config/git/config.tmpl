@@ -37,13 +37,15 @@
 {{- /* inherited helpers (e.g. Nix git's system osxkeychain) so gh is the    */}}
 {{- /* only one consulted. Declared here rather than via `gh auth setup-git`, */}}
 {{- /* which writes ~/.gitconfig (workspace-owned on workspaces).             */}}
+{{- /* The PATH suffix lets GUI apps launched with launchd's minimal PATH     */}}
+{{- /* (e.g. Obsidian Git) find gh; shells already resolve it earlier.       */}}
 [credential "https://github.com"]
   helper =
-  helper = !gh auth git-credential
+  helper = !PATH=\"$PATH:$HOME/.local/bin/shims:$HOME/.local/state/nix/profiles/dotfiles/bin\" gh auth git-credential
 
 [credential "https://gist.github.com"]
   helper =
-  helper = !gh auth git-credential
+  helper = !PATH=\"$PATH:$HOME/.local/bin/shims:$HOME/.local/state/nix/profiles/dotfiles/bin\" gh auth git-credential
 
 [pull]
   rebase = true

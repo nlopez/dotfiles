@@ -28,6 +28,11 @@
 # models live in ~/.local/share/omlx/models (redirected via settings.json)
 .local/share/omlx/**
 
+# ── Obsidian vault: darwin personal-only (work Macs use ~/notes) ─────────────
+{{ if or (ne .chezmoi.os "darwin") .work -}}
+Documents/**
+{{ end -}}
+
 # ── OS-specific scripts ────────────────────────────────────────────────────────
 {{ if ne .chezmoi.os "darwin" -}}
 .chezmoiscripts/darwin/**

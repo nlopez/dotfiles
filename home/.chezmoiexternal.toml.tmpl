@@ -85,6 +85,19 @@
     executable = true
 {{- end }}
 
+{{- if and (eq .chezmoi.os "darwin") (not .work) }}
+{{- /* renovate: datasource=github-releases depName=Vinzent03/obsidian-git */}}
+{{- $obsidianGitVersion := "2.44.0" }}
+# Obsidian Git — https://github.com/Vinzent03/obsidian-git
+# The release assets Obsidian's community-plugin installer fetches. Enabled by
+# Documents/Obsidian Vault/dot_obsidian/modify_community-plugins.json.
+{{- range list "main.js" "manifest.json" "styles.css" }}
+["Documents/Obsidian Vault/.obsidian/plugins/obsidian-git/{{ . }}"]
+    type = "file"
+    url = "https://github.com/Vinzent03/obsidian-git/releases/download/{{ $obsidianGitVersion }}/{{ . }}"
+{{- end }}
+{{- end }}
+
 # Nerd Fonts (Iosevka) are intentionally NOT managed by chezmoi as externals:
 # the release zips are ~375MB each and chezmoi must fully decompress an
 # "archive" external into memory to compute its target state on every
