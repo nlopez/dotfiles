@@ -2,6 +2,10 @@ packages:
   brew_prefix: /opt/homebrew
   darwin:
     brew_prefix: /opt/homebrew
+    # Macs that run the open-source tailscaled (Homebrew formula, root launchd
+    # daemon) in place of the Tailscale app: the app can't be a Tailscale SSH server.
+    tailscaled_hosts:
+    - akane-jr
     brew:
       # When true, `brew bundle` also uninstalls anything not declared here
       # (brew bundle cleanup --force). Preview first with `brew-cleanup`.

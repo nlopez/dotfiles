@@ -1,0 +1,18 @@
+{{- if has .hostname (.packages.darwin.tailscaled_hosts | default list) -}}
+#!/bin/bash
+
+# Runs the Homebrew tailscaled as a root launchd daemon (Tailscale SSH needs the
+# open-source daemon) and turns on its SSH server once the node is logged in.
+# First login is interactive: sudo tailscale up --ssh --advertise-tags=tag:admin
+
+set -euo pipefail
+
+TAILSCALE="{{ .packages.brew_prefix }}/bin/tailscale"
+
+sudo brew services start tailscale
+if "$TAILSCALE" status >/dev/null 2>&1; then
+    sudo "$TAILSCALE" set --ssh
+else
+    echo "tailscaled: not logged in; run: sudo $TAILSCALE up --ssh --advertise-tags=tag:admin" >&2
+fi
+{{- end }}
