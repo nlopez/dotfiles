@@ -19,6 +19,12 @@ local function is_fg(p, name)
   return a == name or a:match("/" .. name .. "$") ~= nil or n == name
 end
 
+-- Claude's transcript search shows its query input ("/query") or its
+-- "n/N to navigate" hint on the screen's last line.
+local function last_line(content)
+  return content:gsub("%s+$", ""):match("([^\n]*)$") or ""
+end
+
 -- Fullscreen pi and Claude Code run in the alternate screen where Rex's Find bar
 -- has no scrollback; forward to their built-in transcript search instead.
 rex.action {
@@ -37,7 +43,7 @@ rex.action {
       if is_fg(p, "claude") then
         local ok_f, f = pcall(rex.block.call, "com.superlogical.terminal", "format")
         local content = (ok_f and f and type(f.content) == "string") and f.content or ""
-        if content:find("Search transcript", 1, true) then return end
+        if last_line(content):match("^%s*/") then return end -- query input already open
         if not content:find("Showing detailed transcript", 1, true) then
           rex.block.call("com.superlogical.terminal", "write", { data = "\15" }) -- ctrl+o
           rex.exec({ "sleep", "0.05" }) -- rex.sleep is script-only, missing in init.lua actions
@@ -72,7 +78,7 @@ local function find_step(forward)
         return
       end
     else
-      local footer = content:gsub("%s+$", ""):match("([^\n]*)$") or ""
+      local footer = last_line(content)
       if footer:find("n/N to navigate", 1, true) then
         write(forward and "n" or "N")
         return
