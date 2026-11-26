@@ -106,10 +106,15 @@ Host workspace-* *.workspace.infra.dog
 {{- end }}
 {{- if .personal }}
 
-# Homelab hosts that do not log in as the global default user. The
-# gateways, knodes, and odroids all use nlopez.
-Host nas1 nas1.lga1.radoncanyon.com nas2 nas2.lga1.radoncanyon.com
+# Homelab hosts, by tailnet name and home DNS name.
+Host gw-lga? gw.lga?.radoncanyon.com odroid-lga? odroid.lga?.radoncanyon.com knode? knode?.lga?.radoncanyon.com
+  User nlopez
+
+Host nas? nas?.lga?.radoncanyon.com
   User root
+
+Host akane akane.local akane-jr akane-jr.local
+  User localuser
 
 Host uos
   User root
