@@ -8,15 +8,23 @@
 set -euo pipefail
 
 R=/Applications/RustDesk.app/Contents/MacOS/RustDesk
+USER_CONFIG="$HOME/Library/Preferences/com.carriez.RustDesk/RustDesk2.toml"
 
-sudo "$R" --option direct-server Y
-sudo "$R" --option stop-service N
-sudo "$R" --option verification-method use-permanent-password
+# macOS sudo keeps HOME, so a plain `sudo RustDesk` leaves a root-owned config
+# in the user's preferences that the user's server can no longer read. -H keeps
+# root's own writes in root's home; hand back a file an earlier run left behind.
+if [ -e "$USER_CONFIG" ] && [ ! -O "$USER_CONFIG" ]; then
+  sudo chown "$(id -un):staff" "$USER_CONFIG"
+fi
+
+sudo -H "$R" --option direct-server Y
+sudo -H "$R" --option stop-service N
+sudo -H "$R" --option verification-method use-permanent-password
 # Tailscale's IPv4 and IPv6 ranges, plus the lga1 and lga2 LANs so a Mac stays
 # reachable by LAN address (through the sites' subnet routers) when its own
 # Tailscale is down. Relayed (ID) connections arrive from the relay's address,
 # so they are refused too.
-sudo "$R" --option whitelist 100.64.0.0/10,fd7a:115c:a1e0::/48,192.168.221.0/24,192.168.222.0/24,192.168.223.0/24,192.168.239.0/24
+sudo -H "$R" --option whitelist100.64.0.0/10,fd7a:115c:a1e0::/48,192.168.221.0/24,192.168.222.0/24,192.168.223.0/24,192.168.239.0/24
 
 launchctl kickstart -k "gui/$(id -u)/com.carriez.RustDesk_server"
 {{- end }}
