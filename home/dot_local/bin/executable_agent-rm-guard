@@ -25,7 +25,8 @@ MESSAGE_ARG = re.compile(
 )
 
 # A command word starts after a separator, a subshell opener, or a wrapper.
-START = r"(?:^|[;&|(){`\n]|\$\(|\b(?:sudo|xargs|exec|command|time|env|nohup|then|do|else)\s)\s*"
+SUDO = r"sudo(?:\s+-\w+(?:\s+[^-\s]\S*)?)*"  # sudo and its options, e.g. -u bob
+START = r"(?:^|[;&|(){`\n]|\$\(|\b(?:" + SUDO + r"|xargs|exec|command|time|env|nohup|then|do|else)\s)\s*"
 RM = re.compile(START + r"\\?(?:/(?:usr/)?bin/)?rm(?=\s|$)")
 EXEC_RM = re.compile(r"-exec(?:dir)?\s+\\?(?:/(?:usr/)?bin/)?rm(?=\s|$)")
 FIND_DELETE = re.compile(r"\bfind\b[^;&|\n]*\s-delete\b")

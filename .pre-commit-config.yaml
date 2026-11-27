@@ -29,6 +29,12 @@ repos:
     pass_filenames: false
     always_run: true
     verbose: true
+  - id: agent-guards
+    name: agent-guards
+    language: system
+    entry: scripts/test-agent-guards.py
+    files: ^(home/dot_local/bin/executable_agent-|home/dot_config/git/executable_agent-|scripts/test-agent-guards\.py$)
+    pass_filenames: false
   - id: yamlfmt
     name: yamlfmt
     language: system

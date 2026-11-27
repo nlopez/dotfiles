@@ -35,6 +35,7 @@ BYPASSES = [
     re.compile(r"\bgit\b.*--no-verify\b"),
     re.compile(r"\bgit\b(?:\s+-c\s+\S+)*\s+commit\b[^;&|]*\s-[a-zA-Z]*n[a-zA-Z]*\b"),
     re.compile(r"\bgit\s+fcommit\b"),
+    re.compile(r"\bcore\.hooksPath\s*=", re.I),
     # Disable or replace the signing hooks.
     re.compile(r"\bhook\.require-signed-\w+\."),
     re.compile(r"\bGIT_CONFIG_(?:GLOBAL|NOSYSTEM|COUNT|PARAMETERS|KEY_\d+|VALUE_\d+)\s*="),
