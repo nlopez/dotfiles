@@ -2,6 +2,18 @@ import json
 import sys
 
 
+def load_settings(current_raw):
+    # A file we can't parse is written back unchanged: replacing it with only
+    # the managed keys would drop everything else the app stored there.
+    if not current_raw.strip():
+        return {}
+    try:
+        return json.loads(current_raw)
+    except ValueError:
+        sys.stdout.write(current_raw)
+        sys.exit(0)
+
+
 def _align_keys(new, old):
     # JSON objects are unordered: lay out new's keys in old's order (new keys
     # last), recursing into lists by index, so reordering by the app that owns

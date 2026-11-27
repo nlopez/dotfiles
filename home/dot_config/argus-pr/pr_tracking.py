@@ -640,6 +640,7 @@ def _review_comments(pr, env, cwd):
             "path": item.get("path") or "",
             "line": item.get("line") or item.get("original_line"),
             "createdAt": item.get("created_at") or "",
+            "authorAssociation": item.get("author_association") or "",
         }
         for item in json.loads(out.stdout or "[]")
         if item.get("id") is not None
@@ -811,8 +812,21 @@ def _comment_key(key):
     return f"{kind}:{_database_id(cid)}"
 
 
+# Anyone can comment on a public repo; their text must not reach the agent as a task.
+UNTRUSTED_AUTHORS = {"NONE", "FIRST_TIMER", "FIRST_TIME_CONTRIBUTOR", "MANNEQUIN"}
+
+
+def _trusted(item):
+    """Whether a comment's author has a role in the repo, or is the ARP reviewer."""
+    if item.get("authorAssociation") not in UNTRUSTED_AUTHORS:
+        return True
+    return _login(item.get("author")).startswith(ARP_AUTHOR)
+
+
 def _comments(pr):
-    """{kind:id: comment} of a PR's comments, inline review comments and review bodies, or None if not fetched."""
+    """{kind:id: comment} of a PR's comments, inline review comments and review bodies, or None if not fetched.
+
+    Comments from authors with no role in the repo are left out."""
     if not any(k in pr for k in ("comments", "reviews", "reviewComments")):
         return None
     groups = (
@@ -830,7 +844,7 @@ def _comments(pr):
         }
         for kind, items in groups
         for i in items
-        if i.get("id") is not None
+        if i.get("id") is not None and _trusted(i)
     }
 
 

@@ -22,13 +22,10 @@
 import json
 import sys
 
+{{ template "json-settings-emit.py" }}
+
 current_raw = sys.stdin.read()
-current = {}
-try:
-    if current_raw.strip():
-        current = json.loads(current_raw)
-except Exception:
-    pass
+current = load_settings(current_raw)
 
 current.setdefault("providers", {})
 
