@@ -1,0 +1,34 @@
+#!/bin/bash
+# gpg.ssh.program. Coding agents (Claude Code, pi) sign commits with a
+# Secure Enclave key held by Secretive, which needs no approval; everything
+# else, including all verification, goes to 1Password's op-ssh-sign.
+set -euo pipefail
+
+op={{ .platform.gpg_op_path | quote }}
+sock="$HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
+
+if [[ "${CLAUDECODE:-}" != 1 && -z "${PI_CODING_AGENT:-}" ]] || [[ "${1:-} ${2:-}" != "-Y sign" ]] || [[ ! -S "$sock" ]]; then
+  exec "$op" "$@"
+fi
+
+# shortcut: signs with the first key Secretive holds; pick by name if it ever holds more than one.
+pub=$(SSH_AUTH_SOCK="$sock" ssh-add -L 2>/dev/null | head -n1) || true
+if [[ "$pub" != ecdsa-* && "$pub" != ssh-* ]]; then
+  exec "$op" "$@"
+fi
+
+keyfile=$(mktemp)
+trap 'rm -f "$keyfile"' EXIT
+printf '%s\n' "$pub" >"$keyfile"
+
+# Swap git's -f <key> for the agent key; -U tells ssh-keygen the key is in the agent.
+args=()
+while (($#)); do
+  case "$1" in
+    -f) args+=(-f "$keyfile"); shift 2 ;;
+    -U) shift ;;
+    *) args+=("$1"); shift ;;
+  esac
+done
+
+SSH_AUTH_SOCK="$sock" /usr/bin/ssh-keygen -U "${args[@]}"

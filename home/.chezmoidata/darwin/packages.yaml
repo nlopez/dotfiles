@@ -73,6 +73,8 @@ packages:
         - signal
         - telegram-desktop
         - rustdesk
+        # Secure Enclave SSH agent; holds the key coding agents sign commits with.
+        - secretive
         - claude
         - equibop
         - firefox

@@ -97,7 +97,7 @@
 
 [gpg "ssh"]
   allowedSignersFile = ~/.config/git/allowed_signers
-  program = {{ .platform.gpg_op_path }}
+  program = {{ .chezmoi.homeDir }}/.config/git/ssh-sign
 {{- end }}
 
 [alias]
