@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # Managed by chezmoi — source: home/dot_claude/executable_statusline.py
 # Claude Code status line modelled on pi's powerline footer:
-#   model | think:<effort> | dir <name> | ⎇ <branch> | PR #12 ✓ approved | PRs #9 ✗ · repo#4 merged
-#   | ▥ used/size (pct%) AC | (sub)
+#   user@host | model | think:<effort> | <repo> [·wt <worktree>] | ⎇ <branch>[*]
+#   | PR #12 ✓ approved | PRs #9 ✗ · repo#4 merged | ▥ used/size (pct%) AC | (sub)
 # `--no-prs` drops the PR parts. PR data comes from ~/.config/argus-pr/pr_tracking.py
 # (cached `gh pr view`, refreshed in the background).
 # PR labels are OSC 8 hyperlinks to the PR. In Rex they move to a tiled
@@ -48,16 +48,35 @@ def pr_parts(data, cwd, common, branch):
     return parts
 
 
-def dir_part(cwd, common, git_dir, top):
-    # Linked worktrees (`claude -w`) get random directory names, so show the
-    # main repo's name instead, plus any subdirectory below the worktree root.
-    if common and git_dir and common != git_dir and top:
-        name = os.path.basename(os.path.dirname(common.rstrip("/")))
-        rel = os.path.relpath(os.path.realpath(cwd), os.path.realpath(top))
-        if rel != ".":
-            name = f"{name}/{rel}"
-        return c(CYAN, f"dir {name}") + c(DIM, " (worktree)")
-    return c(CYAN, f"dir {os.path.basename(cwd.rstrip('/')) or '/'}")
+def norm(name):
+    # `claude -w foo/bar` makes folder `foo+bar` and branch `worktree-foo+bar`.
+    return name.lower().replace("+", "/").removeprefix("worktree-")
+
+
+def location_parts(data, cwd, common, git_dir, top, branch, dirty):
+    # Linked worktrees get arbitrary directory names, so name the main repo
+    # instead, tag the worktree, and fold the tag into the branch when the
+    # two name the same work.
+    ws = data.get("workspace", {})
+    if not (common and git_dir and common != git_dir and top):
+        name = os.path.basename(cwd.rstrip("/")) or "/"
+        parts = [c(CYAN, name)]
+        if branch:
+            parts.append(c(GREEN, f"⎇ {branch}{dirty}"))
+        return parts
+
+    repo = (ws.get("repo") or {}).get("name") or os.path.basename(os.path.dirname(common.rstrip("/")))
+    rel = os.path.relpath(os.path.realpath(cwd), os.path.realpath(top))
+    label = c(CYAN, repo if rel == "." else f"{repo}/{rel}")
+    wt = ws.get("git_worktree") or os.path.basename(top.rstrip("/"))
+    folded = bool(branch) and (norm(branch) == norm(wt) or norm(branch).endswith("/" + norm(wt)))
+    if not folded:
+        label += c(DIM, f" ·wt {wt}")
+    parts = [label]
+    if branch:
+        shown = branch.removeprefix("worktree-") if folded else branch
+        parts.append(c(GREEN, f"⎇ {shown}{dirty}"))
+    return parts
 
 
 def auto_compact_on():
@@ -97,13 +116,12 @@ def main():
 
     rev = git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir", "--git-dir", "--show-toplevel")
     common, git_dir, top = (rev.splitlines() + ["", "", ""])[:3]
-    parts.append(dir_part(cwd, common, git_dir, top))
-
     branch = git(cwd, "branch", "--show-current")
-    if branch:
-        # Pure marks a branch with uncommitted changes to tracked files with `*`.
-        dirty = "*" if git(cwd, "--no-optional-locks", "status", "--porcelain", "--untracked-files=no") else ""
-        parts.append(c(GREEN, f"⎇ {branch}{dirty}"))
+    # Pure marks a branch with uncommitted changes to tracked files with `*`.
+    dirty = ""
+    if branch and git(cwd, "--no-optional-locks", "status", "--porcelain", "--untracked-files=no"):
+        dirty = "*"
+    parts.extend(location_parts(data, cwd, common, git_dir, top, branch, dirty))
 
     if "--no-prs" not in sys.argv:
         with contextlib.suppress(Exception):
