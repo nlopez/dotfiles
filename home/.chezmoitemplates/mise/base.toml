@@ -10,6 +10,6 @@
 # zsh-completions package in the Nix profile.
 "npm:cf" = "1.0.0-beta.32"
 "github:dmno-dev/varlock" = "1.24.0"
-"github:DataDog/pup" = "2.4.7"
+"github:DataDog/pup" = "2.7.1"
 # Markdown/diff review TUI; also drives Rex Annotate (dot_config/rex/plannotator).
 "github:plannotator/plannotator-tui" = "0.11.7"
