@@ -5,4 +5,4 @@
 [tools]
 # nixpkgs' azure-cli depends on python3Packages.fabric, which is marked
 # broken. macOS gets the Homebrew cask instead (.chezmoidata/darwin/packages.yaml).
-azure-cli = "2.91.0"
+azure-cli = "2.93.0"
