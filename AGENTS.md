@@ -15,9 +15,7 @@
 - Release from a worktree branch, without asking: `git fetch origin && git rebase origin/main`,
   then `git push origin HEAD:main` (fast-forward only; if rejected, fetch, rebase, retry). Don't
   push the branch itself; if it was pushed, `git push origin --delete <branch>`. Then run
-  `chezmoi-fast update` to pull the main checkout and apply. Leave the worktree in place and
-  tell the user to run `wt remove <branch>` from the main checkout.
-- `modify_*` files are scripts. Rendered-template output needs `chezmoi:modify-template` and
+  `chezmoi-fast update` to pull the main checkout and apply.- `modify_*` files are scripts. Rendered-template output needs `chezmoi:modify-template` and
   no `.tmpl` suffix.
 - Pi plugins: declare in `.chezmoidata/pi.yaml` → `packages`, then `chezmoi apply`.
 

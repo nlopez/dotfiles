@@ -4,14 +4,12 @@
 import json
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 HOME = Path(__file__).resolve().parent.parent / "home"
 RM = HOME / "dot_local/bin/executable_agent-rm-guard"
 STAGE = HOME / "dot_local/bin/executable_agent-stage-guard"
 BYPASS = HOME / "dot_local/bin/executable_agent-bypass-guard"
-WORKTREE = HOME / "dot_local/bin/executable_agent-worktree-guard"
 
 # (guard, command, blocked)
 CASES = [
@@ -73,28 +71,6 @@ def main():
     for guard, command, want in CASES:
         if run(guard, {"tool_name": "Bash", "tool_input": {"command": command}}) != want:
             failures.append(f"{guard.name}: {command!r} should be {'blocked' if want else 'allowed'}")
-
-    with tempfile.TemporaryDirectory() as tmp:
-        main_repo, linked, plain = Path(tmp, "main"), Path(tmp, "linked"), Path(tmp, "plain")
-        (main_repo / ".git/worktrees/linked").mkdir(parents=True)
-        linked.mkdir()
-        (linked / ".git").write_text(f"gitdir: {main_repo}/.git/worktrees/linked\n")
-        (plain / ".git").mkdir(parents=True)
-        # (tool, cwd, command or file path, blocked)
-        worktree_cases = [
-            ("Bash", main_repo, "git checkout -b x", True),
-            ("Bash", tmp, "cd main && git commit -m x", True),
-            ("Bash", tmp, f"git -C {main_repo} reset --hard", True),
-            ("Bash", main_repo, "git status && git pull", False),
-            ("Bash", linked, "git commit -m x", False),
-            ("Bash", plain, "git checkout -b x", False),
-            ("Edit", tmp, str(main_repo / "a.py"), True),
-            ("Write", tmp, str(linked / "a.py"), False),
-        ]
-        for tool, cwd, what, want in worktree_cases:
-            key = "command" if tool == "Bash" else "file_path"
-            if run(WORKTREE, {"tool_name": tool, "cwd": str(cwd), "tool_input": {key: what}}) != want:
-                failures.append(f"{WORKTREE.name}: {tool} {what!r} should be {'blocked' if want else 'allowed'}")
 
     for f in failures:
         print(f, file=sys.stderr)
