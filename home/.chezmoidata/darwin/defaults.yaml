@@ -106,9 +106,6 @@ macos:
       ReduceMotionEnabled: 1
     com.apple.screencapture:
       target: clipboard
-    # Apple Intelligence on (System Settings > Apple Intelligence & Siri)
-    com.apple.CloudSubscriptionFeatures.optIn:
-      "545129924": true
     # "Displays have separate Spaces" on
     com.apple.spaces:
       spans-displays: false
