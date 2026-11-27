@@ -1,34 +1,39 @@
 #!/bin/bash
-# gpg.ssh.program. Coding agents (Claude Code, pi) sign commits with a
-# Secure Enclave key held by Secretive, which needs no approval; everything
-# else, including all verification, goes to 1Password's op-ssh-sign.
+# gpg.ssh.program. Coding agents (Claude Code, pi) sign nlopez commits with
+# this Mac's Secure Enclave key (~/.ssh/git-agent-signing, created by
+# run_after_51-agent-signing-key), which needs no approval. Everything else,
+# including all verification, goes to 1Password's op-ssh-sign.
 set -euo pipefail
 
 op={{ .platform.gpg_op_path | quote }}
-sock="$HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
+stub="$HOME/.ssh/git-agent-signing"
 
-if [[ "${CLAUDECODE:-}" != 1 && -z "${PI_CODING_AGENT:-}" ]] || [[ "${1:-} ${2:-}" != "-Y sign" ]] || [[ ! -S "$sock" ]]; then
+if [[ "${CLAUDECODE:-}" != 1 && -z "${PI_CODING_AGENT:-}" ]] || [[ "${1:-} ${2:-}" != "-Y sign" ]] || [[ ! -f "$stub" ]]; then
   exec "$op" "$@"
 fi
 
-# shortcut: signs with the first key Secretive holds; pick by name if it ever holds more than one.
-pub=$(SSH_AUTH_SOCK="$sock" ssh-add -L 2>/dev/null | head -n1) || true
-if [[ "$pub" != ecdsa-* && "$pub" != ssh-* ]]; then
-  exec "$op" "$@"
-fi
-
-keyfile=$(mktemp)
-trap 'rm -f "$keyfile"' EXIT
-printf '%s\n' "$pub" >"$keyfile"
-
-# Swap git's -f <key> for the agent key; -U tells ssh-keygen the key is in the agent.
+# Rebuild the arguments with the stub as the key. Only the nlopez key is
+# swapped: the agent key is registered on that GitHub account alone.
+orig=("$@")
 args=()
+swap=0
 while (($#)); do
   case "$1" in
-    -f) args+=(-f "$keyfile"); shift 2 ;;
+    -f)
+      if [[ "$(cut -d' ' -f1,2 "$2")" == "$(cut -d' ' -f1,2 "$HOME/.ssh/id_nlopez.pub")" ]]; then
+        swap=1
+        args+=(-f "$stub")
+      else
+        args+=(-f "$2")
+      fi
+      shift 2
+      ;;
     -U) shift ;;
     *) args+=("$1"); shift ;;
   esac
 done
 
-SSH_AUTH_SOCK="$sock" /usr/bin/ssh-keygen -U "${args[@]}"
+if ((swap)); then
+  SSH_SK_PROVIDER=/usr/lib/ssh-keychain.dylib exec /usr/bin/ssh-keygen "${args[@]}"
+fi
+exec "$op" "${orig[@]}"

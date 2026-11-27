@@ -1,0 +1,51 @@
+{{- if not .externalgit -}}
+#!/bin/bash
+
+# Give coding agents a commit-signing key that needs no approval: a
+# non-exportable Secure Enclave key (macOS 26 sc_auth + ssh-keychain.dylib),
+# its key stub at ~/.ssh/git-agent-signing, and the public key registered on
+# the nlopez GitHub account as a signing key. ~/.config/git/ssh-sign uses it.
+
+set -euo pipefail
+
+label=git-agent-signing
+stub="$HOME/.ssh/$label"
+stamp="${XDG_STATE_HOME:-$HOME/.local/state}/$label/registered"
+export SSH_SK_PROVIDER=/usr/lib/ssh-keychain.dylib
+
+[[ -e $SSH_SK_PROVIDER ]] || exit 0
+
+fingerprint() { sc_auth list-ctk-identities -t ssh | awk -v l="$label" '$4 == l { print $2 }'; }
+
+if [[ -z "$(fingerprint)" ]]; then
+  sc_auth create-ctk-identity -l "$label" -k p-256-ne -t none -N "$label"
+fi
+fp=$(fingerprint)
+
+if [[ ! -f $stub ]]; then
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
+  # shortcut: -K writes every Secure Enclave SSH key under the same name, so this assumes it is the only one; name the downloads apart if a second one appears.
+  (cd "$tmp" && /usr/bin/ssh-keygen -K -N "" </dev/null >/dev/null 2>&1)
+  for pub in "$tmp"/*.pub; do
+    if [[ "$(ssh-keygen -lf "$pub" | awk '{ print $2 }')" == "$fp" ]]; then
+      mv "${pub%.pub}" "$stub"
+      mv "$pub" "$stub.pub"
+    fi
+  done
+  [[ -f $stub ]] || { echo "$label: no key stub matched $fp" >&2; exit 1; }
+fi
+
+[[ "$(cat "$stamp" 2>/dev/null)" == "$fp" ]] && exit 0
+
+key=$(cut -d' ' -f1,2 "$stub.pub")
+if ! keys=$(gh api --hostname github.com user/ssh_signing_keys --jq '.[].key' 2>/dev/null); then
+  echo "$label: gh can't manage signing keys. Run: gh auth refresh -h github.com -s admin:ssh_signing_key" >&2
+  exit 0
+fi
+if ! grep -qxF "$key" <<<"$keys"; then
+  gh ssh-key add "$stub.pub" --type signing --title "$label {{ includeTemplate "hostname" . }}"
+fi
+mkdir -p "$(dirname "$stamp")"
+echo "$fp" >"$stamp"
+{{- end }}
