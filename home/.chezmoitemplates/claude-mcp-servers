@@ -10,6 +10,7 @@
      workspace secret (darwin/run_onchange_after_21-workspace-secrets.sh.tmpl).
      1password: needs the desktop app with Settings > Developer > Integrate
      with MCP clients enabled.
+     opentofu: hosted HTTP server providing OpenTofu Registry docs.
      Private servers (work machines only) come from private-mcp-servers:
      Pi's oauth.callbackUrl (:PORT/...) becomes Claude's oauth.callbackPort. */ -}}
 {{- $nix := includeTemplate "nix-profile" . -}}
@@ -23,6 +24,7 @@
 {{- if not .headless -}}
 {{-   $_ := set $s "1password" (dict "type" "stdio" "command" "1password-mcp" "args" (list)) -}}
 {{- end -}}
+{{- $_ := set $s "opentofu" (dict "type" "http" "url" "https://mcp.opentofu.org/mcp") -}}
 {{- if .work -}}
 {{-   range $k, $v := includeTemplate "private-mcp-servers" . | fromJson -}}
 {{-     $e := dict "type" "http" "url" $v.url -}}

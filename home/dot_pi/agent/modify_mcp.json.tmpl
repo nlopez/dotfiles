@@ -41,6 +41,10 @@ OVERLAY=$(cat << 'EOF'
       "command": "1password-mcp"
     }
 {{- end }}
+    ,"opentofu": {
+      "type": "http",
+      "url": "https://mcp.opentofu.org/mcp"
+    }
 {{- range $k, $v := $servers }}
     ,"{{ $k }}": {{ $v | toJson }}
 {{- end }}
