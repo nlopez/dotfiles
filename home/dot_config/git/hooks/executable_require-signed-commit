@@ -13,6 +13,19 @@
 # and pre-commit cannot detect the flag — require-signed-push (pre-push) is
 # the backstop for that. Bypass for a one-off with `git commit --no-verify`
 # (alias: git fcommit).
+#
+# Repos under the temp directory ($TMPDIR or /tmp) are exempt: test suites
+# build throwaway repos there with -c commit.gpgsign=false.
+
+toplevel=$(git rev-parse --show-toplevel 2>/dev/null) &&
+  toplevel=$(cd -P "$toplevel" && pwd)
+for tmp in "${TMPDIR:-}" /tmp; do
+  [ -n "$tmp" ] && [ -n "$toplevel" ] || continue
+  tmp=$(cd -P "$tmp" 2>/dev/null && pwd) || continue
+  case "$toplevel/" in
+  "${tmp%/}"/*) exit 0 ;;
+  esac
+done
 
 if [ "$(git config --type=bool commit.gpgsign)" != "true" ]; then
   cat >&2 <<'EOF'
