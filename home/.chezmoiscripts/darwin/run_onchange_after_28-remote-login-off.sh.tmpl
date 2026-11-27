@@ -1,9 +1,8 @@
-{{- if and .personal (not .work) -}}
+{{- if has (includeTemplate "hostname" .) (.packages.darwin.tailscaled_hosts | default list) -}}
 #!/bin/bash
 
-# Turn off Remote Login (macOS sshd): SSH to these Macs goes through Tailscale
-# SSH. launchctl is used because `systemsetup -setremotelogin` needs Full Disk
-# Access.
+# Turn off Remote Login (macOS sshd) on Macs that run Tailscale SSH. launchctl
+# is used because `systemsetup -setremotelogin` needs Full Disk Access.
 
 set -eufo pipefail
 

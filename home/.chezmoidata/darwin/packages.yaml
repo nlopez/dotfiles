@@ -5,7 +5,6 @@ packages:
     # Macs that run the open-source tailscaled (Homebrew formula, root launchd
     # daemon) in place of the Tailscale app: the app can't be a Tailscale SSH server.
     tailscaled_hosts:
-    - akane
     - akane-jr
     brew:
       # When true, `brew bundle` also uninstalls anything not declared here
