@@ -36,13 +36,6 @@ OVERLAY=$(cat << 'EOF'
 {{- end }}
     }
 {{- end }}
-{{- if and .personal (not .work) (not .headless) }}
-    ,"netbox": {
-      "command": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/varlock",
-      "args": ["run", "-p", "{{ .chezmoi.homeDir }}/.config/varlock/agents.env", "--filter", "NETBOX_TOKEN", "--inject", "vars", "--no-redact-stdout", "--", "{{ includeTemplate "nix-profile" . }}/bin/uvx", "netbox-mcp-server"],
-      "env": {"NETBOX_URL": "https://kikit.desertbluffs.com/"}
-    }
-{{- end }}
 {{- if not .headless }}
     ,"1password": {
       "command": "1password-mcp"
@@ -64,7 +57,7 @@ else
   # Retired servers, plus private servers excluded on this machine (see
   # .chezmoitemplates/private-mcp-servers), are removed.
 {{- $p := includeTemplate "private-data" . | fromYaml }}
-{{- $drop := concat (list "figma") ($p.mcp_retired | default list) }}
+{{- $drop := concat (list "figma" "netbox") ($p.mcp_retired | default list) }}
 {{- if .workspace }}{{ $drop = concat $drop ($p.mcp_workspace_exclude | default list) }}{{ end }}
   # On workspaces, wmux owns the servers it marks wmuxManaged (it points
   # them at its local auth proxy), so their entries are kept as wmux wrote them.
