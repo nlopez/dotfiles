@@ -1,7 +1,7 @@
 # Claude Code plugins installed at user scope by
 # .chezmoiscripts/run_onchange_after_18-claude-plugins.sh.tmpl. Each entry is
 # `<plugin>@<marketplace>` plus the GitHub repo that hosts the marketplace.
-# Engram and worktrunk have their own scripts (version-dependent setup).
+# Engram has its own script (version-dependent setup).
 # Anything else at user scope is uninstalled on apply by
 # .chezmoiscripts/run_after_20-claude-plugins-prune.sh.tmpl.
 # Private plugins live in the encrypted private data (claude.plugins).

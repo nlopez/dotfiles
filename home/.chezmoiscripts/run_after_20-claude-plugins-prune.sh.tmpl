@@ -1,12 +1,11 @@
 {{- /* Renders empty (chezmoi skips it) when every user-scope plugin and known
    marketplace is declared. Otherwise the plan shows in `chezmoi diff`.
    Declared: .chezmoidata/claude.yaml, the private claude.plugins (personal
-   machines), engram (run_after_10-engram-claude.sh.tmpl) and worktrunk
-   (run_onchange_after_19-worktrunk-plugins.sh.tmpl), plus the marketplaces
-   they come from and the official one. */ -}}
+   machines) and engram (run_after_10-engram-claude.sh.tmpl), plus the
+   marketplaces they come from and the official one. */ -}}
 {{- $p := includeTemplate "private-data" . | fromYaml -}}
 {{- $private := and .personal (not .work) (not .headless) -}}
-{{- $keep := list "engram@engram" "worktrunk@worktrunk" -}}
+{{- $keep := list "engram@engram" -}}
 {{- range .claude.plugins }}{{ $keep = append $keep .name }}{{ end -}}
 {{- if $private }}{{ range ($p.claude.plugins | default list) }}{{ $keep = append $keep . }}{{ end }}{{ end -}}
 {{- $keepMarketplaces := list "claude-plugins-official" -}}
