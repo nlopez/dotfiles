@@ -39,9 +39,16 @@ fi
 [[ "$(cat "$stamp" 2>/dev/null)" == "$fp" ]] && exit 0
 
 key=$(cut -d' ' -f1,2 "$stub.pub")
-if ! keys=$(gh api --hostname github.com user/ssh_signing_keys --jq '.[].key' 2>/dev/null); then
-  echo "$label: gh can't manage signing keys. Run: gh auth refresh -h github.com -s admin:ssh_signing_key" >&2
-  exit 0
+signing_keys() { gh api --hostname github.com user/ssh_signing_keys --jq '.[].key' 2>/dev/null; }
+if ! keys=$(signing_keys); then
+  # Missing scope: ask for it when someone is at the terminal (browser device flow).
+  if [[ -t 0 && -t 2 ]] && gh auth status -h github.com >/dev/null 2>&1; then
+    gh auth refresh -h github.com -s admin:ssh_signing_key
+  fi
+  if ! keys=$(signing_keys); then
+    echo "$label: gh can't manage signing keys. Run: gh auth login (or gh auth refresh -h github.com -s admin:ssh_signing_key), then chezmoi apply" >&2
+    exit 0
+  fi
 fi
 if ! grep -qxF "$key" <<<"$keys"; then
   gh ssh-key add "$stub.pub" --type signing --title "$label {{ includeTemplate "hostname" . }}"
