@@ -5,13 +5,10 @@
 Project linting is automated via pre-commit hooks and custom scripts. Ensure all changes pass validation before committing:
 
 ```sh
-# Lint all JSON templates (renders for darwin/linux)
-uv run scripts/jsonlint.py
-
 # Shellcheck all .sh and .sh.tmpl files in .chezmoiscripts/
 uv run scripts/shellcheck.py
 
-# Run all pre-commit hooks (gitleaks, yamlfmt, jsonlint, shellcheck)
+# Run all pre-commit hooks (gitleaks, ruff, prettier, shellcheck, agent-guards, yamlfmt)
 pre-commit run --all-files
 ```
 
@@ -53,7 +50,6 @@ and re-runs when the pup version in `mise/base.toml` changes.
 
 ### ✅ Always do
 
-- Use `uv run scripts/jsonlint.py` before committing
 - Run `pre-commit run --all-files` locally
 - Declare Pi npm packages in `.chezmoidata/pi.yaml`
 - Follow chezmoi `modify_` semantics: plain `modify_*` files are scripts; only use
