@@ -10,7 +10,7 @@ from pathlib import Path
 HOME = Path(__file__).resolve().parent.parent / "home"
 RM = HOME / "dot_local/bin/executable_agent-rm-guard"
 STAGE = HOME / "dot_local/bin/executable_agent-stage-guard"
-BYPASS = HOME / "dot_config/git/executable_agent-bypass-guard"
+BYPASS = HOME / "dot_local/bin/executable_agent-bypass-guard"
 WORKTREE = HOME / "dot_local/bin/executable_agent-worktree-guard"
 
 # (guard, command, blocked)
@@ -18,6 +18,7 @@ CASES = [
     (RM, "rm -rf build", True),
     (RM, "echo hi && rm x", True),
     (RM, "ls | xargs rm", True),
+    (RM, "ls | xargs -t rm", True),
     (RM, "command rm x", True),
     (RM, "/bin/rm x", True),
     (RM, "sudo rm x", True),

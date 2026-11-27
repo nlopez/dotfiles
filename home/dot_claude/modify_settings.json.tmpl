@@ -59,11 +59,11 @@ current["hooks"]["PreToolUse"] = atuin_hook + [{
     }],
 }, {
     # Block shell commands that skip git hooks or disable commit signing
-    # (rules in ~/.config/git/agent-bypass-guard, shared with pi).
+    # (rules in ~/.local/bin/agent-bypass-guard, shared with pi).
     "matcher": "Bash",
     "hooks": [{
         "type": "command",
-        "command": os.path.expanduser("~/.config/git/agent-bypass-guard"),
+        "command": os.path.expanduser("~/.local/bin/agent-bypass-guard"),
     }],
 }, {
     # Block permanent deletes (rm, find -delete) and point at `trash`

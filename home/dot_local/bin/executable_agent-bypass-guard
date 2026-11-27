@@ -2,27 +2,23 @@
 """Refuse agent shell commands that skip git hooks or disable commit signing.
 
 Used as a Claude Code PreToolUse hook (Bash matcher) and by the pi extension
-git-bypass-guard.ts. Reads the hook JSON on stdin ({"tool_input": {"command":
-...}}); exits 2 with the reason on stderr to block, 0 to allow.
+git-bypass-guard.ts; hook I/O in agent_guard.py.
 
 Commit/PR message text (-m/--message/--body/--title arguments and heredoc
 bodies) is ignored so a message that mentions a flag is not blocked.
 """
 
-import json
+import os
 import re
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+import agent_guard  # noqa: E402
 
 REASON = (
     "Blocked: this command skips git hooks or disables commit signing. "
     "Commits must be signed and hooks must run. If signing or a hook fails, "
     "stop and report the error to the user instead of working around it."
-)
-
-HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1.*?\n\2\b", re.S)
-MESSAGE_ARG = re.compile(
-    r"""(?:\s(?:-m|-b|-t|--message|--body|--title)(?:=|\s+))"""
-    r"""(?:"(?:[^"\\]|\\.)*"|'[^']*'|\$'(?:[^'\\]|\\.)*')"""
 )
 
 BYPASSES = [
@@ -42,22 +38,9 @@ BYPASSES = [
 ]
 
 
-def blocked(command: str) -> bool:
-    text = HEREDOC.sub(" ", command)
-    text = MESSAGE_ARG.sub(" ", text)
+def blocked(text: str) -> bool:
     return any(p.search(text) for p in BYPASSES)
 
 
-def main() -> int:
-    try:
-        command = json.load(sys.stdin).get("tool_input", {}).get("command") or ""
-    except (ValueError, AttributeError):
-        return 0
-    if blocked(command):
-        print(REASON, file=sys.stderr)
-        return 2
-    return 0
-
-
 if __name__ == "__main__":
-    sys.exit(main())
+    agent_guard.run(blocked, REASON)

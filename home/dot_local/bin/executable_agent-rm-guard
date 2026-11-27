@@ -2,52 +2,35 @@
 """Refuse agent shell commands that delete files permanently.
 
 Used as a Claude Code PreToolUse hook (Bash matcher) and by the pi extension
-rm-guard.ts. Reads the hook JSON on stdin ({"tool_input": {"command": ...}});
-exits 2 with the reason on stderr to block, 0 to allow.
+rm-guard.ts; hook I/O in agent_guard.py.
 
 Blocks `rm` as a command word and `find -delete`; `git rm` is allowed.
 Heredoc bodies and commit/PR message arguments are ignored.
 """
 
-import json
+import os
 import re
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+import agent_guard  # noqa: E402
 
 REASON = (
     "Blocked: rm and find -delete delete permanently. Run `trash <path>...` "
     "instead; it moves files to the system trash. Do not pass flags such as -rf."
 )
 
-HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1.*?\n\2\b", re.S)
-MESSAGE_ARG = re.compile(
-    r"""(?:\s(?:-m|-b|-t|--message|--body|--title)(?:=|\s+))"""
-    r"""(?:"(?:[^"\\]|\\.)*"|'[^']*'|\$'(?:[^'\\]|\\.)*')"""
-)
-
 # A command word starts after a separator, a subshell opener, or a wrapper.
-SUDO = r"sudo(?:\s+-\w+(?:\s+[^-\s]\S*)?)*"  # sudo and its options, e.g. -u bob
-START = r"(?:^|[;&|(){`\n]|\$\(|\b(?:" + SUDO + r"|xargs|exec|command|time|env|nohup|then|do|else)\s)\s*"
+WRAPPER = r"(?:sudo|xargs|exec|command|time|env|nohup)(?:\s+-\w+(?:\s+[^-\s]\S*)?)*"  # with options: sudo -u bob
+START = r"(?:^|[;&|(){`\n]|\$\(|\b(?:" + WRAPPER + r"|then|do|else)\s)\s*"
 RM = re.compile(START + r"\\?(?:/(?:usr/)?bin/)?rm(?=\s|$)")
 EXEC_RM = re.compile(r"-exec(?:dir)?\s+\\?(?:/(?:usr/)?bin/)?rm(?=\s|$)")
 FIND_DELETE = re.compile(r"\bfind\b[^;&|\n]*\s-delete\b")
 
 
-def blocked(command: str) -> bool:
-    text = HEREDOC.sub(" ", command)
-    text = MESSAGE_ARG.sub(" ", text)
+def blocked(text: str) -> bool:
     return any(p.search(text) for p in (RM, EXEC_RM, FIND_DELETE))
 
 
-def main() -> int:
-    try:
-        command = json.load(sys.stdin).get("tool_input", {}).get("command") or ""
-    except (ValueError, AttributeError):
-        return 0
-    if blocked(command):
-        print(REASON, file=sys.stderr)
-        return 2
-    return 0
-
-
 if __name__ == "__main__":
-    sys.exit(main())
+    agent_guard.run(blocked, REASON)
