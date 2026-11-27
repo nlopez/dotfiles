@@ -1,0 +1,16 @@
+{{- if and .personal (not .work) -}}
+#!/bin/bash
+
+# Turn off Remote Login (macOS sshd): SSH to these Macs goes through Tailscale
+# SSH. launchctl is used because `systemsetup -setremotelogin` needs Full Disk
+# Access.
+
+set -eufo pipefail
+
+if launchctl print system/com.openssh.sshd >/dev/null 2>&1; then
+  sudo launchctl bootout system/com.openssh.sshd
+fi
+if ! launchctl print-disabled system | grep -q '"com.openssh.sshd" => disabled'; then
+  sudo launchctl disable system/com.openssh.sshd
+fi
+{{- end }}

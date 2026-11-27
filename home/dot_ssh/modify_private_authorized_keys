@@ -1,7 +1,0 @@
-{{- /* chezmoi:modify-template */ -}}
-{{- /* Personal Macs trust exactly the nlopez key; elsewhere the file is left alone. */ -}}
-{{- if and .personal (not .work) -}}
-{{ include "dot_ssh/id_nlopez.pub" | trim }}
-{{ else -}}
-{{ .chezmoi.stdin }}
-{{- end -}}

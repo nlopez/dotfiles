@@ -7,6 +7,11 @@
 .bash_profile
 {{ end -}}
 
+# Personal Macs take SSH through Tailscale SSH, so no key is authorized for sshd
+{{ if and .personal (not .work) -}}
+.ssh/authorized_keys
+{{ end -}}
+
 # macOS Terminal.app session files — disabled via SHELL_SESSIONS_DISABLE=1
 .zsh_sessions/
 
