@@ -4,3 +4,5 @@
 
 [tools]
 "pypi:osxphotos" = "0.78.1"
+# Rule-based file cleanup; configs in ~/.config/organize (e.g. `organize run illust`).
+"pypi:organize-tool" = "3.4.0"

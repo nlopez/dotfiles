@@ -1,0 +1,37 @@
+# Flattens illust_<id>.zip downloads and their illust_<id>/ folders into
+# ~/Downloads, then trashes the zip and the emptied folder.
+#
+#   organize sim illust   # preview
+#   organize run illust
+rules:
+- name: Unpack illust zips
+  locations: ~/Downloads
+  filters:
+  - regex: '^illust_\d+\.zip$'
+  actions:
+  - shell: "ditto -x -k '{path}' '{path.parent}'"
+  - trash
+- name: Move images out of illust folders
+  locations:
+  - path: ~/Downloads
+    max_depth: 1
+  subfolders: true
+  filters:
+  - python: |
+      import re
+      return bool(re.fullmatch(r"illust_\d+", path.parent.name)) and not (
+          path.name.startswith(".")
+      )
+  actions:
+  - move:
+      dest: "{path.parent.parent}/"
+      on_conflict: skip
+- name: Trash emptied illust folders
+  locations: ~/Downloads
+  targets: dirs
+  filters:
+  - regex: '^illust_\d+$'
+  - python: |
+      return not any(not p.name.startswith(".") for p in path.iterdir())
+  actions:
+  - trash
