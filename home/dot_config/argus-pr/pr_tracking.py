@@ -82,6 +82,8 @@ def _session_path(session_id, kind="sessions", ext=".json"):
 DB_PATH = os.path.join(CACHE, "state.db")
 NOTIFY_PATH = os.path.join(CACHE, "notify")
 
+# Bump when _SCHEMA changes, so existing databases pick up the change.
+SCHEMA_VERSION = 1
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS session_prs (
     session_id TEXT NOT NULL,
@@ -159,10 +161,12 @@ def _db():
     fresh = not os.path.exists(DB_PATH)
     conn = sqlite3.connect(DB_PATH, timeout=5.0, isolation_level=None)
     try:
-        conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
-        conn.execute("PRAGMA busy_timeout=5000")
-        conn.executescript(_SCHEMA)
+        # WAL mode and the schema persist in the file; set them up once per schema version.
+        if conn.execute("PRAGMA user_version").fetchone()[0] != SCHEMA_VERSION:
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.executescript(_SCHEMA)
+            conn.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
         if fresh:
             conn.execute("BEGIN IMMEDIATE")
             try:
