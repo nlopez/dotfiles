@@ -1,9 +1,10 @@
 {{- /* Copies .chezmoitemplates/firefox/ into every Firefox profile. Profile
    directory names are random per machine, so these can't be plain target files.
-   Prefs go in the org.mozilla.firefox policy in .chezmoidata/darwin/defaults.yaml.
+   Prefs go in the org.mozilla.firefox policy in .chezmoidata/darwin/defaults.yaml;
+   user.js holds only the ones that policy rejects.
    Renders empty (chezmoi skips it) when every profile already matches. */ -}}
 {{- /* shortcut: only profiles under Profiles/, not ones profiles.ini points elsewhere (IsRelative=0); parse profiles.ini if that ever happens. */ -}}
-{{- $files := dict "chrome/userChrome.css" (include ".chezmoitemplates/firefox/userChrome.css") }}
+{{- $files := dict "chrome/userChrome.css" (include ".chezmoitemplates/firefox/userChrome.css") "user.js" (include ".chezmoitemplates/firefox/user.js") }}
 {{- $pending := list }}
 {{- range glob (joinPath .chezmoi.homeDir "Library/Application Support/Firefox/Profiles/*") }}
 {{-   $profile := . }}
@@ -20,7 +21,7 @@
 #!/bin/bash
 
 # Writes Firefox profile files declared in .chezmoitemplates/firefox/.
-# Restart Firefox to pick up userChrome.css.
+# Restart Firefox to pick up userChrome.css and user.js.
 
 set -euo pipefail
 {{ range $pending }}
