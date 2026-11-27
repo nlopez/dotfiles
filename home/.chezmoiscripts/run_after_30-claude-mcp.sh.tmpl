@@ -1,0 +1,44 @@
+{{- /* Renders empty (chezmoi skips it) when the user-scope MCP servers in
+   ~/.claude.json match .chezmoitemplates/claude-mcp-servers plus engram.
+   Otherwise the plan shows in `chezmoi diff`. */ -}}
+{{- $want := includeTemplate "claude-mcp-servers" . | fromJson -}}
+{{- $claudeJson := joinPath .chezmoi.homeDir ".claude.json" -}}
+{{- $have := dict -}}
+{{- if stat $claudeJson }}{{ $have = (include $claudeJson | fromJson).mcpServers | default dict }}{{ end -}}
+{{- $add := list -}}
+{{- range $name, $def := $want -}}
+{{-   if ne (toJson $def) (toJson (get $have $name)) }}{{ $add = append $add $name }}{{ end -}}
+{{- end -}}
+{{- $remove := list -}}
+{{- range $name, $_ := $have -}}
+{{-   if not (or (hasKey $want $name) (eq $name "engram")) }}{{ $remove = append $remove $name }}{{ end -}}
+{{- end -}}
+{{- if or $add $remove -}}
+#!/bin/bash
+
+# Makes Claude Code's user-scope MCP servers match
+# .chezmoitemplates/claude-mcp-servers: registers missing or changed servers
+# and removes undeclared ones (engram excepted). Re-registering clears a
+# server's OAuth login: run /mcp in Claude Code afterwards to sign in again.
+#
+# Pending changes:
+{{- range $add }}
+#   register mcp server {{ . }}
+{{- end }}
+{{- range $remove }}
+#   remove mcp server {{ . }}
+{{- end }}
+
+set -eufo pipefail
+
+export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+{{ range $remove }}
+claude mcp remove {{ . | squote }} --scope user
+{{- end }}
+{{- range $add }}
+claude mcp remove {{ . | squote }} --scope user >/dev/null 2>&1 || true
+claude mcp add-json {{ . | squote }} --scope user {{ get $want . | toJson | squote }}
+{{- end }}
+{{ end -}}

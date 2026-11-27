@@ -1,0 +1,40 @@
+{{- /* JSON object of the user-scope MCP servers Claude Code gets on this
+     machine, each in the form `claude mcp add-json` stores it in
+     ~/.claude.json (stdio entries carry "args"). The full set, except engram,
+     which `engram setup` registers (run_after_10-engram-claude.sh.tmpl).
+     run_after_30-claude-mcp.sh.tmpl registers these and removes the rest. Pi
+     gets the same servers from dot_pi/agent/modify_mcp.json.tmpl.
+
+     kagi: desktops launch it through `varlock run`, which resolves
+     KAGI_API_KEY from 1Password (dot_config/varlock/agents.env.tmpl) into that
+     process only. Workspaces have no `op`; they export KAGI_API_KEY as a
+     workspace secret (darwin/run_onchange_after_21-workspace-secrets.sh.tmpl).
+     1password: needs the desktop app with Settings > Developer > Integrate
+     with MCP clients enabled.
+     Private servers (work machines only) come from private-mcp-servers:
+     Pi's oauth.callbackUrl (:PORT/...) becomes Claude's oauth.callbackPort. */ -}}
+{{- $nix := includeTemplate "nix-profile" . -}}
+{{- $s := dict -}}
+{{- $_ := set $s "playwright" (dict "type" "stdio" "command" (print $nix "/bin/npx") "args" (list "-y" (.mcp.playwright | trimPrefix "npm:"))) -}}
+{{- if .workspace -}}
+{{-   $_ := set $s "kagi" (dict "type" "stdio" "command" (print $nix "/bin/uvx") "args" (list "kagimcp")) -}}
+{{- else if not .headless -}}
+{{-   $_ := set $s "kagi" (dict "type" "stdio" "command" (print .chezmoi.homeDir "/.local/share/mise/shims/varlock") "args" (list "run" "-p" (print .chezmoi.homeDir "/.config/varlock/agents.env") "--filter" "KAGI_API_KEY" "--inject" "vars" "--no-redact-stdout" "--" (print $nix "/bin/uvx") "kagimcp")) -}}
+{{- end -}}
+{{- if not .headless -}}
+{{-   $_ := set $s "1password" (dict "type" "stdio" "command" "1password-mcp" "args" (list)) -}}
+{{- end -}}
+{{- if .work -}}
+{{-   range $k, $v := includeTemplate "private-mcp-servers" . | fromJson -}}
+{{-     $e := dict "type" "http" "url" $v.url -}}
+{{-     $id := dig "oauth" "clientId" "" $v -}}
+{{-     if $id -}}
+{{-       $o := dict "clientId" $id -}}
+{{-       $port := dig "oauth" "callbackUrl" "" $v | regexFind ":[0-9]+/" | trimAll ":/" -}}
+{{-       if $port }}{{ $_ := set $o "callbackPort" (atoi $port) }}{{ end -}}
+{{-       $_ := set $e "oauth" $o -}}
+{{-     end -}}
+{{-     $_ := set $s $k $e -}}
+{{-   end -}}
+{{- end -}}
+{{- $s | toJson -}}

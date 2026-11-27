@@ -45,7 +45,7 @@ without the hook.
 | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `onepassword_account`                                                     | `darwin/run_onchange_after_21-workspace-secrets.sh.tmpl`, `dot_config/zsh/dot_zprofile.tmpl`, `dot_config/varlock/agents.env.tmpl` |
 | `workspace_secrets.*`                                                     | same                                                                                                                               |
-| `mcp_servers`, `mcp_workspace_exclude`, `mcp_retired`, `mcp_descriptions` | `.chezmoitemplates/private-mcp-servers`, Pi `modify_mcp.json.tmpl`, `run_onchange_after_32-work-mcp-claude.sh.tmpl`                |
+| `mcp_servers`, `mcp_workspace_exclude`, `mcp_retired`, `mcp_descriptions` | `.chezmoitemplates/private-mcp-servers`, Pi `modify_mcp.json.tmpl`, `.chezmoitemplates/claude-mcp-servers`                         |
 | `claude.plugins`, `claude.remove_mcp`                                     | `run_onchange_after_18-claude-plugins.sh.tmpl`                                                                                     |
 | `pi.packages`, `pi.local_repo`, `pi.local_packages`                       | Pi `modify_settings.json.tmpl`, `run_after_pi-packages.py.tmpl`, `run_after_clone-work-pi-packages.sh.tmpl`                        |
 | `pi.gateway`                                                              | Pi `modify_models.json.tmpl`                                                                                                       |

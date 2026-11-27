@@ -1,4 +1,4 @@
-# MCP servers launched via npx, shared by Claude (run_onchange_after_31-playwright-claude.sh.tmpl)
+# MCP servers launched via npx, shared by Claude (.chezmoitemplates/claude-mcp-servers)
 # and Pi (dot_pi/agent/modify_mcp.json.tmpl).
 # Renovate scans this file for npm:pkg@version patterns.
 #
