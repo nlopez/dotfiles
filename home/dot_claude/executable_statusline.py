@@ -46,6 +46,18 @@ def pr_parts(data, cwd, common, branch):
     return parts
 
 
+def dir_part(cwd, common, git_dir, top):
+    # Linked worktrees (`claude -w`) get random directory names, so show the
+    # main repo's name instead, plus any subdirectory below the worktree root.
+    if common and git_dir and common != git_dir and top:
+        name = os.path.basename(os.path.dirname(common.rstrip("/")))
+        rel = os.path.relpath(os.path.realpath(cwd), os.path.realpath(top))
+        if rel != ".":
+            name = f"{name}/{rel}"
+        return c(CYAN, f"dir {name}") + c(DIM, " (worktree)")
+    return c(CYAN, f"dir {os.path.basename(cwd.rstrip('/')) or '/'}")
+
+
 def auto_compact_on():
     config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
     path = os.path.join(config_dir, ".claude.json") if config_dir else os.path.expanduser("~/.claude.json")
@@ -77,14 +89,15 @@ def main():
     elif data.get("thinking", {}).get("enabled"):
         parts.append(c(BLUE, "think"))
 
-    parts.append(c(CYAN, f"dir {os.path.basename(cwd.rstrip('/')) or '/'}"))
+    rev = git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir", "--git-dir", "--show-toplevel")
+    common, git_dir, top = (rev.splitlines() + ["", "", ""])[:3]
+    parts.append(dir_part(cwd, common, git_dir, top))
 
     branch = git(cwd, "branch", "--show-current")
     if branch:
         parts.append(c(GREEN, f"⎇ {branch}"))
 
     if "--no-prs" not in sys.argv:
-        common = git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir")
         with contextlib.suppress(Exception):
             parts.extend(pr_parts(data, cwd, common, branch))
 
