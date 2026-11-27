@@ -10,6 +10,10 @@
   change touches secrets or age-encrypted files.
 - Edit via `chezmoi edit <path>` / `chezmoi source-path <path>`; verify with `--dry-run`.
 - Commit and push `main` when done. No PRs, no bypassed hooks.
+- Release from a worktree branch, without asking: `git fetch origin && git rebase origin/main`,
+  then `git push origin HEAD:main` (fast-forward only; if rejected, fetch, rebase, retry). Don't
+  push the branch itself; if it was pushed, `git push origin --delete <branch>`. Leave the
+  worktree in place and tell the user to run `wt remove <branch>` from the main checkout.
 - `modify_*` files are scripts. Rendered-template output needs `chezmoi:modify-template` and
   no `.tmpl` suffix.
 - Pi plugins: declare in `.chezmoidata/pi.yaml` → `packages`, then `chezmoi apply`.
