@@ -59,5 +59,6 @@ tfplan*
 !.terraform.lock.hcl
 
 **/.claude/settings.local.json
+.claude/worktrees/
 .playwright-mcp/
 .envrc
