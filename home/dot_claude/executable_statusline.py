@@ -9,8 +9,10 @@
 # pane on the right of Claude's pane (~/.config/argus-pr/pr_float.py).
 # Claude pipes a JSON blob on stdin; whatever we print is the status line.
 import contextlib
+import getpass
 import json
 import os
+import socket
 import sys
 
 sys.path.insert(0, os.path.expanduser("~/.config/argus-pr"))
@@ -79,6 +81,10 @@ def main():
     sep = c(DIM, " | ")
     parts = []
 
+    # Like the zsh prompt (pure): user@host first, always shown.
+    with contextlib.suppress(Exception):
+        parts.append(c(DIM, f"{getpass.getuser()}@{socket.gethostname().split('.')[0]}"))
+
     model = data.get("model", {}).get("display_name")
     if model:
         parts.append(c(MAGENTA, model))
@@ -95,7 +101,9 @@ def main():
 
     branch = git(cwd, "branch", "--show-current")
     if branch:
-        parts.append(c(GREEN, f"⎇ {branch}"))
+        # Pure marks a branch with uncommitted changes to tracked files with `*`.
+        dirty = "*" if git(cwd, "--no-optional-locks", "status", "--porcelain", "--untracked-files=no") else ""
+        parts.append(c(GREEN, f"⎇ {branch}{dirty}"))
 
     if "--no-prs" not in sys.argv:
         with contextlib.suppress(Exception):
