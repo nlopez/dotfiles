@@ -1,3 +1,5 @@
+{{- /* Work machines only; renders empty (so chezmoi removes it) elsewhere. */ -}}
+{{- if .work -}}
 /**
  * pr-tracker extension
  *
@@ -327,3 +329,4 @@ export default function (pi: ExtensionAPI) {
     },
   });
 }
+{{ end -}}

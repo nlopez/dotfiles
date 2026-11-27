@@ -2,8 +2,9 @@
 # Managed by chezmoi — source: home/dot_claude/executable_statusline.py
 # Claude Code status line modelled on pi's powerline footer:
 #   model | think:<effort> | dir <name> | ⎇ <branch> | PR #12 ✓ approved | PRs #9 ✗ · repo#4 merged
-#   | ▥ used/size (pct%) AC | (sub) | 🧠 <project> · ready
-# PR data comes from ~/.config/argus-pr/pr_tracking.py (cached `gh pr view`, refreshed in the background).
+#   | ▥ used/size (pct%) AC | (sub)
+# `--no-prs` drops the PR parts. PR data comes from ~/.config/argus-pr/pr_tracking.py
+# (cached `gh pr view`, refreshed in the background).
 # PR labels are OSC 8 hyperlinks to the PR. In Rex they move to a tiled
 # pane on the right of Claude's pane (~/.config/argus-pr/pr_float.py).
 # Claude pipes a JSON blob on stdin; whatever we print is the status line.
@@ -11,12 +12,11 @@ import contextlib
 import json
 import os
 import sys
-import urllib.request
 
 sys.path.insert(0, os.path.expanduser("~/.config/argus-pr"))
 import pr_float  # noqa: E402
 import pr_tracking  # noqa: E402
-from pr_tracking import BLUE, CYAN, DIM, GREEN, MAGENTA, RED, WHITE, YELLOW, c, git  # noqa: E402
+from pr_tracking import BLUE, CYAN, DIM, GREEN, MAGENTA, WHITE, c, git  # noqa: E402
 
 
 def tokens(n):
@@ -25,14 +25,6 @@ def tokens(n):
     if n >= 1000:
         return f"{n / 1000:.1f}".removesuffix(".0") + "k"
     return str(n)
-
-
-def engram_ready():
-    try:
-        with urllib.request.urlopen("http://127.0.0.1:7437/health", timeout=0.3) as r:
-            return r.status == 200
-    except Exception:
-        return False
 
 
 def pr_parts(data, cwd, common, branch):
@@ -91,9 +83,10 @@ def main():
     if branch:
         parts.append(c(GREEN, f"⎇ {branch}"))
 
-    common = git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir")
-    with contextlib.suppress(Exception):
-        parts.extend(pr_parts(data, cwd, common, branch))
+    if "--no-prs" not in sys.argv:
+        common = git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir")
+        with contextlib.suppress(Exception):
+            parts.extend(pr_parts(data, cwd, common, branch))
 
     ctx = data.get("context_window") or {}
     size = ctx.get("context_window_size")
@@ -110,12 +103,6 @@ def main():
         cost = data.get("cost", {}).get("total_cost_usd")
         if cost is not None:
             parts.append(c(WHITE, f"${cost:.2f}"))
-
-    # Engram: project = repo name (worktree-safe via the common git dir), health = local server.
-    project = os.path.basename(os.path.dirname(common)) if common else ""
-    if project:
-        state = c(YELLOW, "ready") if engram_ready() else c(RED, "offline")
-        parts.append(f"🧠 {c(YELLOW, project)} {c(DIM, '·')} {state}")
 
     print(sep.join(parts))
 

@@ -1,5 +1,5 @@
 {{- /* Renders empty (chezmoi skips it) when the user-scope MCP servers in
-   ~/.claude.json match .chezmoitemplates/claude-mcp-servers plus engram.
+   ~/.claude.json match .chezmoitemplates/claude-mcp-servers.
    Otherwise the plan shows in `chezmoi diff`. */ -}}
 {{- $want := includeTemplate "claude-mcp-servers" . | fromJson -}}
 {{- $claudeJson := joinPath .chezmoi.homeDir ".claude.json" -}}
@@ -11,14 +11,14 @@
 {{- end -}}
 {{- $remove := list -}}
 {{- range $name, $_ := $have -}}
-{{-   if not (or (hasKey $want $name) (eq $name "engram")) }}{{ $remove = append $remove $name }}{{ end -}}
+{{-   if not (hasKey $want $name) }}{{ $remove = append $remove $name }}{{ end -}}
 {{- end -}}
 {{- if or $add $remove -}}
 #!/bin/bash
 
 # Makes Claude Code's user-scope MCP servers match
 # .chezmoitemplates/claude-mcp-servers: registers missing or changed servers
-# and removes undeclared ones (engram excepted). Re-registering clears a
+# and removes undeclared ones. Re-registering clears a
 # server's OAuth login: run /mcp in Claude Code afterwards to sign in again.
 #
 # Pending changes:

@@ -9,12 +9,9 @@ pi:
   packages:
   - "npm:pi-auto-theme@1.1.1"
   - "npm:pi-interrupt-steer@0.1.0"
-  - "npm:gentle-engram@0.7.1"
   - "npm:pi-away@0.1.4"
   - "npm:pi-cc-monitor@0.13.1"
   - "npm:@mrclrchtr/supi-prompt-suggestions@14.0.0"
-  - "npm:@dietrichgebert/ponytail@5.3.3"
-  - "npm:context-mode@2.2.1"
   - "npm:pi-intercom@0.18.1"
   - "npm:pi-subagents@0.90.0"
   - "npm:@getpipher/vision@0.5.3"

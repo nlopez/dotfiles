@@ -1,7 +1,6 @@
 {{- /* JSON object of the user-scope MCP servers Claude Code gets on this
      machine, each in the form `claude mcp add-json` stores it in
-     ~/.claude.json (stdio entries carry "args"). The full set, except engram,
-     which `engram setup` registers (run_after_10-engram-claude.sh.tmpl).
+     ~/.claude.json (stdio entries carry "args").
      run_after_30-claude-mcp.sh.tmpl registers these and removes the rest. Pi
      gets the same servers from dot_pi/agent/modify_mcp.json.tmpl.
 

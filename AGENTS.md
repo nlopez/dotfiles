@@ -8,14 +8,16 @@
 
 - `chezmoi-fast <cmd>` (`CHEZMOI_SKIP_SECRETS=1`) by default. Plain `chezmoi` only when the
   change touches secrets or age-encrypted files.
-- Edit via `chezmoi edit <path>` / `chezmoi source-path <path>`; verify with `--dry-run`.
+- Edit source files under `home/` directly (`chezmoi source-path <target>` finds one); verify
+  with `--dry-run`.
 - In a worktree, chezmoi still reads `~/.local/share/chezmoi`: pass `-S <worktree root>` to
   `diff` and `apply --dry-run`. Never `apply` from a worktree; `~` is shared.
 - Commit and push `main` when done. No PRs, no bypassed hooks.
 - Release from a worktree branch, without asking: `git fetch origin && git rebase origin/main`,
   then `git push origin HEAD:main` (fast-forward only; if rejected, fetch, rebase, retry). Don't
   push the branch itself; if it was pushed, `git push origin --delete <branch>`. Then run
-  `chezmoi-fast update` to pull the main checkout and apply.- `modify_*` files are scripts. Rendered-template output needs `chezmoi:modify-template` and
+  `chezmoi-fast update` to pull the main checkout and apply.
+- `modify_*` files are scripts. Rendered-template output needs `chezmoi:modify-template` and
   no `.tmpl` suffix.
 - Pi plugins: declare in `.chezmoidata/pi.yaml` → `packages`, then `chezmoi apply`.
 

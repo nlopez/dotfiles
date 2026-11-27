@@ -11,7 +11,7 @@
 #             effortLevel (default medium; an /effort choice is kept),
 #             theme (auto = match the terminal's light/dark background),
 #             statusLine (pi-style bar, see statusline.py),
-#             hooks (atuin, no-chat-comments, agent-bypass-guard, agent-rm-guard, agent-stage-guard, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
+#             hooks (atuin, no-chat-comments, agent-bypass-guard, agent-rm-guard, agent-stage-guard, Rex session-start, and on work machines track-prs, pr-notify).
 # Removes:    ECC env. Undeclared plugins and marketplaces are removed by
 #             .chezmoiscripts/run_after_20-claude-plugins-prune.sh.tmpl.
 import json
@@ -84,6 +84,7 @@ current["hooks"]["PreToolUse"] = atuin_hook + [{
     }],
 }]
 
+{{- if .work }}
 # PostToolUse: record PRs this session opens or pushes to, for the status line
 # (script managed in hooks/executable_track-prs.py).
 current["hooks"]["PostToolUse"] = atuin_hook + [{
@@ -94,19 +95,15 @@ current["hooks"]["PostToolUse"] = atuin_hook + [{
         "timeout": 5,
     }],
 }]
+{{- end }}
 
-# Keep third-party SessionStart hooks that are installed outside chezmoi and
-# re-register themselves at runtime, so they are preserved rather than declared:
-#   - context-mode's cache-heal hook (its MCP server re-registers it on every
-#     boot, start.mjs, with a command path built from the running node binary)
-#   - Rex's session-start hook (`rex skill setup` writes it into whichever
-#     settings file it finds; it is declared below, preserved copies are kept
-#     so re-running rex setup does not duplicate it)
+# Keep Rex's session-start hook if `rex skill setup` wrote it (it writes into
+# whichever settings file it finds; it is declared below, preserved copies are
+# kept so re-running rex setup does not duplicate it).
 keep_session_start = [
     h for h in previous_hooks.get("SessionStart") or []
     if any(
-        ("context-mode-cache-heal" in (hh.get("command") or ""))
-        or ("rex __internal session-start" in (hh.get("command") or ""))
+        "rex __internal session-start" in (hh.get("command") or "")
         for hh in h.get("hooks") or []
     )
 ]
@@ -121,34 +118,21 @@ rex_hook = [{
 }]
 # Prefer the declared copy; dedupe preserved Rex entries against it by
 # command text so re-running `rex skill setup` never duplicates the hook.
-cache_heal = []
-surviving_rex = []
-for h in keep_session_start:
-    cmds = [hh.get("command") or "" for hh in h.get("hooks") or []]
-    if any("context-mode-cache-heal" in c for c in cmds):
-        cache_heal.append(h)
-    elif any("rex __internal session-start" in c for c in cmds):
-        if not set(cmds) <= {rex_hook[0]["hooks"][0]["command"]}:
-            surviving_rex.append(h)
+surviving_rex = [
+    h for h in keep_session_start
+    if not {hh.get("command") or "" for hh in h.get("hooks") or []} <= {rex_hook[0]["hooks"][0]["command"]}
+]
+current["hooks"]["SessionStart"] = surviving_rex + rex_hook
+{{- if .work }}
 # Open the Rex floating PR box, and backfill session PRs from the transcript
 # when a session is resumed.
-track_prs_resume = [{
+current["hooks"]["SessionStart"] += [{
     "hooks": [{
         "type": "command",
         "command": os.path.expanduser("~/.claude/hooks/track-prs.py"),
         "timeout": 5,
     }],
 }]
-# Give Claude its Engram session ID so writes work with several sessions open
-# in one directory (script managed in hooks/executable_engram-session-id.sh).
-engram_session_id = [{
-    "hooks": [{
-        "type": "command",
-        "command": os.path.expanduser("~/.claude/hooks/engram-session-id.sh"),
-        "timeout": 5,
-    }],
-}]
-current["hooks"]["SessionStart"] = surviving_rex + rex_hook + track_prs_resume + engram_session_id + cache_heal
 
 # PR notifications from the Rex PR box (CI failed, approved, changes requested), script managed
 # in hooks/executable_pr-notify.py. The Stop hook waits in the background and
@@ -160,36 +144,23 @@ current["hooks"]["Stop"] = [{
 current["hooks"]["UserPromptSubmit"] = [{
     "hooks": [{"type": "command", "command": pr_notify, "timeout": 5}],
 }]
+{{- end }}
 
 # Status line: pi-style bar (script managed in executable_statusline.py).
 current["statusLine"] = {
     "type": "command",
+{{- if .work }}
     "command": os.path.expanduser("~/.claude/statusline.py"),
     # PR status is fetched in the background after a render, so re-render on a
     # timer to show it without waiting for the next conversation event.
     "refreshInterval": 10,
-}
-for key in ("ECC_DISABLED_MCPS", "_ZO_DOCTOR"):
-    current.get("env", {}).pop(key, None)
-
-# Engram: pin one data dir so hooks and the MCP server never fall back to ~/.engram
-# when Claude isn't launched from a shell that exports ENGRAM_DATA_DIR (see
-# dot_config/shell/env.tmpl), and drop permissions for the nonexistent
-# plugin-provided MCP server (`engram setup claude-code` registers a user-level
-# `engram` server, so only mcp__engram__* is real).
-xdg_data = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
-current.setdefault("env", {})["ENGRAM_DATA_DIR"] = os.path.join(xdg_data, "engram")
-{{- if or (and .personal (not .headless)) .work }}
-# Cloud autosync: the server URL and token come from <data dir>/cloud.json
-# (dot_local/share/engram/private_cloud.json.tmpl); only the opt-in flag is env.
-current["env"]["ENGRAM_CLOUD_AUTOSYNC"] = "1"
 {{- else }}
-current["env"].pop("ENGRAM_CLOUD_AUTOSYNC", None)
+    "command": os.path.expanduser("~/.claude/statusline.py") + " --no-prs",
 {{- end }}
-
-# Context-mode: Claude's own state dir, under XDG state home.
-xdg_state = os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state")
-current["env"]["CONTEXT_MODE_DIR"] = os.path.join(xdg_state, "claude", "context-mode")
+}
+current.setdefault("env", {})
+for key in ("ECC_DISABLED_MCPS", "_ZO_DOCTOR", "ENGRAM_DATA_DIR", "ENGRAM_CLOUD_AUTOSYNC", "CONTEXT_MODE_DIR"):
+    current["env"].pop(key, None)
 
 # Local mods (function-hook plugins) deployed from dot_claude/mods/, loaded
 # from their folders; other folders already listed are kept.
@@ -203,7 +174,8 @@ current["env"]["CLAUDE_CODE_PLUGIN_DIRS"] = os.pathsep.join(
 permissions = current.get("permissions", {})
 if "allow" in permissions:
     permissions["allow"] = [
-        p for p in permissions["allow"] if not p.startswith("mcp__plugin_engram_engram__")
+        p for p in permissions["allow"]
+        if not p.startswith(("mcp__engram__", "mcp__plugin_engram_engram__", "mcp__plugin_context-mode_"))
     ]
 
 emit_settings(current, current_raw, ensure_ascii=False)
