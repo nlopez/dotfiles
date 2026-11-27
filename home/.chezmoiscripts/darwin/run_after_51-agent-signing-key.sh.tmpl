@@ -25,8 +25,8 @@ fp=$(fingerprint)
 if [[ ! -f $stub ]]; then
   tmp=$(mktemp -d)
   trap 'rm -rf "$tmp"' EXIT
-  # shortcut: -K writes every Secure Enclave SSH key under the same name, so this assumes it is the only one; name the downloads apart if a second one appears.
-  (cd "$tmp" && /usr/bin/ssh-keygen -K -N "" </dev/null >/dev/null 2>&1)
+  # The Secure Enclave key has no PIN, but ssh-keygen -K asks for one on /dev/tty; answer it with an empty askpass.
+  (cd "$tmp" && SSH_ASKPASS=/usr/bin/true SSH_ASKPASS_REQUIRE=force /usr/bin/ssh-keygen -K -N "" </dev/null >/dev/null 2>&1)
   for pub in "$tmp"/*.pub; do
     if [[ "$(ssh-keygen -lf "$pub" | awk '{ print $2 }')" == "$fp" ]]; then
       mv "${pub%.pub}" "$stub"
@@ -43,6 +43,7 @@ signing_keys() { gh api --hostname github.com user/ssh_signing_keys --jq '.[].ke
 if ! keys=$(signing_keys); then
   # Missing scope: ask for it when someone is at the terminal (browser device flow).
   if [[ -t 0 && -t 2 ]] && gh auth status -h github.com >/dev/null 2>&1; then
+    echo "$label: registering this Mac's agent commit-signing key on GitHub needs the gh admin:ssh_signing_key scope; refreshing gh auth to add it." >&2
     gh auth refresh -h github.com -s admin:ssh_signing_key
   fi
   if ! keys=$(signing_keys); then
