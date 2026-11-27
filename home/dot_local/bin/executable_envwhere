@@ -1,0 +1,197 @@
+#!/usr/bin/env zsh
+# envwhere — show where each exported variable in the current environment was set.
+#
+# Starts a fresh login + interactive zsh from a near-empty environment with
+# xtrace on, runs its chpwd/precmd hooks once (direnv, mise, ...), and records
+# every assignment, export, and unset with the file:line that ran it. Each
+# variable in the caller's environment is then reported as one of:
+#
+#   file:line             set during shell startup, value unchanged since
+#   file:line (changed)   set during startup, but the live value differs
+#                         (a later hook, a manual export, or a parent shell)
+#   inherited (startup unset at file:line)
+#                         startup removes it, so the live value came from the
+#                         parent process
+#   inherited (<proc>)    never set by startup; came from the parent process
+#   launchd               inherited, and also present in `launchctl getenv` (macOS)
+#   zsh                   maintained by zsh itself (PWD, SHLVL, ...)
+#
+# Usage: envwhere [-v] [-a] [PATTERN...]
+#   -v         also print values and every earlier assignment site
+#   -a         include variables startup sets but the live env lacks
+#   PATTERN    zsh glob(s) to filter variable names, e.g. 'AWS_*' PATH
+
+emulate -L zsh
+setopt extendedglob
+
+zmodload zsh/zutil
+local -a o_verbose o_all
+zparseopts -D -E -F -- v=o_verbose a=o_all h=o_help -help=o_help 2>/dev/null || {
+  print -u2 "usage: envwhere [-v] [-a] [PATTERN...]"; exit 2
+}
+if (( $#o_help )); then
+  sed -n '2,/^$/s/^# \{0,1\}//p' "$0"; exit 0
+fi
+(( $#1 )) && [[ $1 == -- ]] && shift
+local -a patterns=("$@")
+(( $#patterns )) || patterns=('*')
+
+# Live environment of the caller (this script inherits it unchanged).
+local -A live
+local k
+for k in ${(k)parameters[(R)*export*]}; do live[$k]=${(P)k}; done
+
+local tmp
+tmp=$(mktemp -d "${TMPDIR:-/tmp}/envwhere.XXXXXX") || exit 1
+trap 'rm -rf -- "$tmp"' EXIT
+
+# Fields: eval context, file, line, caller stack, function stack, command.
+local US=$'\x1f' RS=$'\x1e'
+local ps4="+${US}\${(j:,:)zsh_eval_context}${US}%x${US}%I${US}\${(pj:${RS}:)funcfiletrace}${US}\${(j:<:)funcstack}${US} "
+local hooks='for _ew_f in $chpwd_functions $precmd_functions; do (( $+functions[$_ew_f] )) && $_ew_f; done'
+local baseline=(HOME USER LOGNAME SHELL TERM TMPDIR LANG)
+local -a base_env=()
+for k in $baseline; do [[ -n ${(P)k} ]] && base_env+=("$k=${(P)k}"); done
+
+# Prompt themes routinely set PS4, which would break the trace format. zsh
+# reads $ZDOTDIR/.zshenv first, so point ZDOTDIR at a shim that installs a
+# DEBUG trap pinning PS4, restores the default ZDOTDIR, and hands off to the
+# real ~/.zshenv; the later startup files resolve normally from there.
+mkdir "$tmp/zdot"
+cat >"$tmp/zdot/.zshenv" <<'EOF'
+_ew_ps4=$PS4
+trap '[[ $PS4 == "$_ew_ps4" ]] || PS4=$_ew_ps4' DEBUG
+unset ZDOTDIR
+[[ -r $HOME/.zshenv ]] && source "$HOME/.zshenv"
+EOF
+
+env -i "${base_env[@]}" PATH=/usr/bin:/bin:/usr/sbin:/sbin PS4="$ps4" \
+  ZDOTDIR="$tmp/zdot" ENVWHERE_OUT="$tmp/final" \
+  zsh -l -i -o promptsubst -x -c "$hooks; unsetopt xtrace; env -0 >\"\$ENVWHERE_OUT\"" \
+  </dev/null >/dev/null 2>"$tmp/trace"
+
+local -A final
+if [[ -r $tmp/final ]]; then
+  local kv
+  for kv in ${(0)"$(<$tmp/final)"}; do final[${kv%%=*}]=${kv#*=}; done
+fi
+
+# zsh's tied scalar/array pairs: assigning the array changes the exported scalar.
+local -A tied=(path PATH fpath FPATH manpath MANPATH cdpath CDPATH module_path MODULE_PATH)
+
+# A location is useful only if it is a real file; eval, process-substitution
+# and -c code are attributed to the nearest caller that is.
+_ew_real() { [[ $1 == (/|./|~)* && $1 != /dev/fd/* ]] }
+
+local -A last hist
+local line ctx file lno fft fstack cmd loc via frame w name op
+local -a f frames words
+while IFS= read -r line; do
+  [[ $line == +${US}* ]] || continue
+  f=("${(@ps:$US:)line}")
+  ctx=$f[2] file=$f[3] lno=$f[4] fft=$f[5] fstack=$f[6] cmd=${f[7]# }
+  [[ $file == $tmp/* || $cmd == PS4=* ]] && continue
+  [[ $cmd == (export|typeset|declare|readonly|unset|[A-Za-z_][A-Za-z0-9_]#(+|)=)* ]] || continue
+
+  words=("${(@z)cmd}")
+  local -a names=() unsets=()
+  case $words[1] in
+    export)
+      for w in $words[2,-1]; do [[ $w == [A-Za-z_][A-Za-z0-9_]#(=*|) ]] && names+=(${w%%=*}); done ;;
+    typeset|declare|readonly)
+      local flags=${(j::)${(M)words:#-*}}
+      [[ $flags == *x* ]] || continue
+      for w in $words[2,-1]; do [[ $w == [A-Za-z_][A-Za-z0-9_]#(=*|) ]] && names+=(${w%%=*}); done ;;
+    unset)
+      for w in $words[2,-1]; do [[ $w == [A-Za-z_][A-Za-z0-9_]# ]] && unsets+=($w); done ;;
+    *)
+      # Leading NAME=... words; if a command follows, they were command-local.
+      local i=1
+      while (( i <= $#words )) && [[ $words[i] == [A-Za-z_][A-Za-z0-9_]#(+|)=* ]]; do
+        name=${words[i]%%(+|)=*}
+        names+=(${tied[$name]:-$name})
+        if [[ $words[i] == *=\( ]]; then
+          while (( i <= $#words )) && [[ $words[i] != \) ]]; do (( i++ )); done
+        fi
+        (( i++ ))
+      done
+      (( i <= $#words )) && continue ;;
+  esac
+  (( $#names + $#unsets )) || continue
+
+  # Pick the innermost frame that lives in a real file.
+  frames=()
+  [[ ${ctx##*,} != (eval|cmdsubst) ]] && frames+=("$file:$lno")
+  frames+=("${(@ps:$RS:)fft}")
+  loc=
+  for frame in $frames; do
+    if _ew_real ${frame%:*}; then loc=$frame; break; fi
+  done
+  [[ -z $loc ]] && loc="$file:$lno"
+  loc=${loc/#$HOME/\~}
+  via=
+  case ${ctx##*,} in
+    eval)   via=" (eval)" ;;
+    shfunc) via=" (in ${fstack%%<*})" ;;
+  esac
+  [[ $file == /dev/fd/* ]] && via=" (source <(...))"
+
+  for name in $names;  do last[$name]="$loc$via";       hist[$name]+="$loc$via"$'\n'; done
+  for name in $unsets; do last[$name]="unset at $loc$via"; hist[$name]+="unset at $loc$via"$'\n'; done
+done < <(grep -aE "^\+${US}.*${US} (export|typeset|declare|readonly|unset|[A-Za-z_][A-Za-z0-9_]*\+?=)" "$tmp/trace")
+
+local -A zsh_owned=(PWD 1 OLDPWD 1 SHLVL 1 _ 1)
+local parent
+parent=$(ps -o comm= -p "$(ps -o ppid= -p $PPID | tr -d ' ')" 2>/dev/null)
+parent=${parent:t}
+local has_launchctl=0
+(( $+commands[launchctl] )) && has_launchctl=1
+
+local c_name='' c_loc='' c_warn='' c_dim='' c_off=''
+if [[ -t 1 ]]; then
+  c_name=$'\e[1m' c_loc=$'\e[36m' c_warn=$'\e[33m' c_dim=$'\e[2m' c_off=$'\e[0m'
+fi
+
+local -a names_out
+names_out=(${(k)live})
+(( $#o_all )) && names_out+=(${(k)final})
+names_out=(${(ou)names_out})
+
+local width=0 origin pat match
+for name in $names_out; do (( $#name > width )) && width=$#name; done
+(( width > 32 )) && width=32
+
+for name in $names_out; do
+  match=0
+  for pat in $patterns; do [[ $name == ${~pat} ]] && { match=1; break; }; done
+  (( match )) || continue
+
+  if (( ${+zsh_owned[$name]} )); then
+    origin="${c_dim}zsh${c_off}"
+  elif (( ${+last[$name]} )); then
+    origin="${c_loc}${last[$name]}${c_off}"
+    if (( ! ${+live[$name]} )); then
+      origin+=" ${c_warn}(not in live env)${c_off}"
+    elif [[ ${last[$name]} == unset\ * ]] && (( ${+final[$name]} )); then
+      origin="${c_dim}zsh${c_off}"
+    elif [[ ${last[$name]} == unset\ * ]]; then
+      origin="${c_dim}inherited${parent:+ ($parent)}${c_off} ${c_warn}(startup ${last[$name]})${c_off}"
+    elif (( ${+final[$name]} )) && [[ ${final[$name]} != ${live[$name]} ]]; then
+      origin+=" ${c_warn}(changed)${c_off}"
+    fi
+  elif (( has_launchctl )) && [[ -n $(launchctl getenv $name 2>/dev/null) ]]; then
+    origin="${c_dim}launchd${c_off}"
+  else
+    origin="${c_dim}inherited${parent:+ ($parent)}${c_off}"
+  fi
+  printf "%s%-${width}s%s  %s\n" "$c_name" "$name" "$c_off" "$origin"
+
+  if (( $#o_verbose )); then
+    (( ${+live[$name]} )) && printf "  %s= %s%s\n" "$c_dim" "${live[$name]}" "$c_off"
+    local -a sites=("${(@f)hist[$name]}")
+    sites=(${sites:#})
+    # Earlier sites, oldest first, repeats collapsed (loops, re-run hooks).
+    sites=(${(u)sites[1,-2]})
+    for w in ${sites:#${last[$name]}}; do printf "  %searlier: %s%s\n" "$c_dim" "$w" "$c_off"; done
+  fi
+done
