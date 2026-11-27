@@ -1,9 +1,10 @@
 {{- if and .personal (not .work) -}}
 #!/bin/bash
 
-# macOS Screen Sharing has no listen-address setting, so a pf anchor limits
-# port 5900 to tailnet addresses and loopback. A root LaunchDaemon enables pf
-# and reloads the anchor at boot; /etc/pf.conf already includes com.apple/*.
+# Screen Sharing (5900) and Remote Login (22) are launchd sockets on every
+# interface, and sshd ignores ListenAddress there, so a pf anchor limits both
+# ports to tailnet addresses and loopback. A root LaunchDaemon enables pf and
+# reloads the anchor at boot; /etc/pf.conf already includes com.apple/*.
 
 set -eufo pipefail
 
@@ -17,9 +18,9 @@ plist="$(mktemp)"
 trap 'rm -f "$rules" "$plist"' EXIT
 
 cat >"$rules" <<'EOF'
-pass in quick on lo0 proto { tcp udp } to any port 5900
-pass in quick proto { tcp udp } from { 100.64.0.0/10, fd7a:115c:a1e0::/48 } to any port 5900
-block in quick proto { tcp udp } to any port 5900
+pass in quick on lo0 proto { tcp udp } to any port { 22 5900 }
+pass in quick proto { tcp udp } from { 100.64.0.0/10, fd7a:115c:a1e0::/48 } to any port { 22 5900 }
+block in quick proto { tcp udp } to any port { 22 5900 }
 EOF
 
 cat >"$plist" <<EOF
