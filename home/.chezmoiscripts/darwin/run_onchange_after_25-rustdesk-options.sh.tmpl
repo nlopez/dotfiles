@@ -2,8 +2,8 @@
 {{- if and .personal (stat "/Library/LaunchDaemons/com.carriez.RustDesk_service.plist") -}}
 #!/bin/bash
 
-# RustDesk's root service holds the authoritative options and copies them to
-# the per-user server when it starts, so set them as root, then restart it.
+# `RustDesk --option` needs root. It passes each option to the running user
+# server over IPC, which applies it live and saves it to both configs.
 
 set -euo pipefail
 
@@ -24,7 +24,5 @@ sudo -H "$R" --option verification-method use-permanent-password
 # reachable by LAN address (through the sites' subnet routers) when its own
 # Tailscale is down. Relayed (ID) connections arrive from the relay's address,
 # so they are refused too.
-sudo -H "$R" --option whitelist100.64.0.0/10,fd7a:115c:a1e0::/48,192.168.221.0/24,192.168.222.0/24,192.168.223.0/24,192.168.239.0/24
-
-launchctl kickstart -k "gui/$(id -u)/com.carriez.RustDesk_server"
+sudo -H "$R" --option whitelist 100.64.0.0/10,fd7a:115c:a1e0::/48,192.168.221.0/24,192.168.222.0/24,192.168.223.0/24,192.168.239.0/24
 {{- end }}
