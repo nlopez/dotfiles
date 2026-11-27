@@ -36,6 +36,13 @@ OVERLAY=$(cat << 'EOF'
 {{- end }}
     }
 {{- end }}
+{{- if and .personal (not .work) (not .headless) }}
+    ,"netbox": {
+      "command": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/varlock",
+      "args": ["run", "-p", "{{ .chezmoi.homeDir }}/.config/varlock/agents.env", "--filter", "NETBOX_TOKEN", "--inject", "vars", "--no-redact-stdout", "--", "{{ includeTemplate "nix-profile" . }}/bin/uvx", "netbox-mcp-server"],
+      "env": {"NETBOX_URL": "https://kikit.desertbluffs.com/"}
+    }
+{{- end }}
 {{- if not .headless }}
     ,"1password": {
       "command": "1password-mcp"

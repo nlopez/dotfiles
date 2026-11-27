@@ -1,0 +1,26 @@
+{{- if and .personal (not .work) (not .headless) -}}
+#!/bin/bash
+
+# Registers NetBox Labs' read-only MCP server (netbox-mcp-server) for the
+# homelab NetBox with Claude Code at user scope. Pi gets the same server from
+# dot_pi/agent/modify_mcp.json.tmpl. NETBOX_TOKEN comes from 1Password through
+# `varlock run` (dot_config/varlock/agents.env.tmpl), so it reaches only the
+# server process.
+# Re-run by bumping the revision below.
+# netbox-mcp-revision: 1
+
+set -eufo pipefail
+
+export PATH="{{ includeTemplate "agent-path" . }}:$PATH"
+
+command -v claude >/dev/null 2>&1 || { echo "claude not found, skipping" >&2; exit 0; }
+command -v uvx >/dev/null 2>&1 || { echo "uvx not found, skipping" >&2; exit 0; }
+
+claude mcp remove netbox --scope user >/dev/null 2>&1 || true
+claude mcp add-json netbox --scope user '{
+  "type": "stdio",
+  "command": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/varlock",
+  "args": ["run", "-p", "{{ .chezmoi.homeDir }}/.config/varlock/agents.env", "--filter", "NETBOX_TOKEN", "--inject", "vars", "--no-redact-stdout", "--", "{{ includeTemplate "nix-profile" . }}/bin/uvx", "netbox-mcp-server"],
+  "env": {"NETBOX_URL": "https://kikit.desertbluffs.com/"}
+}'
+{{- end }}

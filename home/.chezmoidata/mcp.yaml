@@ -16,3 +16,4 @@ mcp_descriptions:
   google-calendar: "Read and manage Google Calendar events"
   "1password": "1Password item lookup"
   datadog: "Query Datadog logs, metrics, traces, monitors and dashboards"
+  netbox: "Read-only homelab NetBox: devices, IPs, prefixes, VLANs, sites, changelog"
