@@ -11,7 +11,7 @@
 #             effortLevel (default medium; an /effort choice is kept),
 #             theme (auto = match the terminal's light/dark background),
 #             statusLine (pi-style bar, see statusline.py),
-#             hooks (atuin, no-chat-comments, agent-bypass-guard, agent-rm-guard, agent-stage-guard, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
+#             hooks (atuin, no-chat-comments, agent-bypass-guard, agent-rm-guard, agent-stage-guard, agent-worktree-guard, track-prs, pr-notify, Rex session-start, plus context-mode cache-heal if present).
 # Removes:    ECC env. Undeclared plugins and marketplaces are removed by
 #             .chezmoiscripts/run_after_20-claude-plugins-prune.sh.tmpl.
 import json
@@ -86,6 +86,15 @@ current["hooks"]["PreToolUse"] = atuin_hook + [{
     "hooks": [{
         "type": "command",
         "command": os.path.expanduser("~/.local/bin/agent-stage-guard"),
+    }],
+}, {
+    # Block edits and branch-changing git in the main worktree of a repo that
+    # has linked worktrees, which every session shares
+    # (script managed in dot_local/bin/executable_agent-worktree-guard).
+    "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit",
+    "hooks": [{
+        "type": "command",
+        "command": os.path.expanduser("~/.local/bin/agent-worktree-guard"),
     }],
 }]
 

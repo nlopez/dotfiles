@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""Refuse agent edits and git changes in the main worktree of a repo that has
+linked worktrees.
+
+Repos worked through worktrees keep the main clone on its default branch,
+shared by every session; a branch switch or edit there lands under all of
+them. Repos with no linked worktrees are not affected. Used as a Claude Code
+PreToolUse hook (Bash and Edit|Write|MultiEdit|NotebookEdit matchers). Reads
+the hook JSON on stdin; exits 2 with the reason on stderr to block, 0 to allow.
+The git pre-commit hook ~/.config/git/hooks/no-main-worktree-commit is the
+backstop for edits made some other way.
+
+Bash: follows `cd`/`pushd` through each command chain and blocks git
+subcommands that change the work tree, index, or branch when they run in a
+guarded main worktree (directly or via `git -C`). Read-only git, `pull`,
+`fetch`, `push`, `branch`, and `worktree` stay allowed.
+"""
+
+import json
+import os
+import re
+import shlex
+import sys
+
+REASON = (
+    "Blocked: {top} is the main worktree of a repo that uses linked worktrees, "
+    "and other sessions share it. Do this in your own worktree instead: "
+    "`wt switch --create <branch>` (or use the existing one under "
+    "~/src/.worktrees/), then work there."
+)
+
+MUTATING = {
+    "add", "am", "apply", "checkout", "cherry-pick", "clean", "commit", "merge",
+    "mv", "rebase", "reset", "restore", "revert", "rm", "stage", "stash", "switch",
+}
+SEPARATORS = {";", "&&", "||", "|", "&", "(", ")", "{", "}"}
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1.*?\n\2\b", re.S)
+
+
+def guarded_top(path: str) -> str | None:
+    """Return the main worktree root containing path, if it has linked worktrees."""
+    d = os.path.abspath(path)
+    while not os.path.isdir(d):
+        d = os.path.dirname(d)
+    while True:
+        dotgit = os.path.join(d, ".git")
+        if os.path.isfile(dotgit):
+            return None  # linked worktree
+        if os.path.isdir(dotgit):
+            linked = os.path.join(dotgit, "worktrees")
+            return d if os.path.isdir(linked) and os.listdir(linked) else None
+        parent = os.path.dirname(d)
+        if parent == d:
+            return None
+        d = parent
+
+
+def resolve(base: str, arg: str) -> str:
+    return os.path.join(base, os.path.expandvars(os.path.expanduser(arg)))
+
+
+def git_target(words: list[str], cwd: str) -> tuple[str, str | None]:
+    """Return (directory, subcommand) for a `git ...` word list."""
+    i = 1
+    while i < len(words) and words[i].startswith("-"):
+        if words[i] in ("-C", "-c", "--git-dir", "--work-tree") and i + 1 < len(words):
+            if words[i] == "-C":
+                cwd = resolve(cwd, words[i + 1])
+            i += 2
+        else:
+            i += 1
+    return cwd, words[i] if i < len(words) else None
+
+
+def bash_block(command: str, cwd: str) -> str | None:
+    lexer = shlex.shlex(HEREDOC.sub(" ", command).replace("\n", " ; "),
+                        posix=True, punctuation_chars=True)
+    lexer.whitespace_split = True
+    try:
+        tokens = list(lexer)
+    except ValueError:
+        return None
+    segments, current = [], []
+    for tok in tokens:
+        if tok in SEPARATORS or set(tok) <= set(";&|()"):
+            segments.append(current)
+            current = []
+        else:
+            current.append(tok)
+    segments.append(current)
+
+    for words in segments:
+        while words and re.fullmatch(r"\w+=.*", words[0]):
+            words = words[1:]  # leading VAR=value assignments
+        if not words:
+            continue
+        if words[0] in ("cd", "pushd") and len(words) > 1:
+            cwd = resolve(cwd, words[1])
+        elif words[0] == "git":
+            where, sub = git_target(words, cwd)
+            if sub in MUTATING and (top := guarded_top(where)):
+                return top
+    return None
+
+
+def main() -> int:
+    try:
+        data = json.load(sys.stdin)
+        tool, args = data.get("tool_name", ""), data.get("tool_input") or {}
+        cwd = data.get("cwd") or os.getcwd()
+    except (ValueError, AttributeError):
+        return 0
+    if tool == "Bash":
+        top = bash_block(args.get("command") or "", cwd)
+    else:
+        path = args.get("file_path") or args.get("notebook_path")
+        top = guarded_top(resolve(cwd, path)) if path else None
+    if top:
+        print(REASON.format(top=top), file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

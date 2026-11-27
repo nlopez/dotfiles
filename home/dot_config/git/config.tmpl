@@ -77,6 +77,10 @@
   event = pre-commit
   command = ~/.config/git/hooks/require-signed-commit
 
+[hook "no-main-worktree-commit"]
+  event = pre-commit
+  command = ~/.config/git/hooks/no-main-worktree-commit
+
 [init]
   defaultBranch = main
 
