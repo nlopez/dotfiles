@@ -16,18 +16,23 @@
 #   launchd               inherited, and also present in `launchctl getenv` (macOS)
 #   zsh                   maintained by zsh itself (PWD, SHLVL, ...)
 #
-# Usage: envwhere [-v] [-a] [PATTERN...]
+# Files that chezmoi manages are reported as their source file and line:
+# template lines are aligned against the rendered target, and lines produced
+# by {{ template }} / {{ includeTemplate }} point into .chezmoitemplates.
+#
+# Usage: envwhere [-v] [-a] [-T] [PATTERN...]
 #   -v         also print values and every earlier assignment site
 #   -a         include variables startup sets but the live env lacks
+#   -T         report target files in ~ instead of chezmoi source files
 #   PATTERN    zsh glob(s) to filter variable names, e.g. 'AWS_*' PATH
 
 emulate -L zsh
 setopt extendedglob
 
 zmodload zsh/zutil
-local -a o_verbose o_all
-zparseopts -D -E -F -- v=o_verbose a=o_all h=o_help -help=o_help 2>/dev/null || {
-  print -u2 "usage: envwhere [-v] [-a] [PATTERN...]"; exit 2
+local -a o_verbose o_all o_target o_help
+zparseopts -D -E -F -- v=o_verbose a=o_all T=o_target h=o_help -help=o_help 2>/dev/null || {
+  print -u2 "usage: envwhere [-v] [-a] [-T] [PATTERN...]"; exit 2
 }
 if (( $#o_help )); then
   sed -n '2,/^$/s/^# \{0,1\}//p' "$0"; exit 0
@@ -65,6 +70,14 @@ unset ZDOTDIR
 [[ -r $HOME/.zshenv ]] && source "$HOME/.zshenv"
 EOF
 
+local mapper=${0:A:h}/envwhere_chezmoi.py map_sources=0
+if (( ! $#o_target && $+commands[chezmoi] && $+commands[python3] )) && [[ -r $mapper ]]; then
+  map_sources=1
+  # Target -> source paths; only reads the source state, so skip secrets.
+  CHEZMOI_SKIP_SECRETS=1 chezmoi managed --path-style all --format json \
+    >"$tmp/managed.json" 2>/dev/null &
+fi
+
 env -i "${base_env[@]}" PATH=/usr/bin:/bin:/usr/sbin:/sbin PS4="$ps4" \
   ZDOTDIR="$tmp/zdot" ENVWHERE_OUT="$tmp/final" \
   zsh -l -i -o promptsubst -x -c "$hooks; unsetopt xtrace; env -0 >\"\$ENVWHERE_OUT\"" \
@@ -83,7 +96,9 @@ local -A tied=(path PATH fpath FPATH manpath MANPATH cdpath CDPATH module_path M
 # and -c code are attributed to the nearest caller that is.
 _ew_real() { [[ $1 == (/|./|~)* && $1 != /dev/fd/* ]] }
 
-local -A last hist
+# Entries are "prefix<US>file:line<US>suffix"; _ew_fmt renders them once the
+# file:line has (optionally) been mapped to its chezmoi source.
+local -A last hist locs
 local line ctx file lno fft fstack cmd loc via frame w name op
 local -a f frames words
 while IFS= read -r line; do
@@ -128,7 +143,7 @@ while IFS= read -r line; do
     if _ew_real ${frame%:*}; then loc=$frame; break; fi
   done
   [[ -z $loc ]] && loc="$file:$lno"
-  loc=${loc/#$HOME/\~}
+  locs[$loc]=1
   via=
   case ${ctx##*,} in
     eval)   via=" (eval)" ;;
@@ -136,9 +151,22 @@ while IFS= read -r line; do
   esac
   [[ $file == /dev/fd/* ]] && via=" (source <(...))"
 
-  for name in $names;  do last[$name]="$loc$via";       hist[$name]+="$loc$via"$'\n'; done
-  for name in $unsets; do last[$name]="unset at $loc$via"; hist[$name]+="unset at $loc$via"$'\n'; done
+  for name in $names;  do last[$name]="${US}$loc${US}$via";          hist[$name]+=$last[$name]$'\n'; done
+  for name in $unsets; do last[$name]="unset at ${US}$loc${US}$via"; hist[$name]+=$last[$name]$'\n'; done
 done < <(grep -aE "^\+${US}.*${US} (export|typeset|declare|readonly|unset|[A-Za-z_][A-Za-z0-9_]*\+?=)" "$tmp/trace")
+
+local -A shown
+if (( map_sources )); then
+  wait
+  local t s
+  while IFS=$'\t' read -r t s; do shown[$t]=$s; done < <(
+    print -rl -- ${(k)locs} | python3 "$mapper" "$tmp/managed.json" "$HOME" 2>/dev/null)
+fi
+_ew_fmt() {
+  local -a e=("${(@ps:$US:)1}")
+  print -r -- "$e[1]${shown[$e[2]]:-${e[2]/#$HOME/~}}$e[3]"
+}
+for name in ${(k)last}; do last[$name]=$(_ew_fmt $last[$name]); done
 
 local -A zsh_owned=(PWD 1 OLDPWD 1 SHLVL 1 _ 1)
 local parent
@@ -190,6 +218,7 @@ for name in $names_out; do
     (( ${+live[$name]} )) && printf "  %s= %s%s\n" "$c_dim" "${live[$name]}" "$c_off"
     local -a sites=("${(@f)hist[$name]}")
     sites=(${sites:#})
+    for w in {1..$#sites}; do sites[w]=$(_ew_fmt $sites[w]); done
     # Earlier sites, oldest first, repeats collapsed (loops, re-run hooks).
     sites=(${(u)sites[1,-2]})
     for w in ${sites:#${last[$name]}}; do printf "  %searlier: %s%s\n" "$c_dim" "$w" "$c_off"; done
