@@ -10,6 +10,10 @@
   change touches secrets or age-encrypted files.
 - Edit source files under `home/` directly (`chezmoi source-path <target>` finds one); verify
   with `--dry-run`.
+- Global agent instructions (`~/.claude/CLAUDE.md` → `~/.pi/agent/AGENTS.md`) come from
+  `home/dot_pi/agent/AGENTS.md.tmpl`.
+- Before committing: `pre-commit run --all-files` (gitleaks, ruff, prettier, shellcheck,
+  agent-guards, yamlfmt).
 - In a worktree, chezmoi still reads `~/.local/share/chezmoi`: pass `-S <worktree root>` to
   `diff` and `apply --dry-run`. Never `apply` from a worktree; `~` is shared.
 - Commit and push `main` when done. No PRs, no bypassed hooks.
