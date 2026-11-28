@@ -3,9 +3,12 @@
 
 # Keeps personal Macs awake with the lid closed while on AC power, so agents
 # keep running. A root LaunchDaemon sets `pmset disablesleep` to match the power
-# source on every power-source change notification, and every 60 seconds as a
-# fallback: 1 on AC, 0 on battery. disablesleep has no per-source
-# setting, and leaving it on under battery would keep a closed Mac awake in a bag.
+# source (1 on AC, 0 on battery) whenever `notifyutil` sees a power-source change,
+# and every 60 seconds as a fallback. disablesleep has no per-source setting, and
+# leaving it on under battery would keep a closed Mac awake in a bag.
+# The notification is watched with notifyutil rather than LaunchEvents, because
+# launchd stops delivering events to a job that never consumes them with
+# xpc_set_event_stream_handler(3).
 # macOS only sleeps on the lid-close event, so a Mac closed on AC and then
 # unplugged is put to sleep explicitly.
 
@@ -25,25 +28,25 @@ cat >"$tmp" <<'EOF'
   <string>com.local.lid-closed-awake</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/bin/sh</string>
+    <string>/bin/bash</string>
     <string>-c</string>
-    <string>want=0; /usr/bin/pmset -g ps | /usr/bin/grep -q "'AC Power'" &amp;&amp; want=1; have=$(/usr/bin/pmset -g | /usr/bin/awk '/SleepDisabled/ {print $2}'); [ "${have:-0}" = "$want" ] &amp;&amp; exit 0; /usr/bin/pmset -a disablesleep "$want"; [ "$want" = 0 ] &amp;&amp; /usr/sbin/ioreg -r -k AppleClamshellState -d 4 | /usr/bin/grep -q '"AppleClamshellState" = Yes' &amp;&amp; /usr/bin/pmset sleepnow; exit 0</string>
+    <string>apply() {
+  want=0
+  /usr/bin/pmset -g ps | /usr/bin/grep -q "'AC Power'" &amp;&amp; want=1
+  have=$(/usr/bin/pmset -g | /usr/bin/awk '/SleepDisabled/ {print $2}')
+  [ "${have:-0}" = "$want" ] &amp;&amp; return
+  /usr/bin/pmset -a disablesleep "$want"
+  [ "$want" = 0 ] &amp;&amp; /usr/sbin/ioreg -r -k AppleClamshellState -d 4 | /usr/bin/grep -q '"AppleClamshellState" = Yes' &amp;&amp; /usr/bin/pmset sleepnow
+}
+while :; do apply; /bin/sleep 60; done &amp;
+poller=$!
+/usr/bin/notifyutil -w com.apple.system.powersources.source | while read -r _; do apply; done
+kill "$poller"</string>
   </array>
   <key>RunAtLoad</key>
   <true/>
-  <key>StartInterval</key>
-  <integer>60</integer>
-  <key>LaunchEvents</key>
-  <dict>
-    <key>com.apple.notifyd.matching</key>
-    <dict>
-      <key>power-source-changed</key>
-      <dict>
-        <key>Notification</key>
-        <string>com.apple.system.powersources.source</string>
-      </dict>
-    </dict>
-  </dict>
+  <key>KeepAlive</key>
+  <true/>
 </dict>
 </plist>
 EOF
