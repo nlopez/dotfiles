@@ -1,0 +1,47 @@
+{{- if and .personal (not .work) -}}
+#!/bin/bash
+
+# Keeps personal Macs awake with the lid closed while on AC power, so agents
+# keep running. A root LaunchDaemon sets `pmset disablesleep` to match the power
+# source every 60 seconds: 1 on AC, 0 on battery. disablesleep has no per-source
+# setting, and leaving it on under battery would keep a closed Mac awake in a bag.
+# macOS only sleeps on the lid-close event, so a Mac closed on AC and then
+# unplugged is put to sleep explicitly.
+
+set -eufo pipefail
+
+LABEL="com.local.lid-closed-awake"
+PLIST="/Library/LaunchDaemons/${LABEL}.plist"
+
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+cat >"$tmp" <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.local.lid-closed-awake</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>want=0; /usr/bin/pmset -g ps | /usr/bin/grep -q "'AC Power'" &amp;&amp; want=1; have=$(/usr/bin/pmset -g | /usr/bin/awk '/SleepDisabled/ {print $2}'); [ "${have:-0}" = "$want" ] &amp;&amp; exit 0; /usr/bin/pmset -a disablesleep "$want"; [ "$want" = 0 ] &amp;&amp; /usr/sbin/ioreg -r -k AppleClamshellState -d 4 | /usr/bin/grep -q '"AppleClamshellState" = Yes' &amp;&amp; /usr/bin/pmset sleepnow; exit 0</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StartInterval</key>
+  <integer>60</integer>
+</dict>
+</plist>
+EOF
+
+sudo install -m 0644 -o root -g wheel "$tmp" "$PLIST"
+sudo launchctl bootout "system/${LABEL}" 2>/dev/null || true
+# bootout returns before the old job is fully gone; retry bootstrap briefly.
+for _ in 1 2 3 4 5; do
+  sudo launchctl bootstrap system "$PLIST" && exit 0
+  sleep 1
+done
+sudo launchctl bootstrap system "$PLIST"
+{{- end }}
