@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Lets sudo authenticate with Touch ID. /etc/pam.d/sudo includes sudo_local,
+# which survives macOS updates. pam_reattach moves sudo into the GUI session
+# first, so Touch ID also works inside tmux and other detached sessions; its
+# path is the root-owned Nix store path rather than the user-writable profile,
+# and the file is rewritten whenever a Nix update changes that path.
+
+set -eufo pipefail
+
+SUDO_LOCAL=/etc/pam.d/sudo_local
+REATTACH="$HOME/.local/state/nix/profiles/dotfiles/lib/pam/pam_reattach.so"
+
+desired="# Managed by chezmoi (.chezmoiscripts/darwin/run_after_19-sudo-touch-id.sh)."
+if [[ -e "$REATTACH" ]]; then
+  desired+=$'\n'"auth       optional       $(/bin/realpath "$REATTACH") ignore_ssh"
+fi
+desired+=$'\n'"auth       sufficient     pam_tid.so"
+
+if [[ "$(cat "$SUDO_LOCAL" 2>/dev/null)" == "$desired" ]]; then
+  exit 0
+fi
+
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+printf '%s\n' "$desired" >"$tmp"
+
+{{ template "sudo-notice" "enable Touch ID for sudo in /etc/pam.d/sudo_local" }}
+sudo install -m 0444 -o root -g wheel "$tmp" "$SUDO_LOCAL"

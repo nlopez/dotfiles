@@ -110,6 +110,9 @@ nix:
       - duti
       - e2fsprogs
       - mas
+      # pam-reattach: Touch ID for sudo inside tmux; see
+      # .chezmoiscripts/darwin/run_after_19-sudo-touch-id.sh.tmpl.
+      - pam-reattach
       - pass
       - pv
       - skopeo
