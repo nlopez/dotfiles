@@ -7,9 +7,11 @@
 set -eufo pipefail
 
 if launchctl print system/com.openssh.sshd >/dev/null 2>&1; then
+  {{ template "sudo-notice" "turn off Remote Login (macOS sshd); Tailscale SSH replaces it" }}
   sudo launchctl bootout system/com.openssh.sshd
 fi
 if ! launchctl print-disabled system | grep -q '"com.openssh.sshd" => disabled'; then
+  {{ template "sudo-notice" "turn off Remote Login (macOS sshd); Tailscale SSH replaces it" }}
   sudo launchctl disable system/com.openssh.sshd
 fi
 {{- end }}

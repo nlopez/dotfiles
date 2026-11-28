@@ -9,6 +9,7 @@ set -euo pipefail
 
 TAILSCALE="{{ .packages.brew_prefix }}/bin/tailscale"
 
+{{ template "sudo-notice" "start tailscaled as a root launchd daemon and enable Tailscale SSH" }}
 sudo brew services start tailscale
 if "$TAILSCALE" status >/dev/null 2>&1; then
     sudo "$TAILSCALE" set --ssh

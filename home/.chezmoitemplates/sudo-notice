@@ -1,0 +1,4 @@
+{{- /* Shell line that says why the next sudo call is needed, printed only when
+   sudo will prompt for a password. Usage: {{ template "sudo-notice" "<purpose>" }} */ -}}
+sudo -n true 2>/dev/null || echo {{ printf "==> sudo: %s" . | quote }} >&2
+{{- /* trims the file's final newline */ -}}

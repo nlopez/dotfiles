@@ -42,6 +42,7 @@ cat >"$plist" <<EOF
 EOF
 
 /sbin/pfctl -n -f "$rules"
+{{ template "sudo-notice" "install a pf anchor that limits Screen Sharing (port 5900) to the tailnet" }}
 sudo install -m 0644 -o root -g wheel "$rules" "$ANCHOR_FILE"
 sudo install -m 0644 -o root -g wheel "$plist" "$PLIST"
 sudo launchctl bootout "system/${LABEL}" 2>/dev/null || true

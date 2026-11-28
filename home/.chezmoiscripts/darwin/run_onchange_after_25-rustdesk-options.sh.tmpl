@@ -10,6 +10,8 @@ set -euo pipefail
 R=/Applications/RustDesk.app/Contents/MacOS/RustDesk
 USER_CONFIG="$HOME/Library/Preferences/com.carriez.RustDesk/RustDesk2.toml"
 
+{{ template "sudo-notice" "set RustDesk options (direct IP access, permanent password, tailnet/LAN whitelist)" }}
+
 # macOS sudo keeps HOME, so a plain `sudo RustDesk` leaves a root-owned config
 # in the user's preferences that the user's server can no longer read. -H keeps
 # root's own writes in root's home; hand back a file an earlier run left behind.

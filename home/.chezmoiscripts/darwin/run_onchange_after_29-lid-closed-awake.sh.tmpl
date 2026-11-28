@@ -36,6 +36,7 @@ cat >"$tmp" <<'EOF'
 </plist>
 EOF
 
+{{ template "sudo-notice" "install a LaunchDaemon that keeps the Mac awake with the lid closed on AC power" }}
 sudo install -m 0644 -o root -g wheel "$tmp" "$PLIST"
 sudo launchctl bootout "system/${LABEL}" 2>/dev/null || true
 # bootout returns before the old job is fully gone; retry bootstrap briefly.

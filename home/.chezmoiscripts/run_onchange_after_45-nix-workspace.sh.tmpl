@@ -11,6 +11,7 @@ set -eu
 [ -x /nix/var/nix/profiles/default/bin/nix ] && exit 0
 store="${XDG_DATA_HOME:-$HOME/.local/share}/nix"
 mkdir -p "$store"
+{{ template "sudo-notice" "bind-mount ~/.local/share/nix onto /nix" }}
 [ -d /nix ] || sudo mkdir /nix
 mountpoint -q /nix || sudo mount --bind "$store" /nix
 
