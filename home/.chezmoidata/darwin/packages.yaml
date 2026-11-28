@@ -47,7 +47,6 @@ packages:
       # an autoupdate/:latest cask without a SHA, move it to casks_unsigned.
       casks:
         base:
-        - keepingyouawake
         - little-snitch
         - notunes
         - grandperspective
