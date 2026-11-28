@@ -3,7 +3,8 @@
 
 # Keeps personal Macs awake with the lid closed while on AC power, so agents
 # keep running. A root LaunchDaemon sets `pmset disablesleep` to match the power
-# source every 60 seconds: 1 on AC, 0 on battery. disablesleep has no per-source
+# source on every power-source change notification, and every 60 seconds as a
+# fallback: 1 on AC, 0 on battery. disablesleep has no per-source
 # setting, and leaving it on under battery would keep a closed Mac awake in a bag.
 # macOS only sleeps on the lid-close event, so a Mac closed on AC and then
 # unplugged is put to sleep explicitly.
@@ -32,6 +33,17 @@ cat >"$tmp" <<'EOF'
   <true/>
   <key>StartInterval</key>
   <integer>60</integer>
+  <key>LaunchEvents</key>
+  <dict>
+    <key>com.apple.notifyd.matching</key>
+    <dict>
+      <key>power-source-changed</key>
+      <dict>
+        <key>Notification</key>
+        <string>com.apple.system.powersources.source</string>
+      </dict>
+    </dict>
+  </dict>
 </dict>
 </plist>
 EOF
